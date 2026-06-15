@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrasyRouteImport } from './routes/trasy'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RulesNewRouteImport } from './routes/rules.new'
+import { Route as RulesNewIndexRouteImport } from './routes/rules.new.index'
+import { Route as RulesNewEditRouteImport } from './routes/rules.new.edit'
 
 const TrasyRoute = TrasyRouteImport.update({
   id: '/trasy',
@@ -28,35 +30,56 @@ const RulesNewRoute = RulesNewRouteImport.update({
   path: '/rules/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RulesNewIndexRoute = RulesNewIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => RulesNewRoute,
+} as any)
+const RulesNewEditRoute = RulesNewEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => RulesNewRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/trasy': typeof TrasyRoute
-  '/rules/new': typeof RulesNewRoute
+  '/rules/new': typeof RulesNewRouteWithChildren
+  '/rules/new/edit': typeof RulesNewEditRoute
+  '/rules/new/': typeof RulesNewIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/trasy': typeof TrasyRoute
-  '/rules/new': typeof RulesNewRoute
+  '/rules/new/edit': typeof RulesNewEditRoute
+  '/rules/new': typeof RulesNewIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/trasy': typeof TrasyRoute
-  '/rules/new': typeof RulesNewRoute
+  '/rules/new': typeof RulesNewRouteWithChildren
+  '/rules/new/edit': typeof RulesNewEditRoute
+  '/rules/new/': typeof RulesNewIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/trasy' | '/rules/new'
+  fullPaths: '/' | '/trasy' | '/rules/new' | '/rules/new/edit' | '/rules/new/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/trasy' | '/rules/new'
-  id: '__root__' | '/' | '/trasy' | '/rules/new'
+  to: '/' | '/trasy' | '/rules/new/edit' | '/rules/new'
+  id:
+    | '__root__'
+    | '/'
+    | '/trasy'
+    | '/rules/new'
+    | '/rules/new/edit'
+    | '/rules/new/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   TrasyRoute: typeof TrasyRoute
-  RulesNewRoute: typeof RulesNewRoute
+  RulesNewRoute: typeof RulesNewRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -82,13 +105,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RulesNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/rules/new/': {
+      id: '/rules/new/'
+      path: '/'
+      fullPath: '/rules/new/'
+      preLoaderRoute: typeof RulesNewIndexRouteImport
+      parentRoute: typeof RulesNewRoute
+    }
+    '/rules/new/edit': {
+      id: '/rules/new/edit'
+      path: '/edit'
+      fullPath: '/rules/new/edit'
+      preLoaderRoute: typeof RulesNewEditRouteImport
+      parentRoute: typeof RulesNewRoute
+    }
   }
 }
+
+interface RulesNewRouteChildren {
+  RulesNewEditRoute: typeof RulesNewEditRoute
+  RulesNewIndexRoute: typeof RulesNewIndexRoute
+}
+
+const RulesNewRouteChildren: RulesNewRouteChildren = {
+  RulesNewEditRoute: RulesNewEditRoute,
+  RulesNewIndexRoute: RulesNewIndexRoute,
+}
+
+const RulesNewRouteWithChildren = RulesNewRoute._addFileChildren(
+  RulesNewRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   TrasyRoute: TrasyRoute,
-  RulesNewRoute: RulesNewRoute,
+  RulesNewRoute: RulesNewRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

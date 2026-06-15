@@ -8,6 +8,7 @@ import {
   Circle,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { AREAS } from "@/lib/model/areas";
 import { AppHeader } from "@/components/AppHeader";
@@ -25,6 +26,7 @@ const ICONS: Record<string, LucideIcon> = {
 export function AreaPicker({ preselectedArea }: { preselectedArea?: Area }) {
   const [name, setName] = useState("");
   const [selected, setSelected] = useState<Area | undefined>(preselectedArea);
+  const navigate = useNavigate();
 
   return (
     <div className="flex h-screen w-screen flex-col bg-background text-foreground">
@@ -122,6 +124,14 @@ export function AreaPicker({ preselectedArea }: { preselectedArea?: Area }) {
           <div className="flex justify-end">
             <button
               disabled={!selected}
+              onClick={() => {
+                if (selected) {
+                  void navigate({
+                    to: "/rules/new/edit",
+                    search: { area: selected, name },
+                  });
+                }
+              }}
               className={cn(
                 "bg-primary text-primary-foreground rounded-lg px-4 py-2 text-sm font-medium",
                 !selected && "opacity-50 cursor-not-allowed",
