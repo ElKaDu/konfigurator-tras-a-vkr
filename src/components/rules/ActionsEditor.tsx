@@ -26,7 +26,7 @@ function AddActionAffordance() {
   return (
     <div className="flex items-center gap-1.5 text-sm text-primary cursor-pointer mt-2">
       <Plus size={14} />
-      <span>+ přidat akci</span>
+      <span>přidat akci</span>
     </div>
   );
 }
