@@ -1,27 +1,10 @@
 import { useState } from "react";
-import {
-  TextSearch,
-  Route,
-  ClipboardCheck,
-  PackageX,
-  Scale,
-  Circle,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { AREAS } from "@/lib/model/areas";
 import { AppHeader } from "@/components/AppHeader";
+import { resolveAreaIcon } from "@/components/common/areaIcons";
 import type { Area } from "@/lib/model/types";
-
-// Mirror AreaBadge.tsx icon remap: ListSearch → TextSearch, PackageOff → PackageX
-const ICONS: Record<string, LucideIcon> = {
-  ListSearch: TextSearch,
-  Route,
-  ClipboardCheck,
-  PackageOff: PackageX,
-  Scale,
-};
 
 export function AreaPicker({ preselectedArea }: { preselectedArea?: Area }) {
   const [name, setName] = useState("");
@@ -63,7 +46,7 @@ export function AreaPicker({ preselectedArea }: { preselectedArea?: Area }) {
           {/* Area cards grid */}
           <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(200px,1fr))] mb-8">
             {AREAS.map((area) => {
-              const Icon = ICONS[area.icon] ?? Circle;
+              const Icon = resolveAreaIcon(area.icon);
               const isSelected = selected === area.id;
 
               if (!area.enabled) {
@@ -93,7 +76,7 @@ export function AreaPicker({ preselectedArea }: { preselectedArea?: Area }) {
               return (
                 <button
                   key={area.id}
-                  onClick={() => setSelected(area.id as Area)}
+                  onClick={() => setSelected(area.id)}
                   className={cn(
                     "rounded-xl border p-4 text-left cursor-pointer transition-colors",
                     isSelected

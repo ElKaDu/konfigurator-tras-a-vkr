@@ -4,18 +4,12 @@ import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { AppHeader } from "@/components/AppHeader";
 import { AreaBadge } from "@/components/common/AreaBadge";
-import { AREAS } from "@/lib/model/areas";
+import { AREAS, CIRCLED } from "@/lib/model/areas";
 import { useRules } from "@/lib/model/store";
 import type { Area } from "@/lib/model/types";
 
-// Circled number prefix for each area in the spec-defined display order ①②③④⑤
-const AREA_ORDER: { id: Area; circled: string }[] = [
-  { id: "order_eval",       circled: "①" },
-  { id: "unpickup",         circled: "②" },
-  { id: "params_price",     circled: "③" },
-  { id: "tracking_records", circled: "④" },
-  { id: "route_compliance", circled: "⑤" },
-];
+// Sidebar area list sorted by spec-defined canonical number (AREAS.num).
+const SORTED_AREAS = [...AREAS].sort((a, b) => a.num - b.num);
 
 type Selection =
   | { kind: "all" }
@@ -146,8 +140,9 @@ export function RulesList() {
             Oblasti
           </div>
 
-          {AREA_ORDER.map(({ id, circled }) => {
-            const meta    = AREAS.find((a) => a.id === id)!;
+          {SORTED_AREAS.map((meta) => {
+            const { id } = meta;
+            const circled = CIRCLED[meta.num - 1];
             const count   = rules.filter((r) => r.area === id).length;
             const isActive = selection.kind === "area" && selection.area === id;
             const disabled = !meta.enabled;

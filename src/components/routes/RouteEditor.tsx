@@ -100,8 +100,7 @@ export function RouteEditor() {
             />
           </SectionCard>
 
-          {/* Task 10: CheckpointWizard for active milestone */}
-          <CheckpointWizard milestoneLabel={labels[activeIndex]} />
+          <CheckpointWizard milestoneLabel={labels[activeIndex] ?? ""} />
         </div>
       </div>
     </div>

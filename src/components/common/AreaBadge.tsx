@@ -1,25 +1,7 @@
-import {
-  TextSearch,
-  Route,
-  ClipboardCheck,
-  PackageX,
-  Scale,
-  Circle,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { areaById } from "@/lib/model/areas";
+import { resolveAreaIcon } from "./areaIcons";
 import type { Area } from "@/lib/model/types";
-
-// Map from icon strings in areas.ts to available lucide-react icons in this version.
-// ListSearch → TextSearch, PackageOff → PackageX (closest equivalents available).
-const ICONS: Record<string, LucideIcon> = {
-  ListSearch: TextSearch,
-  Route,
-  ClipboardCheck,
-  PackageOff: PackageX,
-  Scale,
-};
 
 function colorFor(area: Area): string {
   if (area === "tracking_records") {
@@ -33,7 +15,7 @@ function colorFor(area: Area): string {
 
 export function AreaBadge({ area }: { area: Area }) {
   const meta = areaById(area);
-  const Icon = ICONS[meta.icon] ?? Circle;
+  const Icon = resolveAreaIcon(meta.icon);
 
   return (
     <span

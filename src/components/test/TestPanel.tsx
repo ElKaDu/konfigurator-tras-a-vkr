@@ -109,7 +109,7 @@ function OutcomeCard({
           <span
             className={cn(
               "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium",
-              "bg-emerald-50 text-emerald-700",
+              "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
             )}
           >
             <CircleCheck size={14} />
