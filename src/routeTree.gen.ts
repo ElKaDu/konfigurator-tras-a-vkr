@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrasyRouteImport } from './routes/trasy'
+import { Route as TestRouteImport } from './routes/test'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RulesNewRouteImport } from './routes/rules.new'
 import { Route as RulesNewIndexRouteImport } from './routes/rules.new.index'
@@ -18,6 +19,11 @@ import { Route as RulesNewEditRouteImport } from './routes/rules.new.edit'
 const TrasyRoute = TrasyRouteImport.update({
   id: '/trasy',
   path: '/trasy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestRoute = TestRouteImport.update({
+  id: '/test',
+  path: '/test',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -43,6 +49,7 @@ const RulesNewEditRoute = RulesNewEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/test': typeof TestRoute
   '/trasy': typeof TrasyRoute
   '/rules/new': typeof RulesNewRouteWithChildren
   '/rules/new/edit': typeof RulesNewEditRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/test': typeof TestRoute
   '/trasy': typeof TrasyRoute
   '/rules/new/edit': typeof RulesNewEditRoute
   '/rules/new': typeof RulesNewIndexRoute
@@ -57,6 +65,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/test': typeof TestRoute
   '/trasy': typeof TrasyRoute
   '/rules/new': typeof RulesNewRouteWithChildren
   '/rules/new/edit': typeof RulesNewEditRoute
@@ -64,12 +73,19 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/trasy' | '/rules/new' | '/rules/new/edit' | '/rules/new/'
+  fullPaths:
+    | '/'
+    | '/test'
+    | '/trasy'
+    | '/rules/new'
+    | '/rules/new/edit'
+    | '/rules/new/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/trasy' | '/rules/new/edit' | '/rules/new'
+  to: '/' | '/test' | '/trasy' | '/rules/new/edit' | '/rules/new'
   id:
     | '__root__'
     | '/'
+    | '/test'
     | '/trasy'
     | '/rules/new'
     | '/rules/new/edit'
@@ -78,6 +94,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  TestRoute: typeof TestRoute
   TrasyRoute: typeof TrasyRoute
   RulesNewRoute: typeof RulesNewRouteWithChildren
 }
@@ -89,6 +106,13 @@ declare module '@tanstack/react-router' {
       path: '/trasy'
       fullPath: '/trasy'
       preLoaderRoute: typeof TrasyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test': {
+      id: '/test'
+      path: '/test'
+      fullPath: '/test'
+      preLoaderRoute: typeof TestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -138,6 +162,7 @@ const RulesNewRouteWithChildren = RulesNewRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  TestRoute: TestRoute,
   TrasyRoute: TrasyRoute,
   RulesNewRoute: RulesNewRouteWithChildren,
 }
