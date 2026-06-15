@@ -5,6 +5,8 @@ import { SectionCard } from "@/components/common/SectionCard";
 import { PlainToken } from "@/components/common/PlainToken";
 import { AreaBadge } from "@/components/common/AreaBadge";
 import { ActionsEditor } from "@/components/rules/ActionsEditor";
+import { TrackingAggregateEditor } from "@/components/rules/editors/TrackingAggregateEditor";
+import { RouteComplianceEditor } from "@/components/rules/editors/RouteComplianceEditor";
 import type { Area } from "@/lib/model/types";
 
 export function RuleEditor({ area, name }: { area: Area; name: string }) {
@@ -44,11 +46,17 @@ export function RuleEditor({ area, name }: { area: Area; name: string }) {
               <PlainToken chevron>při každé nové tracking události</PlainToken>
             </SectionCard>
 
-            {/* 2 — Podmínka (placeholder for Task 8) */}
+            {/* 2 — Podmínka */}
             <SectionCard icon={Filter} title="Podmínka">
-              <div className="text-sm text-muted-foreground">
-                Obsah podmínky podle oblasti (doplní Task 8).
-              </div>
+              {area === "tracking_records" ? (
+                <TrackingAggregateEditor />
+              ) : area === "route_compliance" ? (
+                <RouteComplianceEditor />
+              ) : (
+                <div className="text-sm text-muted-foreground">
+                  Editor této oblasti se připravuje.
+                </div>
+              )}
             </SectionCard>
 
             {/* 3 — Akce */}
