@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { AppHeader } from "@/components/AppHeader";
 import { AreaBadge } from "@/components/common/AreaBadge";
@@ -103,9 +104,13 @@ export function RulesList() {
       <AppHeader
         current="rules"
         extras={
-          <button className="bg-primary text-primary-foreground rounded-lg px-3 py-1.5 text-sm font-medium hover:bg-primary/90">
+          <Link
+            to="/rules/new"
+            search={{ area: selection.kind === "area" ? selection.area : undefined }}
+            className="bg-primary text-primary-foreground rounded-lg px-3 py-1.5 text-sm font-medium hover:bg-primary/90"
+          >
             + Nové pravidlo
-          </button>
+          </Link>
         }
       />
 
