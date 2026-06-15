@@ -6,6 +6,7 @@ import { useRoutes, useCheckpointTypes } from "@/lib/model/store";
 import { cn } from "@/lib/utils";
 import { CoverageEditor } from "./CoverageEditor";
 import { RouteMap } from "./RouteMap";
+import { CheckpointWizard } from "./CheckpointWizard";
 
 export function RouteEditor() {
   const route = useRoutes()[0];
@@ -99,7 +100,8 @@ export function RouteEditor() {
             />
           </SectionCard>
 
-          {/* Task 10: CheckpointWizard for active milestone goes here */}
+          {/* Task 10: CheckpointWizard for active milestone */}
+          <CheckpointWizard milestoneLabel={labels[activeIndex]} />
         </div>
       </div>
     </div>
