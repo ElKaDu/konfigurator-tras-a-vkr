@@ -32,7 +32,7 @@ function stubLines(
   shipment: SampleShipment,
   branch: "fulfilled" | "not_fulfilled",
 ): string[] {
-  const carrier = [shipment.carrier, shipment.transport_type]
+  const carrier = [shipment.carrier, shipment.service_type]
     .filter(Boolean)
     .join(" ");
   const dest = shipment.country_import;

@@ -26,7 +26,7 @@ export const ROUTES: Route[] = [
     name: "FedEx Air — CZ",
     active: true,
     carriers: ["FedEx"],
-    transportTypes: ["AIR"],
+    serviceTypes: ["ECONOMY"],
     destCountries: ["CZ"],
     checkpoints: [
       {
@@ -212,7 +212,7 @@ export const SAMPLE_SHIPMENTS: SampleShipment[] = [
     id: "ship_1",
     label: "FedEx Air → Praha (clení)",
     carrier: "FedEx",
-    transport_type: "AIR",
+    service_type: "ECONOMY",
     country_import: "CZ",
     state: "IN_TRANSPORT",
     dest_postal_code: "11000",
@@ -261,7 +261,7 @@ export const SAMPLE_SHIPMENTS: SampleShipment[] = [
     id: "ship_2",
     label: "FedEx Air → Brno (zaseklá zásilka)",
     carrier: "FedEx",
-    transport_type: "AIR",
+    service_type: "ECONOMY",
     country_import: "CZ",
     state: "IN_TRANSPORT",
     dest_postal_code: "60200",

@@ -44,7 +44,7 @@ function PillGroup({
 }
 
 const CARRIER_OPTIONS = ["UPS", "DHL", "PPL", "GLS"];
-const TRANSPORT_OPTIONS = ["SEA", "ROAD", "EXPRESS"];
+const SERVICE_OPTIONS = ["EXPRESS", "ECONOMY"];
 const COUNTRY_OPTIONS: string[] = [];
 
 export function CoverageEditor({ route }: { route: Route }) {
@@ -52,8 +52,8 @@ export function CoverageEditor({ route }: { route: Route }) {
     (c) => !route.carriers.includes(c)
   ).slice(0, 2);
 
-  const unselectedTransport = TRANSPORT_OPTIONS.filter(
-    (t) => !route.transportTypes.includes(t)
+  const unselectedTransport = SERVICE_OPTIONS.filter(
+    (t) => !route.serviceTypes.includes(t)
   ).slice(0, 2);
 
   return (
@@ -65,8 +65,8 @@ export function CoverageEditor({ route }: { route: Route }) {
         addLabel="+"
       />
       <PillGroup
-        label="Varianta přepravy (transport_type)"
-        selected={route.transportTypes}
+        label="Služba (service_type)"
+        selected={route.serviceTypes}
         unselected={unselectedTransport}
         addLabel="+"
       />

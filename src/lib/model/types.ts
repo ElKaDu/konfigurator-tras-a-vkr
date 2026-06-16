@@ -32,7 +32,7 @@ export interface Checkpoint {
 
 export interface Route {
   id: string; code: string; name: string; active: boolean;
-  carriers: string[]; transportTypes: string[]; destCountries: string[];
+  carriers: string[]; serviceTypes: string[]; destCountries: string[];
   checkpoints: Checkpoint[];
 }
 
@@ -58,7 +58,7 @@ export interface Rule {
 export interface SampleActivity { status?: string; status_code?: string; location_city?: string; location_country_code?: string; location_postal_code?: string; latest?: boolean; status_datetime?: string }
 export interface SampleShipment {
   id: string; label: string;
-  carrier: string; transport_type: string; country_import: string; state: string;
+  carrier: string; service_type: string; country_import: string; state: string;
   dest_postal_code?: string; etd?: string; eta?: string;
   activities: SampleActivity[];
 }
