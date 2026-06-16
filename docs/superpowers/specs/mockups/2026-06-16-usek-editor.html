@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="cs"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — editor úseku + knihovna milníků</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.31.0/tabler-icons.min.css">
+<style>
+:root{
+  --color-background-primary:#fff; --color-background-secondary:#f4f3ee; --color-background-info:#E6F1FB;
+  --color-text-primary:#2C2C2A; --color-text-secondary:#5F5E5A; --color-text-tertiary:#888780; --color-text-info:#185FA5;
+  --color-border-tertiary:rgba(0,0,0,.15); --color-border-secondary:rgba(0,0,0,.3); --color-border-info:rgba(24,95,165,.45);
+  --border-radius-md:8px; --border-radius-lg:12px;
+}
+body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--color-text-primary);background:#fbfbfa;margin:0;padding:24px;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto}
+.lib-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:var(--border-radius-md);cursor:pointer;font-size:13px}
+.lib-item:hover{background:var(--color-background-primary)}
+.cnt{font-size:12px;color:var(--color-text-tertiary)}
+.cp{background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px 14px;margin-bottom:10px}
+.badge{font-size:12px;padding:2px 9px;border-radius:var(--border-radius-md);background:var(--color-background-info);color:var(--color-text-info)}
+.tok{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:var(--border-radius-md);background:var(--color-background-secondary);font-size:13px;border:.5px solid var(--color-border-secondary)}
+.tok.ext{border-style:dashed;border-color:var(--color-border-info)}
+.opt{padding:7px 10px;font-size:13px;border-radius:var(--border-radius-md)}
+</style></head>
+<body><div class="wrap">
+<div style="background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:16px;display:grid;grid-template-columns:190px minmax(0,1fr);gap:16px">
+
+  <div>
+    <p style="font-size:13px;font-weight:500;margin:0 0 8px;color:var(--color-text-secondary)">Knihovna milníků</p>
+    <div class="lib-item"><span>Vyzvednutí</span><span class="cnt">2×</span></div>
+    <div class="lib-item"><span>Přílet do Paříže</span><span class="cnt">4×</span></div>
+    <div class="lib-item" style="background:var(--color-background-primary)"><span>Odlet z Paříže</span><span class="cnt">4×</span></div>
+    <div class="lib-item"><span>Příchod na clení</span><span class="cnt">6×</span></div>
+    <div class="lib-item"><span>Doručeno</span><span class="cnt">9×</span></div>
+    <div class="lib-item" style="color:var(--color-text-info)"><span><i class="ti ti-plus" style="font-size:15px;vertical-align:-2px;margin-right:4px"></i>Nový milník</span></div>
+  </div>
+
+  <div>
+    <div style="display:flex;align-items:baseline;gap:8px;margin:0 0 2px">
+      <span style="font-size:16px;font-weight:500">Úsek 1 · ČR → Paříž</span>
+      <span style="font-size:12px;color:var(--color-text-tertiary)">UPS · Economy</span>
+    </div>
+    <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 14px">Sdílený vstup do Paříže — společný pro USA / Kanadu / Tunis</p>
+
+    <div class="cp">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-weight:500">Přílet do Paříže</span>
+        <span class="badge"><i class="ti ti-link" style="font-size:13px;vertical-align:-1px;margin-right:3px"></i>sdílený · 4 trasy</span>
+      </div>
+      <div style="font-size:13px;color:var(--color-text-secondary);margin-top:8px"><i class="ti ti-clock" style="font-size:15px;vertical-align:-2px;margin-right:5px"></i>má přiletět ve 3:00</div>
+    </div>
+
+    <div class="cp" style="border-color:var(--color-border-info)">
+      <div style="font-size:12px;color:var(--color-text-tertiary);margin-bottom:6px">Typ milníku</div>
+      <div style="display:flex;align-items:center;gap:8px;border:.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:7px 10px;background:var(--color-background-primary)">
+        <i class="ti ti-search" style="font-size:15px;color:var(--color-text-tertiary)"></i>
+        <span style="font-size:14px">Odlet z Paříže</span>
+      </div>
+      <div style="border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);margin-top:6px;padding:4px;background:var(--color-background-primary)">
+        <div class="opt" style="background:var(--color-background-info);color:var(--color-text-info)"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;margin-right:5px"></i>Vytvořit „Odlet z Paříže"</div>
+        <div class="opt" style="color:var(--color-text-secondary)">Odlet ze země odeslání</div>
+      </div>
+      <div style="font-size:13px;color:var(--color-text-secondary);margin-top:12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <i class="ti ti-clock" style="font-size:15px"></i>do <span class="tok">2 h</span> od
+        <span class="tok ext"><i class="ti ti-arrow-back-up" style="font-size:13px"></i>Přílet do Paříže<span style="color:var(--color-text-info);font-size:11px">jiný úsek</span></span>
+      </div>
+    </div>
+
+    <div style="font-size:13px;color:var(--color-text-info);padding:4px 2px"><i class="ti ti-plus" style="font-size:15px;vertical-align:-2px;margin-right:4px"></i>přidat milník</div>
+  </div>
+</div>
+</div></body></html>
