@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Boxes, Layers, MapPin, Truck } from "lucide-react";
+import { AlertTriangle, Boxes, Layers, MapPin, Truck } from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
 import { SectionCard } from "@/components/common/SectionCard";
 import {
@@ -7,13 +7,11 @@ import {
   useCheckpointTypes,
   useSegments,
   routesStore,
-  segmentsStore,
 } from "@/lib/model/store";
 import { cn } from "@/lib/utils";
 import {
   assembledCheckpoints,
   eligibleSegments,
-  segmentUsageCount,
   validateRouteComposition,
 } from "@/lib/model/routeAssembly";
 import { CoverageEditor } from "./CoverageEditor";
@@ -30,6 +28,13 @@ export function RouteEditor() {
 
   // Build a map from checkpointTypeId → name for quick lookup
   const ctMap = new Map(checkpointTypes.map((ct) => [ct.id, ct.name]));
+
+  // Build a map from segmentId → segment for reactive lookup
+  const segMap = new Map(segments.map((s) => [s.id, s]));
+
+  // Precompute usage counts for all segments
+  const usageBySegment = new Map<string, number>();
+  for (const r of routes) for (const sid of r.segmentIds) usageBySegment.set(sid, (usageBySegment.get(sid) ?? 0) + 1);
 
   // Assemble checkpoints from segments in order
   const checkpoints = assembledCheckpoints(route, segments);
@@ -71,8 +76,8 @@ export function RouteEditor() {
               ) : (
                 <div className="flex flex-col gap-1.5">
                   {route.segmentIds.map((id) => {
-                    const seg = segmentsStore.byId(id);
-                    const usageCount = segmentUsageCount(id, routes);
+                    const seg = segMap.get(id);
+                    const usageCount = usageBySegment.get(id) ?? 0;
                     return (
                       <div
                         key={id}
@@ -156,15 +161,17 @@ export function RouteEditor() {
               {/* Validation issues */}
               {issues.length > 0 && (
                 <div className="flex flex-col gap-1 mt-1">
-                  {issues.map((issue, i) => (
-                    <p key={i} className="text-sm text-amber-600">
-                      ⚠ {issue.message}
+                  {issues.map((issue) => (
+                    <div key={issue.kind + "_" + issue.checkpointTypeId} className="flex items-center gap-2 text-sm text-amber-600">
+                      <AlertTriangle className="size-3.5 shrink-0" />
+                      <span>{issue.message}
                       {ctMap.has(issue.checkpointTypeId) && (
                         <span className="ml-1 text-amber-500">
                           ({ctMap.get(issue.checkpointTypeId)})
                         </span>
                       )}
-                    </p>
+                      </span>
+                    </div>
                   ))}
                 </div>
               )}
