@@ -3,6 +3,7 @@ import type {
   Route,
   Rule,
   SampleShipment,
+  Segment,
 } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -17,17 +18,15 @@ export const CHECKPOINT_TYPES: CheckpointType[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Routes
+// Segments
 // ---------------------------------------------------------------------------
-export const ROUTES: Route[] = [
+export const SEGMENTS: Segment[] = [
   {
-    id: "route_fx_air_cz",
-    code: "R-FX-AIR-CZ",
-    name: "FedEx Air — CZ",
-    active: true,
+    id: "seg_cz_arrival",
+    name: "ČR → Příchod na clení",
+    description: "Sdílený vstup do CZ.",
     carriers: ["FedEx"],
     serviceTypes: ["ECONOMY"],
-    destCountries: ["CZ"],
     checkpoints: [
       {
         id: "cp_departure",
@@ -55,11 +54,21 @@ export const ROUTES: Route[] = [
             operator: "within",
             anchorKind: "checkpoint",
             anchorLabel: "od milníku Odlet ze země odeslání",
+            anchorCheckpointTypeId: "ct_departure",
             value: 2,
             unit: "h",
           },
         ],
       },
+    ],
+  },
+  {
+    id: "seg_cz_lastmile",
+    name: "Příchod na clení → Doručeno",
+    description: "Poslední míle v CZ.",
+    carriers: ["FedEx"],
+    serviceTypes: ["ECONOMY"],
+    checkpoints: [
       {
         id: "cp_first_scan",
         checkpointTypeId: "ct_first_scan",
@@ -93,6 +102,22 @@ export const ROUTES: Route[] = [
         correctness: [],
       },
     ],
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Routes
+// ---------------------------------------------------------------------------
+export const ROUTES: Route[] = [
+  {
+    id: "route_fx_air_cz",
+    code: "R-FX-AIR-CZ",
+    name: "FedEx Air — CZ",
+    active: true,
+    carriers: ["FedEx"],
+    serviceTypes: ["ECONOMY"],
+    destCountries: ["CZ"],
+    segmentIds: ["seg_cz_arrival", "seg_cz_lastmile"],
   },
 ];
 

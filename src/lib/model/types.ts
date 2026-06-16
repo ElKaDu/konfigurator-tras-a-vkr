@@ -43,7 +43,6 @@ export interface Segment {
 export interface Route {
   id: string; code: string; name: string; active: boolean;
   carriers: string[]; serviceTypes: string[]; destCountries: string[];
-  checkpoints: Checkpoint[];
   segmentIds: string[];         // uspořádané odkazy na úseky
   destZone?: string[];          // volitelná jemnější zóna (stát / PSČ prefix)
 }

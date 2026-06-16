@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import type { CheckpointType, Route, Rule, SampleShipment } from "./types";
+import type { CheckpointType, Route, Rule, SampleShipment, Segment } from "./types";
 import {
   CHECKPOINT_TYPES,
   ROUTES,
   RULES,
   SAMPLE_SHIPMENTS,
+  SEGMENTS,
 } from "./seed";
 
 // ---------------------------------------------------------------------------
@@ -138,4 +139,28 @@ export const sampleShipmentsStore = {
   all: (): SampleShipment[] => _ships.getState(),
   byId: (id: string): SampleShipment | undefined =>
     _ships.getState().find((s) => s.id === id),
+};
+
+// ---------------------------------------------------------------------------
+// Segments store
+// ---------------------------------------------------------------------------
+
+const _segments = makeStore<Segment>(SEGMENTS);
+
+export function useSegments(): Segment[] {
+  return _segments.useItems();
+}
+
+export const segmentsStore = {
+  all: (): Segment[] => _segments.getState(),
+  byId: (id: string): Segment | undefined =>
+    _segments.getState().find((s) => s.id === id),
+  upsert(seg: Segment): void {
+    const cur = _segments.getState();
+    const idx = cur.findIndex((s) => s.id === seg.id);
+    _segments.setState(idx >= 0 ? cur.map((s) => (s.id === seg.id ? seg : s)) : [...cur, seg]);
+  },
+  reset(): void {
+    _segments.setState([..._segments.seed]);
+  },
 };

@@ -2,8 +2,9 @@ import { useState } from "react";
 import { MapPin, Truck } from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
 import { SectionCard } from "@/components/common/SectionCard";
-import { useRoutes, useCheckpointTypes } from "@/lib/model/store";
+import { useRoutes, useCheckpointTypes, useSegments } from "@/lib/model/store";
 import { cn } from "@/lib/utils";
+import { assembledCheckpoints } from "@/lib/model/routeAssembly";
 import { CoverageEditor } from "./CoverageEditor";
 import { RouteMap } from "./RouteMap";
 import { CheckpointWizard } from "./CheckpointWizard";
@@ -11,13 +12,17 @@ import { CheckpointWizard } from "./CheckpointWizard";
 export function RouteEditor() {
   const route = useRoutes()[0];
   const checkpointTypes = useCheckpointTypes();
+  const segments = useSegments();
   const [activeIndex, setActiveIndex] = useState(0);
 
   // Build a map from checkpointTypeId → name for quick lookup
   const ctMap = new Map(checkpointTypes.map((ct) => [ct.id, ct.name]));
 
-  // Resolve milestone labels from the route's checkpoints
-  const labels: string[] = route.checkpoints.map(
+  // Assemble checkpoints from segments in order
+  const checkpoints = assembledCheckpoints(route, segments);
+
+  // Resolve milestone labels from the assembled checkpoints
+  const labels: string[] = checkpoints.map(
     (cp) => ctMap.get(cp.checkpointTypeId) ?? cp.checkpointTypeId
   );
 
