@@ -65,9 +65,9 @@ interface CheckpointType { id; name; description?; createdAt; updatedAt }
 // Podmínka "jak má správně proběhnout" (0..N na checkpointu, spojené implicitním AND)
 interface CheckpointCorrectness {
   id;
-  aspect?: "record_created" | "record_event_time";   // default record_event_time
-  operator: "within" | "longer_than" | "exact";
-  anchor: TimeAnchor;        // viz §4.4 (do fáze 5 zůstává dnešní ConditionAnchor)
+  aspect?: "record_created" | "record_event_time";   // default record_event_time; co se měří na záznamu TOHOTO checkpointu
+  operator: "within" | "longer_than" | "exact";      // UI: do / více než / přesně
+  anchor: TimeAnchor;                                 // viz §4.1.1 (3 typy kotvy)
 }
 
 interface Checkpoint {
@@ -94,8 +94,34 @@ Pravidla:
 - „Nastal" není konfigurovatelná podmínka — checkpoint na trase MÁ nastat (baseline). Nenastání = automaticky odchylka.
 - Jeden `checkpointType` smí být na trase max 1× (validace unikátnosti).
 - Zaniká `RouteProblem`, `ProblemCondition` jako samostatný objekt; jejich časová logika se přesouvá do `Checkpoint.correctness[]`.
-- `Duration` (v `expectedDuration`) i `TimeAnchor` (v `correctness[].anchor`) jsou do **fáze 5** dnešní `OffsetSpec` resp. `ConditionAnchor`; sjednocení až v §4.4.
+- `TimeAnchor` (v `correctness[].anchor`) je definovaný v **§4.1.1** (3 typy kotvy, revize 2026-06-15). `Duration` zůstává do **fáze 5** dnešní `OffsetSpec`; sjednocení v §4.4.
 - Vztah `expectedDuration` × `correctness[]`: `expectedDuration` je pojmenovaný práh doby trvání v checkpointu (normal/critical); `correctness[]` pokrývá ukotvená očekávání „do kdy" (`within/longer_than/exact` vůči kotvě). „Checkpoint trval moc dlouho" = `correctness` s `operator: longer_than` (kotva na vlastní záznam), volitelně odkazem na práh `expectedDuration`.
+
+### 4.1.1 Kotva časové podmínky (`TimeAnchor`) — revize 2026-06-15
+
+Kotva má **3 typy** (sjednocení dřívějších 4):
+```ts
+type TimeAnchor =
+  // 1) od záznamu JINÉHO milníku téže trasy
+  | { kind: "checkpoint"; checkpointId: ID;
+      reference: "record_event_time" | "record_created"; offset: Duration }
+  // 2) od DATA UDÁLOSTI — sjednocuje dřívější system_event + field_value do jednoho seznamu
+  | { kind: "date_event"; sourceId: string; offset: Duration }
+  // 3) v konkrétní ČAS daného DNE
+  | { kind: "absolute_time"; time: { hours: number; minutes: number };
+      timezone: TimezoneSpec; day: DaySpec };
+```
+
+Rozhodnutí:
+- **`date_event` („od data události") sjednocuje `system_event` + `field_value`.** Uživatel vybírá z **jednoho dropdownu**, kde jsou pohromadě:
+  - **systémová událost** — reálně už jen **„Vytvoření zásilky"** (`shipment_created`);
+  - **datum-pole** zásilky (pole, jejichž hodnota je datum): „Vyzvednutí zásilky", „Vytvoření objednávky", „Avizované doručení zákazníkovi (ADD)", „Doručení hlášené dopravcem", … Dřívější „systémové události" kromě vytvoření zásilky se překlápějí sem (reálně jsou to hodnoty polí).
+  - Uživatel neřeší rozdíl „systémová událost vs. pole" — vidí jen seznam „dat".
+- **`checkpoint` („od jiného checkpointu")** zůstává — odkaz na záznam jiného milníku trasy + `reference` (čas události / přijetí záznamu).
+- **`absolute_time` („v konkrétní čas")** zůstává a v UI se prezentuje jako **„má nastat v konkrétní čas …(vyplň)… a den …(vyplň)…"**: čas (HH:MM + TZ) + **`DaySpec`** (zachovány všechny varianty: pevné datum / hodnota pole / systémová událost / vznik záznamu CP / čas záznamu CP, + offset). `DaySpec` se nabízí **jen** u absolutního času.
+- **Aspekt** (`record_created` / `record_event_time`) beze změny — měří se nad záznamem subjektového checkpointu.
+
+Mentální model: uživatel volí mezi **3 kotvami**; u relativních (`checkpoint`/`date_event`) jen vyplní offset + zdroj z jednoho seznamu; absolutní čas má vlastní tvar věty (čas + den).
 
 ### 4.2 Pravidla (`lib/vkr/types.ts`)
 ```ts
