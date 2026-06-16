@@ -119,7 +119,7 @@ Rozhodnutí:
   - Uživatel neřeší rozdíl „systémová událost vs. pole" — vidí jen seznam „dat".
 - **`checkpoint` („od jiného checkpointu")** zůstává — odkaz na záznam jiného milníku trasy + `reference` (čas události / přijetí záznamu).
 - **`absolute_time` („v konkrétní čas")** zůstává a v UI se prezentuje jako **„má nastat v konkrétní čas …(vyplň)… a den …(vyplň)…"**: čas (HH:MM + TZ) + **`DaySpec`** (zachovány všechny varianty: pevné datum / hodnota pole / systémová událost / vznik záznamu CP / čas záznamu CP, + offset). `DaySpec` se nabízí **jen** u absolutního času.
-- **Aspekt** (`record_created` / `record_event_time`) beze změny — měří se nad záznamem subjektového checkpointu.
+- **Aspekt** se měří nad záznamem subjektového checkpointu; **default = `record_event_time` (čas události).** V UI je to **jediný přepínač pod „pokročilé": „počítat od vytvoření záznamu v trackingu"** (= `record_created`). `reference` u kotvy typu `checkpoint` defaultně rovněž `record_event_time` a v v1 se samostatně nevystavuje (drží se mentální zátěž nízko).
 
 Mentální model: uživatel volí mezi **3 kotvami**; u relativních (`checkpoint`/`date_event`) jen vyplní offset + zdroj z jednoho seznamu; absolutní čas má vlastní tvar věty (čas + den).
 
