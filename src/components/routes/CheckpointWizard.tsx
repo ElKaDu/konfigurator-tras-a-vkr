@@ -37,6 +37,7 @@ export function CheckpointWizard({ milestoneLabel }: Props) {
   const [anchorMode, setAnchorMode] = useState<AnchorMode>("date_event");
   const [anchorOpen, setAnchorOpen] = useState(false);
   const [anchorLabel, setAnchorLabel] = useState("Vyzvednutí zásilky");
+  const [anchorCheckpointTypeId, setAnchorCheckpointTypeId] = useState<string | null>(null);
   const [fromRecordCreated, setFromRecordCreated] = useState(false);
 
   return (
@@ -198,6 +199,7 @@ export function CheckpointWizard({ milestoneLabel }: Props) {
                               onClick={() => {
                                 setAnchorMode("milestone");
                                 setAnchorLabel(ct.name);
+                                setAnchorCheckpointTypeId(ct.id);
                                 setAnchorOpen(false);
                               }}
                               className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-left hover:bg-muted"
@@ -219,6 +221,7 @@ export function CheckpointWizard({ milestoneLabel }: Props) {
                                 onClick={() => {
                                   setAnchorMode("date_event");
                                   setAnchorLabel(d);
+                                  setAnchorCheckpointTypeId(null);
                                   setAnchorOpen(false);
                                 }}
                                 className={cn(
@@ -236,6 +239,7 @@ export function CheckpointWizard({ milestoneLabel }: Props) {
                           <button
                             onClick={() => {
                               setAnchorMode("absolute");
+                              setAnchorCheckpointTypeId(null);
                               setAnchorOpen(false);
                             }}
                             className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-left text-primary font-medium hover:bg-muted"
