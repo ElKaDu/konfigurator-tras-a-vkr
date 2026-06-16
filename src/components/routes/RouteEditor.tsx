@@ -20,11 +20,22 @@ import { SegmentsPanel } from "./SegmentsPanel";
 
 export function RouteEditor() {
   const routes = useRoutes();
-  const route = routes[0];
   const checkpointTypes = useCheckpointTypes();
   const segments = useSegments();
   const [activeIndex, setActiveIndex] = useState(0);
   const [pickerOpen, setPickerOpen] = useState(false);
+
+  const route = routes[0];
+
+  // Guard against no route
+  if (!route) {
+    return (
+      <div className="flex h-screen w-screen flex-col bg-background text-foreground">
+        <AppHeader current="routes" />
+        <div className="p-6 text-sm text-muted-foreground">Žádná trasa k zobrazení.</div>
+      </div>
+    );
+  }
 
   // Build a map from checkpointTypeId → name for quick lookup
   const ctMap = new Map(checkpointTypes.map((ct) => [ct.id, ct.name]));
@@ -86,7 +97,7 @@ export function RouteEditor() {
                         <span className="font-medium">
                           {seg?.name ?? id}
                           <span className="ml-2 text-muted-foreground font-normal">
-                            · použito na {usageCount}× trasách
+                            · použito na {usageCount} trasách
                           </span>
                         </span>
                         <button
@@ -212,24 +223,6 @@ export function RouteEditor() {
                   </button>
                 </div>
               ))}
-
-              {/* Add milestone chip */}
-              <div className="flex items-center gap-1.5">
-                <svg
-                  viewBox="0 0 8 14"
-                  className="size-3 text-muted-foreground shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M1 1l6 6-6 6" />
-                </svg>
-                <button className="rounded-full border border-dashed border-border px-3 py-1 text-sm text-muted-foreground hover:bg-muted">
-                  + milník
-                </button>
-              </div>
             </div>
 
             {/* Schematic map */}
