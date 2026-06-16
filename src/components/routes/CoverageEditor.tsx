@@ -76,6 +76,12 @@ export function CoverageEditor({ route }: { route: Route }) {
         unselected={COUNTRY_OPTIONS}
         addLabel="+ země"
       />
+      <PillGroup
+        label="Jemnější cíl (stát / PSČ) · volitelné"
+        selected={route.destZone ?? []}
+        unselected={[]}
+        addLabel="+ zóna"
+      />
     </div>
   );
 }
