@@ -21,6 +21,7 @@ export interface CheckpointCorrectness {
   anchorKind: "checkpoint" | "system_event" | "field" | "absolute_time";
   anchorLabel: string;            // lidský popis pro mockup
   value?: number; unit?: "h" | "d" | "bd";
+  anchorCheckpointTypeId?: string; // id typu milníku, na který kotva ukazuje
 }
 
 export interface Checkpoint {
@@ -30,10 +31,21 @@ export interface Checkpoint {
   correctness: CheckpointCorrectness[];   // prázdné = jen "musí nastat"
 }
 
+export interface Segment {
+  id: string;
+  name: string;                 // „ČR → Paříž"
+  description?: string;         // orientace: „Paříž → US hub, pro USA trasy"
+  carriers: string[];           // service_provider (CarriersProviders)
+  serviceTypes: string[];       // service_type (ServicesTypes: EXPRESS/ECONOMY)
+  checkpoints: Checkpoint[];    // uspořádané
+}
+
 export interface Route {
   id: string; code: string; name: string; active: boolean;
   carriers: string[]; serviceTypes: string[]; destCountries: string[];
   checkpoints: Checkpoint[];
+  segmentIds: string[];         // uspořádané odkazy na úseky
+  destZone?: string[];          // volitelná jemnější zóna (stát / PSČ prefix)
 }
 
 export type Condition =
