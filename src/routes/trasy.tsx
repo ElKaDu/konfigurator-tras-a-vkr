@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { RouteEditor } from "@/components/routes/RouteEditor";
+import { RoutesAndSegmentsPage } from "@/components/routes/RoutesAndSegmentsPage";
 
 export const Route = createFileRoute("/trasy")({
   head: () => ({
@@ -12,5 +12,5 @@ export const Route = createFileRoute("/trasy")({
       },
     ],
   }),
-  component: RouteEditor,
+  component: RoutesAndSegmentsPage,
 });

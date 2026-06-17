@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrasyRouteImport } from './routes/trasy'
 import { Route as TestRouteImport } from './routes/test'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UsekIdRouteImport } from './routes/usek.$id'
+import { Route as TrasaIdRouteImport } from './routes/trasa.$id'
 import { Route as RulesNewRouteImport } from './routes/rules.new'
 import { Route as RulesNewIndexRouteImport } from './routes/rules.new.index'
 import { Route as RulesNewEditRouteImport } from './routes/rules.new.edit'
@@ -29,6 +31,16 @@ const TestRoute = TestRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsekIdRoute = UsekIdRouteImport.update({
+  id: '/usek/$id',
+  path: '/usek/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrasaIdRoute = TrasaIdRouteImport.update({
+  id: '/trasa/$id',
+  path: '/trasa/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RulesNewRoute = RulesNewRouteImport.update({
@@ -52,6 +64,8 @@ export interface FileRoutesByFullPath {
   '/test': typeof TestRoute
   '/trasy': typeof TrasyRoute
   '/rules/new': typeof RulesNewRouteWithChildren
+  '/trasa/$id': typeof TrasaIdRoute
+  '/usek/$id': typeof UsekIdRoute
   '/rules/new/edit': typeof RulesNewEditRoute
   '/rules/new/': typeof RulesNewIndexRoute
 }
@@ -59,6 +73,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/test': typeof TestRoute
   '/trasy': typeof TrasyRoute
+  '/trasa/$id': typeof TrasaIdRoute
+  '/usek/$id': typeof UsekIdRoute
   '/rules/new/edit': typeof RulesNewEditRoute
   '/rules/new': typeof RulesNewIndexRoute
 }
@@ -68,6 +84,8 @@ export interface FileRoutesById {
   '/test': typeof TestRoute
   '/trasy': typeof TrasyRoute
   '/rules/new': typeof RulesNewRouteWithChildren
+  '/trasa/$id': typeof TrasaIdRoute
+  '/usek/$id': typeof UsekIdRoute
   '/rules/new/edit': typeof RulesNewEditRoute
   '/rules/new/': typeof RulesNewIndexRoute
 }
@@ -78,16 +96,27 @@ export interface FileRouteTypes {
     | '/test'
     | '/trasy'
     | '/rules/new'
+    | '/trasa/$id'
+    | '/usek/$id'
     | '/rules/new/edit'
     | '/rules/new/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/test' | '/trasy' | '/rules/new/edit' | '/rules/new'
+  to:
+    | '/'
+    | '/test'
+    | '/trasy'
+    | '/trasa/$id'
+    | '/usek/$id'
+    | '/rules/new/edit'
+    | '/rules/new'
   id:
     | '__root__'
     | '/'
     | '/test'
     | '/trasy'
     | '/rules/new'
+    | '/trasa/$id'
+    | '/usek/$id'
     | '/rules/new/edit'
     | '/rules/new/'
   fileRoutesById: FileRoutesById
@@ -97,6 +126,8 @@ export interface RootRouteChildren {
   TestRoute: typeof TestRoute
   TrasyRoute: typeof TrasyRoute
   RulesNewRoute: typeof RulesNewRouteWithChildren
+  TrasaIdRoute: typeof TrasaIdRoute
+  UsekIdRoute: typeof UsekIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -120,6 +151,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/usek/$id': {
+      id: '/usek/$id'
+      path: '/usek/$id'
+      fullPath: '/usek/$id'
+      preLoaderRoute: typeof UsekIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trasa/$id': {
+      id: '/trasa/$id'
+      path: '/trasa/$id'
+      fullPath: '/trasa/$id'
+      preLoaderRoute: typeof TrasaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rules/new': {
@@ -165,6 +210,8 @@ const rootRouteChildren: RootRouteChildren = {
   TestRoute: TestRoute,
   TrasyRoute: TrasyRoute,
   RulesNewRoute: RulesNewRouteWithChildren,
+  TrasaIdRoute: TrasaIdRoute,
+  UsekIdRoute: UsekIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

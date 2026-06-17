@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { X, Zap, Mail, FileEdit, AlertCircle, Pencil, ListChecks, Hand, Hourglass, Bell, PlayCircle, History as HistoryIcon, FileText, Sparkles } from "lucide-react";
+import { X, Mail, FileEdit, AlertCircle, Pencil, ListChecks, Hand, Bell, PlayCircle, History as HistoryIcon, Sparkles } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Action, ConditionGroup, Condition, Rule } from "@/lib/vkr/types";
 import { isGroup } from "@/lib/vkr/types";
@@ -62,9 +62,8 @@ export function RuleDetailPanel({
       </div>
 
       <Tabs defaultValue="summary" className="flex min-h-0 flex-1 flex-col">
-        <TabsList className="mx-5 grid w-auto grid-cols-4">
+        <TabsList className="mx-5 grid w-auto grid-cols-3">
           <TabsTrigger value="summary" className="text-xs"><Sparkles className="mr-1 size-3.5" />Shrnutí</TabsTrigger>
-          <TabsTrigger value="json" className="text-xs"><FileText className="mr-1 size-3.5" />JSON</TabsTrigger>
           <TabsTrigger value="test" className="text-xs"><PlayCircle className="mr-1 size-3.5" />Test</TabsTrigger>
           <TabsTrigger value="history" className="text-xs"><HistoryIcon className="mr-1 size-3.5" />Historie</TabsTrigger>
         </TabsList>
@@ -72,9 +71,6 @@ export function RuleDetailPanel({
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-3">
           <TabsContent value="summary" className="mt-0 space-y-5">
             <SummaryTab rule={rule} />
-          </TabsContent>
-          <TabsContent value="json" className="mt-0">
-            <JsonTab rule={rule} />
           </TabsContent>
           <TabsContent value="test" className="mt-0">
             <TestTab rule={rule} />

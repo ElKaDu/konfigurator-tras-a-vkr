@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { Search, X, Pencil, Sparkles, PlayCircle, History as HistoryIcon } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { AppHeader } from "@/components/AppHeader";
 import { AreaBadge } from "@/components/common/AreaBadge";
 import { AREAS, CIRCLED } from "@/lib/model/areas";
 import { useRules } from "@/lib/model/store";
-import type { Area } from "@/lib/model/types";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { Area, Rule } from "@/lib/model/types";
 
 // Sidebar area list sorted by spec-defined canonical number (AREAS.num).
 const SORTED_AREAS = [...AREAS].sort((a, b) => a.num - b.num);
@@ -70,6 +71,7 @@ function isPriorityHigh(p: string): boolean {
 export function RulesList() {
   const rules = useRules();
   const [selection, setSelection] = useState<Selection>({ kind: "all" });
+  const [selectedRule, setSelectedRule] = useState<Rule | null>(null);
 
   const allCount    = rules.length;
   const activeCount = rules.filter((r) => r.active).length;
@@ -179,7 +181,7 @@ export function RulesList() {
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 min-w-0 p-6 overflow-auto">
+        <main className={cn("flex-1 min-w-0 p-6 overflow-auto", selectedRule && "mr-[460px]")}>
           <div className="mb-4">
             <h1 className="text-lg font-semibold">{title}</h1>
             {subtitle && (
@@ -203,9 +205,11 @@ export function RulesList() {
               visible.map((rule) => (
                 <div
                   key={rule.id}
+                  onClick={() => setSelectedRule(selectedRule?.id === rule.id ? null : rule)}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg border border-border px-3 py-2.5",
+                    "flex items-center gap-3 rounded-lg border px-3 py-2.5 cursor-pointer transition-colors hover:bg-muted/40",
                     !rule.active && "opacity-60",
+                    selectedRule?.id === rule.id ? "border-primary bg-primary-soft/20" : "border-border",
                   )}
                 >
                   {/* Code */}
@@ -249,6 +253,187 @@ export function RulesList() {
           </div>
         </main>
       </div>
+
+      {/* Rule detail sidebar */}
+      {selectedRule && (
+        <RuleDetailSidebar
+          rule={selectedRule}
+          onClose={() => setSelectedRule(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ─── Rule Detail Sidebar ────────────────────────────────── */
+
+const MOCK_SHIPMENTS_TEST = [
+  "BYT-2026-1142 — FedEx Express → DE",
+  "BYT-2026-1117 — UPS World → USA",
+  "BYT-2026-1099 — FedEx Eco → CH",
+];
+
+function RuleDetailSidebar({ rule, onClose }: { rule: Rule; onClose: () => void }) {
+  return (
+    <aside className="fixed right-0 top-14 bottom-0 flex w-[460px] flex-col border-l border-border bg-surface shadow-xl">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3 px-5 pt-5 pb-3">
+        <div className="min-w-0">
+          <div className="font-mono text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+            {rule.code}
+          </div>
+          <h3 className="mt-1 text-base font-semibold leading-snug">{rule.name}</h3>
+        </div>
+        <button
+          onClick={onClose}
+          className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+        >
+          <X className="size-4" />
+        </button>
+      </div>
+
+      <Tabs defaultValue="summary" className="flex min-h-0 flex-1 flex-col">
+        <TabsList className="mx-5 grid w-auto grid-cols-3">
+          <TabsTrigger value="summary" className="text-xs">
+            <Sparkles className="mr-1 size-3.5" />Shrnutí
+          </TabsTrigger>
+          <TabsTrigger value="test" className="text-xs">
+            <PlayCircle className="mr-1 size-3.5" />Test
+          </TabsTrigger>
+          <TabsTrigger value="history" className="text-xs">
+            <HistoryIcon className="mr-1 size-3.5" />Historie
+          </TabsTrigger>
+        </TabsList>
+
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-3">
+          <TabsContent value="summary" className="mt-0 space-y-4">
+            <RuleSummaryTab rule={rule} />
+          </TabsContent>
+          <TabsContent value="test" className="mt-0">
+            <RuleTestTab rule={rule} />
+          </TabsContent>
+          <TabsContent value="history" className="mt-0">
+            <div className="rounded-lg border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
+              Žádné záznamy spuštění.
+            </div>
+          </TabsContent>
+        </div>
+      </Tabs>
+
+      <div className="flex items-center gap-2 border-t border-border bg-surface p-4">
+        <Link
+          to="/rules/new"
+          className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+        >
+          <Pencil className="size-4" /> Upravit pravidlo
+        </Link>
+      </div>
+    </aside>
+  );
+}
+
+function SummarySection({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</div>
+      {children}
+    </div>
+  );
+}
+
+function RuleSummaryTab({ rule }: { rule: Rule }) {
+  const actionTypeLabel: Record<string, string> = {
+    create_vkr: "Vytvořit VkŘ",
+    send_email: "Poslat e-mail",
+    set_field: "Nastavit pole",
+    change_phase: "Změnit fázi",
+    add_note: "Přidat poznámku",
+    update_vkr: "Aktualizovat VkŘ",
+    request_field_from_operator: "Vyžádat pole od operátora",
+  };
+
+  return (
+    <div className="space-y-4">
+      <SummarySection label="Oblast">
+        <AreaBadge area={rule.area} />
+      </SummarySection>
+
+      <SummarySection label="Spouštěč">
+        <div className="rounded-lg border border-border bg-background px-3 py-2 text-sm">
+          {rule.trigger.label}
+        </div>
+      </SummarySection>
+
+      <SummarySection label="Akce">
+        <div className="space-y-2">
+          {rule.actions.map((a) => (
+            <div key={a.id} className="rounded-lg border border-border bg-background p-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm font-medium">{actionTypeLabel[a.type] ?? a.type}</span>
+                {a.runWhenRouteCondition && (
+                  <span className={cn(
+                    "text-[10px] font-semibold rounded-full px-2 py-0.5",
+                    a.runWhenRouteCondition === "fulfilled" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                  )}>
+                    {a.runWhenRouteCondition === "fulfilled" ? "splněno" : "nesplněno"}
+                  </span>
+                )}
+              </div>
+              {a.title && <div className="mt-0.5 text-xs text-muted-foreground">{a.title}</div>}
+            </div>
+          ))}
+        </div>
+      </SummarySection>
+
+      <SummarySection label="Priorita">
+        <span className={cn(
+          "inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold",
+          rule.priority === "high" || rule.priority === "urgent"
+            ? "bg-destructive/15 text-destructive"
+            : "bg-muted text-muted-foreground"
+        )}>
+          {rule.priority.toUpperCase()}
+        </span>
+      </SummarySection>
+    </div>
+  );
+}
+
+function RuleTestTab({ rule }: { rule: Rule }) {
+  const [selected, setSelected] = useState(MOCK_SHIPMENTS_TEST[0]);
+  const [result, setResult] = useState<{ met: boolean } | null>(null);
+
+  const run = () => {
+    const seed = (selected + rule.id).split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+    setResult({ met: seed % 3 !== 0 });
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="text-xs text-muted-foreground">
+        Otestuj pravidlo na konkrétní zásilce (dry run — nic se neuloží).
+      </div>
+      <select
+        value={selected}
+        onChange={(e) => setSelected(e.target.value)}
+        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+      >
+        {MOCK_SHIPMENTS_TEST.map((s) => <option key={s} value={s}>{s}</option>)}
+      </select>
+      <button
+        onClick={run}
+        className="w-full rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+      >
+        Spustit dry run
+      </button>
+      {result && (
+        <div className={cn(
+          "rounded-lg border p-3 text-sm font-semibold",
+          result.met ? "border-green-300 bg-green-50 text-green-700" : "border-red-300 bg-red-50 text-red-700"
+        )}>
+          {result.met ? "✓ Podmínky splněny — akce by byla provedena" : "✗ Podmínky nesplněny"}
+        </div>
+      )}
     </div>
   );
 }

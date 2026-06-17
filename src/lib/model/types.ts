@@ -9,7 +9,7 @@ export interface CheckpointType { id: string; name: string; description?: string
 export interface CheckpointMatch {
   status?: string[]; status_code?: string[]; status_type?: string[];
   exception_code?: string[];
-  location_country_code?: string[]; location_postal_code?: string[]; location_type?: string[];
+  location_country_code?: string[]; location_postal_code?: string[]; location_city?: string[]; location_type?: string[];
   latest?: boolean; zip_matches_destination?: boolean; free_text?: string;
 }
 
@@ -27,7 +27,9 @@ export interface CheckpointCorrectness {
 export interface Checkpoint {
   id: string; checkpointTypeId: string; note?: string;
   match: CheckpointMatch;
-  expectedDurationLabel?: string;
+  expectedDurationHours?: number;
+  warnAfterHours?: number;
+  criticalAfterHours?: number;
   correctness: CheckpointCorrectness[];   // prázdné = jen "musí nastat"
 }
 
