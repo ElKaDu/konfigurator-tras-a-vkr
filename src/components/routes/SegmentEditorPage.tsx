@@ -616,6 +616,14 @@ const SYS_DATE_OPTIONS = [
   { id: "sys_carrier_delivery", label: "Doručení hlášené dopravcem" },
 ];
 
+const SPECIFIC_TIME_DAY_OPTIONS = [
+  { id: "std_delivery", label: "den avizovaného doručení (ADD)" },
+  { id: "std_pickup", label: "den vyzvednutí zásilky" },
+  { id: "std_order", label: "den vytvoření objednávky" },
+  { id: "std_created", label: "den vytvoření zásilky" },
+  { id: "std_custom_offset", label: "jiný den (vlastní offset)" },
+];
+
 function CorrectnessRuleCard({
   rule, onChange, onRemove,
 }: {
@@ -625,13 +633,29 @@ function CorrectnessRuleCard({
 }) {
   const checkpointTypes = useCheckpointTypes();
   const [anchorOpen, setAnchorOpen] = useState(false);
+  const [drillIn, setDrillIn] = useState<"specific_time" | null>(null);
+  const [specificTime, setSpecificTime] = useState("08:00");
+  const [specificDay, setSpecificDay] = useState("std_delivery");
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Sync local state if rule already has specific_time anchor
+  useEffect(() => {
+    if (rule.anchorCheckpointTypeId === "sys_specific_time" && rule.anchorLabel) {
+      const match = rule.anchorLabel.match(/^v (\d{2}:\d{2}) · (.+)$/);
+      if (match) {
+        setSpecificTime(match[1]);
+        const found = SPECIFIC_TIME_DAY_OPTIONS.find(o => o.label === match[2]);
+        if (found) setSpecificDay(found.id);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setAnchorOpen(false);
+        setDrillIn(null);
       }
     }
     document.addEventListener("mousedown", handleClick);
@@ -641,6 +665,15 @@ function CorrectnessRuleCard({
   function selectAnchor(id: string, label: string, kind: "checkpoint" | "date_event") {
     onChange({ ...rule, anchorCheckpointTypeId: id, anchorLabel: label, anchorKind: kind });
     setAnchorOpen(false);
+    setDrillIn(null);
+  }
+
+  function confirmSpecificTime() {
+    const dayLabel = SPECIFIC_TIME_DAY_OPTIONS.find(o => o.id === specificDay)?.label ?? specificDay;
+    const label = `v ${specificTime} · ${dayLabel}`;
+    onChange({ ...rule, anchorCheckpointTypeId: "sys_specific_time", anchorLabel: label, anchorKind: "date_event" });
+    setAnchorOpen(false);
+    setDrillIn(null);
   }
 
   return (
@@ -689,50 +722,124 @@ function CorrectnessRuleCard({
         </button>
 
         {anchorOpen && (
-          <div className="absolute left-0 top-full z-50 mt-1 w-full rounded-lg border border-border bg-popover shadow-lg">
-            {/* Milníky trasy */}
-            <div className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground border-b border-border">
-              Jiný milník trasy
-            </div>
-            <div className="py-1">
-              {checkpointTypes.map((ct) => (
-                <button
-                  key={ct.id}
-                  onClick={() => selectAnchor(ct.id, ct.name, "checkpoint")}
-                  className="flex w-full items-center gap-2.5 px-3 py-2 text-sm hover:bg-muted/50 transition-colors text-left"
-                >
-                  <MapPin className="size-4 text-muted-foreground shrink-0" />
-                  <span className="flex-1">{ct.name}</span>
-                  {rule.anchorCheckpointTypeId === ct.id && <Check className="size-4 text-primary shrink-0" />}
-                </button>
-              ))}
-            </div>
+          <div className="absolute left-0 top-full z-50 mt-1 w-full rounded-lg border border-border bg-popover shadow-lg overflow-hidden">
+            {drillIn === "specific_time" ? (
+              /* Sub-panel: konkrétní čas */
+              <div>
+                <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border">
+                  <button
+                    onClick={() => setDrillIn(null)}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <ChevronRight className="size-4 rotate-180" />
+                  </button>
+                  <span className="text-xs font-semibold">v konkrétní čas v daný den</span>
+                </div>
 
-            {/* Systémová data */}
-            <div className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground border-t border-border border-b">
-              Datum události · systémová data i pole, na jednom místě
-            </div>
-            <div className="py-1">
-              {SYS_DATE_OPTIONS.map((opt) => (
-                <button
-                  key={opt.id}
-                  onClick={() => selectAnchor(opt.id, opt.label, "date_event")}
-                  className={cn(
-                    "flex w-full items-center gap-2.5 px-3 py-2 text-sm hover:bg-muted/50 transition-colors text-left",
-                    rule.anchorCheckpointTypeId === opt.id && "bg-primary/5 text-primary"
-                  )}
-                >
-                  <Calendar className={cn("size-4 shrink-0", rule.anchorCheckpointTypeId === opt.id ? "text-primary" : "text-muted-foreground")} />
-                  <span className="flex-1">{opt.label}</span>
-                  {rule.anchorCheckpointTypeId === opt.id && <Check className="size-4 text-primary shrink-0" />}
-                </button>
-              ))}
-              <button className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-primary hover:bg-muted/50 transition-colors text-left">
-                <Clock className="size-4 shrink-0" />
-                <span className="flex-1">...v konkrétní čas v daný den</span>
-                <ChevronRight className="size-4 shrink-0" />
-              </button>
-            </div>
+                <div className="p-3 space-y-3">
+                  {/* Čas */}
+                  <div>
+                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block mb-1.5">
+                      Čas
+                    </label>
+                    <input
+                      type="time"
+                      value={specificTime}
+                      onChange={(e) => setSpecificTime(e.target.value)}
+                      className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary/40"
+                    />
+                  </div>
+
+                  {/* Den */}
+                  <div>
+                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block mb-1.5">
+                      Den
+                    </label>
+                    <div className="space-y-1">
+                      {SPECIFIC_TIME_DAY_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.id}
+                          onClick={() => setSpecificDay(opt.id)}
+                          className={cn(
+                            "flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors text-left",
+                            specificDay === opt.id
+                              ? "bg-primary/10 text-primary"
+                              : "hover:bg-muted/50"
+                          )}
+                        >
+                          <span className="flex-1">{opt.label}</span>
+                          {specificDay === opt.id && <Check className="size-4 text-primary shrink-0" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Potvrdit */}
+                  <button
+                    onClick={confirmSpecificTime}
+                    className="w-full rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                  >
+                    Potvrdit · v {specificTime} · {SPECIFIC_TIME_DAY_OPTIONS.find(o => o.id === specificDay)?.label}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* Hlavní panel */
+              <>
+                {/* Milníky trasy */}
+                <div className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground border-b border-border">
+                  Jiný milník trasy
+                </div>
+                <div className="py-1">
+                  {checkpointTypes.map((ct) => (
+                    <button
+                      key={ct.id}
+                      onClick={() => selectAnchor(ct.id, ct.name, "checkpoint")}
+                      className="flex w-full items-center gap-2.5 px-3 py-2 text-sm hover:bg-muted/50 transition-colors text-left"
+                    >
+                      <MapPin className="size-4 text-muted-foreground shrink-0" />
+                      <span className="flex-1">{ct.name}</span>
+                      {rule.anchorCheckpointTypeId === ct.id && <Check className="size-4 text-primary shrink-0" />}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Systémová data */}
+                <div className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground border-t border-border border-b">
+                  Datum události · systémová data i pole, na jednom místě
+                </div>
+                <div className="py-1">
+                  {SYS_DATE_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.id}
+                      onClick={() => selectAnchor(opt.id, opt.label, "date_event")}
+                      className={cn(
+                        "flex w-full items-center gap-2.5 px-3 py-2 text-sm hover:bg-muted/50 transition-colors text-left",
+                        rule.anchorCheckpointTypeId === opt.id && "bg-primary/5 text-primary"
+                      )}
+                    >
+                      <Calendar className={cn("size-4 shrink-0", rule.anchorCheckpointTypeId === opt.id ? "text-primary" : "text-muted-foreground")} />
+                      <span className="flex-1">{opt.label}</span>
+                      {rule.anchorCheckpointTypeId === opt.id && <Check className="size-4 text-primary shrink-0" />}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setDrillIn("specific_time")}
+                    className={cn(
+                      "flex w-full items-center gap-2.5 px-3 py-2 text-sm hover:bg-muted/50 transition-colors text-left",
+                      rule.anchorCheckpointTypeId === "sys_specific_time" ? "text-primary" : "text-primary"
+                    )}
+                  >
+                    <Clock className="size-4 shrink-0" />
+                    <span className="flex-1">...v konkrétní čas v daný den</span>
+                    {rule.anchorCheckpointTypeId === "sys_specific_time"
+                      ? <Check className="size-4 shrink-0" />
+                      : <ChevronRight className="size-4 shrink-0" />
+                    }
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>
