@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Search, X, Pencil, Sparkles, PlayCircle, History as HistoryIcon } from "lucide-react";
+import { Search, X, Pencil, Sparkles, PlayCircle, History as HistoryIcon, Trash2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { AppHeader } from "@/components/AppHeader";
 import { AreaBadge } from "@/components/common/AreaBadge";
 import { AREAS, CIRCLED } from "@/lib/model/areas";
-import { useRules } from "@/lib/model/store";
+import { useRules, rulesStore } from "@/lib/model/store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Area, Rule } from "@/lib/model/types";
 
@@ -207,7 +207,7 @@ export function RulesList() {
                   key={rule.id}
                   onClick={() => setSelectedRule(selectedRule?.id === rule.id ? null : rule)}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg border px-3 py-2.5 cursor-pointer transition-colors hover:bg-muted/40",
+                    "group flex items-center gap-3 rounded-lg border px-3 py-2.5 cursor-pointer transition-colors hover:bg-muted/40",
                     !rule.active && "opacity-60",
                     selectedRule?.id === rule.id ? "border-primary bg-primary-soft/20" : "border-border",
                   )}
@@ -222,11 +222,9 @@ export function RulesList() {
                     <div className="text-sm font-medium truncate">{rule.name}</div>
                     <div className="flex flex-wrap items-center gap-1.5 mt-1">
                       <AreaBadge area={rule.area} />
-                      {/* Trigger chip */}
                       <span className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground">
                         {triggerLabel(rule.trigger.kind)}
                       </span>
-                      {/* Priority chip */}
                       <span
                         className={cn(
                           "rounded-full border border-border px-2 py-0.5 text-[11px] font-semibold",
@@ -240,13 +238,26 @@ export function RulesList() {
                     </div>
                   </div>
 
-                  {/* Status dot */}
-                  <span
-                    className={cn(
-                      "size-2 rounded-full shrink-0",
-                      rule.active ? "bg-emerald-500" : "bg-border",
-                    )}
-                  />
+                  {/* Status dot + trash */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        rulesStore.remove(rule.id);
+                        if (selectedRule?.id === rule.id) setSelectedRule(null);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 rounded p-1 text-muted-foreground hover:text-red-500 transition-all"
+                      title="Smazat pravidlo"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                    <span
+                      className={cn(
+                        "size-2 rounded-full",
+                        rule.active ? "bg-emerald-500" : "bg-border",
+                      )}
+                    />
+                  </div>
                 </div>
               ))
             )}
@@ -320,13 +331,19 @@ function RuleDetailSidebar({ rule, onClose }: { rule: Rule; onClose: () => void 
         </div>
       </Tabs>
 
-      <div className="flex items-center gap-2 border-t border-border bg-surface p-4">
+      <div className="border-t border-border bg-surface p-4 space-y-2">
         <Link
           to="/rules/new"
-          className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
         >
           <Pencil className="size-4" /> Upravit pravidlo
         </Link>
+        <button
+          onClick={() => { rulesStore.remove(rule.id); onClose(); }}
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground hover:border-red-300 hover:text-red-500 transition-colors"
+        >
+          <Trash2 className="size-4" /> Smazat pravidlo
+        </button>
       </div>
     </aside>
   );

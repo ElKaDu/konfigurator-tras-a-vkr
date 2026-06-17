@@ -69,6 +69,9 @@ export const rulesStore = {
       idx >= 0 ? cur.map((r) => (r.id === rule.id ? rule : r)) : [...cur, rule]
     );
   },
+  remove(id: string): void {
+    _rules.setState(_rules.getState().filter((r) => r.id !== id));
+  },
   reset(): void {
     _rules.setState([..._rules.seed]);
   },
@@ -97,6 +100,9 @@ export const routesStore = {
         : [...cur, route]
     );
   },
+  remove(id: string): void {
+    _routes.setState(_routes.getState().filter((r) => r.id !== id));
+  },
   reset(): void {
     _routes.setState([..._routes.seed]);
   },
@@ -122,6 +128,9 @@ export const checkpointTypesStore = {
     _cts.setState(
       idx >= 0 ? cur.map((c) => (c.id === ct.id ? ct : c)) : [...cur, ct]
     );
+  },
+  remove(id: string): void {
+    _cts.setState(_cts.getState().filter((ct) => ct.id !== id));
   },
 };
 
@@ -160,7 +169,26 @@ export const segmentsStore = {
     const idx = cur.findIndex((s) => s.id === seg.id);
     _segments.setState(idx >= 0 ? cur.map((s) => (s.id === seg.id ? seg : s)) : [...cur, seg]);
   },
+  remove(id: string): void {
+    _segments.setState(_segments.getState().filter((s) => s.id !== id));
+  },
   reset(): void {
     _segments.setState([..._segments.seed]);
   },
 };
+
+// ---------------------------------------------------------------------------
+// Usage helpers
+// ---------------------------------------------------------------------------
+
+export function isSegmentUsed(segId: string): { used: boolean; count: number } {
+  const count = _routes.getState().filter((r) => r.segmentIds.includes(segId)).length;
+  return { used: count > 0, count };
+}
+
+export function isCheckpointTypeUsed(ctId: string): { used: boolean; count: number } {
+  const count = _segments.getState().filter((s) =>
+    s.checkpoints.some((cp) => cp.checkpointTypeId === ctId)
+  ).length;
+  return { used: count > 0, count };
+}

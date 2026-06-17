@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { Search, Plus, X, ChevronRight, ChevronDown, MapPin, Calendar, Clock, Check } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { AppHeader } from "@/components/AppHeader";
-import { useSegments, useCheckpointTypes, segmentsStore, checkpointTypesStore } from "@/lib/model/store";
+import { useSegments, useCheckpointTypes, segmentsStore, checkpointTypesStore, isCheckpointTypeUsed } from "@/lib/model/store";
+import { Trash2 } from "lucide-react";
 import { milestoneTypeUsage } from "@/lib/model/routeAssembly";
 import { cn } from "@/lib/utils";
 import type { Checkpoint, CheckpointCorrectness } from "@/lib/model/types";
@@ -31,7 +32,7 @@ interface NewMilestoneTypeFormProps {
   onCancel: () => void;
 }
 
-export function SegmentEditorPage({ segmentId }: { segmentId: string }) {
+export function SegmentEditorPage({ segmentId, fromRouteId }: { segmentId: string; fromRouteId?: string | null }) {
   const segments = useSegments();
   const checkpointTypes = useCheckpointTypes();
   const segment = segments.find((s) => s.id === segmentId);
@@ -162,18 +163,38 @@ export function SegmentEditorPage({ segmentId }: { segmentId: string }) {
 
           {/* Save */}
           <div className="border-t border-border p-4 space-y-2">
-            <Link
-              to="/trasy"
-              className="block w-full rounded-lg bg-primary px-4 py-2.5 text-center text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
-              Uložit úsek
-            </Link>
-            <Link
-              to="/trasy"
-              className="block w-full rounded-lg border border-border px-4 py-2 text-center text-sm text-muted-foreground hover:bg-muted transition-colors"
-            >
-              ← Zpět na trasy
-            </Link>
+            {fromRouteId ? (
+              <Link
+                to="/trasa/$id"
+                params={{ id: fromRouteId }}
+                className="block w-full rounded-lg bg-primary px-4 py-2.5 text-center text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                Uložit úsek
+              </Link>
+            ) : (
+              <Link
+                to="/trasy"
+                className="block w-full rounded-lg bg-primary px-4 py-2.5 text-center text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                Uložit úsek
+              </Link>
+            )}
+            {fromRouteId ? (
+              <Link
+                to="/trasa/$id"
+                params={{ id: fromRouteId }}
+                className="block w-full rounded-lg border border-border px-4 py-2 text-center text-sm text-muted-foreground hover:bg-muted transition-colors"
+              >
+                ← Zpět na trasu
+              </Link>
+            ) : (
+              <Link
+                to="/trasy"
+                className="block w-full rounded-lg border border-border px-4 py-2 text-center text-sm text-muted-foreground hover:bg-muted transition-colors"
+              >
+                ← Zpět na trasy
+              </Link>
+            )}
           </div>
         </div>
 
@@ -244,18 +265,32 @@ export function SegmentEditorPage({ segmentId }: { segmentId: string }) {
 
             {/* Milestone type list */}
             <div className="flex flex-col gap-1">
-              {filteredTypes.map((t) => (
-                <div key={t.id} className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-muted/40 transition-colors">
-                  <span className="flex-1 text-sm">{t.name}</span>
-                  <span className="text-xs text-muted-foreground">{usage.get(t.id) ?? 0}×</span>
-                  <button
-                    onClick={() => addMilestone(t.id)}
-                    className="shrink-0 text-primary hover:text-primary/80 text-xs font-medium"
-                  >
-                    + přidat
-                  </button>
-                </div>
-              ))}
+              {filteredTypes.map((t) => {
+                const { used, count } = isCheckpointTypeUsed(t.id);
+                return (
+                  <div key={t.id} className="group flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-muted/40 transition-colors">
+                    <span className="flex-1 text-sm">{t.name}</span>
+                    <span className="text-xs text-muted-foreground">{usage.get(t.id) ?? 0}×</span>
+                    <button
+                      onClick={() => addMilestone(t.id)}
+                      className="shrink-0 text-primary hover:text-primary/80 text-xs font-medium"
+                    >
+                      + přidat
+                    </button>
+                    <button
+                      disabled={used}
+                      onClick={() => checkpointTypesStore.remove(t.id)}
+                      title={used ? `Používá se v ${count} ${count === 1 ? "úseku" : "úsecích"}` : "Smazat typ milníku"}
+                      className={cn(
+                        "shrink-0 opacity-0 group-hover:opacity-100 rounded p-0.5 transition-all",
+                        used ? "text-muted-foreground/30 cursor-not-allowed" : "text-muted-foreground hover:text-red-500"
+                      )}
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Create new type */}

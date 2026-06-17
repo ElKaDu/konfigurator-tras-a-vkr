@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
-import { ChevronDown, ChevronRight, Plus, Search, X, Layers } from "lucide-react";
+import { ChevronDown, ChevronRight, Plus, Search, X, Layers, Trash2 } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { AppHeader } from "@/components/AppHeader";
-import { useRoutes, useSegments, useCheckpointTypes, routesStore, segmentsStore } from "@/lib/model/store";
+import { useRoutes, useSegments, useCheckpointTypes, routesStore, segmentsStore, isSegmentUsed } from "@/lib/model/store";
 import { assembledCheckpoints } from "@/lib/model/routeAssembly";
 import { cn } from "@/lib/utils";
 import type { Route, Segment } from "@/lib/model/types";
@@ -213,7 +213,9 @@ export function RoutesAndSegmentsPage() {
         <SegmentDetailSidebar
           segment={selectedSegment}
           ctMap={ctMap}
+          fromRouteId={expandedRouteId}
           onClose={() => setSelectedSegmentId(null)}
+          onDelete={() => setSelectedSegmentId(null)}
         />
       )}
     </div>
@@ -328,6 +330,13 @@ function RouteExpandedDetail({
         >
           Upravit trasu
         </Link>
+        <button
+          onClick={() => routesStore.remove(route.id)}
+          className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-muted-foreground hover:border-red-300 hover:text-red-500 transition-colors"
+          title="Smazat trasu"
+        >
+          <Trash2 className="size-3.5" /> Smazat
+        </button>
       </div>
     </div>
   );
@@ -370,11 +379,13 @@ function SegmentRow({
 /* ─── Segment Detail Sidebar ─────────────────────────────── */
 
 function SegmentDetailSidebar({
-  segment, ctMap, onClose,
+  segment, ctMap, fromRouteId, onClose, onDelete,
 }: {
   segment: Segment;
   ctMap: Map<string, string>;
+  fromRouteId: string | null;
   onClose: () => void;
+  onDelete: () => void;
 }) {
   return (
     <aside className="fixed right-0 top-14 bottom-0 flex w-[400px] flex-col border-l border-border bg-surface shadow-xl">
@@ -460,14 +471,34 @@ function SegmentDetailSidebar({
       </div>
 
       {/* Footer */}
-      <div className="flex items-center gap-2 border-t border-border bg-surface p-4">
+      <div className="border-t border-border bg-surface p-4 space-y-2">
         <Link
           to="/usek/$id"
           params={{ id: segment.id }}
-          className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          search={fromRouteId ? { from: fromRouteId } : {}}
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
         >
           Upravit úsek
         </Link>
+        {(() => {
+          const { used, count } = isSegmentUsed(segment.id);
+          return (
+            <button
+              disabled={used}
+              onClick={() => { segmentsStore.remove(segment.id); onDelete(); }}
+              title={used ? `Používá se v ${count} ${count === 1 ? "trase" : count < 5 ? "trasách" : "trasách"}` : "Smazat úsek"}
+              className={cn(
+                "flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm transition-colors",
+                used
+                  ? "border-border text-muted-foreground/40 cursor-not-allowed"
+                  : "border-border text-muted-foreground hover:border-red-300 hover:text-red-500"
+              )}
+            >
+              <Trash2 className="size-4" />
+              {used ? `Nelze smazat — používá se v ${count} ${count === 1 ? "trase" : "trasách"}` : "Smazat úsek"}
+            </button>
+          );
+        })()}
       </div>
     </aside>
   );

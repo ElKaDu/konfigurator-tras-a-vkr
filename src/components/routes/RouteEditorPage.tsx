@@ -26,7 +26,7 @@ export function RouteEditorPage({ routeId }: { routeId: string }) {
   function createAndOpenNewSegment() {
     const id = "seg_" + Date.now();
     segmentsStore.upsert({ id, name: "Nový úsek", carriers: [], serviceTypes: [], checkpoints: [] });
-    navigate({ to: "/usek/$id", params: { id } });
+    navigate({ to: "/usek/$id", params: { id }, search: { from: routeId } });
   }
 
   const ctMap = useMemo(() => new Map(checkpointTypes.map((ct) => [ct.id, ct.name])), [checkpointTypes]);
@@ -362,6 +362,7 @@ export function RouteEditorPage({ routeId }: { routeId: string }) {
                 <Link
                   to="/usek/$id"
                   params={{ id: selectedSegment.id }}
+                  search={{ from: routeId }}
                   className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors mt-2"
                 >
                   Upravit úsek

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Lock, Clock, MapPin, AlertTriangle, Zap, ChevronDown, ChevronUp, Plus, X } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { AppHeader } from "@/components/AppHeader";
 import { AREAS } from "@/lib/model/areas";
 import { resolveAreaIcon } from "@/components/common/areaIcons";
@@ -211,53 +212,10 @@ export function RuleCreatorPage() {
               </div>
             )}
 
-            {/* Meta */}
-            <div>
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Nastavení pravidla</div>
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Název pravidla</label>
-                  <input
-                    value={ruleName}
-                    onChange={(e) => setRuleName(e.target.value)}
-                    placeholder="Pojmenuj pravidlo…"
-                    className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Priorita</label>
-                  <select
-                    value={priority}
-                    onChange={(e) => setPriority(e.target.value)}
-                    className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none"
-                  >
-                    <option value="low">LOW</option>
-                    <option value="medium">MEDIUM</option>
-                    <option value="high">HIGH</option>
-                    <option value="urgent">URGENT</option>
-                  </select>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Aktivní</span>
-                  <button
-                    onClick={() => setActive((v) => !v)}
-                    className={cn(
-                      "relative inline-block h-5 w-9 rounded-full transition-colors",
-                      active ? "bg-primary" : "bg-muted"
-                    )}
-                  >
-                    <span className={cn(
-                      "absolute top-0.5 size-4 rounded-full bg-white transition-all shadow",
-                      active ? "right-0.5" : "left-0.5"
-                    )} />
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Save button */}
-          <div className="border-t border-border p-4">
+          <div className="border-t border-border p-4 space-y-2">
             <button
               disabled={!ruleName || !selectedArea}
               onClick={() => {
@@ -287,6 +245,12 @@ export function RuleCreatorPage() {
             >
               Uložit pravidlo
             </button>
+            <Link
+              to="/rules"
+              className="block w-full rounded-lg border border-border px-4 py-2 text-center text-sm text-muted-foreground hover:bg-muted transition-colors"
+            >
+              ← Zpět na pravidla
+            </Link>
           </div>
         </div>
 
@@ -354,6 +318,49 @@ export function RuleCreatorPage() {
                 )}
               </>
             )}
+
+
+            {/* Meta — název, priorita, aktivní */}
+            <div className="border-t border-border pt-4 space-y-3">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Nastavení pravidla</div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Název pravidla</label>
+                <input
+                  value={ruleName}
+                  onChange={(e) => setRuleName(e.target.value)}
+                  placeholder="Pojmenuj pravidlo…"
+                  className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Priorita</label>
+                <select
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value)}
+                  className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none"
+                >
+                  <option value="low">LOW</option>
+                  <option value="medium">MEDIUM</option>
+                  <option value="high">HIGH</option>
+                  <option value="urgent">URGENT</option>
+                </select>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Aktivní</span>
+                <button
+                  onClick={() => setActive((v) => !v)}
+                  className={cn(
+                    "relative inline-block h-5 w-9 rounded-full transition-colors",
+                    active ? "bg-primary" : "bg-muted"
+                  )}
+                >
+                  <span className={cn(
+                    "absolute top-0.5 size-4 rounded-full bg-white transition-all shadow",
+                    active ? "right-0.5" : "left-0.5"
+                  )} />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
