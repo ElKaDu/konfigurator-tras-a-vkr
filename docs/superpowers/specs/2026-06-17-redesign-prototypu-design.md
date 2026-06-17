@@ -81,10 +81,11 @@ Pod výběrem oblasti se zobrazí sekce **Situace** s pěti kartami:
 
 **Karta D — Zásilka příliš dlouho na milníku:**
 - Určeno pro situace jako "zásilka stojí na celnici déle, než je očekáváno"
-- **Výběr milníku:** dropdown nebo radiolist — pouze milníky, které mají nastavené Očekávané trvání; zobrazuje se název milníku + nastavené trvání
+- **Výběr milníku:** dropdown nebo radiolist — pouze milníky, které mají nastavený alespoň jeden práh (Dlouho nebo Kriticky dlouho); zobrazuje se název milníku + hodnoty obou prahů
+- **Vyhodnocovat jako:** radio — `Dlouho` / `Kriticky dlouho` — uživatel vybírá, který práh chce tímto pravidlem hlídat
 - **Interval kontroly:** uživatel si vybere, jak často se pravidlo spouští (chipy nebo select: každých 30 min / 1 h / 2 h / 6 h / vlastní)
-- Podmínka je splněna, pokud: zásilka je aktuálně na daném milníku A uplynulo více než nastavené Očekávané trvání bez posunu
-- Auto-summary note: "Pravidlo se spouští opakovaně v nastaveném intervalu. Podmínka se splní, pokud zásilka na milníku setrvává déle, než je definováno v nastavení milníku."
+- Podmínka je splněna, pokud: zásilka je aktuálně na daném milníku A uplynulo více než zvolený práh bez posunu na další milník
+- Auto-summary note: "Pravidlo se spouští opakovaně v nastaveném intervalu. Podmínka se splní, pokud zásilka na milníku setrvává déle, než odpovídá zvolenému prahu."
 - Read-only trigger zobrazuje: 🔒 Časový plán — každých [N] [h/min] (interval)
 
 **Všechny karty — read-only trigger:**
@@ -189,6 +190,9 @@ Jeden klik dělá dvě věci najednou:
   - Dostupná pole: **status**, **status_code**, **země** (location_country_code), **PSČ** (location_postal_code), **město** (location_city), **typ lokace** (location_type), **kód výjimky** (exception_code)
   - Operátory dle pole: `=`, `obsahuje`, `je jedním z`, `není`
 - **Očekávané trvání:** [do/od-do ▼] [číslo] [hodin/dní/prac.dní ▼] od [kotva ▼]
+  - **Práh "Dlouho":** [číslo] [hodin/dní/prac.dní ▼] od [kotva ▼] — překročení = zásilka je na milníku déle, než je v pořádku
+  - **Práh "Kriticky dlouho":** [číslo] [hodin/dní/prac.dní ▼] od [kotva ▼] — překročení = eskalační stav, vyžaduje okamžitou reakci
+  - Oba prahy jsou volitelné; kotva je sdílená s očekávaným trváním nebo nastavitelná samostatně
 - **Správnost (volitelné):** tlačítko `+ přidat pravidlo správnosti`
 - Pokud aktivní "Vytvořit nový typ milníku": zobrazí formulář Název + Popis místo konfigurace
 
