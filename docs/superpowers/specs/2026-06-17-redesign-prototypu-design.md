@@ -11,7 +11,7 @@
 
 ### Sidebar pravidla
 - Hlavička: kód pravidla + název
-- Záložky: **Shrnutí** / **JSON** / **Test** / **Historie**
+- Záložky: **Shrnutí** / **Test** / **Historie** (bez JSON)
 - Záložka Shrnutí zobrazuje: spouštěč, podmínky, akce (read-only přehled)
 - Patička sidebaru: tlačítko **Upravit pravidlo** (naviguje na editor)
 - Sidebar se zavírá křížkem nebo kliknutím mimo
@@ -34,8 +34,8 @@ Krok 1 (výběr oblasti) a krok 2 (nastavení) jsou na **jedné stránce**. Žá
 - Tlačítko **Uložit pravidlo** (fixed v patičce sloupce)
 
 ### Střední sloupec — Spouštěč + Podmínky
-- Pro většinu oblastí: typ spouštěče + editor podmínek (AND/OR logika, + přidat podmínku)
-- Pro oblast **Soulad s trasou**: wizard (viz sekce 2a)
+- Implementováno pouze pro oblast **Soulad s trasou**: wizard (viz sekce 2a)
+- Ostatní oblasti jsou v prototypu disabled — střední a pravý sloupec zůstávají prázdné, žádné editory podmínek se neimplementují
 
 ### Pravý sloupec — Akce
 - Všechny typy akcí dle specifikace:
@@ -54,13 +54,14 @@ Krok 1 (výběr oblasti) a krok 2 (nastavení) jsou na **jedné stránce**. Žá
 ## 2a. Soulad s trasou — wizard v levém + středním sloupci
 
 ### Levý sloupec (rozšíření)
-Pod výběrem oblasti se zobrazí sekce **Situace** se čtyřmi kartami:
+Pod výběrem oblasti se zobrazí sekce **Situace** s pěti kartami:
 
 | Karta | Název | Spouštěč |
 |---|---|---|
 | 📅 | Kontrola v den doručení | Časový plán (schedule) |
 | 📍 | Zásilka v neočekávané lokaci | Reaktivní (condition_met) |
 | ⏰ | Zásilka zmeškala milník | Reaktivní (condition_met) |
+| 🕐 | Zásilka příliš dlouho na milníku | Časový plán — interval (schedule) |
 | ⚙️ | Jiná situace | *disabled — zatím nedostupné* |
 
 ### Střední sloupec — upřesnění dle karty
@@ -77,6 +78,14 @@ Pod výběrem oblasti se zobrazí sekce **Situace** se čtyřmi kartami:
 
 **Karta C — Zásilka zmeškala milník:**
 - Žádné formuláře. Auto-summary: "Podmínka je nastavena automaticky. Systém sleduje každý milník definovaný na trase zásilky. Jakmile uplyne časový limit milníku a zásilka nemá platný tracking záznam, podmínka se splní. Časové limity nastavuješ v editoru trasy."
+
+**Karta D — Zásilka příliš dlouho na milníku:**
+- Určeno pro situace jako "zásilka stojí na celnici déle, než je očekáváno"
+- **Výběr milníku:** dropdown nebo radiolist — pouze milníky, které mají nastavené Očekávané trvání; zobrazuje se název milníku + nastavené trvání
+- **Interval kontroly:** uživatel si vybere, jak často se pravidlo spouští (chipy nebo select: každých 30 min / 1 h / 2 h / 6 h / vlastní)
+- Podmínka je splněna, pokud: zásilka je aktuálně na daném milníku A uplynulo více než nastavené Očekávané trvání bez posunu
+- Auto-summary note: "Pravidlo se spouští opakovaně v nastaveném intervalu. Podmínka se splní, pokud zásilka na milníku setrvává déle, než je definováno v nastavení milníku."
+- Read-only trigger zobrazuje: 🔒 Časový plán — každých [N] [h/min] (interval)
 
 **Všechny karty — read-only trigger:**
 - Zobrazuje se jako zamčený řádek (🔒 ikona) se popisem automatického spouštěče
@@ -176,7 +185,9 @@ Jeden klik dělá dvě věci najednou:
 
 ### Pravý sloupec — Konfigurace vybraného milníku
 - Hlavička: číslo + název milníku
-- **Match podmínky:** řádky [pole ▼] [operátor ▼] [hodnota] + × odebrat + tlačítko `+ přidat podmínku`
+- **Match podmínky** ("Jak poznáme, že milník nastal"): řádky [pole ▼] [operátor ▼] [hodnota] + × odebrat + tlačítko `+ přidat podmínku`
+  - Dostupná pole: **status**, **status_code**, **země** (location_country_code), **PSČ** (location_postal_code), **město** (location_city), **typ lokace** (location_type), **kód výjimky** (exception_code)
+  - Operátory dle pole: `=`, `obsahuje`, `je jedním z`, `není`
 - **Očekávané trvání:** [do/od-do ▼] [číslo] [hodin/dní/prac.dní ▼] od [kotva ▼]
 - **Správnost (volitelné):** tlačítko `+ přidat pravidlo správnosti`
 - Pokud aktivní "Vytvořit nový typ milníku": zobrazí formulář Název + Popis místo konfigurace
