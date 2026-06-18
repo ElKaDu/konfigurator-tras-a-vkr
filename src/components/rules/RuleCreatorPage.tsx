@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Lock, Clock, MapPin, AlertTriangle, Zap, ChevronDown, ChevronUp, Plus, X } from "lucide-react";
+import { Lock, Clock, MapPin, AlertTriangle, Zap, ChevronDown, ChevronUp, Plus, X, Radio, PauseCircle, LocateFixed } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { AppHeader } from "@/components/AppHeader";
 import { AREAS } from "@/lib/model/areas";
@@ -12,6 +12,49 @@ type Situation = "delivery_day" | "unexpected_location" | "missed_milestone" | "
 type CheckInterval = "30min" | "1h" | "2h" | "6h";
 type ThresholdLevel = "warn" | "critical";
 interface SkipCondition { id: string; ruleId: string; outcome: "positive" | "negative" | "any"; }
+
+type TrackingSituation = "tracking_event" | "no_movement" | "stuck_location";
+interface TrackingConditionRow { id: string; field: string; operator: string; value: string; }
+type StuckMatchMode = "locationId" | "city" | "countryCode";
+
+const TRACKING_SITUATION_CARDS: { id: TrackingSituation; icon: React.ReactNode; label: string; trigger: string }[] = [
+  {
+    id: "tracking_event",
+    icon: <Radio className="size-4" />,
+    label: "Přišel konkrétní tracking záznam",
+    trigger: "Reaktivní — při každém novém záznamu",
+  },
+  {
+    id: "no_movement",
+    icon: <PauseCircle className="size-4" />,
+    label: "Zásilka bez pohybu po stanovenou dobu",
+    trigger: "Časový plán — kontroluje periodicky",
+  },
+  {
+    id: "stuck_location",
+    icon: <LocateFixed className="size-4" />,
+    label: "Zásilka zaseknutá na jednom místě",
+    trigger: "Reaktivní — při každém novém záznamu",
+  },
+];
+
+const TRACKING_FIELDS: { value: string; label: string; group: string }[] = [
+  { value: "eventType", label: "Typ záznamu (eventType)", group: "Typ a status" },
+  { value: "derivedStatus", label: "Odvozený status", group: "Typ a status" },
+  { value: "derivedStatusCode", label: "Kód odvozeného statusu", group: "Typ a status" },
+  { value: "eventDescription", label: "Popis události", group: "Typ a status" },
+  { value: "exceptionCode", label: "Kód výjimky", group: "Výjimka" },
+  { value: "exceptionDescription", label: "Popis výjimky", group: "Výjimka" },
+  { value: "locationType", label: "Typ místa", group: "Lokace" },
+  { value: "locationId", label: "ID místa", group: "Lokace" },
+  { value: "city", label: "Město", group: "Lokace" },
+  { value: "countryCode", label: "Kód země", group: "Lokace" },
+  { value: "postalCode", label: "PSČ", group: "Lokace" },
+  { value: "deliveryAttempts", label: "Počet pokusů o doručení", group: "Doručení" },
+  { value: "eventTime", label: "Čas záznamu (eventTime)", group: "Čas" },
+];
+
+const TRACKING_OPERATORS = ["je jedním z", "není žádným z", "je", "není", "obsahuje", "je větší než", "je menší nebo rovno"];
 
 const SITUATION_CARDS: {
   id: Situation;
@@ -76,6 +119,19 @@ export function RuleCreatorPage() {
 
   const [selectedArea, setSelectedArea] = useState<Area>("route_compliance");
   const [selectedSituation, setSelectedSituation] = useState<Situation | null>(null);
+
+  // Tracking records state
+  const [selectedTrackingSituation, setSelectedTrackingSituation] = useState<TrackingSituation | null>(null);
+  const [trackingConditions, setTrackingConditions] = useState<TrackingConditionRow[]>([
+    { id: "tc_1", field: "derivedStatus", operator: "je jedním z", value: "" },
+  ]);
+  const [noMovementDuration, setNoMovementDuration] = useState(72);
+  const [noMovementUnit, setNoMovementUnit] = useState<"h" | "d" | "bd">("h");
+  const [ignoreClearance, setIgnoreClearance] = useState(true);
+  const [stuckCount, setStuckCount] = useState(4);
+  const [stuckMatchMode, setStuckMatchMode] = useState<StuckMatchMode>("city");
+  const [stuckInclude, setStuckInclude] = useState<TrackingConditionRow[]>([]);
+  const [stuckExclude, setStuckExclude] = useState<TrackingConditionRow[]>([]);
   const [ruleName, setRuleName] = useState("");
   const [priority, setPriority] = useState("medium");
   const [active, setActive] = useState(true);
@@ -93,6 +149,7 @@ export function RuleCreatorPage() {
   const [notFulfilledActions, setNotFulfilledActions] = useState<BranchAction[]>([
     { id: "act_1", type: "create_vkr", title: "Soulad s trasou — nesplněno · {{shipment.reference}}" },
   ]);
+  const [trackingActions, setTrackingActions] = useState<BranchAction[]>([]);
   const [advancedOpen, setAdvancedOpen] = useState<Record<string, boolean>>({});
 
   // Milestones with thresholds (for "too_long" situation)
@@ -122,7 +179,9 @@ export function RuleCreatorPage() {
   }
 
   const isRouteCompliance = selectedArea === "route_compliance";
+  const isTrackingRecords = selectedArea === "tracking_records";
   const triggerLabel = getTriggerLabel(selectedSituation, checkInterval);
+  const trackingTriggerLabel = getTrackingTriggerLabel(selectedTrackingSituation);
 
   return (
     <div className="flex h-screen w-screen flex-col bg-background text-foreground">
@@ -167,6 +226,36 @@ export function RuleCreatorPage() {
                 })}
               </div>
             </div>
+
+            {/* Situace (tracking_records) */}
+            {isTrackingRecords && (
+              <div>
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Situace</div>
+                <div className="flex flex-col gap-1.5">
+                  {TRACKING_SITUATION_CARDS.map((card) => {
+                    const isSelected = selectedTrackingSituation === card.id;
+                    return (
+                      <button
+                        key={card.id}
+                        onClick={() => setSelectedTrackingSituation(card.id)}
+                        className={cn(
+                          "flex items-start gap-2.5 rounded-lg border px-3 py-2.5 text-left transition-colors",
+                          isSelected
+                            ? "border-primary bg-primary-soft/40 text-primary"
+                            : "border-border hover:border-primary/30 hover:bg-muted/30 text-foreground"
+                        )}
+                      >
+                        <span className={cn("mt-0.5", isSelected ? "text-primary" : "text-muted-foreground")}>{card.icon}</span>
+                        <div>
+                          <div className="text-xs font-medium">{card.label}</div>
+                          <div className={cn("text-[10px]", isSelected ? "text-primary/70" : "text-muted-foreground")}>{card.trigger}</div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Situace (only for route_compliance) */}
             {isRouteCompliance && (
@@ -246,7 +335,7 @@ export function RuleCreatorPage() {
               Uložit pravidlo
             </button>
             <Link
-              to="/rules"
+              to="/"
               className="block w-full rounded-lg border border-border px-4 py-2 text-center text-sm text-muted-foreground hover:bg-muted transition-colors"
             >
               ← Zpět na pravidla
@@ -257,12 +346,102 @@ export function RuleCreatorPage() {
         {/* MIDDLE COLUMN — Spouštěč + Podmínky */}
         <div className="flex flex-1 min-w-0 flex-col border-r border-border">
           <div className="flex-1 overflow-y-auto p-5 space-y-4">
-            {!isRouteCompliance && (
+            {/* Meta — název, priorita, aktivní — nahoře */}
+            <div className="space-y-3">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Nastavení pravidla</div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Název pravidla</label>
+                <input
+                  value={ruleName}
+                  onChange={(e) => setRuleName(e.target.value)}
+                  placeholder="Pojmenuj pravidlo…"
+                  className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Priorita</label>
+                <select
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value)}
+                  className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none"
+                >
+                  <option value="low">LOW</option>
+                  <option value="medium">MEDIUM</option>
+                  <option value="high">HIGH</option>
+                  <option value="urgent">URGENT</option>
+                </select>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Aktivní</span>
+                <button
+                  onClick={() => setActive((v) => !v)}
+                  className={cn(
+                    "relative inline-block h-5 w-9 rounded-full transition-colors",
+                    active ? "bg-primary" : "bg-muted"
+                  )}
+                >
+                  <span className={cn(
+                    "absolute top-0.5 size-4 rounded-full bg-white transition-all shadow",
+                    active ? "right-0.5" : "left-0.5"
+                  )} />
+                </button>
+              </div>
+            </div>
+
+            <div className="border-t border-border" />
+
+            {!isRouteCompliance && !isTrackingRecords && (
               <div className="rounded-xl border border-dashed border-border p-8 text-center">
                 <div className="text-sm text-muted-foreground">
                   Konfigurace podmínek pro tuto oblast bude přidána později.
                 </div>
               </div>
+            )}
+
+            {isTrackingRecords && !selectedTrackingSituation && (
+              <div className="rounded-xl border border-dashed border-border p-8 text-center">
+                <div className="text-sm text-muted-foreground">Vyber situaci v levém sloupci.</div>
+              </div>
+            )}
+
+            {isTrackingRecords && selectedTrackingSituation && (
+              <>
+                <div className="flex items-center gap-2.5 rounded-lg border border-border bg-muted/30 px-3 py-2.5">
+                  <Lock className="size-3.5 text-muted-foreground shrink-0" />
+                  <div className="text-sm text-muted-foreground">
+                    <span className="font-medium text-foreground">Spouštěč:</span> {trackingTriggerLabel}
+                  </div>
+                </div>
+
+                {selectedTrackingSituation === "tracking_event" && (
+                  <TrackingEventConfig
+                    conditions={trackingConditions}
+                    onConditions={setTrackingConditions}
+                  />
+                )}
+                {selectedTrackingSituation === "no_movement" && (
+                  <NoMovementConfig
+                    duration={noMovementDuration}
+                    onDuration={setNoMovementDuration}
+                    unit={noMovementUnit}
+                    onUnit={setNoMovementUnit}
+                    ignoreClearance={ignoreClearance}
+                    onIgnoreClearance={setIgnoreClearance}
+                  />
+                )}
+                {selectedTrackingSituation === "stuck_location" && (
+                  <StuckLocationConfig
+                    count={stuckCount}
+                    onCount={setStuckCount}
+                    matchMode={stuckMatchMode}
+                    onMatchMode={setStuckMatchMode}
+                    include={stuckInclude}
+                    onInclude={setStuckInclude}
+                    exclude={stuckExclude}
+                    onExclude={setStuckExclude}
+                  />
+                )}
+              </>
             )}
 
             {isRouteCompliance && !selectedSituation && (
@@ -320,47 +499,6 @@ export function RuleCreatorPage() {
             )}
 
 
-            {/* Meta — název, priorita, aktivní */}
-            <div className="border-t border-border pt-4 space-y-3">
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Nastavení pravidla</div>
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Název pravidla</label>
-                <input
-                  value={ruleName}
-                  onChange={(e) => setRuleName(e.target.value)}
-                  placeholder="Pojmenuj pravidlo…"
-                  className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Priorita</label>
-                <select
-                  value={priority}
-                  onChange={(e) => setPriority(e.target.value)}
-                  className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none"
-                >
-                  <option value="low">LOW</option>
-                  <option value="medium">MEDIUM</option>
-                  <option value="high">HIGH</option>
-                  <option value="urgent">URGENT</option>
-                </select>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Aktivní</span>
-                <button
-                  onClick={() => setActive((v) => !v)}
-                  className={cn(
-                    "relative inline-block h-5 w-9 rounded-full transition-colors",
-                    active ? "bg-primary" : "bg-muted"
-                  )}
-                >
-                  <span className={cn(
-                    "absolute top-0.5 size-4 rounded-full bg-white transition-all shadow",
-                    active ? "right-0.5" : "left-0.5"
-                  )} />
-                </button>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -369,9 +507,8 @@ export function RuleCreatorPage() {
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Akce</div>
 
-            {isRouteCompliance ? (
+            {isRouteCompliance && (
               <>
-                {/* Fulfilled branch */}
                 <ActionBranch
                   label="Podmínka splněna"
                   variant="fulfilled"
@@ -387,8 +524,6 @@ export function RuleCreatorPage() {
                     setFulfilledActions((prev) => prev.map((a) => a.id === id ? { ...a, title } : a))
                   }
                 />
-
-                {/* Not fulfilled branch */}
                 <ActionBranch
                   label="Podmínka nesplněna"
                   variant="not_fulfilled"
@@ -405,7 +540,27 @@ export function RuleCreatorPage() {
                   }
                 />
               </>
-            ) : (
+            )}
+
+            {isTrackingRecords && (
+              <ActionBranch
+                label="Podmínka splněna"
+                variant="fulfilled"
+                actions={trackingActions}
+                advancedOpen={advancedOpen}
+                onToggleAdvanced={(id) => setAdvancedOpen((p) => ({ ...p, [id]: !p[id] }))}
+                onAdd={() => setTrackingActions((prev) => [...prev, { id: "ta_" + Date.now(), type: "create_vkr", title: "" }])}
+                onRemove={(id) => setTrackingActions((prev) => prev.filter((a) => a.id !== id))}
+                onChangeType={(id, type) =>
+                  setTrackingActions((prev) => prev.map((a) => a.id === id ? { ...a, type } : a))
+                }
+                onChangeTitle={(id, title) =>
+                  setTrackingActions((prev) => prev.map((a) => a.id === id ? { ...a, title } : a))
+                }
+              />
+            )}
+
+            {!isRouteCompliance && !isTrackingRecords && (
               <div className="rounded-xl border border-dashed border-border p-8 text-center">
                 <div className="text-sm text-muted-foreground">Nejdříve vyber oblast vlevo.</div>
               </div>
@@ -754,7 +909,290 @@ function ActionBranch({
   );
 }
 
+/* ─── Tracking configs ───────────────────────────────────── */
+
+function TrackingFieldSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const groups = Array.from(new Set(TRACKING_FIELDS.map((f) => f.group)));
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="rounded border border-border bg-background px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary/40"
+      style={{ minWidth: 160 }}
+    >
+      {groups.map((g) => (
+        <optgroup key={g} label={g}>
+          {TRACKING_FIELDS.filter((f) => f.group === g).map((f) => (
+            <option key={f.value} value={f.value}>{f.label}</option>
+          ))}
+        </optgroup>
+      ))}
+    </select>
+  );
+}
+
+function TrackingConditionBuilder({
+  conditions,
+  onConditions,
+  simple = false,
+}: {
+  conditions: TrackingConditionRow[];
+  onConditions: (rows: TrackingConditionRow[]) => void;
+  simple?: boolean;
+}) {
+  function addRow() {
+    onConditions([...conditions, { id: "tc_" + Date.now(), field: "derivedStatus", operator: "je jedním z", value: "" }]);
+  }
+  function removeRow(id: string) {
+    if (conditions.length <= 1 && !simple) return;
+    onConditions(conditions.filter((r) => r.id !== id));
+  }
+  function update(id: string, patch: Partial<TrackingConditionRow>) {
+    onConditions(conditions.map((r) => r.id === id ? { ...r, ...patch } : r));
+  }
+
+  return (
+    <div className="space-y-1.5">
+      {conditions.map((row, idx) => (
+        <div key={row.id}>
+          {idx > 0 && (
+            <div className="flex items-center gap-2 my-1">
+              <div className="flex-1 border-t border-dashed border-border" />
+              <span className="text-[10px] font-bold text-primary bg-primary-soft/30 border border-primary/20 rounded px-1.5 py-0.5">A</span>
+              <div className="flex-1 border-t border-dashed border-border" />
+            </div>
+          )}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <TrackingFieldSelect value={row.field} onChange={(v) => update(row.id, { field: v })} />
+            <select
+              value={row.operator}
+              onChange={(e) => update(row.id, { operator: e.target.value })}
+              className="rounded border border-border bg-background px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary/40"
+              style={{ minWidth: 120 }}
+            >
+              {TRACKING_OPERATORS.map((op) => <option key={op}>{op}</option>)}
+            </select>
+            <input
+              value={row.value}
+              onChange={(e) => update(row.id, { value: e.target.value })}
+              placeholder="hodnota…"
+              className="flex-1 min-w-[100px] rounded border border-border bg-background px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary/40"
+            />
+            <button
+              onClick={() => removeRow(row.id)}
+              disabled={conditions.length <= 1 && !simple}
+              className="text-muted-foreground hover:text-foreground disabled:opacity-30"
+            >
+              <X className="size-3.5" />
+            </button>
+          </div>
+        </div>
+      ))}
+      <button
+        onClick={addRow}
+        className="mt-1 flex items-center gap-1 rounded-lg border border-dashed border-border px-3 py-1.5 text-xs text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+      >
+        <Plus className="size-3" /> přidat podmínku
+      </button>
+    </div>
+  );
+}
+
+function TrackingEventConfig({
+  conditions, onConditions,
+}: {
+  conditions: TrackingConditionRow[];
+  onConditions: (rows: TrackingConditionRow[]) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+          Nový záznam musí splňovat
+        </div>
+        <TrackingConditionBuilder conditions={conditions} onConditions={onConditions} />
+      </div>
+      <div className="rounded-lg bg-blue-50 border border-blue-200 px-3 py-2.5 text-xs text-blue-700 leading-relaxed">
+        Více podmínek se vyhodnocuje jako <strong>A (AND)</strong>. Pro alternativy (status A nebo B) zadej hodnoty do jedné podmínky oddělené čárkou.
+      </div>
+    </div>
+  );
+}
+
+function NoMovementConfig({
+  duration, onDuration, unit, onUnit, ignoreClearance, onIgnoreClearance,
+}: {
+  duration: number;
+  onDuration: (v: number) => void;
+  unit: "h" | "d" | "bd";
+  onUnit: (v: "h" | "d" | "bd") => void;
+  ignoreClearance: boolean;
+  onIgnoreClearance: (v: boolean) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+          Zásilka nemá nový záznam déle než
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            min={1}
+            value={duration}
+            onChange={(e) => onDuration(Number(e.target.value))}
+            className="w-20 rounded border border-border bg-background px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
+          <select
+            value={unit}
+            onChange={(e) => onUnit(e.target.value as "h" | "d" | "bd")}
+            className="rounded border border-border bg-background px-2 py-1.5 text-xs focus:outline-none"
+          >
+            <option value="h">hodin</option>
+            <option value="d">dní</option>
+            <option value="bd">pracovních dní</option>
+          </select>
+          <span className="text-xs text-muted-foreground">od posledního záznamu</span>
+        </div>
+      </div>
+
+      <div className="border-t border-border" />
+
+      <div
+        className="flex items-center gap-3 cursor-pointer"
+        onClick={() => onIgnoreClearance(!ignoreClearance)}
+      >
+        <button
+          className={cn(
+            "relative inline-block h-5 w-9 rounded-full transition-colors shrink-0",
+            ignoreClearance ? "bg-primary" : "bg-muted"
+          )}
+        >
+          <span className={cn(
+            "absolute top-0.5 size-4 rounded-full bg-white transition-all shadow",
+            ignoreClearance ? "right-0.5" : "left-0.5"
+          )} />
+        </button>
+        <span className="text-xs text-muted-foreground leading-snug">
+          Ignorovat dobu na celním řízení (stav = Celní řízení se nezapočítává)
+        </span>
+      </div>
+
+      <div className="rounded-lg bg-blue-50 border border-blue-200 px-3 py-2.5 text-xs text-blue-700 leading-relaxed">
+        Systém nemá pro tuto situaci přirozený spouštěč. Podmínka se kontroluje v pravidelném časovém plánu — typicky 2× denně.
+      </div>
+    </div>
+  );
+}
+
+function StuckLocationConfig({
+  count, onCount, matchMode, onMatchMode, include, onInclude, exclude, onExclude,
+}: {
+  count: number;
+  onCount: (v: number) => void;
+  matchMode: StuckMatchMode;
+  onMatchMode: (v: StuckMatchMode) => void;
+  include: TrackingConditionRow[];
+  onInclude: (rows: TrackingConditionRow[]) => void;
+  exclude: TrackingConditionRow[];
+  onExclude: (rows: TrackingConditionRow[]) => void;
+}) {
+  const MATCH_OPTIONS: { id: StuckMatchMode; label: string; sub: string }[] = [
+    { id: "locationId", label: "ID místa", sub: "locationId" },
+    { id: "city", label: "Město", sub: "city" },
+    { id: "countryCode", label: "Kód země", sub: "countryCode" },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+          Počet po sobě jdoucích záznamů ze stejného místa
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            min={2}
+            value={count}
+            onChange={(e) => onCount(Number(e.target.value))}
+            className="w-20 rounded border border-border bg-background px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
+          <span className="text-xs text-muted-foreground">po sobě jdoucích záznamů</span>
+        </div>
+      </div>
+
+      <div>
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Shoda místa podle</div>
+        <div className="flex gap-2">
+          {MATCH_OPTIONS.map((opt) => (
+            <button
+              key={opt.id}
+              onClick={() => onMatchMode(opt.id)}
+              className={cn(
+                "flex-1 rounded-lg border px-3 py-2 text-center text-xs font-medium transition-colors",
+                matchMode === opt.id
+                  ? "border-primary bg-primary-soft/30 text-primary"
+                  : "border-border hover:border-primary/30 text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <div>{opt.label}</div>
+              <div className={cn("text-[10px]", matchMode === opt.id ? "text-primary/70" : "text-muted-foreground")}>{opt.sub}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="border-t border-border" />
+
+      <div>
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+          Záznamy obsahují statusy <span className="font-normal normal-case">(volitelně)</span>
+        </div>
+        <TrackingConditionBuilder conditions={include} onConditions={onInclude} simple />
+        {include.length === 0 && (
+          <button
+            onClick={() => onInclude([{ id: "inc_" + Date.now(), field: "derivedStatus", operator: "je jedním z", value: "" }])}
+            className="mt-1 flex items-center gap-1 rounded-lg border border-dashed border-border px-3 py-1.5 text-xs text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+          >
+            <Plus className="size-3" /> přidat status k zahrnutí
+          </button>
+        )}
+      </div>
+
+      <div>
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+          Záznamy neobsahují statusy <span className="font-normal normal-case">(volitelně)</span>
+        </div>
+        {exclude.length > 0 && (
+          <TrackingConditionBuilder conditions={exclude} onConditions={onExclude} simple />
+        )}
+        {exclude.length === 0 && (
+          <button
+            onClick={() => onExclude([{ id: "exc_" + Date.now(), field: "derivedStatus", operator: "je jedním z", value: "" }])}
+            className="mt-1 flex items-center gap-1 rounded-lg border border-dashed border-border px-3 py-1.5 text-xs text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+          >
+            <Plus className="size-3" /> přidat status k vyloučení
+          </button>
+        )}
+      </div>
+
+      <div className="rounded-lg bg-blue-50 border border-blue-200 px-3 py-2.5 text-xs text-blue-700 leading-relaxed">
+        Systém porovnává posledních N záznamů. Záznamy bez lokace (např. „Label created") se přeskakují.
+      </div>
+    </div>
+  );
+}
+
 /* ─── Helpers ────────────────────────────────────────────── */
+
+function getTrackingTriggerLabel(situation: TrackingSituation | null): string {
+  switch (situation) {
+    case "tracking_event": return "Reaktivní — při každém novém tracking záznamu";
+    case "no_movement": return "Časový plán (schedule) — systém kontroluje periodicky";
+    case "stuck_location": return "Reaktivní — při každém novém tracking záznamu";
+    default: return "—";
+  }
+}
 
 function getTriggerLabel(situation: Situation | null, interval: CheckInterval): string {
   if (!situation) return "—";

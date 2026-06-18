@@ -22,6 +22,7 @@ export interface CheckpointCorrectness {
   anchorLabel: string;            // lidský popis pro mockup
   value?: number; unit?: "h" | "d" | "bd";
   anchorCheckpointTypeId?: string; // id typu milníku, na který kotva ukazuje
+  specificTime?: string;           // HH:MM — upřesnění času, jen pokud unit = d/bd
 }
 
 export interface Checkpoint {
