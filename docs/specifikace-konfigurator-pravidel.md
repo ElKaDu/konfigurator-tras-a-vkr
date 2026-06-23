@@ -36,7 +36,6 @@ Nové pravidlo se tvoří průvodcem (`/rules/new`) v třísloupcovém layoutu:
 | **Plán spuštění** (`ScheduleItems`) | Kdy se odešle VkŘ — seznam časových položek (pevný čas nebo offset od termínu milníku). |
 | **Podmínka zásilky** (`VkrCondition`) | Filtr zásilek v pravidle nebo v akci — VkŘ se odešle jen pro zásilky splňující podmínku. |
 | **Složka** (`Folder`) | Organizační jednotka — pravidla VkŘ jsou řazena do složek. |
-| **Typ problému** (`ProblemType`) | Sdílený slovník pojmenovaných problémových situací (např. „Dlouho na clení") — definuje se jednou, odkazuje se z editoru trasy i z editoru pravidla. |
 
 ---
 
@@ -167,7 +166,7 @@ Tři situační karty:
 
 #### Konfigurace situace `tracking_event` — Přišel konkrétní tracking záznam
 
-Nastavení **co musí být na záznamu** (AND podmínky nad tracking poli):
+Nastavuje se **co musí splňovat posuzovaný záznam** (AND podmínky nad tracking poli):
 
 | Pole | Label |
 |---|---|
@@ -189,32 +188,32 @@ Pro `eventTime` je k dispozici `TrackingTimeValueEditor` — výběr pevného č
 
 Více podmínek = AND. Pro alternativy (status A nebo B) se zadají do jednoho pole oddělené čárkou.
 
-**Do budoucna:** Plánujeme přidat podmínky nad historií trackingu — „zásilka musí mít v historii status X před tímto záznamem".
+Dále lze nastavit **podmínku zásilky** — pravidlo se uplatní jen pro zásilky odpovídající těmto podmínkám (pole zásilky, ne tracking záznamu).
 
-#### Konfigurace situace `no_movement` — Zásilka bez pohybu
+**Do budoucna:** Plánujeme přidat třetí vrstvu — podmínky nad **historií trackingu**: co musí být v předchozích záznamech, než přišel tento. Například „zásilka musí mít v historii status X před tímto záznamem".
+
+Akce: pouze jedna větev — **Podmínka splněna**.
+
+#### Konfigurace situace `no_movement` — Zásilka bez pohybu po stanovenou dobu
 
 - Doba bez pohybu: číslo + jednotka (`h` / `d` / `bd`).
-- Toggle: Ignorovat dobu na celním řízení (`ignoreClearance`).
+- Toggle: Ignorovat dobu na celním řízení (`ignoreClearance`) — stav celního řízení se do doby klidu nezapočítává.
+- Podmínka zásilky (sdílená).
 - Systém nemá přirozený spouštěč — kontroluje se periodicky (typicky 2× denně).
 
-**Do budoucna:** Odladíme podle produkčního chování. Plánujeme přidat podmínky zásilky specifické pro tuto situaci.
+Akce: pouze jedna větev — **Podmínka splněna**.
 
-#### Konfigurace situace `stuck_location` — Zásilka zaseknutá na místě
+#### Konfigurace situace `stuck_location` — Zásilka zaseknutá na jednom místě
 
 - Počet po sobě jdoucích záznamů ze stejného místa: číslo.
 - Shoda místa podle: `locationId` / `city` / `countryCode`.
-- Volitelné: filter tracking záznamu co se do série počítá (pole + operátor + hodnota).
+- Volitelné: filter tracking záznamu, který se do série počítá (pole + operátor + hodnota).
 - Záznamy bez lokace (Label created apod.) se přeskakují.
+- Podmínka zásilky (sdílená).
 
-**Do budoucna:** Zvážíme, zda situace `no_movement` a `stuck_location` sloučit nebo ponechat oddělené, a upřesníme chování podle produkce.
+Akce: pouze jedna větev — **Podmínka splněna**.
 
-#### Podmínka zásilky — sdílená pro všechny tracking situace
-
-V prostředním sloupci je sekce **Podmínka zásilky** — pravidlo se uplatní jen pro zásilky odpovídající těmto podmínkám. Využívá `VkrConditionsBuilder` (viz sekce 6).
-
-#### Akce pro oblast `tracking_records`
-
-Pouze jedna větev: **Podmínka splněna**. Akce se nerozdělují na splněno/nesplněno.
+**Do budoucna:** Situace `no_movement` a `stuck_location` odladíme podle produkčního chování. Zvážíme, zda situace sloučit nebo ponechat oddělené, případně jinak přizpůsobit. V obou situacích plánujeme upřesnit, jaké podmínky zásilky a podmínky nad historií trackingu dávají smysl.
 
 ---
 
@@ -231,7 +230,7 @@ Pouze jedna větev: **Podmínka splněna**. Akce se nerozdělují na splněno/ne
 
 **Spouštěč** — zamčený řádek + disabled tlačítko „Pokročilé" (stejné jako u tracking_records).
 
-Akce: **dvě větve** — „Podmínka splněna" (`runWhenRouteCondition: fulfilled`) a „Podmínka nesplněna" (`runWhenRouteCondition: not_fulfilled`).
+Akce: **dvě větve** — „Podmínka splněna" (`runWhenRouteCondition: fulfilled`) a „Podmínka nesplněna" (`runWhenRouteCondition: not_fulfilled`). Každá akce může mít navíc vlastní podmínky zásilky — akce se spustí jen pro zásilky splňující tyto podmínky.
 
 #### Výběr tras (`RouteScopePicker`)
 
@@ -239,14 +238,31 @@ Zobrazuje se pro všechny aktivní situace. Omezí pravidlo jen na vybrané tras
 
 #### Podmínky zásilky (`VkrConditionsBuilder`)
 
-Zobrazuje se v prostředním sloupci pro všechny aktivní situace. Viz sekce 6.
+Zobrazuje se v prostředním sloupci pro všechny aktivní situace. Pravidlo se uplatní jen pro zásilky splňující tyto podmínky. Viz sekce 6.
 
 #### Situace `delivery_day` — Kontrola v den doručení
 
 Konfigurace:
 1. **Výběr milníku** — radio-list typů milníků z `checkpointTypesStore`. Pravidlo sleduje tento milník na trase zásilky.
-2. **Plán spuštění** — viz sekce 5.
-3. Info: kontrola proběhne pouze v den, kdy carrier avizuje doručení. Pokud předchozí kontrola v daném dni uspěla, pozdější se přeskočí.
+2. **Podmínky zásilky** — volitelné filtrování zásilek (např. jen zásilky, kde carrier avizuje doručení dnes).
+3. **Plán spuštění** — viz sekce 5.
+
+Info: kontrola proběhne pouze v den, kdy carrier avizuje doručení. Pokud předchozí kontrola v daném dni uspěla, pozdější se přeskočí.
+
+**Příklad — dvě kontroly pro 1. fyzický scan:**
+
+Milník „1. Fyzický scan v cílové zemi" má deadline 8:00 v den doručení. Pravidlo má dvě položky v plánu spuštění:
+
+- **Kontrola v 8:00** — spouštěč kontroluje zásilky průběžně (např. každých 10 minut), ale VkŘ se odesílá až v 8:00. Zjistí, zda zásilka milník splnila.
+- **Kontrola v 9:00** (= 1 h po termínu milníku) — zachytí záznamy, které dorazily do systému se zpožděním, ale mají na sobě `event_time` 8:00. Zásilka fyzicky prošla včas, scan se jen pozdě propsal. Vyhodnocuje se čas uvedený na záznamu, ne čas kdy záznam dorazil do systému.
+
+Pokud první kontrola v 8:00 dopadla úspěšně (milník splněn), druhá kontrola v 9:00 VkŘ neodešle — přeskočí se automaticky.
+
+**Příklad — podmínky zásilky pro pravidlo:**
+
+Pravidlo „DD - Kontrola 2 FedEx Facility — doručení přepravce je dnes" má podmínku zásilky `carrier_announced_delivery_at is_today` — spustí se jen tehdy, když carrier avizuje doručení na dnešek.
+
+Pravidlo „DD - Kontrola 2 FedEx Facility — datum doručení není dnes" má podmínku `carrier_announced_delivery_at is_tomorrow` — reaguje, když doručení je naplánováno na zítra.
 
 #### Situace `unexpected_location` — Zásilka v neočekávané lokaci
 
@@ -257,15 +273,16 @@ Podmínka je nastavena automaticky. Systém při každém příchozím tracking 
 Konfigurace:
 1. **Výběr tras** (`RouteScopePicker`) — s možností exclude.
 2. **Výběr typu milníku** (`MilestoneTypePicker`) — systém sleduje tento typ milníku na trase zásilky.
-3. Info: jakmile uplyne deadline a zásilka nemá platný tracking záznam, podmínka se splní. Deadliny nastavuješ v editoru trasy.
+3. **Podmínky zásilky** — volitelné filtrování zásilek.
+4. Info: jakmile uplyne deadline a zásilka nemá platný tracking záznam, podmínka se splní. Deadliny nastavuješ v editoru trasy.
 
-**Do budoucna:** Plán spuštění pro `missed_milestone` přidáme analogicky jako u `delivery_day`.
+**Do budoucna:** Plán spuštění pro `missed_milestone` přidáme analogicky jako u `delivery_day` — kontrola v pevný čas nebo relativně k termínu sledovaného milníku.
 
 ---
 
 ## 5. Plán spuštění (`ScheduleEditor`)
 
-Plán spuštění určuje, **kdy se odešle VkŘ**. Systém může zásilku průběžně kontrolovat (spouštěč), ale VkŘ se odešle až v čase definovaném plánem.
+Plán spuštění určuje, **kdy se odešle VkŘ**. Spouštěč může zásilky kontrolovat průběžně (např. každých 10 minut), ale VkŘ se odešle až v čase z plánu spuštění.
 
 Plán je seznam položek (`ScheduleItem[]`) — lze přidat více položek různých typů.
 
@@ -296,24 +313,17 @@ type ScheduleItem =
 
 **Termín milníku** = pole `event_time_of_day` (mode: fixed) v Match podmínkách checkpointu daného typu na úseku, kterým zásilka prochází. Pokud má úsek víc časových podmínek, jako termín se bere „nejpozději do". Pokud milník nemá `event_time_of_day`, úseky s tímto milníkem se pro relativní plán přeskočí.
 
-### 5.2 Pravidlo přeskočení
+### 5.2 Pravidlo přeskočení při úspěchu
 
 Jakmile milník proběhne v pořádku, žádné pozdější časy z plánu spuštění v daném dni VkŘ neodešlou. Tím se zamezí situaci, kdy zásilka splní milník mezi první a druhou kontrolou a druhá kontrola by znovu odeslala „splněno".
 
-### 5.3 Příklad: dvě kontroly pro 1. fyzický scan
-
-Milník „1. Fyzický scan v cílové zemi" má deadline `event_time_of_day: after 08:00` (termín = 8:00 v den doručení).
-
-- **Kontrola 1** — `time_of_day: 08:00` — zjistí, zda zásilka milník splnila.
-- **Kontrola 2** — `relative_to_milestone_due: after 1h` = 9:00 — zachytí záznamy, které dorazily do systému se zpožděním, ale mají na sobě `event_time` 8:00 (zásilka prošla včas, scan se jen pozdě propsal). Vyhodnocuje se `event_time`, ne čas příchodu záznamu.
-
-### 5.4 Otevřená otázka: více kontrol pro stejný milník — jedno vs. dvě pravidla
+### 5.3 Otevřená otázka: více kontrol — jedno nebo dvě pravidla
 
 Pokud má pravidlo více položek v plánu spuštění (více běhů), přeskočení při úspěchu probíhá automaticky v rámci jednoho pravidla.
 
-Pokud jsou dvě kontroly nastaveny jako **dvě samostatná pravidla** pro stejný milník, lze přeskočení druhého pravidla nastavit přes `skipConditions` — pokud první pravidlo dnes dopadlo pozitivně, druhé se přeskočí. V situaci `delivery_day` by šlo toto přeskočení nastavit automaticky.
+Pokud jsou dvě kontroly nastaveny jako **dvě samostatná pravidla** pro stejný milník, přeskočení druhého pravidla při úspěchu prvního lze nastavit přes `skipIfPrior` (VkŘ model) nebo `skipConditions` (uiState). V situaci `delivery_day` by šlo toto přeskočení nastavit automaticky.
 
-Alternativní přístup: vždy nastavovat více kontrol jako jedno pravidlo a výběr, kterého běhu se daná akce týká, řešit v akci samotné (např. `runAtScheduleTime`). **Toto ještě dořešíme.**
+Alternativní přístup: vždy nastavovat více kontrol jako jedno pravidlo a výběr, které akce se týkají kterého běhu, řešit přímo v akcích (např. `runAtScheduleTime`). **Toto ještě dořešíme.**
 
 ---
 
@@ -323,7 +333,7 @@ Podmínky zásilky (`VkrCondition[]`) filtrují zásilky, pro které se pravidlo
 
 Využívají se na dvou místech:
 1. **Na úrovni pravidla** — v prostředním sloupci pod konfigurací situace (platí pro celé pravidlo).
-2. **Na úrovni akce** — každá akce má sekci „Podmínky zásilky" v pravém sloupci (platí jen pro tuto akci; ukládáno do `uiState.fulfilledActions[].shipmentConditions`).
+2. **Na úrovni akce** — každá akce má sekci „Podmínky zásilky" v pravém sloupci (platí jen pro tuto akci; ukládáno do `uiState`).
 
 ```ts
 interface VkrCondition {
@@ -337,10 +347,6 @@ interface VkrCondition {
 Dostupná pole jsou všechna pole zásilky (katalog z `src/lib/vkr/fields/catalog.shipment.ts`). Příklady:
 - `carrier_announced_delivery_at` — datum doručení hlášené dopravcem (`is_today`, `is_tomorrow`, `within_days`)
 - `customer.tenure` — zákazník (`is` / `is_not`, hodnoty: `new`, `longterm`)
-
-**Příklad:** „DD - Kontrola 2 FedEx Facility — doručení přepravce je dnes" má podmínku `carrier_announced_delivery_at is_today`.
-
-**Příklad:** „DD - Kontrola 2 FedEx Facility — datum doručení není dnes" má podmínku `carrier_announced_delivery_at is_tomorrow`.
 
 ---
 
@@ -368,16 +374,15 @@ export interface Route {
   active: boolean; archivedAt?: string;
   carriers: string[]; serviceTypes: string[]; destCountries: string[];
   checkpoints: Checkpoint[];   // milníky přímo na trase, žádné segmenty
-  problems?: RouteProblem[];   // pokročilé podmínky
   parentRouteId?: ID;          // pro varianty trasy
   createdAt: string; updatedAt: string;
 }
 ```
-Tento model nemá segmenty — milníky jsou přímo na trase. Přibývají: **archivace**, **varianty trasy** (`parentRouteId`), **pokročilé podmínky** (`RouteProblem`). Export dat (`bytorp-export`) aktuálně stále exportuje Segment-based strukturu.
+Tento model nemá segmenty — milníky jsou přímo na trase. Přibývají: archivace, varianty trasy (`parentRouteId`). Export dat (`bytorp-export`) aktuálně stále exportuje Segment-based strukturu.
 
-### 7.2 Varianty trasy (`parentRouteId`)
+### 7.2 Varianty trasy (`parentRouteId`) — vize
 
-Trasa může mít varianty — sub-trasy propojené přes `parentRouteId` (v novém modelu). Varianty se používají pro PSČ-specifické větve nebo jiné odchylky. Kolize signatur (`carrier × serviceType × cílová země`) se kontrolují jen u hlavních tras, ne u variant.
+Trasa může mít varianty — sub-trasy propojené přes `parentRouteId` (v novém modelu). Kolize signatur (`carrier × serviceType × cílová země`) se kontrolují jen u hlavních tras, ne u variant. **V aktuálním prototypu varianty nejsou dostupné.**
 
 ### 7.3 Úsek (`Segment`) — aktuální model
 
@@ -409,7 +414,7 @@ export interface Checkpoint {
 }
 ```
 
-**Doba trvání** se nenastavuje přímo na milníku (deprecated pole). Místo toho se vyjádří porovnáním dvou milníků — deadline druhého milníku je kotven na první. Příklad: „celní odbavení" a „celní odbavení dokončeno" s deadline do 3 h od prvního.
+**Doba trvání** se nenastavuje přímo na milníku (deprecated pole). Místo toho se vyjádří porovnáním dvou milníků — deadline druhého milníku je kotven na první. Příklad: milník „celní odbavení" a milník „celní odbavení dokončeno" s deadline do 3 h od prvního.
 
 ### 7.5 `CheckpointMatch` — co se musí v trackingu objevit
 
@@ -449,7 +454,7 @@ event_time_of_day?: {
 
 ### 7.6 `CheckpointCorrectness` — deadline milníku
 
-**Klíčová sémantika:** Correctness definuje **deadline** — milník musí nastat nejpozději do daného data/času. Pokud se matching tracking záznam objeví dříve (i jiný den, jiný čas) — milník je splněn. Vyhodnocuje se `event_time` záznamu, ne čas příchodu do systému.
+**Klíčová sémantika:** Correctness definuje **deadline** — milník musí nastat nejpozději do daného data/času. Pokud se matching tracking záznam objeví dříve (i jiný den, jiný čas) — milník je splněn. Vyhodnocuje se `event_time` záznamu, ne čas příchodu do systému. To, kdy záznam reálně dorazil, se vyhodnocuje na pravidle (plán spuštění), ne na milníku.
 
 ```ts
 export interface CheckpointCorrectness {
@@ -481,6 +486,10 @@ export interface CheckpointCorrectness {
 
 **Mode `fixed`:** Kotva určuje **den** (ne čas). `fixedTime` určuje čas v tento den. `fixedDayOffset: 0` = ten samý den jako kotva.
 
+**Příklad — fixed:** Milník „1. Fyzický scan v cílové zemi" má deadline: kotva = `sys_add` (avizované doručení zákazníkovi), `fixedOp: "after"`, `fixedTime: "09:00"`, `fixedDayOffset: 0`. Deadline = nejpozději 9:00 v den ADD. Pokud zásilka projde milníkem kdykoliv předtím (i den dřív), je to v pořádku.
+
+**Příklad — offset / vztah dvou milníků:** Milník „celní odbavení dokončeno" má deadline: kotva = checkpoint „celní odbavení", `operator: "within"`, `value: 3`, `unit: "h"`. Deadline = do 3 hodin od záznamu celního odbavení. Toto nahrazuje dřívější pole „doba trvání" — vyjadřuje se porovnáním dvou milníků vůči sobě.
+
 **Systémové události (kotvy) — aktuální model:**
 
 | ID v datech | Label |
@@ -501,56 +510,11 @@ export interface CheckpointCorrectness {
 | `order_created` | Vytvoření objednávky |
 | `promised_delivery_at` | Avizované doručení zákazníkovi |
 
-### 7.7 Pokročilé podmínky trasy (`RouteProblem`, `ProblemType`)
-
-V novém modelu (`routes/types.ts`) má trasa pole `problems?: RouteProblem[]`. Jde o pojmenované pokročilé podmínky odkazující do sdíleného slovníku `ProblemType`.
-
-```ts
-interface RouteProblem {
-  problemTypeId: ID;
-  logic: { operator: "AND" | "OR"; items: ProblemCondition[] };
-}
-
-type ProblemCondition =
-  | { kind: "checkpoint_not_met"; checkpointId: ID }
-  | { kind: "checkpoint_time_constraint"; checkpointId: ID; aspect: ...; operator: ...; anchor: ConditionAnchor };
-```
-
-Slovník `ProblemType` (`src/lib/routes/problemTypes.ts`) je uložen v localStorage. Seed obsahuje: „Možné zpoždění zásilky v den doručení", „Dlouho na clení", „Uvíznutí v hubu", „Doručení na špatné místo". Operátor je definuje jednou a pak je vybírá jak v editoru trasy, tak v editoru pravidla VkŘ.
-
-### 7.8 PSČ scénáře na milnících (`appliesWhenDestZip`) — vize
-
-V novém modelu může mít checkpoint podmínku PSČ:
-
-```ts
-appliesWhenDestZip?: RouteZipRange[];
-// RouteZipRange: { country, prefix?, from?, to? }
-// Příklady: "CZ 1xx" (Praha prefix), "US 38000–39999"
-```
-
-Checkpoint platí jen pro zásilky s cílovým PSČ odpovídajícím rozsahu. **V aktuálním prototypu tato funkce není dostupná — jde o vizi do budoucna.**
-
 ---
 
-## 8. Přeskočení pravidla (`skipConditions`)
+## 8. Storage
 
-Pravidlo může být přeskočeno na základě výsledku jiného pravidla (ukládáno do `uiState.skipConditions`):
-
-```ts
-{ ruleId: string; outcome: "positive" | "negative" | "any" }[]
-```
-
-Pokud pravidlo s `ruleId` dnes vyhodnotilo zásilku jako `positive` (nebo `negative`), aktuální pravidlo se přeskočí.
-
-Ve VkŘ modelu (`vkr/types.ts`) je strukturovanější: `skipIfPrior: { ruleIds: string[]; outcome: "any"|"positive"|"negative" }`.
-
-**Příklad:** „DD - Kontrola 2 FedEx Facility" přeskočí, pokud „DD - Kontrola 1 FedEx Facility" dnes vyhodnotila zásilku jako pozitivní.
-
----
-
-## 9. Storage
-
-### 9.1 In-memory store (konfigurátor pravidel)
+### 8.1 In-memory store (konfigurátor pravidel)
 
 Pravidla konfigurátoru, trasy, úseky a typy milníků jsou uloženy **výhradně v paměti**. Žádná persistence mezi reloady. Seed je v `src/lib/model/seed.ts`.
 
@@ -561,12 +525,12 @@ Stores (`src/lib/model/store.ts`):
 - `checkpointTypesStore` — `CheckpointType[]`
 - `sampleShipmentsStore` — `SampleShipment[]` (read-only)
 
-### 9.2 localStorage (VkŘ pravidla a typy problémů)
+### 8.2 localStorage (VkŘ pravidla a typy problémů)
 
 - **VkŘ pravidla** — `src/lib/vkr/store.ts`, klíč `vkr_rules_v13`, migrace ze starších verzí (`v10`–`v12`).
 - **Typy problémů** — `src/lib/routes/problemTypes.ts`, klíč `problem_types_v1`.
 
-### 9.3 Log spuštění pravidel (`RunLogEntry`)
+### 8.3 Log spuštění pravidel (`RunLogEntry`)
 
 VkŘ pravidla (model `vkr/types.ts`) mají:
 - `runs30d: number` — počet spuštění za 30 dní
@@ -582,7 +546,7 @@ interface RunLogEntry {
 }
 ```
 
-### 9.4 Export dat (`bytorp-export`)
+### 8.4 Export dat (`bytorp-export`)
 
 Tlačítko „Export" generuje JSON (`src/lib/dataExport.ts`):
 
@@ -597,7 +561,7 @@ Export stále používá Segment-based strukturu (starý model).
 
 ---
 
-## 10. Navigace (TanStack Router)
+## 9. Navigace (TanStack Router)
 
 | Cesta | Co dělá |
 |---|---|
@@ -612,7 +576,7 @@ Export stále používá Segment-based strukturu (starý model).
 
 ---
 
-## 11. Implementační mapa (kde co žije)
+## 10. Implementační mapa (kde co žije)
 
 ### Konfigurátor pravidel
 
@@ -637,7 +601,7 @@ Export stále používá Segment-based strukturu (starý model).
 
 | Co | Soubor |
 |---|---|
-| Nový datový model trasy (Route, Checkpoint, ProblemCondition) | `src/lib/routes/types.ts` |
+| Nový datový model trasy (Route, Checkpoint) | `src/lib/routes/types.ts` |
 | Store tras (nový model) | `src/lib/routes/store.ts` |
 | Sdílený slovník typů problémů | `src/lib/routes/problemTypes.ts` |
 | Katalog pozorovaných hodnot (autocomplete) | `src/lib/routes/observedCatalog.ts` |
@@ -672,38 +636,42 @@ Export stále používá Segment-based strukturu (starý model).
 
 ---
 
-## 12. Poznámky a věci k dořešení
+## 11. Poznámky a věci k dořešení
 
-### 12.1 Milníky — deadline vs. doba trvání
+### 11.1 Milníky — deadline vs. doba trvání
 
 Původní pole `expectedDurationHours`, `warnAfterHours`, `criticalAfterHours` jsou deprecated. Nová sémantika:
-- **Deadline** (mode: fixed): milník musí nastat do daného ČASU v daný DEN. Vyhodnocuje se `event_time`, ne čas příchodu záznamu.
-- **Vztah dvou milníků** (mode: offset, kotva = jiný checkpoint): nahrazuje „dobu trvání". Příklad: od celního odbavení do celního odbavení dokončeno musí být max. 3 hodiny.
+- **Deadline** (mode: fixed): milník musí nastat do daného ČASU v daný DEN. Vyhodnocuje se `event_time` na záznamu, ne čas příchodu záznamu do systému.
+- **Vztah dvou milníků** (mode: offset, kotva = jiný checkpoint): nahrazuje „dobu trvání".
 
-### 12.2 Více kontrol pro stejný milník — jedno nebo dvě pravidla
+### 11.2 Více kontrol pro stejný milník — jedno nebo dvě pravidla
 
-Viz sekce 5.4. Toto je otevřená otázka, kterou ještě dořešíme.
+Viz sekce 5.3. Toto je otevřená otázka, kterou ještě dořešíme.
 
-### 12.3 Plán spuštění pro situaci `missed_milestone`
+### 11.3 Plán spuštění pro situaci `missed_milestone`
 
 Zatím existuje jen pro `delivery_day`. Plánujeme přidat i pro `missed_milestone` — logika by byla identická.
 
-### 12.4 Pokročilý spouštěč
+### 11.4 Pokročilý spouštěč
 
 Tlačítko „Pokročilé" u spouštěče je disabled mockup. Po zpřístupnění půjde ručně upravit typ spouštěče (plán / podmínka / manuální).
 
-### 12.5 Podmínky nad historií trackingu
+### 11.5 Podmínky nad historií trackingu
 
-Pro situaci `tracking_event` plánujeme přidat třetí vrstvu podmínek: co musí být v předchozích záznamech trackingu (před příchozím záznamem).
+Pro situaci `tracking_event` plánujeme přidat podmínky nad historií trackingu — co musí být v předchozích záznamech, než přišel aktuální záznam.
 
-### 12.6 AI asistent pro tvorbu pravidel (vize)
+### 11.6 PSČ jako kritérium přiřazení trasy (vize)
 
-Do budoucna plánujeme AI asistenta (`AIWizard`), který umožní popsat textově, co chce uživatel řešit, a AI navrhne název, popis a nastavení pravidla. Implementace v kódu existuje (`src/components/vkr/AIWizard.tsx`), ale v aktuálním prototypu není viditelná — jde o vizi do budoucna.
+Nyní se trasa nastavuje pro určité cílové **země** (carrier × serviceType × cílová země). Do budoucna plánujeme umožnit nastavit trasu i pro konkrétní **PSČ nebo rozsahy PSČ**. Zásilky budou primárně párovány s trasou podle PSČ — pokud se najde shoda, použije se tato trasa. Pokud ne, systém spadne zpět na párování podle země.
 
-### 12.7 Nový model trasy — postupné zavádění
+### 11.7 AI asistent pro tvorbu pravidel (vize)
 
-Nový model (`routes/types.ts`) bez segmentů, s variantami, archivací a pokročilými podmínkami se postupně zavádí. Export dat zatím používá starý model.
+Do budoucna plánujeme AI asistenta, který umožní popsat textově, co chce uživatel řešit, a AI navrhne název, popis a nastavení pravidla. Implementace v kódu existuje (`src/components/vkr/AIWizard.tsx`), ale v aktuálním prototypu není viditelná.
 
-### 12.8 Rizikové kotvy
+### 11.8 Nový model trasy — postupné zavádění
+
+Nový model (`routes/types.ts`) bez segmentů, s archivací a variantami se postupně zavádí. Export dat zatím používá starý model.
+
+### 11.9 Rizikové kotvy
 
 `anchorRisk.ts` obsahuje seznam polí, jejichž hodnotu mění sám operátor nebo pravidla VkŘ (`promised_delivery_at`, `today_delivery_check_state` atd.). Pokud uživatel zvolí takové pole jako kotvu, editor zobrazí varování před možným cyklem.
