@@ -1,16 +1,5 @@
 import { useState } from "react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Calendar,
-  Check,
-  ChevronDown,
-  Clock,
-  Lightbulb,
-  MapPin,
-  Plus,
-  X,
-} from "lucide-react";
+import { Calendar, Check, Lightbulb, MapPin, Plus, X } from "lucide-react";
 import { PlainToken } from "@/components/common/PlainToken";
 import { useCheckpointTypes } from "@/lib/model/store";
 import { cn } from "@/lib/utils";
@@ -19,7 +8,10 @@ interface Props {
   milestoneLabel: string;
 }
 
-type AnchorMode = "milestone" | "date_event" | "absolute";
+type DateAnchorKind = "today" | "milestone" | "event";
+type DateOffsetPos = "in_day" | "before" | "after";
+type TimeMode = "absolute" | "offset";
+type TimeOffsetPos = "before" | "after";
 
 const DATE_EVENTS = [
   "Vytvoření zásilky",
@@ -29,16 +21,28 @@ const DATE_EVENTS = [
   "Doručení hlášené dopravcem",
 ];
 
+const TZ_OPTIONS = ["Europe/Prague", "Europe/Berlin", "UTC", "America/New_York"];
+
 export function CheckpointWizard({ milestoneLabel }: Props) {
   const checkpointTypes = useCheckpointTypes();
 
-  const [hasTiming, setHasTiming] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [anchorMode, setAnchorMode] = useState<AnchorMode>("date_event");
+  const [hasDeadline, setHasDeadline] = useState(false);
   const [anchorOpen, setAnchorOpen] = useState(false);
-  const [anchorLabel, setAnchorLabel] = useState("Vyzvednutí zásilky");
-  const [anchorCheckpointTypeId, setAnchorCheckpointTypeId] = useState<string | null>(null);
-  const [fromRecordCreated, setFromRecordCreated] = useState(false);
+
+  // DATUM
+  const [anchorKind, setAnchorKind] = useState<DateAnchorKind>("today");
+  const [anchorLabel, setAnchorLabel] = useState("dnešní den");
+  const [dateOffsetPos, setDateOffsetPos] = useState<DateOffsetPos>("in_day");
+  const [dateOffsetDays, setDateOffsetDays] = useState(1);
+  const [businessDays, setBusinessDays] = useState(false);
+
+  // ČAS
+  const [timeMode, setTimeMode] = useState<TimeMode>("absolute");
+  const [timeAbs, setTimeAbs] = useState("08:00");
+  const [tz, setTz] = useState("Europe/Prague");
+  const [timeOffsetAmount, setTimeOffsetAmount] = useState(2);
+  const [timeOffsetUnit, setTimeOffsetUnit] = useState<"min" | "h">("h");
+  const [timeOffsetPos, setTimeOffsetPos] = useState<TimeOffsetPos>("before");
 
   return (
     <div className="rounded-xl border border-border bg-background p-5">
@@ -64,18 +68,12 @@ export function CheckpointWizard({ milestoneLabel }: Props) {
 
       {/* Vertical steps block */}
       <div className="relative">
-        {/* Vertical axis line */}
         <div className="absolute left-[14px] top-4 bottom-4 w-0.5 bg-border" />
 
         <div className="flex flex-col gap-5">
           {/* Step 1 — DONE */}
           <div className="relative flex gap-4">
-            <div
-              className={cn(
-                "size-7 rounded-full grid place-items-center text-[13px] font-medium shrink-0 relative z-10",
-                "bg-emerald-100 text-emerald-700"
-              )}
-            >
+            <div className="size-7 rounded-full grid place-items-center text-[13px] font-medium shrink-0 relative z-10 bg-emerald-100 text-emerald-700">
               <Check size={16} />
             </div>
             <div className="flex-1 flex items-center justify-between min-w-0">
@@ -91,19 +89,14 @@ export function CheckpointWizard({ milestoneLabel }: Props) {
             </div>
           </div>
 
-          {/* Step 2 — ACTIVE */}
+          {/* Step 2 — Co musí být na záznamu */}
           <div className="relative flex gap-4">
-            <div
-              className={cn(
-                "size-7 rounded-full grid place-items-center text-[13px] font-medium shrink-0 relative z-10",
-                "bg-primary text-primary-foreground"
-              )}
-            >
+            <div className="size-7 rounded-full grid place-items-center text-[13px] font-medium shrink-0 relative z-10 bg-primary text-primary-foreground">
               2
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[15px] font-medium mb-2.5">
-                Jak poznáme, že nastal?
+                Co musí být na záznamu?
               </p>
               <p className="text-[15px] leading-[2.3] text-foreground">
                 Když má záznam z trackingu{" "}
@@ -119,185 +112,216 @@ export function CheckpointWizard({ milestoneLabel }: Props) {
             </div>
           </div>
 
-          {/* Step 3 — UPCOMING / timing */}
+          {/* Step 3 — TERMÍN ZÁZNAMU */}
           <div className="relative flex gap-4">
-            <div
-              className={cn(
-                "size-7 rounded-full grid place-items-center text-[13px] font-medium shrink-0 relative z-10",
-                hasTiming ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-              )}
-            >
+            <div className={cn(
+              "size-7 rounded-full grid place-items-center text-[13px] font-medium shrink-0 relative z-10",
+              hasDeadline ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
+            )}>
               3
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5 mb-3">
-                <p className={cn("text-[15px] font-medium", hasTiming ? "text-foreground" : "text-muted-foreground")}>
-                  Jak má správně proběhnout?
+                <p className={cn("text-[15px] font-medium", hasDeadline ? "text-foreground" : "text-muted-foreground")}>
+                  Termín záznamu
                 </p>
                 <span className="text-sm text-muted-foreground">· volitelné</span>
               </div>
 
-              {!hasTiming ? (
+              {!hasDeadline ? (
                 <>
-                  {/* Empty state — no checkbox */}
                   <button
-                    onClick={() => setHasTiming(true)}
+                    onClick={() => setHasDeadline(true)}
                     className="w-full rounded-md border border-dashed border-border p-3.5 text-center text-sm text-primary flex items-center justify-center gap-1.5"
                   >
                     <Plus size={16} />
-                    přidat časové očekávání
+                    nastavit termín záznamu
                   </button>
                   <p className="text-xs text-muted-foreground mt-1.5">
-                    Necháš prázdné = milník nemá žádné časové očekávání.
+                    Necháš prázdné = milník nemá žádný termín a stačí, aby kdykoli nastal.
                   </p>
                 </>
               ) : (
-                <div className="rounded-md border border-border p-3">
-                  {anchorMode === "absolute" ? (
-                    <>
-                      <p className="text-[15px] leading-[2.3] text-foreground">
-                        Mělo by nastat v{" "}
-                        <PlainToken chevron>09:00</PlainToken>{" "}
-                        <PlainToken chevron>čas cílové země</PlainToken> dne{" "}
-                        <PlainToken chevron>v den, kdy ADD</PlainToken>
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        „den" nabízí: pevné datum · podle data události · ± posun o dny.
-                      </p>
-                      <button
-                        onClick={() => setAnchorMode("date_event")}
-                        className="flex items-center gap-1 text-xs text-muted-foreground mt-2"
-                      >
-                        <ArrowLeft size={13} />
-                        zpět na „od …"
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-[15px] leading-[2.3] text-foreground">
-                        Mělo by proběhnout{" "}
-                        <PlainToken chevron>do</PlainToken>{" "}
-                        <PlainToken>2</PlainToken>{" "}
-                        <PlainToken chevron>hod</PlainToken> od{" "}
-                        <button
-                          type="button"
-                          onClick={() => setAnchorOpen((v) => !v)}
-                          className="align-baseline"
-                        >
-                          <PlainToken chevron>{anchorLabel}</PlainToken>
-                        </button>
-                      </p>
+                <div className="rounded-md border border-border p-3 space-y-3">
+                  <p className="text-xs text-muted-foreground leading-snug">
+                    Nejpozdější datum a čas, kdy se událost musí na záznamu objevit.
+                    Dřívější dny se započítávají automaticky. Pokud splňujících záznamů
+                    bude víc, bere se ten nejnovější ≤ termín.
+                  </p>
 
-                      {anchorOpen && (
-                        <div className="mt-2 rounded-lg border border-border overflow-hidden max-w-[420px]">
-                          <div className="text-xs text-muted-foreground px-3 pt-2 pb-1">
-                            Jiný milník trasy
-                          </div>
-                          {checkpointTypes.map((ct) => (
-                            <button
-                              key={ct.id}
-                              onClick={() => {
-                                setAnchorMode("milestone");
-                                setAnchorLabel(ct.name);
-                                setAnchorCheckpointTypeId(ct.id);
-                                setAnchorOpen(false);
-                              }}
-                              className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-left hover:bg-muted"
-                            >
-                              <MapPin size={15} className="text-muted-foreground" />
-                              {ct.name}
-                            </button>
-                          ))}
-                          <div className="border-t border-border" />
-                          <div className="text-xs text-muted-foreground px-3 pt-2 pb-1">
-                            Datum události{" "}
-                            <span className="text-muted-foreground">· systémová data i pole, na jednom místě</span>
-                          </div>
-                          {DATE_EVENTS.map((d) => {
-                            const sel = anchorMode === "date_event" && anchorLabel === d;
-                            return (
-                              <button
-                                key={d}
-                                onClick={() => {
-                                  setAnchorMode("date_event");
-                                  setAnchorLabel(d);
-                                  setAnchorCheckpointTypeId(null);
-                                  setAnchorOpen(false);
-                                }}
-                                className={cn(
-                                  "flex w-full items-center gap-2 px-3 py-1.5 text-sm text-left",
-                                  sel ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted"
-                                )}
-                              >
-                                <Calendar size={15} className={sel ? "" : "text-muted-foreground"} />
-                                {d}
-                                {sel && <Check size={15} className="ml-auto" />}
-                              </button>
-                            );
-                          })}
-                          <div className="border-t border-border" />
-                          <button
-                            onClick={() => {
-                              setAnchorMode("absolute");
-                              setAnchorCheckpointTypeId(null);
-                              setAnchorOpen(false);
-                            }}
-                            className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-left text-primary font-medium hover:bg-muted"
-                          >
-                            <Clock size={15} />
-                            …v konkrétní čas v daný den
-                            <ArrowRight size={15} className="ml-auto" />
-                          </button>
-                        </div>
+                  {/* DATUM */}
+                  <div>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Datum</div>
+                    <div className="flex items-center flex-wrap gap-1.5 text-sm">
+                      <select
+                        value={dateOffsetPos}
+                        onChange={(e) => setDateOffsetPos(e.target.value as DateOffsetPos)}
+                        className="rounded border border-border bg-background px-2 py-1 text-xs"
+                      >
+                        <option value="in_day">v den</option>
+                        <option value="before">X dnů před</option>
+                        <option value="after">X dnů po</option>
+                      </select>
+                      {dateOffsetPos !== "in_day" && (
+                        <input
+                          type="number"
+                          min={1}
+                          value={dateOffsetDays}
+                          onChange={(e) => setDateOffsetDays(Math.max(1, Number(e.target.value) || 1))}
+                          className="w-14 rounded border border-border bg-background px-2 py-1 text-xs"
+                        />
                       )}
-                    </>
-                  )}
-
-                  {/* Advanced — single toggle */}
-                  <button
-                    onClick={() => setShowAdvanced((v) => !v)}
-                    className="flex items-center gap-1 text-primary text-sm mt-2"
-                  >
-                    <ChevronDown size={15} className={cn("transition-transform", showAdvanced && "rotate-180")} />
-                    pokročilé
-                  </button>
-                  {showAdvanced && (
-                    <div className="mt-1.5">
+                      <span className="text-xs text-muted-foreground">kotvy</span>
                       <button
-                        onClick={() => setFromRecordCreated((v) => !v)}
-                        className="flex items-center gap-2 text-sm"
+                        type="button"
+                        onClick={() => setAnchorOpen((v) => !v)}
+                        className="align-baseline"
                       >
-                        <span
-                          className={cn(
-                            "w-[34px] h-[18px] rounded-full relative inline-block transition-colors shrink-0",
-                            fromRecordCreated ? "bg-primary" : "bg-muted"
-                          )}
-                        >
-                          <span
-                            className={cn(
-                              "absolute top-0.5 size-3.5 rounded-full bg-white transition-all",
-                              fromRecordCreated ? "right-0.5" : "left-0.5"
-                            )}
-                          />
-                        </span>
-                        počítat od vytvoření záznamu v trackingu
+                        <PlainToken chevron>{anchorLabel}</PlainToken>
                       </button>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Výchozí: počítá se od času události.
-                      </p>
                     </div>
-                  )}
+
+                    {anchorOpen && (
+                      <div className="mt-2 rounded-lg border border-border overflow-hidden max-w-[420px]">
+                        <div className="text-xs text-muted-foreground px-3 pt-2 pb-1">Systémové kotvy</div>
+                        <button
+                          onClick={() => { setAnchorKind("today"); setAnchorLabel("dnešní den"); setAnchorOpen(false); }}
+                          className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-left hover:bg-muted"
+                        >
+                          <Calendar size={15} className="text-muted-foreground" />
+                          dnešní den
+                        </button>
+
+                        <div className="border-t border-border" />
+                        <div className="text-xs text-muted-foreground px-3 pt-2 pb-1">Jiný milník trasy</div>
+                        {checkpointTypes.map((ct) => (
+                          <button
+                            key={ct.id}
+                            onClick={() => { setAnchorKind("milestone"); setAnchorLabel(ct.name); setAnchorOpen(false); }}
+                            className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-left hover:bg-muted"
+                          >
+                            <MapPin size={15} className="text-muted-foreground" />
+                            {ct.name}
+                          </button>
+                        ))}
+
+                        <div className="border-t border-border" />
+                        <div className="text-xs text-muted-foreground px-3 pt-2 pb-1">Datum události</div>
+                        {DATE_EVENTS.map((d) => {
+                          const sel = anchorKind === "event" && anchorLabel === d;
+                          return (
+                            <button
+                              key={d}
+                              onClick={() => { setAnchorKind("event"); setAnchorLabel(d); setAnchorOpen(false); }}
+                              className={cn(
+                                "flex w-full items-center gap-2 px-3 py-1.5 text-sm text-left",
+                                sel ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted",
+                              )}
+                            >
+                              <Calendar size={15} className={sel ? "" : "text-muted-foreground"} />
+                              {d}
+                              {sel && <Check size={15} className="ml-auto" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {dateOffsetPos !== "in_day" && (
+                      <label className="flex items-center gap-2 text-xs text-muted-foreground mt-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={businessDays}
+                          onChange={(e) => setBusinessDays(e.target.checked)}
+                          className="accent-primary"
+                        />
+                        počítat jen pracovní dny
+                      </label>
+                    )}
+                  </div>
+
+                  {/* ČAS */}
+                  <div>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Čas</div>
+                    <div className="space-y-1.5">
+                      <label className="flex items-center gap-2 text-sm cursor-pointer">
+                        <input
+                          type="radio"
+                          checked={timeMode === "absolute"}
+                          onChange={() => setTimeMode("absolute")}
+                          className="accent-primary"
+                        />
+                        <span className="text-xs text-muted-foreground w-16">absolutně</span>
+                        {timeMode === "absolute" && (
+                          <>
+                            <input
+                              type="time"
+                              value={timeAbs}
+                              onChange={(e) => setTimeAbs(e.target.value)}
+                              className="rounded border border-border bg-background px-2 py-1 text-xs"
+                            />
+                            <select
+                              value={tz}
+                              onChange={(e) => setTz(e.target.value)}
+                              className="rounded border border-border bg-background px-2 py-1 text-xs"
+                            >
+                              {TZ_OPTIONS.map((t) => (
+                                <option key={t} value={t}>{t}</option>
+                              ))}
+                            </select>
+                          </>
+                        )}
+                      </label>
+
+                      <label className="flex items-center gap-2 text-sm cursor-pointer flex-wrap">
+                        <input
+                          type="radio"
+                          checked={timeMode === "offset"}
+                          onChange={() => setTimeMode("offset")}
+                          className="accent-primary"
+                        />
+                        <span className="text-xs text-muted-foreground w-16">offset</span>
+                        {timeMode === "offset" && (
+                          <>
+                            <input
+                              type="number"
+                              min={1}
+                              value={timeOffsetAmount}
+                              onChange={(e) => setTimeOffsetAmount(Math.max(1, Number(e.target.value) || 1))}
+                              className="w-14 rounded border border-border bg-background px-2 py-1 text-xs"
+                            />
+                            <select
+                              value={timeOffsetUnit}
+                              onChange={(e) => setTimeOffsetUnit(e.target.value as "min" | "h")}
+                              className="rounded border border-border bg-background px-2 py-1 text-xs"
+                            >
+                              <option value="min">min</option>
+                              <option value="h">h</option>
+                            </select>
+                            <select
+                              value={timeOffsetPos}
+                              onChange={(e) => setTimeOffsetPos(e.target.value as TimeOffsetPos)}
+                              className="rounded border border-border bg-background px-2 py-1 text-xs"
+                            >
+                              <option value="before">před koncem dne</option>
+                              <option value="after">po začátku dne</option>
+                            </select>
+                          </>
+                        )}
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="rounded-md bg-muted/40 border border-border px-3 py-2 text-[11px] text-muted-foreground leading-snug">
+                    ⓘ Příklad: „v den <strong>{anchorLabel}</strong>, do <strong>{timeMode === "absolute" ? `${timeAbs} ${tz}` : `${timeOffsetAmount} ${timeOffsetUnit} ${timeOffsetPos === "before" ? "před koncem dne" : "po začátku dne"}`}</strong>" — záznam přijatý dříve (i v předchozí dny) je splněno.
+                  </div>
 
                   <button
-                    onClick={() => {
-                      setHasTiming(false);
-                      setShowAdvanced(false);
-                      setAnchorOpen(false);
-                    }}
-                    className="flex items-center gap-1 text-xs text-muted-foreground mt-2.5"
+                    onClick={() => { setHasDeadline(false); setAnchorOpen(false); }}
+                    className="flex items-center gap-1 text-xs text-muted-foreground mt-1"
                   >
                     <X size={13} />
-                    odebrat časové očekávání
+                    odebrat termín
                   </button>
                 </div>
               )}
@@ -316,3 +340,4 @@ export function CheckpointWizard({ milestoneLabel }: Props) {
     </div>
   );
 }
+

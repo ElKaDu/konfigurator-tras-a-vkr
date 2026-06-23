@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { ChevronDown, ChevronRight, Plus, Search, X, Layers, Trash2 } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { AppHeader } from "@/components/AppHeader";
+import { DataMenu } from "@/components/common/DataMenu";
 import { useRoutes, useSegments, useCheckpointTypes, routesStore, segmentsStore, isSegmentUsed } from "@/lib/model/store";
 import { assembledCheckpoints } from "@/lib/model/routeAssembly";
 import { cn } from "@/lib/utils";
@@ -77,16 +78,7 @@ export function RoutesAndSegmentsPage() {
     <div className="flex h-screen w-screen flex-col bg-background text-foreground">
       <AppHeader
         current="routes"
-        extras={
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => routesStore.reset()}
-              className="rounded-md border border-border px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted transition-colors"
-            >
-              Reset seed
-            </button>
-          </div>
-        }
+        extras={<DataMenu />}
       />
 
       <div className="flex flex-1 min-h-0 gap-0">
@@ -426,7 +418,15 @@ function SegmentDetailSidebar({
             const name = ctMap.get(cp.checkpointTypeId) ?? cp.checkpointTypeId;
             const matchFields = Object.entries(cp.match)
               .filter(([, v]) => v !== undefined && v !== null && (Array.isArray(v) ? v.length > 0 : true))
-              .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : String(v)}`);
+              .map(([k, v]) => {
+                if (k === "event_time_of_day" && v && typeof v === "object") {
+                  const etod = v as { op: string; from: string; to?: string };
+                  const opLabel: Record<string, string> = { before: "před", after: "po", between: "mezi", eq: "rovno" };
+                  const val = etod.op === "between" ? `${etod.from || "?"} – ${etod.to || "?"}` : etod.from || "?";
+                  return `Čas: ${opLabel[etod.op] ?? etod.op} ${val}`;
+                }
+                return `${k}: ${Array.isArray(v) ? v.join(", ") : String(v)}`;
+              });
             return (
               <div key={cp.id} className="rounded-lg border border-border bg-background p-3">
                 <div className="flex items-center gap-2 mb-2">

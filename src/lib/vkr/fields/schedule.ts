@@ -36,11 +36,25 @@ function fmtDate(iso?: string): string {
   } catch { return iso; }
 }
 
+function formatRelativeMs(off: number): string {
+  if (off === 0) return "v termínu milníku";
+  const abs = Math.abs(off);
+  const txt = abs >= 60 && abs % 60 === 0 ? `${abs / 60} h` : `${abs} min`;
+  return off < 0 ? `${txt} před termínem milníku` : `${txt} po termínu milníku`;
+}
+
 export function describeSchedule(s?: Schedule, fieldLabelFn?: (id?: string) => string, checkpointLabelFn?: (id?: string) => string | undefined): string {
   if (!s) return "";
   const items = s.times ?? [];
-  const fixedTimes = items.map((i) => i.time).sort();
-  const time = fixedTimes.length ? fixedTimes.join(", ") : "08:00";
+  const fixedItems = items.filter((i): i is Extract<typeof i, { kind: "time_of_day" }> => i.kind === "time_of_day");
+  const relItems = items.filter((i): i is Extract<typeof i, { kind: "relative_to_milestone_due" }> => i.kind === "relative_to_milestone_due");
+  const fixedTimes = fixedItems.map((i) => i.time).sort();
+  const relParts = relItems.map((i) => {
+    const base = formatRelativeMs(i.offsetMinutes);
+    return i.checkpointLabel ? `${base} „${i.checkpointLabel}"` : base;
+  });
+  const timeParts = [...fixedTimes, ...relParts];
+  const time = timeParts.length ? timeParts.join(", ") : "08:00";
   const tz = s.timezone === "destination_country"
     ? " (TZ cílové země)"
     : s.timezone && s.timezone !== "operator"

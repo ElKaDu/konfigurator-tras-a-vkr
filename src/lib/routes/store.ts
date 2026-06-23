@@ -108,4 +108,8 @@ export const routesStore = {
     state = SEED_ROUTES;
     persist();
   },
+  replaceAll(routes: Route[]) {
+    state = routes;
+    persist();
+  },
 };

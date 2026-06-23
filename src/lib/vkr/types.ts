@@ -31,14 +31,23 @@ export type NthWeek = 1 | 2 | 3 | 4 | -1;
 
 export type DayMode = "calendar" | "business";
 
-/** Položka Plánu spuštění — pouze pevný denní čas.
- *  (Relativní offsety od checkpointu se řeší přes `condition_met` trigger
- *  + `field_state_duration` podmínku nad polem „Splnění checkpointu".) */
-export interface ScheduleTimeItem {
-  kind: "time_of_day";
-  time: string; // "HH:MM"
-  timezone?: TimezoneSpec;
-}
+/** Položka Plánu spuštění — buď pevný denní čas, nebo offset od termínu milníku.
+ *  Termín milníku = pole „Čas uvedený na záznamu" (`event_time_of_day`)
+ *  v Match podmínkách checkpointu daného typu na úseku, kterým zásilka prochází.
+ *  Pokud má úsek víc podmínek `event_time_of_day`, jako termín se bere „nejpozději do". */
+export type ScheduleTimeItem =
+  | {
+      kind: "time_of_day";
+      time: string; // "HH:MM"
+      timezone?: TimezoneSpec;
+    }
+  | {
+      kind: "relative_to_milestone_due";
+      /** Label typu milníku (sjednocený přes všechny trasy/úseky). */
+      checkpointLabel?: string;
+      /** Záporný = před, 0 = v termínu, kladný = po termínu. */
+      offsetMinutes: number;
+    };
 
 export interface Schedule {
   mode: ScheduleMode;

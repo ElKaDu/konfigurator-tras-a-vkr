@@ -96,6 +96,10 @@ export const problemTypesStore = {
     state = SEED_PROBLEM_TYPES;
     persist();
   },
+  replaceAll(types: ProblemType[]) {
+    state = types;
+    persist();
+  },
 };
 
 export function useProblemTypes(): ProblemType[] {

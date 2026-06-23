@@ -1,20 +1,29 @@
-import { useState } from "react";
-import { Lock, Clock, MapPin, AlertTriangle, Zap, ChevronDown, ChevronUp, Plus, X, Radio, PauseCircle, LocateFixed } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { Lock, Clock, MapPin, AlertTriangle, Zap, ChevronDown, ChevronUp, Plus, X, Radio, PauseCircle, LocateFixed, Settings2 } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { AppHeader } from "@/components/AppHeader";
+import { Textarea } from "@/components/ui/textarea";
 import { AREAS } from "@/lib/model/areas";
 import { resolveAreaIcon } from "@/components/common/areaIcons";
 import { useSegments, useCheckpointTypes, useRules, rulesStore } from "@/lib/model/store";
 import { cn } from "@/lib/utils";
-import type { Area } from "@/lib/model/types";
+import type { Area, Priority, ActionType, Rule } from "@/lib/model/types";
+import { ScheduleEditor, type ScheduleItem } from "@/components/rules/editors/ScheduleEditor";
+import { VkrConditionsBuilder } from "@/components/rules/editors/VkrConditionsBuilder";
+import type { VkrCondition } from "@/lib/vkr/vkrConditionCatalog";
+import { RouteScopePicker, DEFAULT_ROUTE_SCOPE, type RouteScope } from "@/components/rules/editors/RouteScopePicker";
+import { MilestoneTypePicker } from "@/components/rules/editors/MilestoneTypePicker";
+import { TrackingTimeValueEditor, DEFAULT_TIME_SPEC, type TrackingTimeSpec } from "@/components/rules/editors/TrackingTimeValueEditor";
 
-type Situation = "delivery_day" | "unexpected_location" | "missed_milestone" | "too_long" | "other";
+
+type Situation = "delivery_day" | "unexpected_location" | "missed_milestone" | "other";
 type CheckInterval = "30min" | "1h" | "2h" | "6h";
 type ThresholdLevel = "warn" | "critical";
-interface SkipCondition { id: string; ruleId: string; outcome: "positive" | "negative" | "any"; }
+
 
 type TrackingSituation = "tracking_event" | "no_movement" | "stuck_location";
-interface TrackingConditionRow { id: string; field: string; operator: string; value: string; }
+interface TrackingConditionRow { id: string; field: string; operator: string; value: string; timeSpec?: TrackingTimeSpec; }
 type StuckMatchMode = "locationId" | "city" | "countryCode";
 
 const TRACKING_SITUATION_CARDS: { id: TrackingSituation; icon: React.ReactNode; label: string; trigger: string }[] = [
@@ -78,14 +87,8 @@ const SITUATION_CARDS: {
   {
     id: "missed_milestone",
     icon: <AlertTriangle className="size-4" />,
-    label: "Zásilka zmeškala milník",
+    label: "Kontrola splnění milníku",
     trigger: "Reaktivní (condition_met)",
-  },
-  {
-    id: "too_long",
-    icon: <Clock className="size-4" />,
-    label: "Zásilka příliš dlouho na milníku",
-    trigger: "Časový plán — interval (schedule)",
   },
   {
     id: "other",
@@ -110,47 +113,235 @@ interface BranchAction {
   id: string;
   type: string;
   title: string;
+  vkrText?: string;
+  /** Podmínky zásilky — akce se spustí jen pokud platí AND seznam. */
+  shipmentConditions?: VkrCondition[];
 }
 
-export function RuleCreatorPage() {
+interface RuleCreatorUiState {
+  selectedSituation: Situation | null;
+  selectedTrackingSituation: TrackingSituation | null;
+  trackingConditions: TrackingConditionRow[];
+  noMovementDuration: number;
+  noMovementUnit: "h" | "d" | "bd";
+  ignoreClearance: boolean;
+  stuckCount: number;
+  stuckMatchMode: StuckMatchMode;
+  stuckInclude: TrackingConditionRow[];
+  stuckExclude: TrackingConditionRow[];
+  deliveryMilestone: string;
+  checkTimes: string[];
+  scheduleItems: ScheduleItem[];
+  vkrConditions: VkrCondition[];
+  routeScope: RouteScope;
+  missedMilestoneType?: string;
+  
+  tooLongMilestone: string;
+  tooLongThreshold: ThresholdLevel;
+  checkInterval: CheckInterval;
+  fulfilledActions: BranchAction[];
+  notFulfilledActions: BranchAction[];
+  trackingActions: BranchAction[];
+}
+
+type RuleCreatorInitialState = RuleCreatorUiState & {
+  selectedArea: Area;
+  ruleName: string;
+  ruleDescription: string;
+  priority: Priority;
+  active: boolean;
+};
+
+const DEFAULT_TRACKING_CONDITIONS: TrackingConditionRow[] = [
+  { id: "tc_1", field: "derivedStatus", operator: "je jedním z", value: "" },
+];
+
+const DEFAULT_NOT_FULFILLED_ACTIONS: BranchAction[] = [
+  { id: "act_1", type: "create_vkr", title: "Soulad s trasou — nesplněno · {{shipment.reference}}" },
+];
+
+function cloneActions(actions: BranchAction[]): BranchAction[] {
+  return actions.map((a) => ({ ...a }));
+}
+
+function toBranchAction(action: Rule["actions"][number]): BranchAction {
+  return { id: action.id, type: action.type, title: action.title ?? "", vkrText: action.vkrText };
+}
+
+function routeCheckpointFromRule(rule?: Rule): string | undefined {
+  const condition = rule?.conditions.find((c) => c.kind === "route_compliance" && c.mode === "checkpoint_type");
+  return condition?.kind === "route_compliance" ? condition.checkpointTypeId : undefined;
+}
+
+function inferRouteSituation(rule?: Rule): Situation | null {
+  if (!rule || rule.area !== "route_compliance") return null;
+  const name = rule.name.toLocaleLowerCase("cs-CZ");
+  const triggerLabel = rule.trigger.label.toLocaleLowerCase("cs-CZ");
+  const general = rule.conditions.find((c) => c.kind === "route_compliance" && c.mode === "general");
+  if (general?.kind === "route_compliance" && general.generalCheck === "unrecognized_location") return "unexpected_location";
+  if (name.includes("den doručení") || name.includes("doručení v den") || triggerLabel.includes("den doručení")) return "delivery_day";
+  if (name.includes("dlouho") || triggerLabel.includes("interval") || triggerLabel.includes("každých")) return "missed_milestone";
+  return "missed_milestone";
+}
+
+function inferTrackingSituation(rule?: Rule): TrackingSituation | null {
+  if (!rule || rule.area !== "tracking_records") return null;
+  const name = rule.name.toLocaleLowerCase("cs-CZ");
+  if (name.includes("bez pohybu") || name.includes("no movement")) return "no_movement";
+  const aggregate = rule.conditions.find((c) => c.kind === "tracking_aggregate");
+  if (aggregate?.kind === "tracking_aggregate" && (aggregate.valueMode === "same_repeats" || aggregate.trackingFieldId.includes("location"))) return "stuck_location";
+  return "tracking_event";
+}
+
+function trackingConditionsFromRule(rule?: Rule): TrackingConditionRow[] {
+  if (!rule) return [];
+  const fieldRows = rule.conditions
+    .filter((c) => c.kind === "field")
+    .map((c, index) => ({ id: `tc_${index + 1}`, field: c.fieldId, operator: c.operator, value: c.value ?? "" }));
+  if (fieldRows.length > 0) return fieldRows;
+  const aggregate = rule.conditions.find((c) => c.kind === "tracking_aggregate");
+  if (aggregate?.kind !== "tracking_aggregate") return [];
+  return [{
+    id: "tc_1",
+    field: aggregate.trackingFieldId,
+    operator: aggregate.valueMode === "specific" ? "je" : "je jedním z",
+    value: aggregate.expectedValue ?? "",
+  }];
+}
+
+function getInitialFormState(rule?: Rule): RuleCreatorInitialState {
+  const ui = (rule?.uiState ?? {}) as Partial<RuleCreatorUiState>;
+  const fulfilledFromRule = rule?.actions.filter((a) => a.runWhenRouteCondition === "fulfilled").map(toBranchAction) ?? [];
+  const notFulfilledFromRule = rule?.actions.filter((a) => a.runWhenRouteCondition !== "fulfilled").map(toBranchAction) ?? [];
+  const trackingFromRule = rule?.area === "tracking_records" ? rule.actions.map(toBranchAction) : [];
+  const inferredTrackingConditions = trackingConditionsFromRule(rule);
+  const checkpointId = routeCheckpointFromRule(rule);
+
+  return {
+    selectedArea: rule?.area ?? "route_compliance",
+    ruleName: rule?.name ?? "",
+    ruleDescription: rule?.description ?? "",
+    priority: rule?.priority ?? "medium",
+    active: rule?.active ?? true,
+    selectedSituation: ui.selectedSituation ?? inferRouteSituation(rule),
+    selectedTrackingSituation: ui.selectedTrackingSituation ?? inferTrackingSituation(rule),
+    trackingConditions: ui.trackingConditions ?? (inferredTrackingConditions.length > 0 ? inferredTrackingConditions : DEFAULT_TRACKING_CONDITIONS.map((r) => ({ ...r }))),
+    noMovementDuration: ui.noMovementDuration ?? 72,
+    noMovementUnit: ui.noMovementUnit ?? "h",
+    ignoreClearance: ui.ignoreClearance ?? true,
+    stuckCount: ui.stuckCount ?? 4,
+    stuckMatchMode: ui.stuckMatchMode ?? "city",
+    stuckInclude: ui.stuckInclude ?? [],
+    stuckExclude: ui.stuckExclude ?? [],
+    deliveryMilestone: ui.deliveryMilestone ?? checkpointId ?? "ct_first_scan",
+    checkTimes: ui.checkTimes ?? ["08:00", "10:00"],
+    scheduleItems: (ui.scheduleItems as ScheduleItem[] | undefined) ?? [
+      { id: "s_t1", kind: "time_of_day", time: "08:00", tzMode: "destination" },
+      { id: "s_t2", kind: "time_of_day", time: "09:00", tzMode: "destination" },
+    ],
+    vkrConditions: (ui.vkrConditions as VkrCondition[] | undefined) ?? convertLegacyVkrConditions(ui),
+    routeScope: (ui.routeScope as RouteScope | undefined) ?? { ...DEFAULT_ROUTE_SCOPE },
+    missedMilestoneType: ui.missedMilestoneType ?? checkpointId,
+    
+    tooLongMilestone: ui.tooLongMilestone ?? checkpointId ?? "",
+    tooLongThreshold: ui.tooLongThreshold ?? "warn",
+    checkInterval: ui.checkInterval ?? "1h",
+    fulfilledActions: ui.fulfilledActions ?? fulfilledFromRule,
+    notFulfilledActions: ui.notFulfilledActions ?? (notFulfilledFromRule.length > 0 ? notFulfilledFromRule : cloneActions(DEFAULT_NOT_FULFILLED_ACTIONS)),
+    trackingActions: ui.trackingActions ?? trackingFromRule,
+  };
+}
+
+export function RuleCreatorPage({ ruleId }: { ruleId?: string } = {}) {
   const segments = useSegments();
   const checkpointTypes = useCheckpointTypes();
   const rules = useRules();
+  const navigate = useNavigate();
 
-  const [selectedArea, setSelectedArea] = useState<Area>("route_compliance");
-  const [selectedSituation, setSelectedSituation] = useState<Situation | null>(null);
+  const existingRule = ruleId ? rules.find((r) => r.id === ruleId) : undefined;
+  const initialState = useMemo(() => getInitialFormState(existingRule), [existingRule]);
+  const isEdit = !!ruleId;
+
+  const [selectedArea, setSelectedArea] = useState<Area>(
+    initialState.selectedArea
+  );
+  const [selectedSituation, setSelectedSituation] = useState<Situation | null>(
+    initialState.selectedSituation
+  );
 
   // Tracking records state
-  const [selectedTrackingSituation, setSelectedTrackingSituation] = useState<TrackingSituation | null>(null);
-  const [trackingConditions, setTrackingConditions] = useState<TrackingConditionRow[]>([
-    { id: "tc_1", field: "derivedStatus", operator: "je jedním z", value: "" },
-  ]);
-  const [noMovementDuration, setNoMovementDuration] = useState(72);
-  const [noMovementUnit, setNoMovementUnit] = useState<"h" | "d" | "bd">("h");
-  const [ignoreClearance, setIgnoreClearance] = useState(true);
-  const [stuckCount, setStuckCount] = useState(4);
-  const [stuckMatchMode, setStuckMatchMode] = useState<StuckMatchMode>("city");
-  const [stuckInclude, setStuckInclude] = useState<TrackingConditionRow[]>([]);
-  const [stuckExclude, setStuckExclude] = useState<TrackingConditionRow[]>([]);
-  const [ruleName, setRuleName] = useState("");
-  const [priority, setPriority] = useState("medium");
-  const [active, setActive] = useState(true);
+  const [selectedTrackingSituation, setSelectedTrackingSituation] = useState<TrackingSituation | null>(
+    initialState.selectedTrackingSituation
+  );
+  const [trackingConditions, setTrackingConditions] = useState<TrackingConditionRow[]>(
+    initialState.trackingConditions
+  );
+  const [noMovementDuration, setNoMovementDuration] = useState(initialState.noMovementDuration);
+  const [noMovementUnit, setNoMovementUnit] = useState<"h" | "d" | "bd">(initialState.noMovementUnit);
+  const [ignoreClearance, setIgnoreClearance] = useState(initialState.ignoreClearance);
+  const [stuckCount, setStuckCount] = useState(initialState.stuckCount);
+  const [stuckMatchMode, setStuckMatchMode] = useState<StuckMatchMode>(initialState.stuckMatchMode);
+  const [stuckInclude, setStuckInclude] = useState<TrackingConditionRow[]>(initialState.stuckInclude);
+  const [stuckExclude, setStuckExclude] = useState<TrackingConditionRow[]>(initialState.stuckExclude);
+  const [ruleName, setRuleName] = useState(initialState.ruleName);
+  const [ruleDescription, setRuleDescription] = useState(initialState.ruleDescription);
+  const [priority, setPriority] = useState<Priority>(initialState.priority);
+  const [active, setActive] = useState(initialState.active);
 
   // Situation-specific state
-  const [deliveryMilestone, setDeliveryMilestone] = useState("ct_first_scan");
-  const [checkTimes, setCheckTimes] = useState<string[]>(["08:00", "10:00"]);
-  const [skipConditions, setSkipConditions] = useState<SkipCondition[]>([]);
-  const [tooLongMilestone, setTooLongMilestone] = useState("");
-  const [tooLongThreshold, setTooLongThreshold] = useState<ThresholdLevel>("warn");
-  const [checkInterval, setCheckInterval] = useState<CheckInterval>("1h");
+  const [deliveryMilestone, setDeliveryMilestone] = useState(initialState.deliveryMilestone);
+  const [checkTimes, setCheckTimes] = useState<string[]>(initialState.checkTimes);
+  const [scheduleItems, setScheduleItems] = useState<ScheduleItem[]>(initialState.scheduleItems);
+  const [vkrConditions, setVkrConditions] = useState<VkrCondition[]>(initialState.vkrConditions);
+  const [routeScope, setRouteScope] = useState<RouteScope>(initialState.routeScope);
+  const [missedMilestoneType, setMissedMilestoneType] = useState<string | undefined>(initialState.missedMilestoneType);
+  
+  const [tooLongMilestone, setTooLongMilestone] = useState(initialState.tooLongMilestone);
+  const [tooLongThreshold, setTooLongThreshold] = useState<ThresholdLevel>(initialState.tooLongThreshold);
+  const [checkInterval, setCheckInterval] = useState<CheckInterval>(initialState.checkInterval);
 
   // Actions
-  const [fulfilledActions, setFulfilledActions] = useState<BranchAction[]>([]);
-  const [notFulfilledActions, setNotFulfilledActions] = useState<BranchAction[]>([
-    { id: "act_1", type: "create_vkr", title: "Soulad s trasou — nesplněno · {{shipment.reference}}" },
-  ]);
-  const [trackingActions, setTrackingActions] = useState<BranchAction[]>([]);
+  const [fulfilledActions, setFulfilledActions] = useState<BranchAction[]>(
+    initialState.fulfilledActions
+  );
+  const [notFulfilledActions, setNotFulfilledActions] = useState<BranchAction[]>(
+    initialState.notFulfilledActions
+  );
+  const [trackingActions, setTrackingActions] = useState<BranchAction[]>(
+    initialState.trackingActions
+  );
   const [advancedOpen, setAdvancedOpen] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    setSelectedArea(initialState.selectedArea);
+    setSelectedSituation(initialState.selectedSituation);
+    setSelectedTrackingSituation(initialState.selectedTrackingSituation);
+    setTrackingConditions(initialState.trackingConditions);
+    setNoMovementDuration(initialState.noMovementDuration);
+    setNoMovementUnit(initialState.noMovementUnit);
+    setIgnoreClearance(initialState.ignoreClearance);
+    setStuckCount(initialState.stuckCount);
+    setStuckMatchMode(initialState.stuckMatchMode);
+    setStuckInclude(initialState.stuckInclude);
+    setStuckExclude(initialState.stuckExclude);
+    setRuleName(initialState.ruleName);
+    setRuleDescription(initialState.ruleDescription);
+    setPriority(initialState.priority);
+    setActive(initialState.active);
+    setDeliveryMilestone(initialState.deliveryMilestone);
+    setCheckTimes(initialState.checkTimes);
+    setScheduleItems(initialState.scheduleItems);
+    setVkrConditions(initialState.vkrConditions);
+    setRouteScope(initialState.routeScope);
+    setMissedMilestoneType(initialState.missedMilestoneType);
+    
+    setTooLongMilestone(initialState.tooLongMilestone);
+    setTooLongThreshold(initialState.tooLongThreshold);
+    setCheckInterval(initialState.checkInterval);
+    setFulfilledActions(initialState.fulfilledActions);
+    setNotFulfilledActions(initialState.notFulfilledActions);
+    setTrackingActions(initialState.trackingActions);
+  }, [initialState]);
 
   // Milestones with thresholds (for "too_long" situation)
   const milestonesWithThresholds = segments
@@ -308,31 +499,60 @@ export function RuleCreatorPage() {
             <button
               disabled={!ruleName || !selectedArea}
               onClick={() => {
-                const id = "rule_" + Date.now();
+                const id = existingRule?.id ?? ("rule_" + Date.now());
+                const code = existingRule?.code ?? ("R" + Math.floor(Math.random() * 90 + 10));
                 rulesStore.upsert({
                   id,
-                  code: "R" + Math.floor(Math.random() * 90 + 10),
+                  code,
                   name: ruleName,
+                  description: ruleDescription || undefined,
                   area: selectedArea,
                   active,
-                  priority: priority as any,
+                  priority: priority as Priority,
                   trigger: { kind: "condition_met", label: triggerLabel },
                   conditions: [],
                   actions: [...fulfilledActions, ...notFulfilledActions].map((a) => ({
                     id: a.id,
-                    type: a.type as any,
+                    type: a.type as ActionType,
                     title: a.title,
+                    vkrText: a.vkrText,
                     runWhenRouteCondition: fulfilledActions.includes(a) ? "fulfilled" : "not_fulfilled",
                   })),
+                  uiState: {
+                    selectedSituation,
+                    selectedTrackingSituation,
+                    deliveryMilestone,
+                    checkTimes,
+                    scheduleItems,
+                    vkrConditions,
+                    routeScope,
+                    missedMilestoneType,
+                    
+                    tooLongMilestone,
+                    tooLongThreshold,
+                    checkInterval,
+                    trackingConditions,
+                    noMovementDuration,
+                    noMovementUnit,
+                    ignoreClearance,
+                    stuckCount,
+                    stuckMatchMode,
+                    stuckInclude,
+                    stuckExclude,
+                    fulfilledActions,
+                    notFulfilledActions,
+                    trackingActions,
+                  },
                 });
-                alert("Pravidlo uloženo (prototyp — navigace není dokončena).");
+                toast.success(isEdit ? "Pravidlo upraveno" : "Pravidlo uloženo");
+                navigate({ to: "/" });
               }}
               className={cn(
                 "w-full rounded-lg px-4 py-2.5 text-sm font-medium transition-colors",
                 ruleName ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground cursor-not-allowed"
               )}
             >
-              Uložit pravidlo
+              {isEdit ? "Uložit změny" : "Uložit pravidlo"}
             </button>
             <Link
               to="/"
@@ -359,10 +579,20 @@ export function RuleCreatorPage() {
                 />
               </div>
               <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Popis (volitelný)</label>
+                <Textarea
+                  value={ruleDescription}
+                  onChange={(e) => setRuleDescription(e.target.value)}
+                  placeholder="Krátký popis pravidla…"
+                  rows={2}
+                  className="resize-none text-sm"
+                />
+              </div>
+              <div>
                 <label className="text-xs text-muted-foreground mb-1 block">Priorita</label>
                 <select
                   value={priority}
-                  onChange={(e) => setPriority(e.target.value)}
+                  onChange={(e) => setPriority(e.target.value as typeof priority)}
                   className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none"
                 >
                   <option value="low">LOW</option>
@@ -406,11 +636,18 @@ export function RuleCreatorPage() {
 
             {isTrackingRecords && selectedTrackingSituation && (
               <>
-                <div className="flex items-center gap-2.5 rounded-lg border border-border bg-muted/30 px-3 py-2.5">
+                <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2.5">
                   <Lock className="size-3.5 text-muted-foreground shrink-0" />
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-sm text-muted-foreground flex-1 min-w-0">
                     <span className="font-medium text-foreground">Spouštěč:</span> {trackingTriggerLabel}
                   </div>
+                  <button
+                    disabled
+                    title="Brzy: ruční úprava triggeru (plán, podmínka, manuální)."
+                    className="flex items-center gap-1 rounded-md border border-dashed border-border px-2 py-1 text-[11px] text-muted-foreground opacity-60 cursor-not-allowed"
+                  >
+                    <Settings2 className="size-3" /> Pokročilé
+                  </button>
                 </div>
 
                 {selectedTrackingSituation === "tracking_event" && (
@@ -435,12 +672,24 @@ export function RuleCreatorPage() {
                     onCount={setStuckCount}
                     matchMode={stuckMatchMode}
                     onMatchMode={setStuckMatchMode}
-                    include={stuckInclude}
-                    onInclude={setStuckInclude}
-                    exclude={stuckExclude}
-                    onExclude={setStuckExclude}
+                    trackingConditions={stuckInclude}
+                    onTrackingConditions={setStuckInclude}
                   />
                 )}
+
+                {/* Podmínka zásilky — sdíleno pro všechny tracking situace */}
+                <div>
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                    Podmínka zásilky
+                  </div>
+                  <div className="text-[11px] text-muted-foreground mb-2">
+                    Pravidlo se uplatní jen pro zásilky odpovídající těmto podmínkám. V selektoru jsou všechna pole zásilky.
+                  </div>
+                  <VkrConditionsBuilder
+                    conditions={vkrConditions}
+                    onChange={setVkrConditions}
+                  />
+                </div>
               </>
             )}
 
@@ -454,47 +703,55 @@ export function RuleCreatorPage() {
 
             {isRouteCompliance && selectedSituation && (
               <>
-                {/* Locked trigger */}
-                <div className="flex items-center gap-2.5 rounded-lg border border-border bg-muted/30 px-3 py-2.5">
+                {/* Locked trigger + Pokročilé mockup */}
+                <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2.5">
                   <Lock className="size-3.5 text-muted-foreground shrink-0" />
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-sm text-muted-foreground flex-1 min-w-0">
                     <span className="font-medium text-foreground">Spouštěč:</span> {triggerLabel}
                   </div>
+                  <button
+                    disabled
+                    title="Brzy: ruční úprava triggeru (plán, podmínka, manuální)."
+                    className="flex items-center gap-1 rounded-md border border-dashed border-border px-2 py-1 text-[11px] text-muted-foreground opacity-60 cursor-not-allowed"
+                  >
+                    <Settings2 className="size-3" /> Pokročilé
+                  </button>
                 </div>
 
                 {/* Situation-specific config */}
                 {selectedSituation === "delivery_day" && (
-                  <DeliveryDayConfig
-                    milestone={deliveryMilestone}
-                    onMilestoneChange={setDeliveryMilestone}
-                    checkTimes={checkTimes}
-                    onToggleTime={toggleTime}
-                    checkpointTypes={checkpointTypes}
-                    skipConditions={skipConditions}
-                    onSkipConditions={setSkipConditions}
-                    availableRules={rules}
-                  />
+                  <>
+                    <RouteScopePicker value={routeScope} onChange={setRouteScope} />
+                    <DeliveryDayConfig
+                      milestone={deliveryMilestone}
+                      onMilestoneChange={setDeliveryMilestone}
+                      scheduleItems={scheduleItems}
+                      onScheduleItems={setScheduleItems}
+                      checkpointTypes={checkpointTypes}
+                    />
+                  </>
                 )}
 
                 {selectedSituation === "unexpected_location" && (
-                  <AutoSummary text="Podmínka je nastavena automaticky. Systém při každém příchozím tracking záznamu zkontroluje, zda země nebo lokace odpovídá některému bodu na standardní trase zásilky." />
+                  <>
+                    <RouteScopePicker value={routeScope} onChange={setRouteScope} />
+                    <AutoSummary text="Podmínka je nastavena automaticky. Systém při každém příchozím tracking záznamu zkontroluje, zda země nebo lokace odpovídá některému bodu na standardní trase zásilky." />
+                  </>
                 )}
 
                 {selectedSituation === "missed_milestone" && (
-                  <AutoSummary text="Podmínka je nastavena automaticky. Systém sleduje každý milník definovaný na trase zásilky. Jakmile uplyne časový limit milníku a zásilka nemá platný tracking záznam, podmínka se splní. Časové limity nastavuješ v editoru trasy." />
+                  <>
+                    <RouteScopePicker value={routeScope} onChange={setRouteScope} allowExclude />
+                    <MilestoneTypePicker value={missedMilestoneType} onChange={setMissedMilestoneType} />
+                    <AutoSummary text="Podmínka je nastavena automaticky. Systém sleduje vybraný typ milníku na trase zásilky. Jakmile uplyne časový limit a zásilka nemá platný tracking záznam, podmínka se splní. Časové limity nastavuješ v editoru trasy." />
+                  </>
                 )}
 
-                {selectedSituation === "too_long" && (
-                  <TooLongConfig
-                    milestones={milestonesWithThresholds}
-                    selected={tooLongMilestone}
-                    onSelect={setTooLongMilestone}
-                    threshold={tooLongThreshold}
-                    onThreshold={setTooLongThreshold}
-                    interval={checkInterval}
-                    onInterval={setCheckInterval}
-                  />
-                )}
+                {/* Podmínky věci k řešení (v prostředním sloupci) */}
+                <VkrConditionsBuilder
+                  conditions={vkrConditions}
+                  onChange={setVkrConditions}
+                />
               </>
             )}
 
@@ -506,6 +763,7 @@ export function RuleCreatorPage() {
         <div className="flex w-[340px] shrink-0 flex-col">
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Akce</div>
+
 
             {isRouteCompliance && (
               <>
@@ -523,6 +781,12 @@ export function RuleCreatorPage() {
                   onChangeTitle={(id, title) =>
                     setFulfilledActions((prev) => prev.map((a) => a.id === id ? { ...a, title } : a))
                   }
+                  onChangeVkrText={(id, vkrText) =>
+                    setFulfilledActions((prev) => prev.map((a) => a.id === id ? { ...a, vkrText } : a))
+                  }
+                  onChangeShipmentConditions={(id, shipmentConditions) =>
+                    setFulfilledActions((prev) => prev.map((a) => a.id === id ? { ...a, shipmentConditions } : a))
+                  }
                 />
                 <ActionBranch
                   label="Podmínka nesplněna"
@@ -537,6 +801,12 @@ export function RuleCreatorPage() {
                   }
                   onChangeTitle={(id, title) =>
                     setNotFulfilledActions((prev) => prev.map((a) => a.id === id ? { ...a, title } : a))
+                  }
+                  onChangeVkrText={(id, vkrText) =>
+                    setNotFulfilledActions((prev) => prev.map((a) => a.id === id ? { ...a, vkrText } : a))
+                  }
+                  onChangeShipmentConditions={(id, shipmentConditions) =>
+                    setNotFulfilledActions((prev) => prev.map((a) => a.id === id ? { ...a, shipmentConditions } : a))
                   }
                 />
               </>
@@ -557,6 +827,12 @@ export function RuleCreatorPage() {
                 onChangeTitle={(id, title) =>
                   setTrackingActions((prev) => prev.map((a) => a.id === id ? { ...a, title } : a))
                 }
+                onChangeVkrText={(id, vkrText) =>
+                  setTrackingActions((prev) => prev.map((a) => a.id === id ? { ...a, vkrText } : a))
+                }
+                onChangeShipmentConditions={(id, shipmentConditions) =>
+                  setTrackingActions((prev) => prev.map((a) => a.id === id ? { ...a, shipmentConditions } : a))
+                }
               />
             )}
 
@@ -575,41 +851,24 @@ export function RuleCreatorPage() {
 /* ─── Situation configs ──────────────────────────────────── */
 
 function DeliveryDayConfig({
-  milestone, onMilestoneChange, checkTimes, onToggleTime, checkpointTypes,
-  skipConditions, onSkipConditions, availableRules,
+  milestone, onMilestoneChange, scheduleItems, onScheduleItems, checkpointTypes,
 }: {
   milestone: string;
   onMilestoneChange: (v: string) => void;
-  checkTimes: string[];
-  onToggleTime: (t: string) => void;
+  scheduleItems: ScheduleItem[];
+  onScheduleItems: (v: ScheduleItem[]) => void;
   checkpointTypes: { id: string; name: string }[];
-  skipConditions: SkipCondition[];
-  onSkipConditions: (v: SkipCondition[]) => void;
-  availableRules: { id: string; name: string }[];
 }) {
-  const TIMES = ["08:00", "09:00", "10:00"];
+  const selectedMilestoneLabel =
+    checkpointTypes.find((ct) => ct.id === milestone)?.name;
 
-  function addSkip() {
-    onSkipConditions([
-      ...skipConditions,
-      { id: "skip_" + Date.now(), ruleId: availableRules[0]?.id ?? "", outcome: "positive" },
-    ]);
-  }
-
-  function updateSkip(id: string, patch: Partial<SkipCondition>) {
-    onSkipConditions(skipConditions.map((s) => s.id === id ? { ...s, ...patch } : s));
-  }
-
-  function removeSkip(id: string) {
-    onSkipConditions(skipConditions.filter((s) => s.id !== id));
-  }
 
   return (
     <div className="space-y-4">
       <div>
         <div className="text-xs font-medium mb-2">Výběr milníku</div>
         <div className="space-y-1.5">
-          {checkpointTypes.slice(0, 2).map((ct) => (
+          {checkpointTypes.map((ct) => (
             <label key={ct.id} className="flex items-center gap-2.5 cursor-pointer rounded-lg border border-border px-3 py-2 hover:bg-muted/30">
               <input
                 type="radio"
@@ -624,80 +883,16 @@ function DeliveryDayConfig({
           ))}
         </div>
       </div>
-      <div>
-        <div className="text-xs font-medium mb-2">Časy kontroly</div>
-        <div className="flex gap-2">
-          {TIMES.map((t) => (
-            <button
-              key={t}
-              onClick={() => onToggleTime(t)}
-              className={cn(
-                "rounded-full px-3 py-1 text-xs font-medium border transition-colors",
-                checkTimes.includes(t) ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-muted"
-              )}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
-        Časová zóna: automaticky dle cílové země zásilky.
-      </div>
 
-      {/* Přeskočení běhu */}
-      <div>
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-          Přeskočení běhu
-        </div>
+      <ScheduleEditor
+        items={scheduleItems}
+        onChange={onScheduleItems}
+        milestoneLabel={selectedMilestoneLabel}
+      />
 
-        {skipConditions.length === 0 && (
-          <div className="rounded-lg border border-dashed border-border px-3 py-2.5 text-xs text-muted-foreground italic mb-2">
-            Žádné podmínky přeskočení.
-          </div>
-        )}
-
-        {skipConditions.map((skip) => (
-          <div key={skip.id} className="mb-2 flex items-center gap-2">
-            <span className="text-xs text-muted-foreground shrink-0">Pokud pravidlo</span>
-            <select
-              value={skip.ruleId}
-              onChange={(e) => updateSkip(skip.id, { ruleId: e.target.value })}
-              className="flex-1 min-w-0 rounded border border-border bg-background px-2 py-1 text-xs focus:outline-none"
-            >
-              {availableRules.length === 0 && (
-                <option value="">— žádná pravidla —</option>
-              )}
-              {availableRules.map((r) => (
-                <option key={r.id} value={r.id}>{r.name}</option>
-              ))}
-            </select>
-            <span className="text-xs text-muted-foreground shrink-0">dopadlo</span>
-            <select
-              value={skip.outcome}
-              onChange={(e) => updateSkip(skip.id, { outcome: e.target.value as SkipCondition["outcome"] })}
-              className="rounded border border-border bg-background px-2 py-1 text-xs focus:outline-none"
-            >
-              <option value="positive">pozitivně</option>
-              <option value="negative">negativně</option>
-              <option value="any">jakkoliv</option>
-            </select>
-            <button onClick={() => removeSkip(skip.id)} className="text-muted-foreground hover:text-foreground shrink-0">
-              <X className="size-3.5" />
-            </button>
-          </div>
-        ))}
-
-        <button
-          onClick={addSkip}
-          className="flex items-center gap-1 text-xs text-primary hover:underline"
-        >
-          <Plus className="size-3" /> přidat přeskočení
-        </button>
-      </div>
 
       <div className="rounded-lg bg-muted/30 border border-border px-3 py-2 text-xs text-muted-foreground leading-relaxed">
-        Kontrola proběhne pouze v den, kdy carrier avizuje doručení. Pokud předchozí kontrola uspěla, pozdější se přeskočí automaticky.
+        Kontrola proběhne pouze v den, kdy carrier avizuje doručení. Pokud předchozí kontrola dnes uspěla, pozdější se přeskočí automaticky.
       </div>
     </div>
   );
@@ -817,7 +1012,7 @@ function AutoSummary({ text }: { text: string }) {
 /* ─── Action Branch ──────────────────────────────────────── */
 
 function ActionBranch({
-  label, variant, actions, advancedOpen, onToggleAdvanced, onAdd, onRemove, onChangeType, onChangeTitle,
+  label, variant, actions, advancedOpen, onToggleAdvanced, onAdd, onRemove, onChangeType, onChangeTitle, onChangeVkrText, onChangeShipmentConditions,
 }: {
   label: string;
   variant: "fulfilled" | "not_fulfilled";
@@ -828,6 +1023,8 @@ function ActionBranch({
   onRemove: (id: string) => void;
   onChangeType: (id: string, type: string) => void;
   onChangeTitle: (id: string, title: string) => void;
+  onChangeVkrText: (id: string, vkrText: string) => void;
+  onChangeShipmentConditions: (id: string, conditions: VkrCondition[]) => void;
 }) {
   const isFulfilled = variant === "fulfilled";
   return (
@@ -869,11 +1066,32 @@ function ActionBranch({
                 className="w-full rounded border border-border bg-muted/30 px-2 py-1 text-xs focus:outline-none"
               />
             )}
+            <div className="mt-2">
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1 block">
+                Text věci k řešení (volitelný)
+              </label>
+              <Textarea
+                value={action.vkrText ?? ""}
+                onChange={(e) => onChangeVkrText(action.id, e.target.value)}
+                placeholder="Co má operátor udělat / co se stalo…"
+                rows={2}
+                className="resize-none text-xs"
+              />
+            </div>
             {action.type === "create_vkr" && (
               <div className="mt-2 text-[10px] text-muted-foreground">
                 Pokud VkŘ se stejným názvem existuje, nová se nevytvoří.
               </div>
             )}
+            {/* Podmínky zásilky — per akce */}
+            <div className="mt-2">
+              <VkrConditionsBuilder
+                conditions={action.shipmentConditions ?? []}
+                onChange={(next) => onChangeShipmentConditions(action.id, next)}
+                title="Podmínky zásilky"
+                emptyText="Bez podmínek — akce se spustí vždy, když je vyhodnocena větev."
+              />
+            </div>
             {/* Advanced toggle */}
             <button
               onClick={() => onToggleAdvanced(action.id)}
@@ -884,12 +1102,6 @@ function ActionBranch({
             </button>
             {advancedOpen[action.id] && (
               <div className="mt-2 space-y-2 rounded-md bg-muted/30 p-2 text-xs text-muted-foreground">
-                <div>
-                  <div className="font-medium text-foreground mb-1">Vyhodnotit jen pokud</div>
-                  <button className="flex items-center gap-1 text-primary text-xs hover:underline">
-                    <Plus className="size-3" /> přidat podmínku
-                  </button>
-                </div>
                 <div>
                   <div className="font-medium text-foreground">Deduplikace</div>
                   <div>Při vytvoření VkŘ se přeskočí, pokud již existuje stejný název.</div>
@@ -972,12 +1184,22 @@ function TrackingConditionBuilder({
             >
               {TRACKING_OPERATORS.map((op) => <option key={op}>{op}</option>)}
             </select>
-            <input
-              value={row.value}
-              onChange={(e) => update(row.id, { value: e.target.value })}
-              placeholder="hodnota…"
-              className="flex-1 min-w-[100px] rounded border border-border bg-background px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary/40"
-            />
+            {row.field === "eventTime" ? (
+              <div className="flex-1 min-w-[260px]">
+                <TrackingTimeValueEditor
+                  value={row.timeSpec ?? DEFAULT_TIME_SPEC}
+                  onChange={(v) => update(row.id, { timeSpec: v })}
+                />
+              </div>
+            ) : (
+              <input
+                value={row.value}
+                onChange={(e) => update(row.id, { value: e.target.value })}
+                placeholder="hodnota…"
+                className="flex-1 min-w-[100px] rounded border border-border bg-background px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary/40"
+              />
+            )}
+
             <button
               onClick={() => removeRow(row.id)}
               disabled={conditions.length <= 1 && !simple}
@@ -1008,7 +1230,7 @@ function TrackingEventConfig({
     <div className="space-y-4">
       <div>
         <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-          Nový záznam musí splňovat
+          CO MUSÍ BÝT NA ZÁZNAMU
         </div>
         <TrackingConditionBuilder conditions={conditions} onConditions={onConditions} />
       </div>
@@ -1086,16 +1308,14 @@ function NoMovementConfig({
 }
 
 function StuckLocationConfig({
-  count, onCount, matchMode, onMatchMode, include, onInclude, exclude, onExclude,
+  count, onCount, matchMode, onMatchMode, trackingConditions, onTrackingConditions,
 }: {
   count: number;
   onCount: (v: number) => void;
   matchMode: StuckMatchMode;
   onMatchMode: (v: StuckMatchMode) => void;
-  include: TrackingConditionRow[];
-  onInclude: (rows: TrackingConditionRow[]) => void;
-  exclude: TrackingConditionRow[];
-  onExclude: (rows: TrackingConditionRow[]) => void;
+  trackingConditions: TrackingConditionRow[];
+  onTrackingConditions: (rows: TrackingConditionRow[]) => void;
 }) {
   const MATCH_OPTIONS: { id: StuckMatchMode; label: string; sub: string }[] = [
     { id: "locationId", label: "ID místa", sub: "locationId" },
@@ -1146,32 +1366,19 @@ function StuckLocationConfig({
 
       <div>
         <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-          Záznamy obsahují statusy <span className="font-normal normal-case">(volitelně)</span>
+          CO MUSÍ BÝT NA ZÁZNAMU <span className="font-normal normal-case">(volitelně)</span>
         </div>
-        <TrackingConditionBuilder conditions={include} onConditions={onInclude} simple />
-        {include.length === 0 && (
+        <div className="text-[11px] text-muted-foreground mb-2">
+          Filtruj záznamy, které se započítávají do série (např. <code>derivedStatus je jedním z …</code>).
+        </div>
+        {trackingConditions.length > 0 ? (
+          <TrackingConditionBuilder conditions={trackingConditions} onConditions={onTrackingConditions} />
+        ) : (
           <button
-            onClick={() => onInclude([{ id: "inc_" + Date.now(), field: "derivedStatus", operator: "je jedním z", value: "" }])}
+            onClick={() => onTrackingConditions([{ id: "tc_" + Date.now(), field: "derivedStatus", operator: "je jedním z", value: "" }])}
             className="mt-1 flex items-center gap-1 rounded-lg border border-dashed border-border px-3 py-1.5 text-xs text-muted-foreground hover:border-primary hover:text-primary transition-colors"
           >
-            <Plus className="size-3" /> přidat status k zahrnutí
-          </button>
-        )}
-      </div>
-
-      <div>
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-          Záznamy neobsahují statusy <span className="font-normal normal-case">(volitelně)</span>
-        </div>
-        {exclude.length > 0 && (
-          <TrackingConditionBuilder conditions={exclude} onConditions={onExclude} simple />
-        )}
-        {exclude.length === 0 && (
-          <button
-            onClick={() => onExclude([{ id: "exc_" + Date.now(), field: "derivedStatus", operator: "je jedním z", value: "" }])}
-            className="mt-1 flex items-center gap-1 rounded-lg border border-dashed border-border px-3 py-1.5 text-xs text-muted-foreground hover:border-primary hover:text-primary transition-colors"
-          >
-            <Plus className="size-3" /> přidat status k vyloučení
+            <Plus className="size-3" /> přidat podmínku trackingu
           </button>
         )}
       </div>
@@ -1206,7 +1413,38 @@ function getTriggerLabel(situation: Situation | null, interval: CheckInterval): 
     case "delivery_day": return "Časový plán — v den doručení";
     case "unexpected_location": return "Reaktivní — při každém tracking záznamu";
     case "missed_milestone": return "Reaktivní — při překročení časového limitu milníku";
-    case "too_long": return `Časový plán — každých ${intervalLabel[interval]}`;
     case "other": return "—";
   }
 }
+
+/* ─── Migrace starých VkŘ podmínek ──────────────────────── */
+
+type LegacyCarrierDate = { enabled: boolean; operator: "is_today" | "is_tomorrow" | "within_days"; days?: number };
+type LegacyCustomer = { enabled: boolean; operator: "is" | "is_not"; value: "new" | "longterm" };
+
+function convertLegacyVkrConditions(ui: Partial<RuleCreatorUiState> & {
+  vkrConditionCarrierDate?: LegacyCarrierDate;
+  vkrConditionCustomer?: LegacyCustomer;
+}): VkrCondition[] {
+  const out: VkrCondition[] = [];
+  const cd = ui.vkrConditionCarrierDate;
+  if (cd?.enabled) {
+    out.push({
+      id: "vc_legacy_carrier",
+      fieldId: "carrier_announced_delivery_at",
+      operator: cd.operator,
+      value: cd.operator === "within_days" ? String(cd.days ?? 3) : "",
+    });
+  }
+  const cu = ui.vkrConditionCustomer;
+  if (cu?.enabled) {
+    out.push({
+      id: "vc_legacy_customer",
+      fieldId: "customer.tenure",
+      operator: cu.operator,
+      value: cu.value,
+    });
+  }
+  return out;
+}
+

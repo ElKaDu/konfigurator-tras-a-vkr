@@ -10,32 +10,63 @@ import {
 
 // ---------------------------------------------------------------------------
 // Generic helper — avoids repeating subscribe boilerplate in every store.
-// Returns a tuple [getState, setState, useItems] where setState triggers all
-// subscribed hooks to re-render.
+// Optional `storageKey` enables localStorage persistence so user-entered
+// data survives reloads. Bump the version suffix in the key to discard
+// stale shapes after a model change.
 // ---------------------------------------------------------------------------
 
 type Listener = () => void;
 
-function makeStore<T extends { id: string }>(seed: readonly T[]) {
+function makeStore<T extends { id: string }>(seed: readonly T[], storageKey?: string) {
+  function loadInitial(): T[] {
+    if (typeof window === "undefined" || !storageKey) return [...seed];
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return [...seed];
+      const parsed = JSON.parse(raw) as T[];
+      if (!Array.isArray(parsed)) return [...seed];
+      return parsed;
+    } catch {
+      return [...seed];
+    }
+  }
+
   let state: T[] = [...seed];
+  let hydrated = false;
   const listeners = new Set<Listener>();
+
+  function ensureHydrated() {
+    if (hydrated || typeof window === "undefined" || !storageKey) return;
+    state = loadInitial();
+    hydrated = true;
+  }
+
+  function persist() {
+    if (typeof window !== "undefined" && storageKey) {
+      try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch { /* ignore quota */ }
+    }
+  }
 
   function notify() {
     listeners.forEach((l) => l());
   }
 
   function getState(): T[] {
+    ensureHydrated();
     return state;
   }
 
   function setState(next: T[]): void {
     state = next;
+    persist();
     notify();
   }
 
   function useItems(): T[] {
     const [, force] = useState(0);
     useEffect(() => {
+      ensureHydrated();
+      force((n) => n + 1);
       const l = () => force((n) => n + 1);
       listeners.add(l);
       return () => {
@@ -52,7 +83,7 @@ function makeStore<T extends { id: string }>(seed: readonly T[]) {
 // Rules store
 // ---------------------------------------------------------------------------
 
-const _rules = makeStore<Rule>(RULES);
+const _rules = makeStore<Rule>(RULES, "model_rules_v1");
 
 export function useRules(): Rule[] {
   return _rules.useItems();
@@ -75,13 +106,16 @@ export const rulesStore = {
   reset(): void {
     _rules.setState([..._rules.seed]);
   },
+  replaceAll(next: Rule[]): void {
+    _rules.setState(next);
+  },
 };
 
 // ---------------------------------------------------------------------------
 // Routes store
 // ---------------------------------------------------------------------------
 
-const _routes = makeStore<Route>(ROUTES);
+const _routes = makeStore<Route>(ROUTES, "model_routes_v1");
 
 export function useRoutes(): Route[] {
   return _routes.useItems();
@@ -106,13 +140,16 @@ export const routesStore = {
   reset(): void {
     _routes.setState([..._routes.seed]);
   },
+  replaceAll(next: Route[]): void {
+    _routes.setState(next);
+  },
 };
 
 // ---------------------------------------------------------------------------
 // CheckpointTypes store
 // ---------------------------------------------------------------------------
 
-const _cts = makeStore<CheckpointType>(CHECKPOINT_TYPES);
+const _cts = makeStore<CheckpointType>(CHECKPOINT_TYPES, "model_checkpoint_types_v1");
 
 export function useCheckpointTypes(): CheckpointType[] {
   return _cts.useItems();
@@ -131,6 +168,9 @@ export const checkpointTypesStore = {
   },
   remove(id: string): void {
     _cts.setState(_cts.getState().filter((ct) => ct.id !== id));
+  },
+  replaceAll(next: CheckpointType[]): void {
+    _cts.setState(next);
   },
 };
 
@@ -154,7 +194,7 @@ export const sampleShipmentsStore = {
 // Segments store
 // ---------------------------------------------------------------------------
 
-const _segments = makeStore<Segment>(SEGMENTS);
+const _segments = makeStore<Segment>(SEGMENTS, "model_segments_v1");
 
 export function useSegments(): Segment[] {
   return _segments.useItems();
@@ -174,6 +214,9 @@ export const segmentsStore = {
   },
   reset(): void {
     _segments.setState([..._segments.seed]);
+  },
+  replaceAll(next: Segment[]): void {
+    _segments.setState(next);
   },
 };
 

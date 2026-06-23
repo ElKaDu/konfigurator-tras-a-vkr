@@ -1,15 +1,16 @@
 import { useState, useMemo } from "react";
-import { ChevronRight, X, AlertTriangle, Info } from "lucide-react";
+import { ChevronRight, ChevronUp, ChevronDown, X, AlertTriangle, Info } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { AppHeader } from "@/components/AppHeader";
 import { useRoutes, useSegments, useCheckpointTypes, routesStore, segmentsStore } from "@/lib/model/store";
 import { assembledCheckpoints, eligibleSegments, validateRouteComposition } from "@/lib/model/routeAssembly";
 import { cn } from "@/lib/utils";
 import type { Route } from "@/lib/model/types";
+import { TRANSPORT_VARIANTS } from "@/lib/routes/types";
+import { COUNTRY_OPTIONS as ALL_COUNTRIES } from "@/lib/routes/countries";
 
 const CARRIER_OPTIONS = ["FedEx", "UPS", "DHL", "PPL", "GLS"];
-const SERVICE_OPTIONS = ["EXPRESS", "ECONOMY", "STANDARD"];
-const COUNTRY_OPTIONS = ["CZ", "SK", "DE", "AT", "PL", "HU", "RO", "FR", "IT", "ES"];
 
 export function RouteEditorPage({ routeId }: { routeId: string }) {
   const routes = useRoutes();
@@ -114,18 +115,18 @@ export function RouteEditorPage({ routeId }: { routeId: string }) {
                 <div>
                   <label className="text-xs text-muted-foreground mb-1.5 block">Typ služby</label>
                   <div className="flex flex-wrap gap-1.5">
-                    {SERVICE_OPTIONS.map((s) => (
+                    {TRANSPORT_VARIANTS.map((v) => (
                       <button
-                        key={s}
-                        onClick={() => update({ serviceTypes: toggleMulti(route.serviceTypes, s) })}
+                        key={v.value}
+                        onClick={() => update({ serviceTypes: toggleMulti(route.serviceTypes, v.value) })}
                         className={cn(
                           "rounded-full px-3 py-1 text-xs font-medium border transition-colors",
-                          route.serviceTypes.includes(s)
+                          route.serviceTypes.includes(v.value)
                             ? "bg-primary text-primary-foreground border-primary"
                             : "border-border hover:bg-muted"
                         )}
                       >
-                        {s}
+                        {v.label}
                       </button>
                     ))}
                   </div>
@@ -134,18 +135,19 @@ export function RouteEditorPage({ routeId }: { routeId: string }) {
                 <div>
                   <label className="text-xs text-muted-foreground mb-1.5 block">Cílová země</label>
                   <div className="flex flex-wrap gap-1.5">
-                    {COUNTRY_OPTIONS.map((c) => (
+                    {ALL_COUNTRIES.map((c) => (
                       <button
-                        key={c}
-                        onClick={() => update({ destCountries: toggleMulti(route.destCountries, c) })}
+                        key={c.value}
+                        title={c.label}
+                        onClick={() => update({ destCountries: toggleMulti(route.destCountries, c.value) })}
                         className={cn(
                           "rounded-full px-2.5 py-0.5 text-xs font-medium border transition-colors",
-                          route.destCountries.includes(c)
+                          route.destCountries.includes(c.value)
                             ? "bg-primary text-primary-foreground border-primary"
                             : "border-border hover:bg-muted"
                         )}
                       >
-                        {c}
+                        {c.value}
                       </button>
                     ))}
                   </div>
@@ -175,7 +177,13 @@ export function RouteEditorPage({ routeId }: { routeId: string }) {
           </div>
 
           <div className="border-t border-border p-4 space-y-2">
-            <button className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
+            <button
+              onClick={() => {
+                toast.success("Trasa uložena");
+                navigate({ to: "/trasy" });
+              }}
+              className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
               Uložit trasu
             </button>
             <Link
@@ -202,16 +210,41 @@ export function RouteEditorPage({ routeId }: { routeId: string }) {
               {route.segmentIds.map((id, idx) => {
                 const seg = segMap.get(id);
                 const isSelected = selectedSegmentId === id;
+                const moveSegment = (dir: -1 | 1) => {
+                  const next = [...route.segmentIds];
+                  const j = idx + dir;
+                  if (j < 0 || j >= next.length) return;
+                  [next[idx], next[j]] = [next[j], next[idx]];
+                  routesStore.upsert({ ...route, segmentIds: next });
+                };
                 return (
-                  <button
+                  <div
                     key={id}
                     onClick={() => setSelectedSegmentId(isSelected ? null : id)}
                     className={cn(
-                      "group flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors",
+                      "group flex items-center gap-2 rounded-lg border px-3 py-2.5 text-left cursor-pointer transition-colors",
                       isSelected ? "border-primary bg-primary-soft/20" : "border-border hover:bg-muted/40"
                     )}
                   >
                     <span className="tabular-nums text-xs text-muted-foreground shrink-0">{idx + 1}</span>
+                    <div className="flex flex-col shrink-0">
+                      <button
+                        disabled={idx === 0}
+                        onClick={(e) => { e.stopPropagation(); moveSegment(-1); }}
+                        className="text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Posunout nahoru"
+                      >
+                        <ChevronUp className="size-3.5" />
+                      </button>
+                      <button
+                        disabled={idx === route.segmentIds.length - 1}
+                        onClick={(e) => { e.stopPropagation(); moveSegment(1); }}
+                        className="text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Posunout dolů"
+                      >
+                        <ChevronDown className="size-3.5" />
+                      </button>
+                    </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium truncate">{seg?.name ?? id}</div>
                       <div className="text-xs text-muted-foreground">{seg?.checkpoints.length ?? 0} milníků</div>
@@ -227,7 +260,7 @@ export function RouteEditorPage({ routeId }: { routeId: string }) {
                     >
                       <X className="size-4" />
                     </button>
-                  </button>
+                  </div>
                 );
               })}
             </div>
@@ -294,7 +327,7 @@ export function RouteEditorPage({ routeId }: { routeId: string }) {
         </div>
 
         {/* RIGHT — Milníky (read-only) */}
-        <div className="flex w-[320px] shrink-0 flex-col overflow-y-auto">
+        <div className="flex w-[420px] shrink-0 flex-col overflow-y-auto">
           <div className="p-4">
             <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">
               {selectedSegment ? `Milníky úseku: ${selectedSegment.name}` : "Milníky trasy (celkem)"}

@@ -191,7 +191,7 @@ export function RuleEditorDialog({
           <SectionHeader number={5} title="Akce" />
           <ActionsEditor
             actions={draft.actions}
-            scheduleTimes={(draft.trigger?.schedule?.times ?? []).map((t) => t.time).filter(Boolean)}
+            scheduleTimes={(draft.trigger?.schedule?.times ?? []).flatMap((t) => t.kind === "time_of_day" && t.time ? [t.time] : [])}
             hasRouteCompliance={{
               any: hasRouteComplianceCondition(draft.conditionGroup),
               generalCheck: isGeneralCheckRouteCompliance(draft.conditionGroup),
@@ -1850,10 +1850,21 @@ function ProblemTypeOptions() {
 /* ============ Plán spuštění — jeden heterogenní seznam ============ */
 
 function PlanSpusteniEditor({ items, onChange }: { items: ScheduleTimeItem[]; onChange: (arr: ScheduleTimeItem[]) => void }) {
+  const routes = useRoutes();
+  const milestoneLabels = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of routes) {
+      if (r.archivedAt) continue;
+      for (const cp of r.checkpoints) if (cp.label) set.add(cp.label);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "cs"));
+  }, [routes]);
+
   const update = (i: number, next: ScheduleTimeItem) =>
     onChange(items.map((it, idx) => idx === i ? next : it));
   const remove = (i: number) => onChange(items.filter((_, idx) => idx !== i));
   const addFixed = () => onChange([...items, { kind: "time_of_day", time: "08:00", timezone: "destination_country" }]);
+  const addRelative = () => onChange([...items, { kind: "relative_to_milestone_due", offsetMinutes: 0, checkpointLabel: milestoneLabels[0] }]);
 
   return (
     <div className="space-y-2 rounded-lg border border-border bg-background/60 p-3">
@@ -1867,35 +1878,105 @@ function PlanSpusteniEditor({ items, onChange }: { items: ScheduleTimeItem[]; on
             onClick={addFixed}
             className="rounded-md border border-dashed border-border bg-background px-2 py-0.5 text-[11px] font-medium text-muted-foreground hover:border-primary/40 hover:text-primary"
           >
-            + Pevný čas
+            + V určitou hodinu
+          </button>
+          <button
+            type="button"
+            onClick={addRelative}
+            className="rounded-md border border-dashed border-border bg-background px-2 py-0.5 text-[11px] font-medium text-muted-foreground hover:border-primary/40 hover:text-primary"
+          >
+            + Podle termínu milníku
           </button>
         </div>
       </div>
 
       {items.length === 0 && (
         <div className="text-[11px] italic text-muted-foreground">
-          Přidej alespoň jeden pevný čas (např. 08:00 TZ cílové země). Pro spuštění relativně k checkpointu použij trigger „Vždy když je splněna podmínka" + podmínku „Splnění checkpointu" s časovou tolerancí.
+          Přidej alespoň jeden čas spuštění — buď pevný (např. 08:00 v cílové TZ), nebo relativně k termínu vybraného typu milníku.
         </div>
       )}
 
-      {items.map((it, i) => (
-        <div key={i} className="flex flex-wrap items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1 text-xs">
-          <span title="Pevný čas" className="text-muted-foreground">⏰</span>
-          <span className="text-muted-foreground">v</span>
-          <input
-            type="time"
-            value={it.time}
-            onChange={(e) => update(i, { ...it, time: e.target.value })}
-            className="rounded border border-border bg-background px-1.5 py-0.5 text-xs"
-          />
-          <TimezoneSelect
-            includeOperator
-            value={it.timezone ?? "destination_country"}
-            onChange={(v) => update(i, { ...it, timezone: v })}
-          />
-          <button onClick={() => remove(i)} className="ml-auto rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive">×</button>
-        </div>
-      ))}
+      {items.map((it, i) => {
+        if (it.kind === "time_of_day") {
+          return (
+            <div key={i} className="flex flex-wrap items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1 text-xs">
+              <span title="V určitou hodinu" className="text-muted-foreground">⏰</span>
+              <span className="text-muted-foreground">v</span>
+              <input
+                type="time"
+                value={it.time}
+                onChange={(e) => update(i, { ...it, time: e.target.value })}
+                className="rounded border border-border bg-background px-1.5 py-0.5 text-xs"
+              />
+              <TimezoneSelect
+                includeOperator
+                value={it.timezone ?? "destination_country"}
+                onChange={(v) => update(i, { ...it, timezone: v })}
+              />
+              <button onClick={() => remove(i)} className="ml-auto rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive">×</button>
+            </div>
+          );
+        }
+        // relative_to_milestone_due
+        const off = it.offsetMinutes;
+        const position: "before" | "at" | "after" = off < 0 ? "before" : off > 0 ? "after" : "at";
+        const absH = Math.abs(off) / 60;
+        return (
+          <div key={i} className="space-y-1.5 rounded-md border border-border bg-background px-2 py-1.5 text-xs">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span title="Podle termínu milníku" className="text-muted-foreground">🎯</span>
+              <select
+                value={position}
+                onChange={(e) => {
+                  const p = e.target.value as "before" | "at" | "after";
+                  const cur = Math.abs(it.offsetMinutes) || 120;
+                  const next = p === "at" ? 0 : p === "before" ? -cur : cur;
+                  update(i, { ...it, offsetMinutes: next });
+                }}
+                className="rounded border border-border bg-background px-1.5 py-0.5 text-xs"
+              >
+                <option value="before">před termínem milníku</option>
+                <option value="at">v termínu milníku</option>
+                <option value="after">po termínu milníku</option>
+              </select>
+              {position !== "at" && (
+                <>
+                  <input
+                    type="number"
+                    min={0}
+                    step={0.5}
+                    value={absH}
+                    onChange={(e) => {
+                      const h = Math.max(0, Number(e.target.value));
+                      const mins = Math.round(h * 60);
+                      update(i, { ...it, offsetMinutes: position === "before" ? -mins : mins });
+                    }}
+                    className="w-16 rounded border border-border bg-background px-1.5 py-0.5 text-xs"
+                  />
+                  <span className="text-muted-foreground">h</span>
+                </>
+              )}
+              <button onClick={() => remove(i)} className="ml-auto rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive">×</button>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-muted-foreground">Typ milníku:</span>
+              <select
+                value={it.checkpointLabel ?? ""}
+                onChange={(e) => update(i, { ...it, checkpointLabel: e.target.value || undefined })}
+                className="rounded border border-border bg-background px-1.5 py-0.5 text-xs"
+              >
+                <option value="">— vyber typ milníku —</option>
+                {milestoneLabels.map((l) => (
+                  <option key={l} value={l}>{l}</option>
+                ))}
+              </select>
+            </div>
+            <div className="text-[10px] italic text-muted-foreground">
+              Termín = pole „Čas uvedený na záznamu" v Match podmínkách tohoto typu milníku na úseku. Pokud má úsek víc časových podmínek, bere se „nejpozději do". Pravidlo se spustí jen na úsecích, kde má tento typ milníku vyplněný čas — ostatní úseky se přeskočí.
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

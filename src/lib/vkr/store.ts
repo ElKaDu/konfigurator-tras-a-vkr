@@ -131,4 +131,8 @@ export const rulesStore = {
     state = SEED_RULES;
     persist();
   },
+  replaceAll(rules: Rule[]) {
+    state = rules;
+    persist();
+  },
 };

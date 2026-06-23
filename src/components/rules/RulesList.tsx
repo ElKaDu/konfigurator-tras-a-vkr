@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Search, X, Pencil, Sparkles, PlayCircle, History as HistoryIcon, Trash2 } from "lucide-react";
+import { Search, X, Pencil, Sparkles, PlayCircle, History as HistoryIcon, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { AppHeader } from "@/components/AppHeader";
+import { DataMenu } from "@/components/common/DataMenu";
 import { AreaBadge } from "@/components/common/AreaBadge";
 import { AREAS, CIRCLED } from "@/lib/model/areas";
 import { useRules, rulesStore } from "@/lib/model/store";
@@ -100,13 +101,16 @@ export function RulesList() {
       <AppHeader
         current="rules"
         extras={
-          <Link
-            to="/rules/new"
-            search={{ area: selection.kind === "area" ? selection.area : undefined }}
-            className="bg-primary text-primary-foreground rounded-lg px-3 py-1.5 text-sm font-medium hover:bg-primary/90"
-          >
-            + Nové pravidlo
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/rules/new"
+              search={{ area: selection.kind === "area" ? selection.area : undefined }}
+              className="bg-primary text-primary-foreground rounded-lg px-3 py-1.5 text-sm font-medium hover:bg-primary/90"
+            >
+              + Nové pravidlo
+            </Link>
+            <DataMenu />
+          </div>
         }
       />
 
@@ -202,7 +206,20 @@ export function RulesList() {
                 Žádná pravidla
               </p>
             ) : (
-              visible.map((rule) => (
+              visible.map((rule, vIdx) => {
+                const canReorder = selection.kind === "all" || selection.kind === "area";
+                const moveRule = (dir: -1 | 1) => {
+                  const otherVIdx = vIdx + dir;
+                  if (otherVIdx < 0 || otherVIdx >= visible.length) return;
+                  const otherId = visible[otherVIdx].id;
+                  const i = rules.findIndex((r) => r.id === rule.id);
+                  const j = rules.findIndex((r) => r.id === otherId);
+                  if (i < 0 || j < 0) return;
+                  const next = [...rules];
+                  [next[i], next[j]] = [next[j], next[i]];
+                  rulesStore.replaceAll(next);
+                };
+                return (
                 <div
                   key={rule.id}
                   onClick={() => setSelectedRule(selectedRule?.id === rule.id ? null : rule)}
@@ -212,6 +229,27 @@ export function RulesList() {
                     selectedRule?.id === rule.id ? "border-primary bg-primary-soft/20" : "border-border",
                   )}
                 >
+                  {canReorder && (
+                    <div className="flex flex-col shrink-0">
+                      <button
+                        disabled={vIdx === 0}
+                        onClick={(e) => { e.stopPropagation(); moveRule(-1); }}
+                        className="text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Posunout nahoru"
+                      >
+                        <ChevronUp className="size-3.5" />
+                      </button>
+                      <button
+                        disabled={vIdx === visible.length - 1}
+                        onClick={(e) => { e.stopPropagation(); moveRule(1); }}
+                        className="text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Posunout dolů"
+                      >
+                        <ChevronDown className="size-3.5" />
+                      </button>
+                    </div>
+                  )}
+
                   {/* Code */}
                   <span className="font-mono text-xs text-muted-foreground w-9 shrink-0">
                     {rule.code}
@@ -259,7 +297,8 @@ export function RulesList() {
                     />
                   </div>
                 </div>
-              ))
+                );
+              })
             )}
           </div>
         </main>
@@ -294,6 +333,9 @@ function RuleDetailSidebar({ rule, onClose }: { rule: Rule; onClose: () => void 
             {rule.code}
           </div>
           <h3 className="mt-1 text-base font-semibold leading-snug">{rule.name}</h3>
+          {rule.description && (
+            <p className="mt-1 text-xs text-muted-foreground whitespace-pre-wrap">{rule.description}</p>
+          )}
         </div>
         <button
           onClick={onClose}
@@ -333,7 +375,8 @@ function RuleDetailSidebar({ rule, onClose }: { rule: Rule; onClose: () => void 
 
       <div className="border-t border-border bg-surface p-4 space-y-2">
         <Link
-          to="/rules/new"
+          to="/rules/$ruleId/edit"
+          params={{ ruleId: rule.id }}
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
         >
           <Pencil className="size-4" /> Upravit pravidlo
