@@ -18,7 +18,7 @@ import { MilestoneTypePicker } from "@/components/rules/editors/MilestoneTypePic
 import { TrackingTimeValueEditor, DEFAULT_TIME_SPEC, type TrackingTimeSpec } from "@/components/rules/editors/TrackingTimeValueEditor";
 
 
-type Situation = "delivery_day" | "unexpected_location" | "missed_milestone" | "other";
+type RouteUiSituation = "delivery_day" | "unexpected_location" | "missed_milestone" | "other";
 type CheckInterval = "30min" | "1h" | "2h" | "6h";
 type ThresholdLevel = "warn" | "critical";
 
@@ -49,7 +49,7 @@ const TRACKING_SITUATION_CARDS: { id: TrackingSituation; icon: React.ReactNode; 
 ];
 
 const SITUATION_CARDS: {
-  id: Situation;
+  id: RouteUiSituation;
   icon: React.ReactNode;
   label: string;
   trigger: string;
@@ -102,7 +102,7 @@ interface BranchAction {
 }
 
 interface RuleCreatorUiState {
-  selectedSituation: Situation | null;
+  selectedSituation: RouteUiSituation | null;
   selectedTrackingSituation: TrackingSituation | null;
   trackingConditions: TrackingConditionRow[];
   noMovementDuration: number;
@@ -156,7 +156,7 @@ function routeCheckpointFromRule(rule?: Rule): string | undefined {
   return condition?.kind === "route_compliance" ? condition.checkpointTypeId : undefined;
 }
 
-function inferRouteSituation(rule?: Rule): Situation | null {
+function inferRouteSituation(rule?: Rule): RouteUiSituation | null {
   if (!rule || rule.area !== "route_compliance") return null;
   const name = rule.name.toLocaleLowerCase("cs-CZ");
   const triggerLabel = rule.trigger.label.toLocaleLowerCase("cs-CZ");
@@ -258,7 +258,7 @@ export function RuleCreatorPage({
   const [selectedArea, setSelectedArea] = useState<Area>(
     initialState.selectedArea
   );
-  const [selectedSituation, setSelectedSituation] = useState<Situation | null>(
+  const [selectedSituation, setSelectedSituation] = useState<RouteUiSituation | null>(
     initialState.selectedSituation
   );
 
@@ -1394,7 +1394,7 @@ function getTrackingTriggerLabel(situation: TrackingSituation | null): string {
   }
 }
 
-function getTriggerLabel(situation: Situation | null, interval: CheckInterval): string {
+function getTriggerLabel(situation: RouteUiSituation | null, interval: CheckInterval): string {
   if (!situation) return "—";
   const intervalLabel: Record<CheckInterval, string> = {
     "30min": "30 min",
