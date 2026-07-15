@@ -9,6 +9,7 @@ import { resolveAreaIcon } from "@/components/common/areaIcons";
 import { useSegments, useCheckpointTypes, useRules, rulesStore } from "@/lib/model/store";
 import { cn } from "@/lib/utils";
 import type { Area, Priority, ActionType, Rule } from "@/lib/model/types";
+import { TRACKING_FIELDS, TRACKING_OPERATORS } from "@/lib/model/trackingFields";
 import { ScheduleEditor, type ScheduleItem } from "@/components/rules/editors/ScheduleEditor";
 import { VkrConditionsBuilder } from "@/components/rules/editors/VkrConditionsBuilder";
 import type { VkrCondition } from "@/lib/vkr/vkrConditionCatalog";
@@ -46,24 +47,6 @@ const TRACKING_SITUATION_CARDS: { id: TrackingSituation; icon: React.ReactNode; 
     trigger: "Reaktivní — při každém novém záznamu",
   },
 ];
-
-const TRACKING_FIELDS: { value: string; label: string; group: string }[] = [
-  { value: "eventType", label: "Typ záznamu (eventType)", group: "Typ a status" },
-  { value: "derivedStatus", label: "Odvozený status", group: "Typ a status" },
-  { value: "derivedStatusCode", label: "Kód odvozeného statusu", group: "Typ a status" },
-  { value: "eventDescription", label: "Popis události", group: "Typ a status" },
-  { value: "exceptionCode", label: "Kód výjimky", group: "Výjimka" },
-  { value: "exceptionDescription", label: "Popis výjimky", group: "Výjimka" },
-  { value: "locationType", label: "Typ místa", group: "Lokace" },
-  { value: "locationId", label: "ID místa", group: "Lokace" },
-  { value: "city", label: "Město", group: "Lokace" },
-  { value: "countryCode", label: "Kód země", group: "Lokace" },
-  { value: "postalCode", label: "PSČ", group: "Lokace" },
-  { value: "deliveryAttempts", label: "Počet pokusů o doručení", group: "Doručení" },
-  { value: "eventTime", label: "Čas záznamu (eventTime)", group: "Čas" },
-];
-
-const TRACKING_OPERATORS = ["je jedním z", "není žádným z", "je", "není", "obsahuje", "je větší než", "je menší nebo rovno"];
 
 const SITUATION_CARDS: {
   id: Situation;
