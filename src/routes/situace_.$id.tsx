@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SituationEditorPage } from "@/components/situations/SituationEditorPage";
 
-export const Route = createFileRoute("/situace/$id")({
+export const Route = createFileRoute("/situace_/$id")({
   head: () => ({ meta: [{ title: "Editace situace — Bytorp" }] }),
   component: SituaceEditorRoute,
 });

@@ -15,7 +15,7 @@ import { Route as SituaceRouteImport } from './routes/situace'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UsekIdRouteImport } from './routes/usek.$id'
 import { Route as TrasaIdRouteImport } from './routes/trasa.$id'
-import { Route as SituaceIdRouteImport } from './routes/situace.$id'
+import { Route as SituaceIdRouteImport } from './routes/situace_.$id'
 import { Route as RulesNewRouteImport } from './routes/rules.new'
 import { Route as RulesNewIndexRouteImport } from './routes/rules.new.index'
 import { Route as RulesNewEditRouteImport } from './routes/rules.new.edit'
@@ -52,9 +52,9 @@ const TrasaIdRoute = TrasaIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const SituaceIdRoute = SituaceIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => SituaceRoute,
+  id: '/situace_/$id',
+  path: '/situace/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const RulesNewRoute = RulesNewRouteImport.update({
   id: '/rules/new',
@@ -79,7 +79,7 @@ const RulesRuleIdEditRoute = RulesRuleIdEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/situace': typeof SituaceRouteWithChildren
+  '/situace': typeof SituaceRoute
   '/test': typeof TestRoute
   '/trasy': typeof TrasyRoute
   '/rules/new': typeof RulesNewRouteWithChildren
@@ -92,7 +92,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/situace': typeof SituaceRouteWithChildren
+  '/situace': typeof SituaceRoute
   '/test': typeof TestRoute
   '/trasy': typeof TrasyRoute
   '/situace/$id': typeof SituaceIdRoute
@@ -105,11 +105,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/situace': typeof SituaceRouteWithChildren
+  '/situace': typeof SituaceRoute
   '/test': typeof TestRoute
   '/trasy': typeof TrasyRoute
   '/rules/new': typeof RulesNewRouteWithChildren
-  '/situace/$id': typeof SituaceIdRoute
+  '/situace_/$id': typeof SituaceIdRoute
   '/trasa/$id': typeof TrasaIdRoute
   '/usek/$id': typeof UsekIdRoute
   '/rules/$ruleId/edit': typeof RulesRuleIdEditRoute
@@ -149,7 +149,7 @@ export interface FileRouteTypes {
     | '/test'
     | '/trasy'
     | '/rules/new'
-    | '/situace/$id'
+    | '/situace_/$id'
     | '/trasa/$id'
     | '/usek/$id'
     | '/rules/$ruleId/edit'
@@ -159,10 +159,11 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  SituaceRoute: typeof SituaceRouteWithChildren
+  SituaceRoute: typeof SituaceRoute
   TestRoute: typeof TestRoute
   TrasyRoute: typeof TrasyRoute
   RulesNewRoute: typeof RulesNewRouteWithChildren
+  SituaceIdRoute: typeof SituaceIdRoute
   TrasaIdRoute: typeof TrasaIdRoute
   UsekIdRoute: typeof UsekIdRoute
   RulesRuleIdEditRoute: typeof RulesRuleIdEditRoute
@@ -212,12 +213,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrasaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/situace/$id': {
-      id: '/situace/$id'
-      path: '/$id'
+    '/situace_/$id': {
+      id: '/situace_/$id'
+      path: '/situace/$id'
       fullPath: '/situace/$id'
       preLoaderRoute: typeof SituaceIdRouteImport
-      parentRoute: typeof SituaceRoute
+      parentRoute: typeof rootRouteImport
     }
     '/rules/new': {
       id: '/rules/new'
@@ -250,17 +251,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface SituaceRouteChildren {
-  SituaceIdRoute: typeof SituaceIdRoute
-}
-
-const SituaceRouteChildren: SituaceRouteChildren = {
-  SituaceIdRoute: SituaceIdRoute,
-}
-
-const SituaceRouteWithChildren =
-  SituaceRoute._addFileChildren(SituaceRouteChildren)
-
 interface RulesNewRouteChildren {
   RulesNewEditRoute: typeof RulesNewEditRoute
   RulesNewIndexRoute: typeof RulesNewIndexRoute
@@ -277,10 +267,11 @@ const RulesNewRouteWithChildren = RulesNewRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  SituaceRoute: SituaceRouteWithChildren,
+  SituaceRoute: SituaceRoute,
   TestRoute: TestRoute,
   TrasyRoute: TrasyRoute,
   RulesNewRoute: RulesNewRouteWithChildren,
+  SituaceIdRoute: SituaceIdRoute,
   TrasaIdRoute: TrasaIdRoute,
   UsekIdRoute: UsekIdRoute,
   RulesRuleIdEditRoute: RulesRuleIdEditRoute,
