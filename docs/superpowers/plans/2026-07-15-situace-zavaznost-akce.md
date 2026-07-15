@@ -2149,12 +2149,12 @@ Replace with:
 
 (The `getTrackingTriggerLabel` function itself is deleted in Task 17 Step 2, alongside the other now-unused tracking-config helpers — it has no other caller after this line goes.)
 
-- [ ] **Step 9: Verify it compiles**
+- [ ] **Step 8: Verify it compiles**
 
 Run: `npm run build`
 Expected: **Fails** at this point — the JSX further down in the file still references the now-deleted `selectedTrackingSituation`, `TrackingEventConfig`, `NoMovementConfig`, `StuckLocationConfig`, `trackingActions`, etc. That's expected; those references get replaced in Tasks 16-18. Confirm the errors are all about those specific names (not about anything in the state/helper code you just wrote) before moving on.
 
-- [ ] **Step 10: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
 git add src/components/rules/RuleCreatorPage.tsx
