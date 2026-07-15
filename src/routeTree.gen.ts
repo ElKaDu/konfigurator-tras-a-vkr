@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrasyRouteImport } from './routes/trasy'
 import { Route as TestRouteImport } from './routes/test'
+import { Route as SituaceRouteImport } from './routes/situace'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UsekIdRouteImport } from './routes/usek.$id'
 import { Route as TrasaIdRouteImport } from './routes/trasa.$id'
@@ -27,6 +28,11 @@ const TrasyRoute = TrasyRouteImport.update({
 const TestRoute = TestRouteImport.update({
   id: '/test',
   path: '/test',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SituaceRoute = SituaceRouteImport.update({
+  id: '/situace',
+  path: '/situace',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -67,6 +73,7 @@ const RulesRuleIdEditRoute = RulesRuleIdEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/situace': typeof SituaceRoute
   '/test': typeof TestRoute
   '/trasy': typeof TrasyRoute
   '/rules/new': typeof RulesNewRouteWithChildren
@@ -78,6 +85,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/situace': typeof SituaceRoute
   '/test': typeof TestRoute
   '/trasy': typeof TrasyRoute
   '/trasa/$id': typeof TrasaIdRoute
@@ -89,6 +97,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/situace': typeof SituaceRoute
   '/test': typeof TestRoute
   '/trasy': typeof TrasyRoute
   '/rules/new': typeof RulesNewRouteWithChildren
@@ -102,6 +111,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/situace'
     | '/test'
     | '/trasy'
     | '/rules/new'
@@ -113,6 +123,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/situace'
     | '/test'
     | '/trasy'
     | '/trasa/$id'
@@ -123,6 +134,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/situace'
     | '/test'
     | '/trasy'
     | '/rules/new'
@@ -135,6 +147,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SituaceRoute: typeof SituaceRoute
   TestRoute: typeof TestRoute
   TrasyRoute: typeof TrasyRoute
   RulesNewRoute: typeof RulesNewRouteWithChildren
@@ -157,6 +170,13 @@ declare module '@tanstack/react-router' {
       path: '/test'
       fullPath: '/test'
       preLoaderRoute: typeof TestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/situace': {
+      id: '/situace'
+      path: '/situace'
+      fullPath: '/situace'
+      preLoaderRoute: typeof SituaceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -227,6 +247,7 @@ const RulesNewRouteWithChildren = RulesNewRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SituaceRoute: SituaceRoute,
   TestRoute: TestRoute,
   TrasyRoute: TrasyRoute,
   RulesNewRoute: RulesNewRouteWithChildren,
@@ -237,3 +258,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
