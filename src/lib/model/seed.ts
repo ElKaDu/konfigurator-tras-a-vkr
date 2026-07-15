@@ -1,9 +1,11 @@
 import type {
+  ActionTag,
   CheckpointType,
   Route,
   Rule,
   SampleShipment,
   Segment,
+  Situation,
 } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -15,6 +17,122 @@ export const CHECKPOINT_TYPES: CheckpointType[] = [
   { id: "ct_first_scan",    name: "První scan v cíli",        description: "První scan zásilky po průjezdu celnicí." },
   { id: "ct_dest_facility", name: "Destination Facility",    description: "Zásilka přijata na cílovém depu." },
   { id: "ct_delivered",     name: "Doručeno",                 description: "Zásilka předána příjemci." },
+];
+
+// ---------------------------------------------------------------------------
+// Action Tags (katalog Akcí)
+// ---------------------------------------------------------------------------
+export const ACTION_TAGS: ActionTag[] = [
+  { id: "at_call_customer", label: "Zavolat zákazníkovi", icon: "Phone" },
+  { id: "at_email_customer", label: "Informovat e-mailem", icon: "Mail" },
+  { id: "at_check_carrier", label: "Prověřit u dopravce", icon: "Search" },
+  { id: "at_shift_date", label: "Posunout datum doručení", icon: "CalendarClock" },
+];
+
+// ---------------------------------------------------------------------------
+// Situace (3 situace, 7 závažností — viz spec bod 7)
+// ---------------------------------------------------------------------------
+export const SITUATIONS: Situation[] = [
+  {
+    id: "sit_undelivered",
+    code: "SIT-UNDELIVERED",
+    name: "Nedoručeno",
+    description: "Zásilka byla doručována, ale příjemce nebyl zastižen.",
+    area: "tracking_records",
+    severities: [
+      {
+        id: "sev_undelivered_normal",
+        name: "běžné",
+        vkrTitle: "Nedoručeno — informovat zákazníka",
+        vkrDescription: "Zásilka byla doručována, příjemce nebyl zastižen (1. pokus).",
+        priority: "low",
+        actions: [
+          { id: "sa_undelivered_normal_1", actionTagId: "at_email_customer", description: "Informuj zákazníka o neúspěšném pokusu a domluv nový termín." },
+        ],
+      },
+      {
+        id: "sev_undelivered_problem",
+        name: "problémové",
+        vkrTitle: "Nedoručeno — prověřit důvod",
+        vkrDescription: "Druhý neúspěšný pokus o doručení.",
+        priority: "medium",
+        actions: [
+          { id: "sa_undelivered_problem_1", actionTagId: "at_email_customer", description: "Informuj zákazníka o druhém neúspěšném pokusu." },
+          { id: "sa_undelivered_problem_2", actionTagId: "at_check_carrier", description: "Ověř u dopravce důvod opakovaného nedoručení." },
+        ],
+      },
+      {
+        id: "sev_undelivered_critical",
+        name: "kritické",
+        vkrTitle: "Nedoručeno — telefonicky řešit",
+        vkrDescription: "Třetí a další neúspěšný pokus o doručení.",
+        priority: "high",
+        actions: [
+          { id: "sa_undelivered_critical_1", actionTagId: "at_call_customer", description: "Zavolej zákazníkovi, domluv individuální doručení." },
+          { id: "sa_undelivered_critical_2", actionTagId: "at_check_carrier", description: "Ověř u dopravce, proč se opakovaně nedaří doručit." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "sit_damage",
+    code: "SIT-DAMAGE",
+    name: "Poškození zásilky",
+    description: "Tracking hlásí zjištěné poškození zásilky.",
+    area: "tracking_records",
+    severities: [
+      {
+        id: "sev_damage_default",
+        name: "zjištěno poškození",
+        vkrTitle: "Poškození zásilky — kontaktovat zákazníka",
+        vkrDescription: "Tracking hlásí poškození zásilky.",
+        priority: "high",
+        actions: [
+          { id: "sa_damage_1", actionTagId: "at_call_customer", description: "Informuj zákazníka o poškození a domluv další postup (výměna/reklamace)." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "sit_transport_issue",
+    code: "SIT-TRANSPORT",
+    name: "Problém v přepravě",
+    description: "Zásilka vykazuje známky problému v přepravě.",
+    area: "tracking_records",
+    severities: [
+      {
+        id: "sev_transport_possible",
+        name: "možný problém",
+        vkrTitle: "Možný problém v přepravě — prověřit",
+        vkrDescription: "Status signalizuje možný problém, je potřeba ověřit kontext (místo/čas vzniku).",
+        priority: "low",
+        actions: [
+          { id: "sa_transport_possible_1", actionTagId: "at_check_carrier", description: "Ověř kontext statusu (místo, čas) a rozhodni, zda jde o skutečný problém." },
+        ],
+      },
+      {
+        id: "sev_transport_stuck",
+        name: "zaseknutá na místě",
+        vkrTitle: "Zásilka zaseknutá na jednom místě",
+        vkrDescription: "Několik po sobě jdoucích záznamů ze stejného místa — zásilka se fyzicky nepohybuje.",
+        priority: "medium",
+        actions: [
+          { id: "sa_transport_stuck_1", actionTagId: "at_check_carrier", description: "Ověř u dopravce, proč se zásilka nehýbe." },
+        ],
+      },
+      {
+        id: "sev_transport_lost_suspect",
+        name: "podezření na ztrátu",
+        vkrTitle: "Podezření na ztrátu zásilky",
+        vkrDescription: "Zásilka nemá nový tracking záznam déle, než je pro tuto trasu obvyklé.",
+        priority: "high",
+        actions: [
+          { id: "sa_lost_1", actionTagId: "at_check_carrier", description: "Zahaj šetření ztráty u dopravce." },
+          { id: "sa_lost_2", actionTagId: "at_call_customer", description: "Informuj zákazníka o možném zpoždění." },
+        ],
+      },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -157,6 +275,8 @@ export const RULES: Rule[] = [
     area: "tracking_records",
     active: true,
     priority: "low",
+    situationId: "sit_transport_issue",
+    severityId: "sev_transport_stuck",
     trigger: { kind: "condition_met", label: "při každé nové tracking události" },
     conditions: [
       {
