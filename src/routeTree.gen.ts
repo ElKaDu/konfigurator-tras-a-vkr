@@ -15,6 +15,7 @@ import { Route as SituaceRouteImport } from './routes/situace'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UsekIdRouteImport } from './routes/usek.$id'
 import { Route as TrasaIdRouteImport } from './routes/trasa.$id'
+import { Route as SituaceIdRouteImport } from './routes/situace.$id'
 import { Route as RulesNewRouteImport } from './routes/rules.new'
 import { Route as RulesNewIndexRouteImport } from './routes/rules.new.index'
 import { Route as RulesNewEditRouteImport } from './routes/rules.new.edit'
@@ -50,6 +51,11 @@ const TrasaIdRoute = TrasaIdRouteImport.update({
   path: '/trasa/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SituaceIdRoute = SituaceIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => SituaceRoute,
+} as any)
 const RulesNewRoute = RulesNewRouteImport.update({
   id: '/rules/new',
   path: '/rules/new',
@@ -73,10 +79,11 @@ const RulesRuleIdEditRoute = RulesRuleIdEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/situace': typeof SituaceRoute
+  '/situace': typeof SituaceRouteWithChildren
   '/test': typeof TestRoute
   '/trasy': typeof TrasyRoute
   '/rules/new': typeof RulesNewRouteWithChildren
+  '/situace/$id': typeof SituaceIdRoute
   '/trasa/$id': typeof TrasaIdRoute
   '/usek/$id': typeof UsekIdRoute
   '/rules/$ruleId/edit': typeof RulesRuleIdEditRoute
@@ -85,9 +92,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/situace': typeof SituaceRoute
+  '/situace': typeof SituaceRouteWithChildren
   '/test': typeof TestRoute
   '/trasy': typeof TrasyRoute
+  '/situace/$id': typeof SituaceIdRoute
   '/trasa/$id': typeof TrasaIdRoute
   '/usek/$id': typeof UsekIdRoute
   '/rules/$ruleId/edit': typeof RulesRuleIdEditRoute
@@ -97,10 +105,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/situace': typeof SituaceRoute
+  '/situace': typeof SituaceRouteWithChildren
   '/test': typeof TestRoute
   '/trasy': typeof TrasyRoute
   '/rules/new': typeof RulesNewRouteWithChildren
+  '/situace/$id': typeof SituaceIdRoute
   '/trasa/$id': typeof TrasaIdRoute
   '/usek/$id': typeof UsekIdRoute
   '/rules/$ruleId/edit': typeof RulesRuleIdEditRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/test'
     | '/trasy'
     | '/rules/new'
+    | '/situace/$id'
     | '/trasa/$id'
     | '/usek/$id'
     | '/rules/$ruleId/edit'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/situace'
     | '/test'
     | '/trasy'
+    | '/situace/$id'
     | '/trasa/$id'
     | '/usek/$id'
     | '/rules/$ruleId/edit'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/test'
     | '/trasy'
     | '/rules/new'
+    | '/situace/$id'
     | '/trasa/$id'
     | '/usek/$id'
     | '/rules/$ruleId/edit'
@@ -147,7 +159,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  SituaceRoute: typeof SituaceRoute
+  SituaceRoute: typeof SituaceRouteWithChildren
   TestRoute: typeof TestRoute
   TrasyRoute: typeof TrasyRoute
   RulesNewRoute: typeof RulesNewRouteWithChildren
@@ -200,6 +212,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrasaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/situace/$id': {
+      id: '/situace/$id'
+      path: '/$id'
+      fullPath: '/situace/$id'
+      preLoaderRoute: typeof SituaceIdRouteImport
+      parentRoute: typeof SituaceRoute
+    }
     '/rules/new': {
       id: '/rules/new'
       path: '/rules/new'
@@ -231,6 +250,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface SituaceRouteChildren {
+  SituaceIdRoute: typeof SituaceIdRoute
+}
+
+const SituaceRouteChildren: SituaceRouteChildren = {
+  SituaceIdRoute: SituaceIdRoute,
+}
+
+const SituaceRouteWithChildren =
+  SituaceRoute._addFileChildren(SituaceRouteChildren)
+
 interface RulesNewRouteChildren {
   RulesNewEditRoute: typeof RulesNewEditRoute
   RulesNewIndexRoute: typeof RulesNewIndexRoute
@@ -247,7 +277,7 @@ const RulesNewRouteWithChildren = RulesNewRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  SituaceRoute: SituaceRoute,
+  SituaceRoute: SituaceRouteWithChildren,
   TestRoute: TestRoute,
   TrasyRoute: TrasyRoute,
   RulesNewRoute: RulesNewRouteWithChildren,
