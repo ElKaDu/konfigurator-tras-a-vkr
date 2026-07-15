@@ -81,12 +81,13 @@ export function TrackingHistoryConditionsBuilder({
                 <input type="radio" checked={scopeIsLast} onChange={() => updateAt(i, { ...row, count: 1 })} />
                 V posledním záznamu
               </label>
-              <label className="flex items-center gap-1.5">
+              <label className={cn("flex items-center gap-1.5", scopeIsLast && "opacity-40")}>
                 <input type="radio" checked={!scopeIsLast} onChange={() => updateAt(i, { ...row, count: Math.max(2, row.count) })} />
                 V posledních
                 <input
                   type="number"
                   min={2}
+                  disabled={scopeIsLast}
                   value={!scopeIsLast ? row.count : 2}
                   onChange={(e) => updateAt(i, { ...row, count: Math.max(2, Number(e.target.value)) })}
                   className="w-14 rounded border border-border bg-background px-1.5 py-1 text-xs text-center"
