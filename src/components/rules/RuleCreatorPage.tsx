@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
-import { Lock, Clock, MapPin, AlertTriangle, Zap, ChevronDown, ChevronUp, Plus, X, Radio, PauseCircle, LocateFixed, Settings2 } from "lucide-react";
+import { Lock, Clock, MapPin, AlertTriangle, Zap, ChevronDown, ChevronUp, Plus, X, Settings2 } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/AppHeader";
 import { Textarea } from "@/components/ui/textarea";
 import { AREAS } from "@/lib/model/areas";
 import { resolveAreaIcon } from "@/components/common/areaIcons";
-import { useSegments, useCheckpointTypes, useRules, rulesStore } from "@/lib/model/store";
+import { useSegments, useCheckpointTypes, useRules, rulesStore, useSituations, situationsStore, useActionTags } from "@/lib/model/store";
 import { cn } from "@/lib/utils";
-import type { Area, Priority, ActionType, Rule } from "@/lib/model/types";
+import type { Area, Priority, ActionType, Rule, Situation, Severity, Condition } from "@/lib/model/types";
 import { TRACKING_FIELDS, TRACKING_OPERATORS } from "@/lib/model/trackingFields";
 import { ScheduleEditor, type ScheduleItem } from "@/components/rules/editors/ScheduleEditor";
 import { VkrConditionsBuilder } from "@/components/rules/editors/VkrConditionsBuilder";
@@ -16,6 +16,9 @@ import type { VkrCondition } from "@/lib/vkr/vkrConditionCatalog";
 import { RouteScopePicker, DEFAULT_ROUTE_SCOPE, type RouteScope } from "@/components/rules/editors/RouteScopePicker";
 import { MilestoneTypePicker } from "@/components/rules/editors/MilestoneTypePicker";
 import { TrackingTimeValueEditor, DEFAULT_TIME_SPEC, type TrackingTimeSpec } from "@/components/rules/editors/TrackingTimeValueEditor";
+import { CurrentRecordConditionsBuilder } from "@/components/rules/editors/CurrentRecordConditionsBuilder";
+import { TrackingHistoryConditionsBuilder } from "@/components/rules/editors/TrackingHistoryConditionsBuilder";
+import { ActionTagPicker } from "@/components/situations/ActionTagPicker";
 
 
 type RouteUiSituation = "delivery_day" | "unexpected_location" | "missed_milestone" | "other";
@@ -23,30 +26,8 @@ type CheckInterval = "30min" | "1h" | "2h" | "6h";
 type ThresholdLevel = "warn" | "critical";
 
 
-type TrackingSituation = "tracking_event" | "no_movement" | "stuck_location";
+type TrackingTriggerType = "automatic" | "timer";
 interface TrackingConditionRow { id: string; field: string; operator: string; value: string; timeSpec?: TrackingTimeSpec; }
-type StuckMatchMode = "locationId" | "city" | "countryCode";
-
-const TRACKING_SITUATION_CARDS: { id: TrackingSituation; icon: React.ReactNode; label: string; trigger: string }[] = [
-  {
-    id: "tracking_event",
-    icon: <Radio className="size-4" />,
-    label: "Přišel konkrétní tracking záznam",
-    trigger: "Reaktivní — při každém novém záznamu",
-  },
-  {
-    id: "no_movement",
-    icon: <PauseCircle className="size-4" />,
-    label: "Zásilka bez pohybu po stanovenou dobu",
-    trigger: "Časový plán — kontroluje periodicky",
-  },
-  {
-    id: "stuck_location",
-    icon: <LocateFixed className="size-4" />,
-    label: "Zásilka zaseknutá na jednom místě",
-    trigger: "Reaktivní — při každém novém záznamu",
-  },
-];
 
 const SITUATION_CARDS: {
   id: RouteUiSituation;
@@ -101,17 +82,23 @@ interface BranchAction {
   shipmentConditions?: VkrCondition[];
 }
 
+interface SeverityActionRow {
+  id: string;
+  actionTagId: string;
+  enabled: boolean;
+  description: string;
+}
+
 interface RuleCreatorUiState {
   selectedSituation: RouteUiSituation | null;
-  selectedTrackingSituation: TrackingSituation | null;
-  trackingConditions: TrackingConditionRow[];
+  selectedSituationId: string | null;
+  selectedSeverityId: string | null;
+  triggerType: TrackingTriggerType;
+  currentRecordConditions: Condition[];
+  historyConditions: Condition[];
   noMovementDuration: number;
   noMovementUnit: "h" | "d" | "bd";
-  ignoreClearance: boolean;
-  stuckCount: number;
-  stuckMatchMode: StuckMatchMode;
-  stuckInclude: TrackingConditionRow[];
-  stuckExclude: TrackingConditionRow[];
+  severityActions: SeverityActionRow[];
   deliveryMilestone: string;
   checkTimes: string[];
   scheduleItems: ScheduleItem[];
@@ -167,37 +154,34 @@ function inferRouteSituation(rule?: Rule): RouteUiSituation | null {
   return "missed_milestone";
 }
 
-function inferTrackingSituation(rule?: Rule): TrackingSituation | null {
-  if (!rule || rule.area !== "tracking_records") return null;
-  const name = rule.name.toLocaleLowerCase("cs-CZ");
-  if (name.includes("bez pohybu") || name.includes("no movement")) return "no_movement";
-  const aggregate = rule.conditions.find((c) => c.kind === "tracking_aggregate");
-  if (aggregate?.kind === "tracking_aggregate" && (aggregate.valueMode === "same_repeats" || aggregate.trackingFieldId.includes("location"))) return "stuck_location";
-  return "tracking_event";
+function inferTriggerType(rule?: Rule): TrackingTriggerType {
+  if (!rule || rule.area !== "tracking_records") return "automatic";
+  return rule.trigger.kind === "schedule" ? "timer" : "automatic";
 }
 
-function trackingConditionsFromRule(rule?: Rule): TrackingConditionRow[] {
+function currentRecordConditionsFromRule(rule?: Rule): Condition[] {
   if (!rule) return [];
-  const fieldRows = rule.conditions
-    .filter((c) => c.kind === "field")
-    .map((c, index) => ({ id: `tc_${index + 1}`, field: c.fieldId, operator: c.operator, value: c.value ?? "" }));
-  if (fieldRows.length > 0) return fieldRows;
-  const aggregate = rule.conditions.find((c) => c.kind === "tracking_aggregate");
-  if (aggregate?.kind !== "tracking_aggregate") return [];
-  return [{
-    id: "tc_1",
-    field: aggregate.trackingFieldId,
-    operator: aggregate.valueMode === "specific" ? "je" : "je jedním z",
-    value: aggregate.expectedValue ?? "",
-  }];
+  return rule.conditions.filter(
+    (c) => c.kind === "field" || (c.kind === "tracking_aggregate" && c.valueMode === "same_repeats")
+  );
+}
+
+function historyConditionsFromRule(rule?: Rule): Condition[] {
+  if (!rule) return [];
+  return rule.conditions.filter((c) => c.kind === "tracking_aggregate" && c.valueMode === "specific");
+}
+
+function severityActionRowsFromRule(rule?: Rule): SeverityActionRow[] {
+  if (!rule || rule.area !== "tracking_records") return [];
+  return rule.actions
+    .filter((a) => a.actionTagId)
+    .map((a) => ({ id: a.id, actionTagId: a.actionTagId!, enabled: true, description: a.vkrText ?? "" }));
 }
 
 function getInitialFormState(rule?: Rule): RuleCreatorInitialState {
   const ui = (rule?.uiState ?? {}) as Partial<RuleCreatorUiState>;
   const fulfilledFromRule = rule?.actions.filter((a) => a.runWhenRouteCondition === "fulfilled").map(toBranchAction) ?? [];
   const notFulfilledFromRule = rule?.actions.filter((a) => a.runWhenRouteCondition !== "fulfilled").map(toBranchAction) ?? [];
-  const trackingFromRule = rule?.area === "tracking_records" ? rule.actions.map(toBranchAction) : [];
-  const inferredTrackingConditions = trackingConditionsFromRule(rule);
   const checkpointId = routeCheckpointFromRule(rule);
 
   return {
@@ -207,15 +191,14 @@ function getInitialFormState(rule?: Rule): RuleCreatorInitialState {
     priority: rule?.priority ?? "medium",
     active: rule?.active ?? true,
     selectedSituation: ui.selectedSituation ?? inferRouteSituation(rule),
-    selectedTrackingSituation: ui.selectedTrackingSituation ?? inferTrackingSituation(rule),
-    trackingConditions: ui.trackingConditions ?? (inferredTrackingConditions.length > 0 ? inferredTrackingConditions : DEFAULT_TRACKING_CONDITIONS.map((r) => ({ ...r }))),
+    selectedSituationId: ui.selectedSituationId ?? rule?.situationId ?? null,
+    selectedSeverityId: ui.selectedSeverityId ?? rule?.severityId ?? null,
+    triggerType: ui.triggerType ?? inferTriggerType(rule),
+    currentRecordConditions: ui.currentRecordConditions ?? currentRecordConditionsFromRule(rule),
+    historyConditions: ui.historyConditions ?? historyConditionsFromRule(rule),
     noMovementDuration: ui.noMovementDuration ?? 72,
     noMovementUnit: ui.noMovementUnit ?? "h",
-    ignoreClearance: ui.ignoreClearance ?? true,
-    stuckCount: ui.stuckCount ?? 4,
-    stuckMatchMode: ui.stuckMatchMode ?? "city",
-    stuckInclude: ui.stuckInclude ?? [],
-    stuckExclude: ui.stuckExclude ?? [],
+    severityActions: ui.severityActions ?? severityActionRowsFromRule(rule),
     deliveryMilestone: ui.deliveryMilestone ?? checkpointId ?? "ct_first_scan",
     checkTimes: ui.checkTimes ?? ["08:00", "10:00"],
     scheduleItems: (ui.scheduleItems as ScheduleItem[] | undefined) ?? [
@@ -231,7 +214,6 @@ function getInitialFormState(rule?: Rule): RuleCreatorInitialState {
     checkInterval: ui.checkInterval ?? "1h",
     fulfilledActions: ui.fulfilledActions ?? fulfilledFromRule,
     notFulfilledActions: ui.notFulfilledActions ?? (notFulfilledFromRule.length > 0 ? notFulfilledFromRule : cloneActions(DEFAULT_NOT_FULFILLED_ACTIONS)),
-    trackingActions: ui.trackingActions ?? trackingFromRule,
   };
 }
 
@@ -263,19 +245,14 @@ export function RuleCreatorPage({
   );
 
   // Tracking records state
-  const [selectedTrackingSituation, setSelectedTrackingSituation] = useState<TrackingSituation | null>(
-    initialState.selectedTrackingSituation
-  );
-  const [trackingConditions, setTrackingConditions] = useState<TrackingConditionRow[]>(
-    initialState.trackingConditions
-  );
+  const [selectedSituationId, setSelectedSituationId] = useState<string | null>(initialState.selectedSituationId);
+  const [selectedSeverityId, setSelectedSeverityId] = useState<string | null>(initialState.selectedSeverityId);
+  const [triggerType, setTriggerType] = useState<TrackingTriggerType>(initialState.triggerType);
+  const [currentRecordConditions, setCurrentRecordConditions] = useState<Condition[]>(initialState.currentRecordConditions);
+  const [historyConditions, setHistoryConditions] = useState<Condition[]>(initialState.historyConditions);
   const [noMovementDuration, setNoMovementDuration] = useState(initialState.noMovementDuration);
   const [noMovementUnit, setNoMovementUnit] = useState<"h" | "d" | "bd">(initialState.noMovementUnit);
-  const [ignoreClearance, setIgnoreClearance] = useState(initialState.ignoreClearance);
-  const [stuckCount, setStuckCount] = useState(initialState.stuckCount);
-  const [stuckMatchMode, setStuckMatchMode] = useState<StuckMatchMode>(initialState.stuckMatchMode);
-  const [stuckInclude, setStuckInclude] = useState<TrackingConditionRow[]>(initialState.stuckInclude);
-  const [stuckExclude, setStuckExclude] = useState<TrackingConditionRow[]>(initialState.stuckExclude);
+  const [severityActions, setSeverityActions] = useState<SeverityActionRow[]>(initialState.severityActions);
   const [ruleName, setRuleName] = useState(initialState.ruleName);
   const [ruleDescription, setRuleDescription] = useState(initialState.ruleDescription);
   const [priority, setPriority] = useState<Priority>(initialState.priority);
@@ -300,23 +277,19 @@ export function RuleCreatorPage({
   const [notFulfilledActions, setNotFulfilledActions] = useState<BranchAction[]>(
     initialState.notFulfilledActions
   );
-  const [trackingActions, setTrackingActions] = useState<BranchAction[]>(
-    initialState.trackingActions
-  );
   const [advancedOpen, setAdvancedOpen] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     setSelectedArea(initialState.selectedArea);
     setSelectedSituation(initialState.selectedSituation);
-    setSelectedTrackingSituation(initialState.selectedTrackingSituation);
-    setTrackingConditions(initialState.trackingConditions);
+    setSelectedSituationId(initialState.selectedSituationId);
+    setSelectedSeverityId(initialState.selectedSeverityId);
+    setTriggerType(initialState.triggerType);
+    setCurrentRecordConditions(initialState.currentRecordConditions);
+    setHistoryConditions(initialState.historyConditions);
     setNoMovementDuration(initialState.noMovementDuration);
     setNoMovementUnit(initialState.noMovementUnit);
-    setIgnoreClearance(initialState.ignoreClearance);
-    setStuckCount(initialState.stuckCount);
-    setStuckMatchMode(initialState.stuckMatchMode);
-    setStuckInclude(initialState.stuckInclude);
-    setStuckExclude(initialState.stuckExclude);
+    setSeverityActions(initialState.severityActions);
     setRuleName(initialState.ruleName);
     setRuleDescription(initialState.ruleDescription);
     setPriority(initialState.priority);
@@ -333,7 +306,6 @@ export function RuleCreatorPage({
     setCheckInterval(initialState.checkInterval);
     setFulfilledActions(initialState.fulfilledActions);
     setNotFulfilledActions(initialState.notFulfilledActions);
-    setTrackingActions(initialState.trackingActions);
   }, [initialState]);
 
   // Milestones with thresholds (for "too_long" situation)
@@ -364,8 +336,35 @@ export function RuleCreatorPage({
 
   const isRouteCompliance = selectedArea === "route_compliance";
   const isTrackingRecords = selectedArea === "tracking_records";
+
+  const situations = useSituations();
+  const actionTags = useActionTags();
+  const selectedSituationObj: Situation | undefined = situations.find((s) => s.id === selectedSituationId);
+  const selectedSeverityObj: Severity | undefined = selectedSituationObj?.severities.find((s) => s.id === selectedSeverityId);
+
+  function applySeverityTemplate(severity: Severity) {
+    setRuleName(severity.vkrTitle);
+    setRuleDescription(severity.vkrDescription ?? "");
+    setPriority(severity.priority);
+    setSeverityActions(
+      severity.actions.map((a) => ({ id: a.id, actionTagId: a.actionTagId, enabled: true, description: a.description ?? "" }))
+    );
+  }
+
+  function handleSelectSituation(situationId: string) {
+    setSelectedSituationId(situationId);
+    const nextSituation = situations.find((s) => s.id === situationId);
+    const firstSeverity = nextSituation?.severities[0];
+    setSelectedSeverityId(firstSeverity?.id ?? null);
+    if (firstSeverity) applySeverityTemplate(firstSeverity);
+  }
+
+  function handleSelectSeverity(severity: Severity) {
+    setSelectedSeverityId(severity.id);
+    applySeverityTemplate(severity);
+  }
+
   const triggerLabel = getTriggerLabel(selectedSituation, checkInterval);
-  const trackingTriggerLabel = getTrackingTriggerLabel(selectedTrackingSituation);
 
   return (
     <div className="flex h-screen w-screen flex-col bg-background text-foreground">
