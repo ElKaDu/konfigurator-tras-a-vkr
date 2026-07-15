@@ -235,7 +235,17 @@ function getInitialFormState(rule?: Rule): RuleCreatorInitialState {
   };
 }
 
-export function RuleCreatorPage({ ruleId }: { ruleId?: string } = {}) {
+export function RuleCreatorPage({
+  ruleId,
+  initialSituationId,
+  initialSeverityId,
+}: {
+  ruleId?: string;
+  initialSituationId?: string;
+  initialSeverityId?: string;
+} = {}) {
+  void initialSituationId; // wired up in Task 17
+  void initialSeverityId; // wired up in Task 17
   const segments = useSegments();
   const checkpointTypes = useCheckpointTypes();
   const rules = useRules();
