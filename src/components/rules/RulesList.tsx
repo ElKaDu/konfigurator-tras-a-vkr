@@ -103,6 +103,12 @@ export function RulesList() {
         extras={
           <div className="flex items-center gap-2">
             <Link
+              to="/situace"
+              className="rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted transition-colors"
+            >
+              Situace a závažnosti →
+            </Link>
+            <Link
               to="/rules/new"
               search={{ area: selection.kind === "area" ? selection.area : undefined }}
               className="bg-primary text-primary-foreground rounded-lg px-3 py-1.5 text-sm font-medium hover:bg-primary/90"
