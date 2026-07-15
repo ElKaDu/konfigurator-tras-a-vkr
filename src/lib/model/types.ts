@@ -1,3 +1,5 @@
+import type { VkrCondition } from "@/lib/vkr/vkrConditionCatalog";
+
 export type Area = "tracking_records" | "route_compliance" | "order_eval" | "unpickup" | "params_price";
 
 export type Priority = "low" | "medium" | "high" | "urgent";
@@ -90,7 +92,16 @@ export interface Route {
 
 export type Condition =
   | { kind: "field"; fieldId: string; operator: string; value?: string }
-  | { kind: "tracking_aggregate"; trackingFieldId: string; valueMode: "same_repeats" | "specific"; expectedValue?: string; count: number; occurrence: "consecutive" | "any" }
+  | {
+      kind: "tracking_aggregate";
+      trackingFieldId: string;
+      valueMode: "same_repeats" | "specific";
+      expectedValue?: string;
+      /** "contains" (default) = Obsahuje, "not_contains" = Neobsahuje. Only meaningful when valueMode is "specific". */
+      mode?: "contains" | "not_contains";
+      count: number;
+      occurrence: "consecutive" | "any";
+    }
   | { kind: "route_compliance"; mode: "checkpoint_type" | "general"; checkpointTypeId?: string; generalCheck?: "unrecognized_location" | "unrecognized_status" };
 
 export type ActionType = "create_vkr" | "send_email" | "set_field" | "change_phase" | "update_vkr" | "add_note" | "request_field_from_operator";
@@ -99,6 +110,8 @@ export interface Action {
   runWhenRouteCondition?: "fulfilled" | "not_fulfilled";
   title?: string; body?: string; fieldId?: string; value?: string; priority?: Priority;
   vkrText?: string; // Text věci k řešení (volitelný popis akce pro operátora)
+  /** Pro akce vzniklé z katalogu Akcí (tracking_records) — odkaz na ActionTag. */
+  actionTagId?: string;
 }
 
 export interface Rule {
@@ -109,6 +122,48 @@ export interface Rule {
   actions: Action[];
   // Volitelný snapshot UI stavu z RuleCreatorPage, slouží k prefillu při editaci.
   uiState?: Record<string, unknown>;
+  /** Odkaz na Situaci/Závažnost — jen pro klasifikaci a zobrazení. Needitovatelné po založení pravidla. */
+  situationId?: string;
+  severityId?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Situace / Závažnost / Akce
+// ---------------------------------------------------------------------------
+
+/** Jednoduchý tag z katalogu Akcí — zatím bez vlastního chování (viz spec 3.3). */
+export interface ActionTag {
+  id: string;
+  label: string;
+  icon?: string; // lucide icon name
+}
+
+/** Jedna akce přiřazená k závažnosti — výchozí text/podmínka pro tento kontext. */
+export interface SeverityAction {
+  id: string;
+  actionTagId: string;
+  description?: string;
+  condition?: VkrCondition[];
+}
+
+/** Úroveň uvnitř Situace — nese výchozí šablonu VkŘ. */
+export interface Severity {
+  id: string;
+  name: string;
+  vkrTitle: string;
+  vkrDescription?: string;
+  priority: Priority;
+  actions: SeverityAction[];
+}
+
+/** Byznysová kategorie (např. "Nedoručeno"). */
+export interface Situation {
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
+  area: Area;
+  severities: Severity[];
 }
 
 export interface SampleActivity { status?: string; status_code?: string; location_city?: string; location_country_code?: string; location_postal_code?: string; latest?: boolean; status_datetime?: string }
