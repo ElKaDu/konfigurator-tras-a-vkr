@@ -5,19 +5,14 @@ import { cn } from "@/lib/utils";
 import { AppHeader } from "@/components/AppHeader";
 import { DataMenu } from "@/components/common/DataMenu";
 import { AreaBadge } from "@/components/common/AreaBadge";
-import { AREAS, CIRCLED } from "@/lib/model/areas";
 import { useRules, rulesStore } from "@/lib/model/store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Area, Rule } from "@/lib/model/types";
-
-// Sidebar area list sorted by spec-defined canonical number (AREAS.num).
-const SORTED_AREAS = [...AREAS].sort((a, b) => a.num - b.num);
+import type { Rule } from "@/lib/model/types";
 
 type Selection =
   | { kind: "all" }
   | { kind: "active" }
-  | { kind: "archived" }
-  | { kind: "area"; area: Area };
+  | { kind: "archived" };
 
 function SidebarItem({
   label,
@@ -82,17 +77,12 @@ export function RulesList() {
       case "all":      return rules;
       case "active":   return rules.filter((r) => r.active);
       case "archived": return [];
-      case "area":     return rules.filter((r) => r.area === selection.area);
     }
   })();
 
   const { title, subtitle } = (() => {
     if (selection.kind === "active")   return { title: "Pouze aktivní", subtitle: "Pravidla aktuálně vyhodnocovaná runtime evaluátorem." };
     if (selection.kind === "archived") return { title: "Archiv",        subtitle: "Archivovaná pravidla. Momentálně žádné záznamy." };
-    if (selection.kind === "area") {
-      const meta = AREAS.find((a) => a.id === selection.area);
-      return { title: meta?.label ?? selection.area, subtitle: meta?.description };
-    }
     return { title: "Všechna pravidla", subtitle: "Kompletní katalog pravidel napříč oblastmi." };
   })();
 
@@ -110,7 +100,6 @@ export function RulesList() {
             </Link>
             <Link
               to="/rules/new"
-              search={{ area: selection.kind === "area" ? selection.area : undefined }}
               className="bg-primary text-primary-foreground rounded-lg px-3 py-1.5 text-sm font-medium hover:bg-primary/90"
             >
               + Nové pravidlo
@@ -146,48 +135,6 @@ export function RulesList() {
             active={selection.kind === "archived"}
             onClick={() => setSelection({ kind: "archived" })}
           />
-
-          {/* Group: Oblasti */}
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground px-2 py-1 mt-4">
-            Oblasti
-          </div>
-
-          {SORTED_AREAS.map((meta) => {
-            const { id } = meta;
-            const circled = CIRCLED[meta.num - 1];
-            const count   = rules.filter((r) => r.area === id).length;
-            const isActive = selection.kind === "area" && selection.area === id;
-            const disabled = !meta.enabled;
-
-            return (
-              <button
-                key={id}
-                disabled={disabled}
-                onClick={disabled ? undefined : () => setSelection({ kind: "area", area: id })}
-                className={cn(
-                  "flex items-center justify-between rounded-lg px-2.5 py-2 text-sm w-full text-left",
-                  isActive
-                    ? "bg-primary-soft text-primary font-medium"
-                    : "text-foreground hover:bg-muted/60",
-                  disabled && "opacity-60 cursor-default",
-                )}
-              >
-                <span>
-                  {circled} {meta.label}
-                </span>
-                <span
-                  className={cn(
-                    "rounded-md px-1.5 py-0.5 text-[10px] font-semibold",
-                    isActive
-                      ? "bg-primary/15 text-primary"
-                      : "bg-muted text-muted-foreground",
-                  )}
-                >
-                  {disabled ? "brzy" : count}
-                </span>
-              </button>
-            );
-          })}
         </aside>
 
         {/* Main content */}
@@ -213,7 +160,7 @@ export function RulesList() {
               </p>
             ) : (
               visible.map((rule, vIdx) => {
-                const canReorder = selection.kind === "all" || selection.kind === "area";
+                const canReorder = selection.kind === "all";
                 const moveRule = (dir: -1 | 1) => {
                   const otherVIdx = vIdx + dir;
                   if (otherVIdx < 0 || otherVIdx >= visible.length) return;
