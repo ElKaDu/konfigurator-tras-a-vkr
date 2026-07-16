@@ -33,3 +33,4 @@ dist-ssr
 
 # Superpowers brainstorm mockups
 .superpowers/
+.vercel/
