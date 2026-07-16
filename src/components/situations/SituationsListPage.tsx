@@ -27,7 +27,7 @@ export function SituationsListPage() {
 
   return (
     <div className="flex h-screen w-screen flex-col bg-background text-foreground">
-      <AppHeader current="rules" />
+      <AppHeader current="situace" />
 
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-3xl p-6">

@@ -13,7 +13,7 @@ export function SituationEditorPage({ situationId }: { situationId: string }) {
   if (!situation) {
     return (
       <div className="flex h-screen w-screen flex-col bg-background text-foreground">
-        <AppHeader current="rules" />
+        <AppHeader current="situace" />
         <div className="p-6 text-sm text-muted-foreground">Situace nenalezena. <Link to="/situace" className="text-primary underline">Zpět na seznam</Link></div>
       </div>
     );
@@ -51,7 +51,7 @@ export function SituationEditorPage({ situationId }: { situationId: string }) {
 
   return (
     <div className="flex h-screen w-screen flex-col bg-background text-foreground">
-      <AppHeader current="rules" />
+      <AppHeader current="situace" />
 
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-2xl p-6 space-y-5">
