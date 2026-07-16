@@ -390,18 +390,6 @@ export function RuleCreatorPage({
                   </p>
                 </div>
 
-                {triggerType === "automatic" && (
-                  <div>
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                      Podmínky současného záznamu
-                    </div>
-                    <CurrentRecordConditionsBuilder
-                      conditions={currentRecordConditions}
-                      onChange={setCurrentRecordConditions}
-                    />
-                  </div>
-                )}
-
                 {triggerType === "timer" && (
                   <div>
                     <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
@@ -430,27 +418,30 @@ export function RuleCreatorPage({
                 )}
 
                 <div>
-                  <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                    Podmínky na historii záznamů
+                  <div className="text-xs font-semibold uppercase tracking-wider text-foreground mb-3 pb-2 border-b border-border">
+                    Podmínky
                   </div>
-                  <TrackingHistoryConditionsBuilder
-                    conditions={historyConditions}
-                    onChange={setHistoryConditions}
-                  />
-                </div>
 
-                {/* Podmínky z ostatních entit — sdíleno pro všechny tracking situace */}
-                <div>
-                  <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                    Podmínky z ostatních entit
+                  <div className="mb-4">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                      Co platí o záznamech v trackingu
+                    </div>
+                    <TrackingConditionsBuilder
+                      conditions={trackingConditions}
+                      onChange={setTrackingConditions}
+                      allowCurrentRecord={triggerType === "automatic"}
+                    />
                   </div>
-                  <div className="text-[11px] text-muted-foreground mb-2">
-                    Pravidlo se uplatní jen pro zásilky odpovídající těmto podmínkám (zákazník, zásilka…).
+
+                  <div>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                      Co dále platí
+                    </div>
+                    <VkrConditionsBuilder
+                      conditions={vkrConditions}
+                      onChange={setVkrConditions}
+                    />
                   </div>
-                  <VkrConditionsBuilder
-                    conditions={vkrConditions}
-                    onChange={setVkrConditions}
-                  />
                 </div>
               </>
             )}
