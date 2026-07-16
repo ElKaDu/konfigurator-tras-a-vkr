@@ -388,11 +388,11 @@ function RuleSummaryTab({ rule }: { rule: Rule }) {
       <SummarySection label="Priorita">
         <span className={cn(
           "inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold",
-          rule.priority === "high" || rule.priority === "urgent"
+          isPriorityHigh(rule.priority)
             ? "bg-destructive/15 text-destructive"
             : "bg-muted text-muted-foreground"
         )}>
-          {rule.priority.toUpperCase()}
+          {priorityLabel(rule.priority)}
         </span>
       </SummarySection>
     </div>
