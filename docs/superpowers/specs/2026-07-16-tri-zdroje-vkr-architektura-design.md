@@ -31,8 +31,7 @@ Aplikace generuje věci k řešení (VkŘ) ze tří nezávislých zdrojů:
    Situaci). Architektura i wireframe už existují (`2026-07-15-body-trasy-terminologie-design.md`,
    sub-projekt 2 — `mockups/2026-07-15-kontrola-na-bodu-architektura.html`,
    `mockups/2026-07-15-bod-kontroly-wireframe.html`). **Needimplementováno.**
-3. **Ostatní hardcoded oblasti** (vyhodnocení objednávky, nevyzvednutá objednávka, parametry a cena) —
-   řeší se v jiném vlákně. **Mimo rozsah tohoto dokumentu.**
+3. **Ostatní hardcoded oblasti** — řeší se v jiném vlákně. **Mimo rozsah tohoto dokumentu.**
 
 Všechny tři zdroje končí ve **sdílené vrstvě Situace → Závažnost → Akce**. Tahle vrstva definuje "druhou
 polovinu" vzniku VkŘ — bez ohledu na to, co VkŘ vyvolalo:
@@ -57,8 +56,7 @@ tohoto designu — nerozhodovat o něm dřív, než bude jasné, že chybějíc�
 
 ## 3. Dopad na "Soulad s předepsanou trasou"
 
-Dnešní wizard pro tuto oblast (`RuleCreatorPage`, 5 situačních karet — Kontrola v den doručení, Zásilka
-v neočekávané lokaci, Kontrola splnění milníku, Kontrola trvání, Jiná situace) **zaniká úplně**. Kontroly
+Dnešní wizard pro tuto oblast (`RuleCreatorPage`, situační karty) **zaniká úplně**. Kontroly
 (plán spuštění + větvení Splněno/Nesplněno → Situace) se místo toho nastavují přímo v editoru Úseku,
 na úrovni jednotlivého bodu trasy — podle už existující architektury "Kontrola na bodu" (viz odkazy v
 sekci 2, bod 2). `/rules/new` zůstává výhradně pro tracking pravidla.
@@ -72,8 +70,8 @@ sekci 2, bod 2). `/rules/new` zůstává výhradně pro tracking pravidla.
 | Top nav — název sekce pravidel | "Konfigurátor pravidel" | **"Pravidla pro tracking"** — přesnější, protože to teď dělá jen tracking pravidla, ne obecný výběr oblastí. |
 | Top nav — položky | Konfigurátor pravidel \| Trasy zásilek | Pravidla pro tracking \| Trasy zásilek \| **Situace a závažnosti** (nová, vlastní položka) |
 | Vstup do Situace | Jen odkaz "Situace a závažnosti →" uvnitř seznamu Pravidel (`RulesList`) | Vlastní položka v top nav, dostupná odkudkoli — protože je to teď sdílená infrastruktura pro Pravidla i Trasy (a budoucí hardcoded oblasti). |
-| Pill bar "Oblast" uvnitř wizardu (`/rules/new`) | 5 oblastí (1 aktivní — Záznamy z trackingu, 4 "brzy") | **Mizí úplně** — jediná reálná oblast je tracking, není co vybírat. |
-| Postranní panel "Oblasti" v `RulesList` (filtr) | 5 oblastí s počty pravidel, 3 jako "brzy" | **Mizí úplně** — ze stejného důvodu, filtrování podle oblasti ztrácí smysl, když existuje jen jedna. |
+| Pill bar "Oblast" uvnitř wizardu (`/rules/new`) | Výběr z více oblastí | **Mizí úplně** — jediná reálná oblast je tracking, není co vybírat. |
+| Postranní panel "Oblasti" v `RulesList` (filtr) | Filtr podle oblasti | **Mizí úplně** — ze stejného důvodu, filtrování podle oblasti ztrácí smysl, když existuje jen jedna. |
 
 Přejmenování entity **"Pravidlo"** (např. na "Šablona VkŘ") **zůstává mimo rozsah** — to bylo záměrně
 odloženo už v `2026-07-15-situace-zavaznost-akce-design.md` (spolu s "přepínačem pohledů") na pozdější
