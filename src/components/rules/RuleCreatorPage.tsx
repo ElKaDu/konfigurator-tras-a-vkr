@@ -213,7 +213,7 @@ export function RuleCreatorPage({
                       })}
                     </div>
                     <p className="mt-3 text-[10px] italic text-muted-foreground leading-relaxed">
-                      Předvyplní název/popis/prioritu a akce vpravo — dál nezávisle editovatelné.
+                      Předvyplní prioritu a akce vpravo — dál nezávisle editovatelné.
                     </p>
                   </>
                 )}

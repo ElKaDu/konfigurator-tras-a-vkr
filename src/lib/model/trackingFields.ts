@@ -27,11 +27,6 @@ export const REPEATABLE_FIELDS: TrackingFieldDef[] = TRACKING_FIELDS.filter((f) 
   ["locationId", "city", "countryCode"].includes(f.value)
 );
 
-export const TRACKING_OPERATORS = ["je jedním z", "není žádným z", "je", "není", "obsahuje", "je větší než", "je menší nebo rovno"];
-
-/** Zjednodušené operátory pro "Podmínky současného záznamu" → režim Shoda hodnoty. */
-export const SIMPLE_OPERATORS = ["je", "není"];
-
 export type RowKind = "is" | "is_not" | "repeats" | "history";
 
 export function isTrackingConditionRow(c: Condition): boolean {
