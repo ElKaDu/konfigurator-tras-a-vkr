@@ -370,73 +370,85 @@ export function RuleCreatorPage({
     <div className="flex h-screen w-screen flex-col bg-background text-foreground">
       <AppHeader current="rules" />
 
-      <div className="flex flex-1 min-h-0">
-        {/* LEFT COLUMN — Oblast + Situace + Meta */}
-        <div className="flex w-[280px] shrink-0 flex-col border-r border-border">
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {/* Oblast */}
-            <div>
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Oblast</div>
-              <div className="flex flex-col gap-1">
-                {AREAS.map((area) => {
-                  const Icon = resolveAreaIcon(area.icon);
-                  const isSelected = selectedArea === area.id;
-                  if (!area.enabled) {
-                    return (
-                      <div
-                        key={area.id}
-                        className="flex items-center gap-2.5 rounded-lg px-3 py-2 opacity-40 cursor-not-allowed"
-                      >
-                        <Icon className="size-4 shrink-0 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground truncate">{area.label}</span>
-                        <span className="ml-auto text-[10px] text-muted-foreground shrink-0">brzy</span>
-                      </div>
-                    );
-                  }
-                  return (
-                    <button
-                      key={area.id}
-                      onClick={() => { setSelectedArea(area.id); setSelectedSituation(null); }}
-                      className={cn(
-                        "flex items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-colors",
-                        isSelected ? "bg-primary-soft text-primary" : "hover:bg-muted text-foreground"
-                      )}
-                    >
-                      <Icon className="size-4 shrink-0" />
-                      <span className="text-sm truncate">{area.label}</span>
-                    </button>
-                  );
-                })}
+      {/* OBLAST — vodorovná lišta */}
+      <div className="flex items-center gap-1.5 border-b border-border bg-muted/20 px-4 py-2 overflow-x-auto">
+        {AREAS.map((area) => {
+          const Icon = resolveAreaIcon(area.icon);
+          const isSelected = selectedArea === area.id;
+          if (!area.enabled) {
+            return (
+              <div
+                key={area.id}
+                className="flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-xs opacity-40 cursor-not-allowed"
+              >
+                <Icon className="size-3.5 text-muted-foreground" />
+                <span className="text-muted-foreground whitespace-nowrap">{area.label}</span>
+                <span className="text-[10px] text-muted-foreground">brzy</span>
               </div>
-            </div>
+            );
+          }
+          return (
+            <button
+              key={area.id}
+              onClick={() => { setSelectedArea(area.id); setSelectedSituation(null); }}
+              className={cn(
+                "flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap",
+                isSelected ? "bg-primary-soft text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
+            >
+              <Icon className="size-3.5" />
+              {area.label}
+            </button>
+          );
+        })}
+      </div>
 
-            {/* Situace (tracking_records) */}
+      <div className="flex flex-1 min-h-0">
+        {/* LEFT COLUMN — Situace + Závažnost (tracking) / Situace (route_compliance) */}
+        <div className="flex w-[260px] shrink-0 flex-col border-r border-border">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {/* Situace + Závažnost (tracking_records) */}
             {isTrackingRecords && (
               <div>
                 <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Situace</div>
-                <div className="flex flex-col gap-1.5">
-                  {TRACKING_SITUATION_CARDS.map((card) => {
-                    const isSelected = selectedTrackingSituation === card.id;
-                    return (
-                      <button
-                        key={card.id}
-                        onClick={() => setSelectedTrackingSituation(card.id)}
-                        className={cn(
-                          "flex items-start gap-2.5 rounded-lg border px-3 py-2.5 text-left transition-colors",
-                          isSelected
-                            ? "border-primary bg-primary-soft/40 text-primary"
-                            : "border-border hover:border-primary/30 hover:bg-muted/30 text-foreground"
-                        )}
-                      >
-                        <span className={cn("mt-0.5", isSelected ? "text-primary" : "text-muted-foreground")}>{card.icon}</span>
-                        <div>
-                          <div className="text-xs font-medium">{card.label}</div>
-                          <div className={cn("text-[10px]", isSelected ? "text-primary/70" : "text-muted-foreground")}>{card.trigger}</div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+                <select
+                  value={selectedSituationId ?? ""}
+                  onChange={(e) => handleSelectSituation(e.target.value)}
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm mb-3"
+                >
+                  <option value="" disabled>— vyber situaci —</option>
+                  {situations.filter((s) => s.area === "tracking_records").map((s) => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+
+                {selectedSituationObj && (
+                  <>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Závažnost</div>
+                    <div className="flex flex-col gap-1.5">
+                      {selectedSituationObj.severities.map((sev) => {
+                        const isSelected = selectedSeverityId === sev.id;
+                        return (
+                          <button
+                            key={sev.id}
+                            onClick={() => handleSelectSeverity(sev)}
+                            className={cn(
+                              "rounded-lg border px-3 py-2 text-left text-xs font-medium transition-colors",
+                              isSelected
+                                ? "border-primary bg-primary-soft/40 text-primary"
+                                : "border-border hover:border-primary/30 hover:bg-muted/30 text-foreground"
+                            )}
+                          >
+                            {sev.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="mt-3 text-[10px] italic text-muted-foreground leading-relaxed">
+                      Předvyplní název/popis/prioritu a akce vpravo — dál nezávisle editovatelné.
+                    </p>
+                  </>
+                )}
               </div>
             )}
 
