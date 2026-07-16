@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import type { Area, Priority, Rule, Situation, Severity, Condition } from "@/lib/model/types";
 import { VkrConditionsBuilder } from "@/components/rules/editors/VkrConditionsBuilder";
 import type { VkrCondition } from "@/lib/vkr/vkrConditionCatalog";
-import { TrackingConditionsBuilder } from "@/components/rules/editors/TrackingConditionsBuilder";
+import { TrackingConditionsBuilder, isHistoryCondition } from "@/components/rules/editors/TrackingConditionsBuilder";
 import { ActionTagPicker } from "@/components/situations/ActionTagPicker";
 
 
@@ -233,7 +233,10 @@ export function RuleCreatorPage({
                   ? { kind: "schedule" as const, label: "Časový plán — kontroluje periodicky" }
                   : { kind: "condition_met" as const, label: "Reaktivní — při každém novém tracking záznamu" };
 
-                const trackingConditionsOut: Rule["conditions"] = trackingConditions;
+                const trackingConditionsOut: Rule["conditions"] =
+                  triggerType === "timer"
+                    ? trackingConditions.filter(isHistoryCondition)
+                    : trackingConditions;
 
                 const trackingActionsOut: Rule["actions"] = severityActions
                   .filter((a) => a.enabled)

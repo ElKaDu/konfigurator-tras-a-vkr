@@ -15,6 +15,11 @@ function rowKindOf(c: Condition): RowKind {
   return "history";
 }
 
+/** True for conditions valid regardless of Spouštěč (i.e. "bylo v historii" rows) — used by RuleCreatorPage to filter out-of-scope rows at save time when Spouštěč = Časovač. */
+export function isHistoryCondition(c: Condition): boolean {
+  return isTrackingConditionRow(c) && rowKindOf(c) === "history";
+}
+
 /** row.kind narrows to "field" | "tracking_aggregate" | "route_compliance" (Condition is a 3-way union) —
  * route_compliance never actually reaches these rows (filtered out by isTrackingConditionRow), but TS
  * doesn't know that from a plain boolean filter, so every access checks row.kind inline. */
