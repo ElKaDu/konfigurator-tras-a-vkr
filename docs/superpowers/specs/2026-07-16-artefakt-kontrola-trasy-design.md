@@ -32,7 +32,7 @@ Klient dodává pravidla pro soulad zásilky s předepsanou trasou ve formě kon
 ## 3. Datový model
 
 ```
-Trasa → Úsek → Bod                              — beze změny oproti dnešnímu Checkpoint (match + termín)
+Úsek → Bod                                       — match + termín, stejný tvar jako dnešní Checkpoint, ale editovatelné přímo v tomto nástroji (viz §4)
   └─ Kontrola[]                                  — NOVÉ
        ├─ časování: pevný denní čas, nebo v/před/po termínu bodu (offset v h)
        ├─ volitelná podmínka na kontrole          — pole zásilky (např. "datum doručení od přepravce = dnes")
@@ -59,9 +59,9 @@ Podporováno: kontroly jako v R30/R97/R39/R14/R51 — vždy vázané na jeden ko
 
 ## 4. UI: Konfigurační pohled
 
-- **Vlevo** — strom Trasa → Úsek → Bod (ze seed dat, viz §6).
+- **Vlevo** — strom Úsek → Bod (ze seed dat, viz §6). **Trasa jako entita se v tomhle nástroji nezaznamenává** — klient neřeší "která trasa", jen konkrétní úseky a body na nich; artefakt drží jednu množinu úseků, ne katalog tras. **+ Přidat úsek** (jen název) a **+ Přidat bod** (v rámci úseku) jsou vlastní formuláře přímo ve stromu.
 - **Vpravo, pro vybraný Bod:**
-  1. Read-only souhrn "Co musí být na záznamu" (match) + "Termín" (correctness) — přebírá dnešní tvar `CheckpointMatch`/`CheckpointCorrectness`, needituje se tady (tenhle artefakt neřeší editaci Bodů samotných, jen co se na ně věší navíc).
+  1. **Editovatelný souhrn** "Co musí být na záznamu" (match — pole jako status/typ lokace/město/kód země, každé jako seznam přípustných hodnot) + "Termín" (kotva na systémovou událost nebo na jiný bod + pevný čas/den nebo posun v hodinách). Toto **je** editovatelné — přímo tady klient přepisuje, jaký `status` se má na bodu očekávat (viz §3, "Editovatelnost = potvrzení").
   2. **Tabulka Kontrol** (zvolený styl — hustý přehled): řádek = jedna Kontrola, sloupce Časování / Podmínka / výsledek Splněno→ / výsledek Nesplněno→. Klik na řádek rozbalí detail větve (Situace/Závažnost/Akce, přesné podmínky, editace).
   3. **+ Přidat kontrolu** nad tabulkou.
 
@@ -88,8 +88,8 @@ Samostatná záložka vedle konfigurace. Cíl: ověřit, jak se sada Kontrol nap
 
 ## 6. Seed data
 
-Ze skutečného exportu `bytorp-data-2026-06-20.json`:
-- Trasa **ČR–USA (Endevel-test)**, oba úseky (ČR–Paříž, Paříž–USA), všech 10 typů bodů (přejmenováno na terminologii "Bod").
+Ze skutečného exportu `bytorp-data-2026-06-20.json` (trasa ČR–USA / Endevel-test — samotná trasa se nezaznamenává, viz §4, ale úseky a body z ní ano):
+- Oba úseky (ČR–Paříž, Paříž–USA), všech 10 typů bodů (přejmenováno na terminologii "Bod").
 - Existující `route_compliance` pravidla převedená na Kontroly:
   - **R30, R97, R39** → 3 kontroly na bodu „1. Fyzický scan v cílové zemi". R39 dnes obchází chybějící "kontrolu na bodu" tím, že vytváří **duplicitní typ bodu** jen kvůli jinému časování ("1. fyzický scan — pozdější check") — v novém modelu se sloučí na **stejný bod**, jen jako 3. Kontrola s podmínkou "datum doručení od přepravce = dnes". Tohle je referenční příklad přesně toho, co má nový model odstranit.
   - **R14** → 2 kontroly na bodu „2. Fyzický scan v cílové zemi".
@@ -100,7 +100,7 @@ Ze skutečného exportu `bytorp-data-2026-06-20.json`:
 
 ## 7. Mimo rozsah
 
-- Editace samotných Bodů (match/correctness) — používají se jen jako read-only reference, editují se jinde (dnešní `SegmentEditorPage`, mimo tento artefakt).
+- **Entita Trasa** (pokrytí carrier × serviceType × cílová země, přiřazení úseků k trase) — nezaznamenává se, viz §4. Pokud bude klient potřebovat rozlišit víc tras, řeší se to přes samostatné Export/Import JSON soubory (jeden soubor = jedna rozpracovaná sada úseků), ne uvnitř jednoho běhu nástroje.
 - Obecné kontroly nevázané na bod (R85) a sdílené šablony kontrol napříč body (R80) — viz §3.1.
 - Perzistentní "potvrzeno klientem" příznak — nahrazeno přímou editovatelností (§3).
 - Realtime spolupráce víc lidí najednou — řeší se přes export/import JSON nebo sdílenou obrazovku.

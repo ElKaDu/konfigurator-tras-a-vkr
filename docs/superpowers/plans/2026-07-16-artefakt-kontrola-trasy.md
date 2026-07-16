@@ -858,16 +858,48 @@ git commit -m "feat: HTML kostra, CSS a state store s localStorage perzistencí"
 
 ---
 
-## Task 7: Konfigurační pohled — strom Trasa → Úsek → Bod
+## Task 7: Konfigurační pohled — strom Úsek → Bod, přidání nového úseku/bodu
+
+**Poznámka:** Trasa jako entita se v tomhle nástroji nezaznamenává (viz spec §4/§7) — `state.trasa` zůstává jen jako interní obálka kolem pole `useky`, nikde se v UI nezobrazuje ani needituje.
 
 **Files:**
 - Modify: `nastroje/kontrola-na-bodu-trasy.html`
 
-- [ ] **Step 1: Přidat renderování stromu a výběr bodu**
+- [ ] **Step 1: Přidat CSS pro tlačítka "+ Přidat"**
+
+Přidej do `<style>` bloku (za pravidlo `.addkontrola` — tam ještě není, takže na konec `<style>`, před `</style>`):
+
+```css
+  .addbtn { display: block; margin: 4px 0 14px; width: 100%; border: 1px dashed var(--border); border-radius: 6px; background: transparent; color: var(--primary); font-size: 12px; padding: 6px; cursor: pointer; font-family: inherit; }
+```
+
+- [ ] **Step 2: Přidat renderování stromu, výběr bodu a přidávání úseku/bodu**
 
 V `nastroje/kontrola-na-bodu-trasy.html`, uvnitř `<script type="module">`, nahraď funkci `render()` (a vše pod ní) tímto:
 
 ```js
+function addUsek() {
+  const name = window.prompt('Název nového úseku:');
+  if (!name) return;
+  state.trasa.useky.push({ id: 'usek_' + Date.now(), name, body: [] });
+  setState({});
+}
+
+function addBod(usekId) {
+  const name = window.prompt('Název nového bodu:');
+  if (!name) return;
+  const usek = state.trasa.useky.find((u) => u.id === usekId);
+  const id = 'bod_' + Date.now();
+  usek.body.push({
+    id,
+    name,
+    match: {},
+    deadline: { anchor: { kind: 'system_event', key: 'add' }, offsetHours: 0 },
+    kontroly: [],
+  });
+  setState({ selectedBodId: id });
+}
+
 function renderTree() {
   const tree = document.getElementById('tree');
   tree.innerHTML = '';
@@ -883,7 +915,17 @@ function renderTree() {
       btn.addEventListener('click', () => setState({ selectedBodId: bod.id }));
       tree.appendChild(btn);
     }
+    const addBodBtn = document.createElement('button');
+    addBodBtn.className = 'addbtn';
+    addBodBtn.textContent = '+ Přidat bod';
+    addBodBtn.addEventListener('click', () => addBod(usek.id));
+    tree.appendChild(addBodBtn);
   }
+  const addUsekBtn = document.createElement('button');
+  addUsekBtn.className = 'addbtn';
+  addUsekBtn.textContent = '+ Přidat úsek';
+  addUsekBtn.addEventListener('click', addUsek);
+  tree.appendChild(addUsekBtn);
 }
 
 function findBod(bodId) {
@@ -908,34 +950,34 @@ function renderDetail() {
   const detail = document.getElementById('detail');
   const bod = state.selectedBodId ? findBod(state.selectedBodId) : null;
   if (!bod) {
-    detail.innerHTML = '<p>Vyber bod v levém stromu.</p>';
+    detail.innerHTML = '<p>Vyber bod v levém stromu, nebo přidej nový.</p>';
     return;
   }
   detail.innerHTML = `<h2>${bod.name}</h2><p>Detail kontrol přidá Task 8.</p>`;
 }
 ```
 
-- [ ] **Step 2: Ověřit ručně v prohlížeči**
+- [ ] **Step 3: Ověřit ručně v prohlížeči**
 
 Obnov stránku (server z Tasku 6 Step 2 pořád běží).
 
-Expected: Vlevo strom se dvěma úseky ("ČR - Paříž", "Paříž - USA") a jejich body, u „1. Fyzický scan v cílové zemi" značka „3 kontrol", u „Vyzvednutí zásilky" značka „0 kontrol". Klik na bod ho zvýrazní a vpravo se zobrazí jeho název.
+Expected: Vlevo strom se dvěma úseky ("ČR - Paříž", "Paříž - USA") a jejich body, u „1. Fyzický scan v cílové zemi" značka „3 kontrol", u „Vyzvednutí zásilky" značka „0 kontrol". Pod každým úsekem tlačítko "+ Přidat bod", na konci stromu "+ Přidat úsek". Klik na "+ Přidat bod" u úseku "ČR - Paříž", zadání jména do promptu → nový bod se objeví v seznamu a rovnou se vybere (zvýrazní). Klik na "+ Přidat úsek", zadání jména → nový prázdný úsek s vlastním "+ Přidat bod" tlačítkem se objeví na konci stromu.
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
 git add nastroje/kontrola-na-bodu-trasy.html
-git commit -m "feat: strom Trasa/Úsek/Bod v konfiguračním pohledu"
+git commit -m "feat: strom Úsek/Bod, přidávání nového úseku a bodu"
 ```
 
 ---
 
-## Task 8: Konfigurační pohled — tabulka Kontrol pro vybraný bod
+## Task 8: Konfigurační pohled — editovatelný souhrn bodu (match/termín) a tabulka Kontrol
 
 **Files:**
 - Modify: `nastroje/kontrola-na-bodu-trasy.html`
 
-- [ ] **Step 1: Přidat state pro rozbalený řádek a vykreslení tabulky**
+- [ ] **Step 1: Přidat state pro rozbalený řádek a vykreslení editovatelného souhrnu + tabulky**
 
 Přidej do state inicializace (v `loadState()` fallback objektu) pole `expandedKontrolaId: null`, a nahraď `renderDetail()`:
 
@@ -967,11 +1009,50 @@ function formatVetev(vetev) {
   return `<b>${vetev.name}</b><br><span style="font-size:11px;color:var(--ink-soft)">${sit?.name ?? '—'} · ${zav?.name ?? '—'}</span>`;
 }
 
+function allBody() {
+  return state.trasa.useky.flatMap((u) => u.body);
+}
+
+const MATCH_FIELD_LABELS = { status: 'Status', locationType: 'Typ lokace', locationCity: 'Město', locationCountryCode: 'Kód země' };
+
+function matchFieldInputHtml(bod, field) {
+  const value = (bod.match[field] ?? []).join(', ');
+  return `<label style="font-size:11px;display:block;margin-top:4px;">${MATCH_FIELD_LABELS[field]}
+    <input class="edit-match-field" data-field="${field}" value="${value}" placeholder="hodnoty oddělené čárkou" style="width:100%;">
+  </label>`;
+}
+
+function deadlineEditHtml(bod) {
+  const d = bod.deadline;
+  const isBodAnchor = d.anchor.kind === 'bod';
+  const otherBody = allBody().filter((b) => b.id !== bod.id);
+  const isClockMode = Boolean(d.clockTime);
+  return `
+    <div style="margin-top:8px;">
+      <label style="font-size:11px;">Kotva
+        <select id="edit-anchor-kind">
+          <option value="system_event" ${!isBodAnchor ? 'selected' : ''}>Systémová událost</option>
+          <option value="bod" ${isBodAnchor ? 'selected' : ''}>Jiný bod</option>
+        </select>
+      </label>
+      ${isBodAnchor
+        ? `<select id="edit-anchor-value">${otherBody.map((b) => `<option value="${b.id}" ${b.id === d.anchor.bodId ? 'selected' : ''}>${b.name}</option>`).join('')}</select>`
+        : `<input id="edit-anchor-value" value="${d.anchor.key ?? ''}" placeholder="např. add, pickup">`}
+      <br>
+      <label style="font-size:11px;"><input type="radio" name="deadline-mode" id="edit-mode-clock" ${isClockMode ? 'checked' : ''}> pevný čas na dni kotvy</label>
+      <input id="edit-clock-time" type="time" value="${d.clockTime ?? '08:00'}" ${!isClockMode ? 'disabled' : ''}>
+      dní posun <input id="edit-day-offset" type="number" value="${d.dayOffset ?? 0}" style="width:50px;" ${!isClockMode ? 'disabled' : ''}>
+      <br>
+      <label style="font-size:11px;"><input type="radio" name="deadline-mode" id="edit-mode-offset" ${!isClockMode ? 'checked' : ''}> posun v hodinách od kotvy</label>
+      <input id="edit-offset-hours" type="number" value="${d.offsetHours ?? 0}" style="width:60px;" ${isClockMode ? 'disabled' : ''}> h
+    </div>`;
+}
+
 function renderDetail() {
   const detail = document.getElementById('detail');
   const bod = state.selectedBodId ? findBod(state.selectedBodId) : null;
   if (!bod) {
-    detail.innerHTML = '<p>Vyber bod v levém stromu.</p>';
+    detail.innerHTML = '<p>Vyber bod v levém stromu, nebo přidej nový.</p>';
     return;
   }
   const rows = bod.kontroly.map((k, i) => {
@@ -997,7 +1078,12 @@ function renderDetail() {
 
   detail.innerHTML = `
     <h2>${bod.name}</h2>
-    <p style="font-size:12.5px;color:var(--ink-soft)">Co musí být na záznamu: ${JSON.stringify(bod.match)}</p>
+    <div style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:12px;">
+      <b style="font-size:12px;">Co musí být na záznamu</b>
+      ${Object.keys(MATCH_FIELD_LABELS).map((f) => matchFieldInputHtml(bod, f)).join('')}
+      <b style="font-size:12px;display:block;margin-top:10px;">Termín</b>
+      ${deadlineEditHtml(bod)}
+    </div>
     <table class="kontroly">
       <thead><tr><th>#</th><th>Časování</th><th>Podmínka</th><th>Splněno →</th><th>Nesplněno →</th></tr></thead>
       <tbody>${rows || '<tr><td colspan="5"><i>Zatím žádné kontroly.</i></td></tr>'}</tbody>
@@ -1010,6 +1096,51 @@ function renderDetail() {
       setState({ expandedKontrolaId: state.expandedKontrolaId === id ? null : id });
     });
   });
+
+  detail.querySelectorAll('.edit-match-field').forEach((input) => {
+    input.addEventListener('change', (e) => {
+      const values = e.target.value.split(',').map((v) => v.trim()).filter(Boolean);
+      if (values.length > 0) bod.match[e.target.dataset.field] = values;
+      else delete bod.match[e.target.dataset.field];
+      setState({});
+    });
+  });
+
+  const anchorKindSel = document.getElementById('edit-anchor-kind');
+  anchorKindSel.addEventListener('change', (e) => {
+    bod.deadline.anchor = e.target.value === 'bod'
+      ? { kind: 'bod', bodId: allBody().find((b) => b.id !== bod.id)?.id ?? '' }
+      : { kind: 'system_event', key: 'add' };
+    setState({});
+  });
+  document.getElementById('edit-anchor-value').addEventListener('change', (e) => {
+    if (bod.deadline.anchor.kind === 'bod') bod.deadline.anchor.bodId = e.target.value;
+    else bod.deadline.anchor.key = e.target.value;
+    setState({});
+  });
+  document.getElementById('edit-mode-clock').addEventListener('change', () => {
+    bod.deadline.clockTime = document.getElementById('edit-clock-time').value;
+    bod.deadline.dayOffset = Number(document.getElementById('edit-day-offset').value);
+    setState({});
+  });
+  document.getElementById('edit-mode-offset').addEventListener('change', () => {
+    delete bod.deadline.clockTime;
+    delete bod.deadline.dayOffset;
+    bod.deadline.offsetHours = Number(document.getElementById('edit-offset-hours').value);
+    setState({});
+  });
+  document.getElementById('edit-clock-time').addEventListener('change', (e) => {
+    bod.deadline.clockTime = e.target.value;
+    setState({});
+  });
+  document.getElementById('edit-day-offset').addEventListener('change', (e) => {
+    bod.deadline.dayOffset = Number(e.target.value);
+    setState({});
+  });
+  document.getElementById('edit-offset-hours').addEventListener('change', (e) => {
+    bod.deadline.offsetHours = Number(e.target.value);
+    setState({});
+  });
 }
 ```
 
@@ -1017,13 +1148,13 @@ function renderDetail() {
 
 Obnov stránku, klikni na „1. Fyzický scan v cílové zemi".
 
-Expected: Tabulka se 3 řádky (Kontrola 1/2/3), sloupec "Nesplněno →" u řádku 2 ukazuje jméno první varianty větve (`DD - Kontrola 2 FedEx Facility (1.scan)- NEÚSPĚCH`). Klik na řádek 1 rozbalí detail se Situací/Závažností pro obě větve ("Kontrola bodu · v pořádku" / "Kontrola bodu · zpožděno"), druhý klik na stejný řádek detail zase schová.
+Expected: Nahoře editovatelný souhrn — pole "Status" ukazuje `Destination facility`, kotva "Systémová událost" s hodnotou `add`, přepínač na "pevný čas na dni kotvy" se zadaným `08:00`. Přepiš pole "Status" na `delivered, out for delivery` → po refreshi stránky zůstává (localStorage). Pod tím tabulka se 3 řádky (Kontrola 1/2/3), sloupec "Nesplněno →" u řádku 2 ukazuje jméno první varianty větve (`DD - Kontrola 2 FedEx Facility (1.scan)- NEÚSPĚCH`). Klik na řádek 1 rozbalí detail se Situací/Závažností pro obě větve ("Kontrola bodu · v pořádku" / "Kontrola bodu · zpožděno"), druhý klik na stejný řádek detail zase schová.
 
 - [ ] **Step 3: Commit**
 
 ```bash
 git add nastroje/kontrola-na-bodu-trasy.html
-git commit -m "feat: tabulka Kontrol s rozbalitelným detailem větví"
+git commit -m "feat: editovatelný match/termín bodu a tabulka Kontrol s rozbalitelným detailem"
 ```
 
 ---
@@ -1432,11 +1563,12 @@ Spusť `python3 -m http.server 8123` v adresáři `nastroje/` a otevři `http://
 
 Projdi:
 1. Strom vlevo — všech 6 bodů z obou úseků viditelných, správné počty kontrol u každého.
-2. Klik na „1. Fyzický scan v cílové zemi" → tabulka 3 kontrol, rozbalení řádku 2 ukáže obě varianty větve Nesplněno.
-3. Editace názvu VkŘ u jedné větve → reload stránky → změna zůstala (localStorage).
-4. Export JSON → stáhne se soubor, otevřít a ověřit, že obsahuje upravený název z kroku 3.
-5. Import JSON zpět (stejný soubor) → data se nezmění (idempotentní).
-6. Záložka Test → scénář z Tasku 11 Step 2 a Step 3 (bod nastal dřív / později) → výsledky odpovídají.
+2. „+ Přidat úsek" a „+ Přidat bod" — nový úsek/bod se objeví ve stromu, nový bod jde rovnou vybrat a upravit mu match/termín (viz bod 3).
+3. Klik na „1. Fyzický scan v cílové zemi" → editovatelný souhrn match/termín nahoře, tabulka 3 kontrol pod ním, rozbalení řádku 2 ukáže obě varianty větve Nesplněno.
+4. Přepsání pole "Status" v souhrnu bodu (např. na `delivered`) a editace názvu VkŘ u jedné větve → reload stránky → obě změny zůstaly (localStorage).
+5. Export JSON → stáhne se soubor, otevřít a ověřit, že obsahuje upravené hodnoty z kroku 4.
+6. Import JSON zpět (stejný soubor) → data se nezmění (idempotentní).
+7. Záložka Test → scénář z Tasku 11 Step 2 a Step 3 (bod nastal dřív / později) → výsledky odpovídají.
 
 - [ ] **Step 2: Zaznamenat a opravit jakékoliv nalezené problémy**
 
