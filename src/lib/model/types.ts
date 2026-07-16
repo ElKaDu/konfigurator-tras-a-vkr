@@ -146,12 +146,10 @@ export interface SeverityAction {
   condition?: VkrCondition[];
 }
 
-/** Úroveň uvnitř Situace — nese výchozí šablonu VkŘ. */
+/** Úroveň uvnitř Situace — nese výchozí šablonu VkŘ (název/popis VkŘ se propisují z Pravidla, ne odsud). */
 export interface Severity {
   id: string;
   name: string;
-  vkrTitle: string;
-  vkrDescription?: string;
   priority: Priority;
   actions: SeverityAction[];
 }
