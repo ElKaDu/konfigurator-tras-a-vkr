@@ -854,27 +854,49 @@ export function RuleCreatorPage({
             )}
 
             {isTrackingRecords && (
-              <ActionBranch
-                label="Podmínka splněna"
-                variant="fulfilled"
-                actions={trackingActions}
-                advancedOpen={advancedOpen}
-                onToggleAdvanced={(id) => setAdvancedOpen((p) => ({ ...p, [id]: !p[id] }))}
-                onAdd={() => setTrackingActions((prev) => [...prev, { id: "ta_" + Date.now(), type: "create_vkr", title: "" }])}
-                onRemove={(id) => setTrackingActions((prev) => prev.filter((a) => a.id !== id))}
-                onChangeType={(id, type) =>
-                  setTrackingActions((prev) => prev.map((a) => a.id === id ? { ...a, type } : a))
-                }
-                onChangeTitle={(id, title) =>
-                  setTrackingActions((prev) => prev.map((a) => a.id === id ? { ...a, title } : a))
-                }
-                onChangeVkrText={(id, vkrText) =>
-                  setTrackingActions((prev) => prev.map((a) => a.id === id ? { ...a, vkrText } : a))
-                }
-                onChangeShipmentConditions={(id, shipmentConditions) =>
-                  setTrackingActions((prev) => prev.map((a) => a.id === id ? { ...a, shipmentConditions } : a))
-                }
-              />
+              <div className="space-y-2">
+                {severityActions.map((row) => {
+                  const tag = actionTags.find((t) => t.id === row.actionTagId);
+                  return (
+                    <div key={row.id} className="rounded-lg border border-border bg-background p-2.5">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <input
+                          type="checkbox"
+                          checked={row.enabled}
+                          onChange={(e) =>
+                            setSeverityActions((prev) => prev.map((a) => (a.id === row.id ? { ...a, enabled: e.target.checked } : a)))
+                          }
+                        />
+                        <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary flex-1">
+                          {tag?.label ?? row.actionTagId}
+                        </span>
+                        <button
+                          onClick={() => setSeverityActions((prev) => prev.filter((a) => a.id !== row.id))}
+                          className="text-muted-foreground hover:text-foreground"
+                        >
+                          <X className="size-3.5" />
+                        </button>
+                      </div>
+                      <Textarea
+                        value={row.description}
+                        onChange={(e) =>
+                          setSeverityActions((prev) => prev.map((a) => (a.id === row.id ? { ...a, description: e.target.value } : a)))
+                        }
+                        placeholder="Co má operátor udělat…"
+                        rows={2}
+                        className="resize-none text-xs"
+                        disabled={!row.enabled}
+                      />
+                    </div>
+                  );
+                })}
+                <ActionTagPicker
+                  excludeIds={severityActions.map((a) => a.actionTagId)}
+                  onPick={(tag) =>
+                    setSeverityActions((prev) => [...prev, { id: "sa_" + Date.now(), actionTagId: tag.id, enabled: true, description: "" }])
+                  }
+                />
+              </div>
             )}
 
             {!isRouteCompliance && !isTrackingRecords && (
