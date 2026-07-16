@@ -6,6 +6,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { DataMenu } from "@/components/common/DataMenu";
 import { AreaBadge } from "@/components/common/AreaBadge";
 import { useRules, rulesStore } from "@/lib/model/store";
+import { triggerLabel, priorityLabel, isPriorityHigh } from "@/lib/model/ruleDisplay";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Rule } from "@/lib/model/types";
 
@@ -48,20 +49,6 @@ function SidebarItem({
       </span>
     </button>
   );
-}
-
-function triggerLabel(kind: string): string {
-  if (kind === "condition_met") return "Podmínka";
-  if (kind === "schedule") return "Časovač";
-  return "Manuálně";
-}
-
-function priorityLabel(p: string): string {
-  return p.toUpperCase();
-}
-
-function isPriorityHigh(p: string): boolean {
-  return p === "high" || p === "urgent";
 }
 
 export function RulesList() {
