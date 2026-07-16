@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { Plus, X } from "lucide-react";
+import { X } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/AppHeader";
 import { Textarea } from "@/components/ui/textarea";
 import { useRules, rulesStore, useSituations, useActionTags } from "@/lib/model/store";
 import { cn } from "@/lib/utils";
-import type { Area, Priority, ActionType, Rule, Situation, Severity, Condition } from "@/lib/model/types";
+import type { Area, Priority, Rule, Situation, Severity, Condition } from "@/lib/model/types";
 import { VkrConditionsBuilder } from "@/components/rules/editors/VkrConditionsBuilder";
 import type { VkrCondition } from "@/lib/vkr/vkrConditionCatalog";
 import { TrackingConditionsBuilder } from "@/components/rules/editors/TrackingConditionsBuilder";
@@ -94,7 +94,7 @@ export function RuleCreatorPage({
   const initialState = useMemo(() => getInitialFormState(existingRule), [existingRule]);
   const isEdit = !!ruleId;
 
-  const [selectedArea] = useState<Area>(initialState.selectedArea);
+  const selectedArea = initialState.selectedArea;
 
   // Tracking records state
   const [selectedSituationId, setSelectedSituationId] = useState<string | null>(initialState.selectedSituationId);
@@ -224,7 +224,7 @@ export function RuleCreatorPage({
           {/* Save button */}
           <div className="border-t border-border p-4 space-y-2">
             <button
-              disabled={!ruleName || !selectedArea}
+              disabled={!ruleName}
               onClick={() => {
                 const id = existingRule?.id ?? ("rule_" + Date.now());
                 const code = existingRule?.code ?? ("R" + Math.floor(Math.random() * 90 + 10));
@@ -521,6 +521,4 @@ export function RuleCreatorPage({
     </div>
   );
 }
-
-
 
