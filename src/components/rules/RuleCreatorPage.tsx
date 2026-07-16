@@ -111,7 +111,6 @@ interface RuleCreatorUiState {
   checkInterval: CheckInterval;
   fulfilledActions: BranchAction[];
   notFulfilledActions: BranchAction[];
-  trackingActions: BranchAction[];
 }
 
 type RuleCreatorInitialState = RuleCreatorUiState & {
@@ -226,8 +225,6 @@ export function RuleCreatorPage({
   initialSituationId?: string;
   initialSeverityId?: string;
 } = {}) {
-  void initialSituationId; // wired up in Task 17
-  void initialSeverityId; // wired up in Task 17
   const segments = useSegments();
   const checkpointTypes = useCheckpointTypes();
   const rules = useRules();
@@ -363,6 +360,21 @@ export function RuleCreatorPage({
     setSelectedSeverityId(severity.id);
     applySeverityTemplate(severity);
   }
+
+  useEffect(() => {
+    if (isEdit || !initialSituationId) return;
+    setSelectedArea("tracking_records");
+    setSelectedSituationId(initialSituationId);
+    const situation = situations.find((s) => s.id === initialSituationId);
+    const severity = situation?.severities.find((s) => s.id === initialSeverityId) ?? situation?.severities[0];
+    if (severity) {
+      setSelectedSeverityId(severity.id);
+      applySeverityTemplate(severity);
+    }
+    // Only run once on mount for the "+ Pravidlo pro tuto závažnost" entry point — deliberately
+    // excludes `situations` from deps so it doesn't re-fire and clobber user edits on every store update.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const triggerLabel = getTriggerLabel(selectedSituation, checkInterval);
 
@@ -505,6 +517,26 @@ export function RuleCreatorPage({
               onClick={() => {
                 const id = existingRule?.id ?? ("rule_" + Date.now());
                 const code = existingRule?.code ?? ("R" + Math.floor(Math.random() * 90 + 10));
+
+                const trackingTrigger = triggerType === "timer"
+                  ? { kind: "schedule" as const, label: "Časový plán — kontroluje periodicky" }
+                  : { kind: "condition_met" as const, label: "Reaktivní — při každém novém tracking záznamu" };
+
+                const trackingConditionsOut: Rule["conditions"] =
+                  triggerType === "automatic"
+                    ? [...currentRecordConditions, ...historyConditions]
+                    : [...historyConditions];
+
+                const trackingActionsOut: Rule["actions"] = severityActions
+                  .filter((a) => a.enabled)
+                  .map((a) => ({
+                    id: a.id,
+                    type: "create_vkr",
+                    title: ruleName,
+                    vkrText: a.description || undefined,
+                    actionTagId: a.actionTagId,
+                  }));
+
                 rulesStore.upsert({
                   id,
                   code,
@@ -513,39 +545,40 @@ export function RuleCreatorPage({
                   area: selectedArea,
                   active,
                   priority: priority as Priority,
-                  trigger: { kind: "condition_met", label: triggerLabel },
-                  conditions: [],
-                  actions: [...fulfilledActions, ...notFulfilledActions].map((a) => ({
-                    id: a.id,
-                    type: a.type as ActionType,
-                    title: a.title,
-                    vkrText: a.vkrText,
-                    runWhenRouteCondition: fulfilledActions.includes(a) ? "fulfilled" : "not_fulfilled",
-                  })),
+                  trigger: isTrackingRecords ? trackingTrigger : { kind: "condition_met", label: triggerLabel },
+                  conditions: isTrackingRecords ? trackingConditionsOut : [],
+                  situationId: isTrackingRecords ? selectedSituationId ?? undefined : undefined,
+                  severityId: isTrackingRecords ? selectedSeverityId ?? undefined : undefined,
+                  actions: isTrackingRecords
+                    ? trackingActionsOut
+                    : [...fulfilledActions, ...notFulfilledActions].map((a) => ({
+                        id: a.id,
+                        type: a.type as ActionType,
+                        title: a.title,
+                        vkrText: a.vkrText,
+                        runWhenRouteCondition: fulfilledActions.includes(a) ? "fulfilled" : "not_fulfilled",
+                      })),
                   uiState: {
                     selectedSituation,
-                    selectedTrackingSituation,
+                    selectedSituationId,
+                    selectedSeverityId,
+                    triggerType,
+                    currentRecordConditions,
+                    historyConditions,
                     deliveryMilestone,
                     checkTimes,
                     scheduleItems,
                     vkrConditions,
                     routeScope,
                     missedMilestoneType,
-                    
                     tooLongMilestone,
                     tooLongThreshold,
                     checkInterval,
-                    trackingConditions,
                     noMovementDuration,
                     noMovementUnit,
-                    ignoreClearance,
-                    stuckCount,
-                    stuckMatchMode,
-                    stuckInclude,
-                    stuckExclude,
+                    severityActions,
                     fulfilledActions,
                     notFulfilledActions,
-                    trackingActions,
                   },
                 });
                 toast.success(isEdit ? "Pravidlo upraveno" : "Pravidlo uloženo");
