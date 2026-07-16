@@ -40,7 +40,6 @@ export function SituationEditorPage({ situationId }: { situationId: string }) {
     const newSeverity: Severity = {
       id: "sev_" + Date.now(),
       name: "Nová závažnost",
-      vkrTitle: "",
       priority: "medium",
       actions: [],
     };
