@@ -632,62 +632,99 @@ export function RuleCreatorPage({
               </div>
             )}
 
-            {isTrackingRecords && !selectedTrackingSituation && (
+            {isTrackingRecords && !selectedSeverityId && (
               <div className="rounded-xl border border-dashed border-border p-8 text-center">
-                <div className="text-sm text-muted-foreground">Vyber situaci v levém sloupci.</div>
+                <div className="text-sm text-muted-foreground">Vyber situaci a závažnost v levém sloupci.</div>
               </div>
             )}
 
-            {isTrackingRecords && selectedTrackingSituation && (
+            {isTrackingRecords && selectedSeverityId && (
               <>
-                <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2.5">
-                  <Lock className="size-3.5 text-muted-foreground shrink-0" />
-                  <div className="text-sm text-muted-foreground flex-1 min-w-0">
-                    <span className="font-medium text-foreground">Spouštěč:</span> {trackingTriggerLabel}
+                <div>
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Spouštěč</div>
+                  <div className="flex gap-1.5 rounded-lg bg-muted/40 p-1 max-w-xs">
+                    <button
+                      onClick={() => setTriggerType("automatic")}
+                      className={cn(
+                        "flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                        triggerType === "automatic" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      ⚡ Automaticky
+                    </button>
+                    <button
+                      onClick={() => setTriggerType("timer")}
+                      className={cn(
+                        "flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                        triggerType === "timer" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      🕐 Časovač
+                    </button>
                   </div>
-                  <button
-                    disabled
-                    title="Brzy: ruční úprava triggeru (plán, podmínka, manuální)."
-                    className="flex items-center gap-1 rounded-md border border-dashed border-border px-2 py-1 text-[11px] text-muted-foreground opacity-60 cursor-not-allowed"
-                  >
-                    <Settings2 className="size-3" /> Pokročilé
-                  </button>
+                  <p className="mt-1.5 text-[11px] text-muted-foreground">
+                    {triggerType === "automatic"
+                      ? "Vyhodnotí se při každém novém tracking záznamu."
+                      : "Kontroluje periodicky, jestli od posledního záznamu neuplynula nastavená doba."}
+                  </p>
                 </div>
 
-                {selectedTrackingSituation === "tracking_event" && (
-                  <TrackingEventConfig
-                    conditions={trackingConditions}
-                    onConditions={setTrackingConditions}
-                  />
-                )}
-                {selectedTrackingSituation === "no_movement" && (
-                  <NoMovementConfig
-                    duration={noMovementDuration}
-                    onDuration={setNoMovementDuration}
-                    unit={noMovementUnit}
-                    onUnit={setNoMovementUnit}
-                    ignoreClearance={ignoreClearance}
-                    onIgnoreClearance={setIgnoreClearance}
-                  />
-                )}
-                {selectedTrackingSituation === "stuck_location" && (
-                  <StuckLocationConfig
-                    count={stuckCount}
-                    onCount={setStuckCount}
-                    matchMode={stuckMatchMode}
-                    onMatchMode={setStuckMatchMode}
-                    trackingConditions={stuckInclude}
-                    onTrackingConditions={setStuckInclude}
-                  />
+                {triggerType === "automatic" && (
+                  <div>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                      Podmínky současného záznamu
+                    </div>
+                    <CurrentRecordConditionsBuilder
+                      conditions={currentRecordConditions}
+                      onChange={setCurrentRecordConditions}
+                    />
+                  </div>
                 )}
 
-                {/* Podmínka zásilky — sdíleno pro všechny tracking situace */}
+                {triggerType === "timer" && (
+                  <div>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                      Zásilka nemá nový záznam déle než
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min={1}
+                        value={noMovementDuration}
+                        onChange={(e) => setNoMovementDuration(Number(e.target.value))}
+                        className="w-20 rounded border border-border bg-background px-2 py-1.5 text-sm text-center"
+                      />
+                      <select
+                        value={noMovementUnit}
+                        onChange={(e) => setNoMovementUnit(e.target.value as "h" | "d" | "bd")}
+                        className="rounded border border-border bg-background px-2 py-1.5 text-xs"
+                      >
+                        <option value="h">hodin</option>
+                        <option value="d">dní</option>
+                        <option value="bd">pracovních dní</option>
+                      </select>
+                      <span className="text-xs text-muted-foreground">od posledního záznamu</span>
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                    Podmínka zásilky
+                    Podmínky na historii záznamů
+                  </div>
+                  <TrackingHistoryConditionsBuilder
+                    conditions={historyConditions}
+                    onChange={setHistoryConditions}
+                  />
+                </div>
+
+                {/* Podmínky z ostatních entit — sdíleno pro všechny tracking situace */}
+                <div>
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                    Podmínky z ostatních entit
                   </div>
                   <div className="text-[11px] text-muted-foreground mb-2">
-                    Pravidlo se uplatní jen pro zásilky odpovídající těmto podmínkám. V selektoru jsou všechna pole zásilky.
+                    Pravidlo se uplatní jen pro zásilky odpovídající těmto podmínkám (zákazník, zásilka…).
                   </div>
                   <VkrConditionsBuilder
                     conditions={vkrConditions}
@@ -1125,285 +1162,7 @@ function ActionBranch({
   );
 }
 
-/* ─── Tracking configs ───────────────────────────────────── */
-
-function TrackingFieldSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const groups = Array.from(new Set(TRACKING_FIELDS.map((f) => f.group)));
-  return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="rounded border border-border bg-background px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary/40"
-      style={{ minWidth: 160 }}
-    >
-      {groups.map((g) => (
-        <optgroup key={g} label={g}>
-          {TRACKING_FIELDS.filter((f) => f.group === g).map((f) => (
-            <option key={f.value} value={f.value}>{f.label}</option>
-          ))}
-        </optgroup>
-      ))}
-    </select>
-  );
-}
-
-function TrackingConditionBuilder({
-  conditions,
-  onConditions,
-  simple = false,
-}: {
-  conditions: TrackingConditionRow[];
-  onConditions: (rows: TrackingConditionRow[]) => void;
-  simple?: boolean;
-}) {
-  function addRow() {
-    onConditions([...conditions, { id: "tc_" + Date.now(), field: "derivedStatus", operator: "je jedním z", value: "" }]);
-  }
-  function removeRow(id: string) {
-    if (conditions.length <= 1 && !simple) return;
-    onConditions(conditions.filter((r) => r.id !== id));
-  }
-  function update(id: string, patch: Partial<TrackingConditionRow>) {
-    onConditions(conditions.map((r) => r.id === id ? { ...r, ...patch } : r));
-  }
-
-  return (
-    <div className="space-y-1.5">
-      {conditions.map((row, idx) => (
-        <div key={row.id}>
-          {idx > 0 && (
-            <div className="flex items-center gap-2 my-1">
-              <div className="flex-1 border-t border-dashed border-border" />
-              <span className="text-[10px] font-bold text-primary bg-primary-soft/30 border border-primary/20 rounded px-1.5 py-0.5">A</span>
-              <div className="flex-1 border-t border-dashed border-border" />
-            </div>
-          )}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <TrackingFieldSelect value={row.field} onChange={(v) => update(row.id, { field: v })} />
-            <select
-              value={row.operator}
-              onChange={(e) => update(row.id, { operator: e.target.value })}
-              className="rounded border border-border bg-background px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary/40"
-              style={{ minWidth: 120 }}
-            >
-              {TRACKING_OPERATORS.map((op) => <option key={op}>{op}</option>)}
-            </select>
-            {row.field === "eventTime" ? (
-              <div className="flex-1 min-w-[260px]">
-                <TrackingTimeValueEditor
-                  value={row.timeSpec ?? DEFAULT_TIME_SPEC}
-                  onChange={(v) => update(row.id, { timeSpec: v })}
-                />
-              </div>
-            ) : (
-              <input
-                value={row.value}
-                onChange={(e) => update(row.id, { value: e.target.value })}
-                placeholder="hodnota…"
-                className="flex-1 min-w-[100px] rounded border border-border bg-background px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary/40"
-              />
-            )}
-
-            <button
-              onClick={() => removeRow(row.id)}
-              disabled={conditions.length <= 1 && !simple}
-              className="text-muted-foreground hover:text-foreground disabled:opacity-30"
-            >
-              <X className="size-3.5" />
-            </button>
-          </div>
-        </div>
-      ))}
-      <button
-        onClick={addRow}
-        className="mt-1 flex items-center gap-1 rounded-lg border border-dashed border-border px-3 py-1.5 text-xs text-muted-foreground hover:border-primary hover:text-primary transition-colors"
-      >
-        <Plus className="size-3" /> přidat podmínku
-      </button>
-    </div>
-  );
-}
-
-function TrackingEventConfig({
-  conditions, onConditions,
-}: {
-  conditions: TrackingConditionRow[];
-  onConditions: (rows: TrackingConditionRow[]) => void;
-}) {
-  return (
-    <div className="space-y-4">
-      <div>
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-          CO MUSÍ BÝT NA ZÁZNAMU
-        </div>
-        <TrackingConditionBuilder conditions={conditions} onConditions={onConditions} />
-      </div>
-      <div className="rounded-lg bg-blue-50 border border-blue-200 px-3 py-2.5 text-xs text-blue-700 leading-relaxed">
-        Více podmínek se vyhodnocuje jako <strong>A (AND)</strong>. Pro alternativy (status A nebo B) zadej hodnoty do jedné podmínky oddělené čárkou.
-      </div>
-    </div>
-  );
-}
-
-function NoMovementConfig({
-  duration, onDuration, unit, onUnit, ignoreClearance, onIgnoreClearance,
-}: {
-  duration: number;
-  onDuration: (v: number) => void;
-  unit: "h" | "d" | "bd";
-  onUnit: (v: "h" | "d" | "bd") => void;
-  ignoreClearance: boolean;
-  onIgnoreClearance: (v: boolean) => void;
-}) {
-  return (
-    <div className="space-y-4">
-      <div>
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-          Zásilka nemá nový záznam déle než
-        </div>
-        <div className="flex items-center gap-2">
-          <input
-            type="number"
-            min={1}
-            value={duration}
-            onChange={(e) => onDuration(Number(e.target.value))}
-            className="w-20 rounded border border-border bg-background px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-primary/30"
-          />
-          <select
-            value={unit}
-            onChange={(e) => onUnit(e.target.value as "h" | "d" | "bd")}
-            className="rounded border border-border bg-background px-2 py-1.5 text-xs focus:outline-none"
-          >
-            <option value="h">hodin</option>
-            <option value="d">dní</option>
-            <option value="bd">pracovních dní</option>
-          </select>
-          <span className="text-xs text-muted-foreground">od posledního záznamu</span>
-        </div>
-      </div>
-
-      <div className="border-t border-border" />
-
-      <div
-        className="flex items-center gap-3 cursor-pointer"
-        onClick={() => onIgnoreClearance(!ignoreClearance)}
-      >
-        <button
-          className={cn(
-            "relative inline-block h-5 w-9 rounded-full transition-colors shrink-0",
-            ignoreClearance ? "bg-primary" : "bg-muted"
-          )}
-        >
-          <span className={cn(
-            "absolute top-0.5 size-4 rounded-full bg-white transition-all shadow",
-            ignoreClearance ? "right-0.5" : "left-0.5"
-          )} />
-        </button>
-        <span className="text-xs text-muted-foreground leading-snug">
-          Ignorovat dobu na celním řízení (stav = Celní řízení se nezapočítává)
-        </span>
-      </div>
-
-      <div className="rounded-lg bg-blue-50 border border-blue-200 px-3 py-2.5 text-xs text-blue-700 leading-relaxed">
-        Systém nemá pro tuto situaci přirozený spouštěč. Podmínka se kontroluje v pravidelném časovém plánu — typicky 2× denně.
-      </div>
-    </div>
-  );
-}
-
-function StuckLocationConfig({
-  count, onCount, matchMode, onMatchMode, trackingConditions, onTrackingConditions,
-}: {
-  count: number;
-  onCount: (v: number) => void;
-  matchMode: StuckMatchMode;
-  onMatchMode: (v: StuckMatchMode) => void;
-  trackingConditions: TrackingConditionRow[];
-  onTrackingConditions: (rows: TrackingConditionRow[]) => void;
-}) {
-  const MATCH_OPTIONS: { id: StuckMatchMode; label: string; sub: string }[] = [
-    { id: "locationId", label: "ID místa", sub: "locationId" },
-    { id: "city", label: "Město", sub: "city" },
-    { id: "countryCode", label: "Kód země", sub: "countryCode" },
-  ];
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-          Počet po sobě jdoucích záznamů ze stejného místa
-        </div>
-        <div className="flex items-center gap-2">
-          <input
-            type="number"
-            min={2}
-            value={count}
-            onChange={(e) => onCount(Number(e.target.value))}
-            className="w-20 rounded border border-border bg-background px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-primary/30"
-          />
-          <span className="text-xs text-muted-foreground">po sobě jdoucích záznamů</span>
-        </div>
-      </div>
-
-      <div>
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Shoda místa podle</div>
-        <div className="flex gap-2">
-          {MATCH_OPTIONS.map((opt) => (
-            <button
-              key={opt.id}
-              onClick={() => onMatchMode(opt.id)}
-              className={cn(
-                "flex-1 rounded-lg border px-3 py-2 text-center text-xs font-medium transition-colors",
-                matchMode === opt.id
-                  ? "border-primary bg-primary-soft/30 text-primary"
-                  : "border-border hover:border-primary/30 text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <div>{opt.label}</div>
-              <div className={cn("text-[10px]", matchMode === opt.id ? "text-primary/70" : "text-muted-foreground")}>{opt.sub}</div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="border-t border-border" />
-
-      <div>
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-          CO MUSÍ BÝT NA ZÁZNAMU <span className="font-normal normal-case">(volitelně)</span>
-        </div>
-        <div className="text-[11px] text-muted-foreground mb-2">
-          Filtruj záznamy, které se započítávají do série (např. <code>derivedStatus je jedním z …</code>).
-        </div>
-        {trackingConditions.length > 0 ? (
-          <TrackingConditionBuilder conditions={trackingConditions} onConditions={onTrackingConditions} />
-        ) : (
-          <button
-            onClick={() => onTrackingConditions([{ id: "tc_" + Date.now(), field: "derivedStatus", operator: "je jedním z", value: "" }])}
-            className="mt-1 flex items-center gap-1 rounded-lg border border-dashed border-border px-3 py-1.5 text-xs text-muted-foreground hover:border-primary hover:text-primary transition-colors"
-          >
-            <Plus className="size-3" /> přidat podmínku trackingu
-          </button>
-        )}
-      </div>
-
-      <div className="rounded-lg bg-blue-50 border border-blue-200 px-3 py-2.5 text-xs text-blue-700 leading-relaxed">
-        Systém porovnává posledních N záznamů. Záznamy bez lokace (např. „Label created") se přeskakují.
-      </div>
-    </div>
-  );
-}
-
 /* ─── Helpers ────────────────────────────────────────────── */
-
-function getTrackingTriggerLabel(situation: TrackingSituation | null): string {
-  switch (situation) {
-    case "tracking_event": return "Reaktivní — při každém novém tracking záznamu";
-    case "no_movement": return "Časový plán (schedule) — systém kontroluje periodicky";
-    case "stuck_location": return "Reaktivní — při každém novém tracking záznamu";
-    default: return "—";
-  }
-}
 
 function getTriggerLabel(situation: RouteUiSituation | null, interval: CheckInterval): string {
   if (!situation) return "—";
