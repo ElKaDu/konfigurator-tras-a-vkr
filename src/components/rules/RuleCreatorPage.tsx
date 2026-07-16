@@ -9,7 +9,8 @@ import { cn } from "@/lib/utils";
 import type { Area, Priority, Rule, Situation, Severity, Condition } from "@/lib/model/types";
 import { VkrConditionsBuilder } from "@/components/rules/editors/VkrConditionsBuilder";
 import type { VkrCondition } from "@/lib/vkr/vkrConditionCatalog";
-import { TrackingConditionsBuilder, isHistoryCondition } from "@/components/rules/editors/TrackingConditionsBuilder";
+import { TrackingConditionsBuilder } from "@/components/rules/editors/TrackingConditionsBuilder";
+import { isHistoryCondition } from "@/lib/model/trackingFields";
 import { ActionTagPicker } from "@/components/situations/ActionTagPicker";
 
 

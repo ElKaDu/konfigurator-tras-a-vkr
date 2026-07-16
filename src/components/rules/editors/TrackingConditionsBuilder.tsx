@@ -1,24 +1,7 @@
 import { Plus, X } from "lucide-react";
-import { TRACKING_FIELDS, REPEATABLE_FIELDS } from "@/lib/model/trackingFields";
+import { TRACKING_FIELDS, REPEATABLE_FIELDS, isTrackingConditionRow, rowKindOf, type RowKind } from "@/lib/model/trackingFields";
 import { cn } from "@/lib/utils";
 import type { Condition } from "@/lib/model/types";
-
-type RowKind = "is" | "is_not" | "repeats" | "history";
-
-function isTrackingConditionRow(c: Condition): boolean {
-  return c.kind === "field" || c.kind === "tracking_aggregate";
-}
-
-function rowKindOf(c: Condition): RowKind {
-  if (c.kind === "field") return c.operator === "není" ? "is_not" : "is";
-  if (c.kind === "tracking_aggregate" && c.valueMode === "same_repeats") return "repeats";
-  return "history";
-}
-
-/** True for conditions valid regardless of Spouštěč (i.e. "bylo v historii" rows) — used by RuleCreatorPage to filter out-of-scope rows at save time when Spouštěč = Časovač. */
-export function isHistoryCondition(c: Condition): boolean {
-  return isTrackingConditionRow(c) && rowKindOf(c) === "history";
-}
 
 /** row.kind narrows to "field" | "tracking_aggregate" | "route_compliance" (Condition is a 3-way union) —
  * route_compliance never actually reaches these rows (filtered out by isTrackingConditionRow), but TS

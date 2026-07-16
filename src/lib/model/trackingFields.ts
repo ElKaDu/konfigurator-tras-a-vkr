@@ -1,3 +1,5 @@
+import type { Condition } from "@/lib/model/types";
+
 export interface TrackingFieldDef {
   value: string;
   label: string;
@@ -29,3 +31,20 @@ export const TRACKING_OPERATORS = ["je jedním z", "není žádným z", "je", "n
 
 /** Zjednodušené operátory pro "Podmínky současného záznamu" → režim Shoda hodnoty. */
 export const SIMPLE_OPERATORS = ["je", "není"];
+
+export type RowKind = "is" | "is_not" | "repeats" | "history";
+
+export function isTrackingConditionRow(c: Condition): boolean {
+  return c.kind === "field" || c.kind === "tracking_aggregate";
+}
+
+export function rowKindOf(c: Condition): RowKind {
+  if (c.kind === "field") return c.operator === "není" ? "is_not" : "is";
+  if (c.kind === "tracking_aggregate" && c.valueMode === "same_repeats") return "repeats";
+  return "history";
+}
+
+/** True for conditions valid regardless of Spouštěč (i.e. "bylo v historii" rows) — used by RuleCreatorPage to filter out-of-scope rows at save time when Spouštěč = Časovač. */
+export function isHistoryCondition(c: Condition): boolean {
+  return isTrackingConditionRow(c) && rowKindOf(c) === "history";
+}
