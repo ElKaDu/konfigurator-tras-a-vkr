@@ -54,25 +54,6 @@ export function SeverityCard({
       </div>
 
       <div>
-        <label className="text-xs text-muted-foreground mb-1 block">Název VkŘ (výchozí)</label>
-        <input
-          value={severity.vkrTitle}
-          onChange={(e) => onChange({ ...severity, vkrTitle: e.target.value })}
-          className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-sm"
-        />
-      </div>
-
-      <div>
-        <label className="text-xs text-muted-foreground mb-1 block">Popis VkŘ (výchozí)</label>
-        <textarea
-          value={severity.vkrDescription ?? ""}
-          onChange={(e) => onChange({ ...severity, vkrDescription: e.target.value })}
-          rows={2}
-          className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-sm resize-none"
-        />
-      </div>
-
-      <div>
         <label className="text-xs text-muted-foreground mb-1 block">Priorita</label>
         <select
           value={severity.priority}
