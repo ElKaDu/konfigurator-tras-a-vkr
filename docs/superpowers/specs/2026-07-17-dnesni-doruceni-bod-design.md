@@ -142,18 +142,27 @@ podmínky.
 
 ## 6. Wireframe editoru (schváleno)
 
-Ověřeno přes vizuální companion (`.superpowers/brainstorm/`, iterace v1 → v2). Layout:
+Ověřeno přes vizuální companion (`.superpowers/brainstorm/`, iterace v1 → v3). Uložená referenční verze:
+**`mockups/2026-07-17-dnesni-doruceni-editor-wireframe.html`** (v3 — UX/wording se ještě dolaďuje, layout je
+finální). Layout:
 
 - **Vlevo** — strom Úsek → Bod, beze změny.
 - **Vpravo, pro vybraný bod „Dnešní doručení":**
-  1. Sekce **1. fyzický scan** — match + termín.
-  2. Sekce **2. fyzický scan** — match + termín (kotva na scan1 + offset).
-  3. Sekce **Časová nastavení** — tři pole vedle sebe: limitní čas kontroly, celkový limit, tolerance 2. scanu.
-  4. Sekce **Výsledné stavy → Situace / Závažnost** — 7 pevných řádků (viz §5), u každého jen výběr
+  1. Sekce **1. fyzický scan** — match + termín, a hned pod tím dvě pole **limitní čas kontroly** a
+     **celkový limit** (patří k vyhodnocení 1. scanu, proto jsou v jeho sekci, ne v samostatném bloku).
+  2. Sekce **2. fyzický scan** — match + termín (kotva na scan1 + offset), a pod tím pole
+     **tolerance 2. scanu**.
+  3. Sekce **Výsledné stavy → Situace / Závažnost** — 7 pevných řádků (viz §5), u každého jen výběr
      Situace/Závažnosti, žádná podmínka.
 
-První iterace (v1) měla u dvou stavů tlačítko „+ podmínka" pro D-větvení — zamítnuto v review, nahrazeno
-plochým seznamem finálních stavů (viz §5, Varianta C).
+Vývoj iterací:
+- **v1** měla u dvou stavů tlačítko „+ podmínka" pro D-větvení — zamítnuto v review, nahrazeno plochým
+  seznamem finálních stavů (viz §5, Varianta C).
+- **v2** sjednotila na plochý seznam 7 stavů, ale časová nastavení byla v samostatné sekci „Časová
+  nastavení" oddělené od obou scanů.
+- **v3** (uložená verze) přesunula limitní čas/celkový limit pod sekci 1. scanu a toleranci pod sekci
+  2. scanu — každé pole je vizuálně u toho scanu, ke kterému se vyhodnocením váže, žádná samostatná sekce
+  navíc.
 
 ---
 
