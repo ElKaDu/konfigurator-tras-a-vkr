@@ -29,6 +29,9 @@ tolerance) nese jako pojmenovaná nastavení místo ruční skládačky Kontrol.
 
 ## 2. Odvozená byznysová logika
 
+Rozhodovací strom (mermaid diagram) uložen jako samostatný artefakt:
+**`mockups/2026-07-17-zpozdeni-v-den-doruceni-rozhodovaci-strom.html`**.
+
 **Vstupy:**
 
 | Zkratka | Význam |
