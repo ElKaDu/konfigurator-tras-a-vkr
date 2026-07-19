@@ -1,0 +1,313 @@
+<style>
+  :root {
+    --bg: #eef1f5;
+    --surface: #ffffff;
+    --surface-2: #e7ebf1;
+    --ink: #131720;
+    --ink-muted: #545e6e;
+    --border: #d3d9e1;
+    --accent: #2a5ea8;
+    --accent-soft: #e1ebf7;
+    --good: #17734f;
+    --good-soft: #e2f3ea;
+    --warn: #93630a;
+    --warn-soft: #fbf0dc;
+    --bad: #a5332f;
+    --bad-soft: #fbe7e5;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1319; --surface: #161b23; --surface-2: #1e2530; --ink: #e7ebf2; --ink-muted: #97a1b3; --border: #2b3341; --accent: #7fa8dd; --accent-soft: #1c2735; --good: #5cbf94; --good-soft: #17281f; --warn: #dcab52; --warn-soft: #2c2412; --bad: #e18784; --bad-soft: #2c1918; }
+  }
+  :root[data-theme="dark"] { --bg: #0f1319; --surface: #161b23; --surface-2: #1e2530; --ink: #e7ebf2; --ink-muted: #97a1b3; --border: #2b3341; --accent: #7fa8dd; --accent-soft: #1c2735; --good: #5cbf94; --good-soft: #17281f; --warn: #dcab52; --warn-soft: #2c2412; --bad: #e18784; --bad-soft: #2c1918; }
+  :root[data-theme="light"] { --bg: #eef1f5; --surface: #ffffff; --surface-2: #e7ebf1; --ink: #131720; --ink-muted: #545e6e; --border: #d3d9e1; --accent: #2a5ea8; --accent-soft: #e1ebf7; --good: #17734f; --good-soft: #e2f3ea; --warn: #93630a; --warn-soft: #fbf0dc; --bad: #a5332f; --bad-soft: #fbe7e5; }
+
+  * { box-sizing: border-box; }
+  html, body { background: var(--bg); }
+  body { font-family: var(--sans); color: var(--ink); max-width: 100%; overflow-x: hidden; }
+
+  .page { max-width: 880px; margin: 0 auto; padding: 48px 24px 100px; display: flex; flex-direction: column; gap: 40px; }
+
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+  h1 { font-size: 28px; line-height: 1.2; margin: 0; font-weight: 700; letter-spacing: -0.01em; }
+  .lede { color: var(--ink-muted); font-size: 15px; line-height: 1.65; max-width: 68ch; }
+
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; }
+  .toc-title { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-muted); margin-bottom: 8px; }
+  .toc ol { margin: 0; padding-left: 20px; font-size: 13.5px; line-height: 1.9; }
+  .toc a { color: var(--ink); text-decoration: none; }
+  .toc a:hover { color: var(--accent); }
+
+  section { display: flex; flex-direction: column; gap: 14px; scroll-margin-top: 20px; }
+  h2 { font-size: 20px; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 10px; }
+  h2 .num { font-family: var(--mono); font-size: 13px; color: var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 2px 8px; }
+  h3 { font-size: 15.5px; font-weight: 650; margin: 4px 0 0; }
+  p { line-height: 1.65; font-size: 14.5px; margin: 0; }
+  p + p { margin-top: 8px; }
+  ul, ol { line-height: 1.65; font-size: 14.5px; padding-left: 22px; }
+  li + li { margin-top: 4px; }
+  code { font-family: var(--mono); font-size: 12.5px; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
+
+  .field-legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+  .field-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.55; }
+  .field-card b { font-family: var(--mono); color: var(--accent); }
+
+  .callout { border-radius: 10px; padding: 14px 16px; font-size: 13.5px; line-height: 1.6; border: 1px solid; }
+  .callout.warn { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, var(--border)); }
+  .callout.info { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 35%, var(--border)); }
+  .callout b { color: var(--ink); }
+
+  .diagram-frame { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; overflow-x: auto; }
+  .diagram-frame pre.mermaid { margin: 0; min-width: 760px; }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; background: var(--surface); }
+  thead th { text-align: left; font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-muted); background: var(--surface-2); padding: 10px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  tbody td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+  tbody tr:last-child td { border-bottom: none; }
+
+  .kontrola-block { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .kontrola-block h3 { margin-bottom: 6px; }
+
+  footer { border-top: 1px solid var(--border); padding-top: 20px; font-size: 12.5px; color: var(--ink-muted); line-height: 1.7; }
+  footer a { color: var(--accent); }
+</style>
+
+<div class="page">
+
+  <header>
+    <div class="eyebrow">Zadání pro programátory</div>
+    <h1>Soulad s trasou — jak nakódovat kontroly na bodu trasy</h1>
+    <p class="lede">
+      Tenhle dokument předpokládá, že celý flow vidíte poprvé. Vysvětluje od začátku, co je Úsek/Bod/Kontrola/
+      Situace, jak se vyhodnocuje „Běžný bod" a jak složitější „Dnešní doručení", a kde přesně končí vaše
+      práce (kód) a začíná Django admin (obsah).
+    </p>
+  </header>
+
+  <div class="toc">
+    <div class="toc-title">Obsah</div>
+    <ol>
+      <li><a href="#pojmy">Základní pojmy</a></li>
+      <li><a href="#pole">Dvě klíčová pole — ADD a D</a></li>
+      <li><a href="#typy">Dva typy bodu</a></li>
+      <li><a href="#bezny">Běžný bod — logika a flowchart</a></li>
+      <li><a href="#dnesni">Dnešní doručení — logika a flowchart</a></li>
+      <li><a href="#konfigurace">Co se hardcoduje a co je v Django adminu</a></li>
+      <li><a href="#otevrene">Otevřené otázky — nejasnosti k probrání s klientem</a></li>
+      <li><a href="#reference">Reference</a></li>
+    </ol>
+  </div>
+
+  <section id="pojmy">
+    <h2><span class="num">1</span>Základní pojmy</h2>
+    <p>
+      Zásilka jede po <b>Trase</b>, která se skládá z <b>Úseků</b> (např. „ČR – Paříž"). Každý Úsek obsahuje
+      posloupnost <b>Bodů</b> — míst, kterými zásilka reálně prochází (vyzvednutí, odlet ze země, přílet do
+      cílové destinace...). Ke každému Bodu se váže jedna nebo víc <b>Kontrol</b> — pravidlo, které se
+      vyhodnotí a rozhodne, jestli zásilka na daném bodu dorazila v pořádku, nebo ne.
+    </p>
+    <p>
+      Když Kontrola vyjde negativně, vytvoří se <b>VkŘ</b> (věc k řešení) — úkol pro operátora. Každá VkŘ má
+      přiřazenou <b>Situaci</b> (byznysová kategorie, např. „Problém na trase"), <b>Závažnost</b> (např.
+      „běžné"/„kritické") a jednu nebo víc <b>Akcí</b> (co se má stát — typicky „vytvořit věc k řešení").
+    </p>
+  </section>
+
+  <section id="pole">
+    <h2><span class="num">2</span>Dvě klíčová pole — ADD a D</h2>
+    <p>Tahle dvě pole se snadno spletou (stalo se to i při návrhu tohoto zadání) — nezaměňovat:</p>
+    <div class="field-legend">
+      <div class="field-card"><b>ADD</b> — avizované datum doručení <b>zákazníkovi</b>, uložené u nás v
+      systému. Čte se <b>jednou</b> jako vstupní podmínka — určuje, jestli se bod „Dnešní doručení" ten
+      den vůbec vyhodnocuje. V rámci dne se neposouvá.</div>
+      <div class="field-card"><b>D</b> — datum doručení <b>od přepravce</b>, živý odhad z trackingových dat
+      (pole <code>datumDoruceniOdPrepravce</code>). Čte se opakovaně a je to jediné pole, které se v průběhu
+      dne může posunout — posun D znamená jisté zpoždění.</div>
+    </div>
+  </section>
+
+  <section id="typy">
+    <h2><span class="num">3</span>Dva typy bodu</h2>
+    <p>
+      Bod má pole <code>kind</code>, které určuje, podle jaké logiky se vyhodnocuje:
+    </p>
+    <ul>
+      <li><b>Běžný bod</b> — jednoduchý, jedna kontrola, používá se pro většinu bodů na trase (odlety,
+      přílety, celní odbavení...).</li>
+      <li><b>Dnešní doručení</b> — specializovaný typ jen pro vyhodnocení „doručí se zásilka dnes?" na
+      poslední fázi trasy. Používá ADD jako vstupní podmínku a má dva navazující fyzické scany.</li>
+    </ul>
+  </section>
+
+  <section id="bezny">
+    <h2><span class="num">4</span>Běžný bod — logika a flowchart</h2>
+    <p>
+      Bod má <b>match</b> (jaký status/typ lokace/ID místa se na záznamu očekává) a <b>Termín</b> (dokdy tam
+      má záznam se shodou reálně nastat). K tomu jedno nastavení navíc:
+    </p>
+    <table>
+      <thead><tr><th>Nastavení</th><th>Příklad hodnoty</th><th>Co dělá</th></tr></thead>
+      <tbody>
+        <tr><td><code>Konečný limit</code></td><td>„v termínu" (offset 0), nebo absolutní čas</td><td>kdy proběhne (jediná) kontrola — časovač, ne reaktivně</td></tr>
+      </tbody>
+    </table>
+    <p><b>Vyhodnocení:</b> pokud se do Konečného limitu najde záznam splňující match s vlastním časem ≤ Termín,
+    nic se neděje. Pokud ne, vytvoří se VkŘ „Problém na trase" — a <b>řetězec bodů pokračuje dál</b>, další
+    bod se vyhodnocuje nezávisle na tomhle výsledku (viz §7, otevřená otázka).</p>
+    <p><b>Doplňkový mechanismus:</b> pokud se záznam objeví až po Konečném limitu (jinak splňuje podmínky),
+    pošle se samostatná <b>informativní VkŘ</b> (nižší závažnost) — čistě reaktivně, žádné sledování stavu.</p>
+
+    <div class="diagram-frame">
+<pre class="mermaid">
+flowchart TD
+  TB["Bod - zadna vstupni podminka<br/>(na rozdil od Dnesniho doruceni)"] --> B1{"Konecny limit (v terminu):<br/>nalezen zaznam se shodou<br/>a vlastnim casem <= Termin?"}
+  B1 -->|"Ano"| BOK(["Splneno<br/>zadna VkR, pokracuje dalsi bod"])
+  B1 -->|"Ne"| BVKR(["Problem na trase"])
+  BVKR -->|"retezec pokracuje<br/>i pres VkR"| BOK
+  B1 -.->|"pozdeji se objevi<br/>zaznam s pozdejsim casem"| BINFO(["informativni VkR<br/>nizsi zavaznost"])
+</pre>
+    </div>
+
+    <div class="callout warn">
+      <b>Vědomá mezera:</b> Termíny jsou podle zadání klienta vázané na pevné datum a čas vyzvednutí, ne
+      kaskádovitě na skutečný čas předchozího bodu. Důsledek: jakmile je jeden bod zpožděný, každý další bod
+      v řetězci nevyhnutelně taky vyhodnotí Nesplněno a pošle vlastní VkŘ za tentýž kořenový problém. Víc
+      v §7.
+    </div>
+  </section>
+
+  <section id="dnesni">
+    <h2><span class="num">5</span>Dnešní doručení — logika a flowchart</h2>
+    <p>
+      Používá se jen na jednom konkrétním bodu trasy (typicky poslední fáze před doručením). Skládá se ze
+      dvou navazujících fyzických scanů.
+    </p>
+
+    <h3>5.1 Vstupní podmínka</h3>
+    <p>Bod se vyhodnocuje <b>jen pokud <code>ADD = dnes</code></b>. Pokud ne, žádná kontrola níže neproběhne.</p>
+
+    <h3>5.2 1. fyzický scan — tři kontroly</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Kontrola</th><th>Nastavení</th><th>Kdy</th><th>Co dělá</th></tr></thead>
+        <tbody>
+          <tr><td>Kontrola 1 (reaktivní)</td><td><code>Termín</code> (nejpozdější možný čas)</td><td>průběžně do 9:00</td><td>ADD=dnes a status nalezen s vlastním časem ≤ Termín → pozitivní. <b>Žádná kontrola D zde.</b></td></tr>
+          <tr><td>Kontrola 2 (časovač)</td><td><code>Limit pro řádné záznamy</code> (kdy přehodnotit)</td><td>9:00</td><td><b>Posuzuje jen řádnost záznamu</b> (nalezen, čas ≤ Termín?) — stejná otázka jako Kontrola 1, jen s časovačem jako pojistkou. <b>D se tady vůbec nekontroluje</b> — pokud je záznam neřádný, prostě se čeká do Konečného limitu, žádná VkŘ.</td></tr>
+          <tr><td>Kontrola 3 (časovač)</td><td><code>Konečný limit</code> (do kdy čekat)</td><td>10:00</td><td>dva kroky: (1) objevil se záznam vůbec, čas už nerozhoduje? Ne → final zpoždění. Ano → (2) D = dnes? Ano → úspěch, Ne → final zpoždění. <b>Tohle je první místo, kde se D vůbec vyhodnocuje.</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout warn">
+      <b>Časté nepochopení (opravováno opakovaně):</b> D se NEPOSUZUJE v Kontrole 2 vůbec — ani jako
+      samostatný navazující krok. Zadání klienta popisuje D-větvení jen u Kontroly 3 (10:00); dřívější verze
+      tohoto dokumentu přidávaly D-kontrolu i do Kontroly 2 jako domněnku nad rámec zadání — bylo odstraněno.
+    </div>
+
+    <h3>5.3 2. fyzický scan — jednostupňové</h3>
+    <p>Na rozdíl od 1. scanu jen jedna kontrola, žádný mezistupeň:</p>
+    <ul>
+      <li><b>Termín</b> = čas 1. scanu + 2 hodiny (vlastní čas 2. scanu musí být ≤ tohle).</li>
+      <li><b>Konečný limit</b> = Termín + 1 hodina (dvojí režim zadání jako u 1. scanu — absolutní čas nebo
+      relativní posun).</li>
+      <li>Řádný záznam: z cílové země, typ lokace „Destination Facility" (ne „FedEx Facility" jako u 1. scanu),
+      <b>PSČ začíná stejnou jednou číslicí</b> jako PSČ místa doručení zásilky — potřeba nová podmínka
+      „shoda se zásilkou" (dynamické porovnání proti poli konkrétní zásilky, ne pevný seznam hodnot).</li>
+      <li>Žádné čtení D u 2. scanu.</li>
+    </ul>
+
+    <div class="diagram-frame">
+<pre class="mermaid">
+flowchart TD
+  subgraph G_SCAN1["1. fyzicky scan - vstupni podminka"]
+    G1{"ADD = dnes?"}
+    G1 -.->|"Ne"| NORUN1(["Bod se dnes vubec<br/>nevyhodnocuje"])
+    G1 -->|"Ano"| T1["reaktivne dorazi status,<br/>nebo casovac"]
+  end
+
+  subgraph V_SCAN1["1. fyzicky scan - vysledek"]
+    T1 --> S1A{"Limit pro radne zaznamy (9:00):<br/>nalezen, vlastni cas <= Termin (8:00)?"}
+    S1A -->|"Ano"| S1OK[["pokracuje na 2. scan"]]
+    S1A -->|"Ne, chybi nebo neni radny<br/>(napr. pozdejsi vlastni cas)"| S1WAIT["Ceka se do Konecneho limitu<br/>vnitrni stav, bez VkR<br/>D se tady jeste nekontroluje"]
+    S1WAIT --> S1B{"Konecny limit (10:00):<br/>nalezen, cas uz nerozhoduje?"}
+    S1B -->|"Ne"| S1F2(["Zpozdena zasilka<br/>final"])
+    S1B -->|"Ano"| S1D2{"D stale dnes?"}
+    S1D2 -->|"Ano"| S1OK
+    S1D2 -.->|"Ne, D se posunulo"| S1F3(["Zpozdena zasilka<br/>final"])
+  end
+
+  subgraph V_SCAN2["2. fyzicky scan - jednostupnove"]
+    S1OK --> S2A{"Termin (scan1 plus 2h):<br/>nalezen do Konecneho limitu<br/>(Termin plus 1h)?"}
+    S2A -->|"Ano"| S2OK(["Predpoklad<br/>dnesniho doruceni"])
+    S2A -->|"Ne"| S2F(["Zpozdena zasilka<br/>final"])
+  end
+</pre>
+    </div>
+
+    <h3>5.4 Výsledné situace</h3>
+    <p>Sedm technických stavů se slévá do dvou situací (viz §6 — mapování je hardcoded, obsah situace je
+    v Django adminu):</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Situace</th><th>Kdy nastane (plain language)</th></tr></thead>
+        <tbody>
+          <tr><td><b>Dnešní doručení</b></td><td>Oba fyzické scany proběhly v pořádku — buď hned zrána, nebo (pokud to trvalo déle) přepravce do 10:00 pořád slibuje doručení dnes.</td></tr>
+          <tr><td><b>Zpožděná zásilka</b></td><td>Něco z plánu nevyšlo — některý ze scanů vůbec nedorazil nebo přišel pozdě, nebo přepravce mezitím posunul datum doručení.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="konfigurace">
+    <h2><span class="num">6</span>Co se hardcoduje a co je v Django adminu</h2>
+    <p>Tohle je nejdůležitější rozlišení pro vaši implementaci:</p>
+    <div class="field-legend">
+      <div class="field-card"><b>Hardcoded (vy)</b> — celá logika vyhodnocení popsaná v §4 a §5: kdy se
+      která kontrola spouští, jak se počítají termíny, kdy se čte ADD/D, a <b>mapování</b> „tenhle technický
+      výsledek → tahle Situace". Uživatel tohle nemůže v UI nijak měnit ani rozbít.</div>
+      <div class="field-card"><b>Django admin (byznys)</b> — obsah Situace/Závažnost/Akce: název, popis,
+      priorita, jaké akce se spustí (např. text notifikace). Toto se <b>nezobrazuje v appce</b> jako
+      konfigurovatelné UI (viz wireframe, žádný dropdown pro výběr situace u bodu) — jen v Django adminu,
+      aby to nešlo omylem přepsat z běžného UI appky.</div>
+    </div>
+    <div class="callout info">
+      Prakticky to znamená: ve vašem kódu bude např. <code>createVkr(shipment, SITUACE.ZPOZDENA_ZASILKA)</code>
+      s pevně danou konstantou/identifikátorem situace — ale <b>text, který operátor uvidí</b> (název,
+      popis, priorita, akce k provedení) se natáhne z Django modelu přes ID, ne z hardcoded stringu.
+    </div>
+  </section>
+
+  <section id="otevrene">
+    <h2><span class="num">7</span>Otevřené otázky — nejasnosti k probrání s klientem</h2>
+    <ul>
+      <li><b>Vazba termínů na ADD u „Běžného bodu":</b> termíny (22:00, 3:00...) jsou dnes vázané na pevné
+      datum/čas vyzvednutí, ne kaskádovitě na skutečný čas předchozího bodu. Jakmile je jeden bod zpožděný,
+      každý další bod v řetězci nevyhnutelně taky vyhodnotí Nesplněno a pošle vlastní VkŘ za tentýž kořenový
+      problém — i když operátor mezitím ručně upraví ADD, navazující kontroly to nereflektují. Otázka pro
+      klienta: dá se termín navazujících bodů nějak odvodit/odečítat od ADD?</li>
+      <li><b>D v minulosti</b> (přepravce tvrdí, že mělo být doručeno už dřív) — traktováno stejně jako D v
+      budoucnosti, ale klientovo zadání tenhle případ vůbec neřeší.</li>
+      <li><b>Řádky 7/8 u Dnešního doručení</b> (rekontrola v 10:00 vyžaduje i 2. scan) — v doslovném zadání
+      klienta to není, přidáno pro konzistenci s hlavní větví.</li>
+    </ul>
+  </section>
+
+  <section id="reference">
+    <h2><span class="num">8</span>Reference</h2>
+    <ul>
+      <li><code>docs/superpowers/specs/2026-07-17-dnesni-doruceni-bod-design.md</code> — plná specifikace s
+      rozhodovacími tabulkami a zdůvodněním každého dopočteného předpokladu.</li>
+      <li><code>mockups/2026-07-17-spolecny-flowchart-final.html</code> — stejné flowcharty jako výše,
+      samostatně.</li>
+      <li><code>nastroje/kontrola-na-bodu-trasy.*</code> (worktree <code>artefakt-kontrola-trasy</code>) —
+      existující (zjednodušený, needimplementovaný podle nejnovější logiky) simulátor.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Needimplementováno. Tento dokument je zadání k implementaci, ne popis hotového stavu.
+  </footer>
+
+</div>

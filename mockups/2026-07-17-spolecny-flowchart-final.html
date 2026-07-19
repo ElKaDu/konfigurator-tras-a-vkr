@@ -72,9 +72,7 @@ flowchart TD
   subgraph V_SCAN1["1. fyzicky scan - Vysledek"]
     T1 --> S1A{"Limit pro radne zaznamy (9:00):<br/>nalezen, vlastni cas <= Termin (8:00)?"}
     S1A -->|"Ano"| S1OK[["pokracuje na 2. scan"]]
-    S1A -->|"Ne, chybi nebo neni radny<br/>(napr. pozdejsi vlastni cas)"| S1D{"D = dnes?"}
-    S1D -->|"Ano"| S1WAIT["Ceka se do Konecneho limitu<br/>vnitrni stav, bez VkR"]
-    S1D -.->|"Ne"| S1F1(["Zpozdena zasilka<br/>final"])
+    S1A -->|"Ne, chybi nebo neni radny<br/>(napr. pozdejsi vlastni cas)"| S1WAIT["Ceka se do Konecneho limitu<br/>vnitrni stav, bez VkR<br/>D se tady jeste nekontroluje"]
     S1WAIT --> S1B{"Konecny limit (10:00):<br/>nalezen, cas uz nerozhoduje?"}
     S1B -->|"Ne"| S1F2(["Zpozdena zasilka<br/>final"])
     S1B -->|"Ano"| S1D2{"D stale dnes?"}

@@ -56,19 +56,18 @@ neproběhne vůbec.
 |---|---|---|---|---|
 | **Kontrola 1** (reaktivní) | **Termín** (nejpozdější možný čas) | aktivní do 9:00 | ADD = dnes ∧ status nalezen v trackingu | vlastní čas záznamu ≤ Termín (8:00) |
 | **Kontrola 2** (časovač) | **Limit pro řádné záznamy** (kdy přehodnotit) | 9:00 | ADD = dnes ∧ status se **řádně neobjevil do Termínu** (buď vůbec, nebo s pozdějším vlastním časem než 8:00) | — |
-| **Kontrola 3** (časovač) | **Konečný limit** (do kdy čekat) | 10:00 | zásilky, které z Kontroly 2 přešly do stavu „čeká se" (D bylo dnes) | — |
+| **Kontrola 3** (časovač) | **Konečný limit** (do kdy čekat) | 10:00 | zásilky, které z Kontroly 2 přešly do stavu „čeká se" (záznam se neobjevil řádně) | — |
 
 **Kontrola 1 — výsledek:** vlastní čas ≤ Termín → **pozitivní** (žádná kontrola D zde — vědomě, viz níže).
 
-**Kontrola 2 sama o sobě posuzuje jen řádnost záznamu** (nalezen, vlastní čas ≤ Termín?) — je to tatáž otázka
-jako u Kontroly 1, jen s časovačem jako pojistkou v 9:00. **D se neposuzuje v rámci Kontroly 2** — je to
-samostatný, navazující krok, který nastává až když Kontrola 2 vyjde negativně:
+**Kontrola 2 posuzuje jen řádnost záznamu** (nalezen, vlastní čas ≤ Termín?) — je to tatáž otázka jako u
+Kontroly 1, jen s časovačem jako pojistkou v 9:00. **D se v rámci Kontroly 2 vůbec nekontroluje** — poprvé se
+vyhodnotí až v Kontrole 3 (Konečný limit, 10:00).
 
 **Kontrola 2 — výsledek:**
 - Záznam řádný (nalezen do Termínu) → stejně jako u Kontroly 1, pokračuje se na 2. scan.
-- Záznam neřádný (chybí, nebo nalezen s pozdějším vlastním časem) → **teprve teď** se kontroluje D:
-  - D = dnes → zatím žádná akce, vnitřní stav „čeká se do 10:00", **bez VkŘ**.
-  - D ≠ dnes (posunulo se do budoucna) → rovnou **final negativní výsledek** „Zpožděná zásilka".
+- Záznam neřádný (chybí, nebo nalezen s pozdějším vlastním časem) → **žádná VkŘ**, vnitřní stav „čeká se do
+  Konečného limitu" — bez ohledu na D.
 
 **Kontrola 3 — výsledek, dva kroky postupně:**
 1. Objevil se záznam vůbec (kdykoli, i mezi 9:00–10:00 — vlastní čas záznamu už nerozhoduje)? Ne → **final
@@ -114,18 +113,19 @@ Rozhodovací strom (mermaid diagram) uložen jako samostatný artefakt:
 |---|---|---|---|
 | 1 | 1. scan (vlastní čas ≤ Termín) ∧ 2. scan v okně (Termín+2h, Konečný limit +1h) | ✅ Předpoklad dnešního doručení | explicitně v zadání |
 | 2 | 1. scan (vlastní čas ≤ Termín) ∧ ¬2. scan v okně | 🚫 Zpožděná zásilka | explicitně v zadání |
-| 3 | ¬1. scan do Limitu pro řádné záznamy (9:00) ∧ D ≠ dnes (už v tomhle checku) | 🚫 Zpožděná zásilka | **dopočteno** — zadání tenhle stav vůbec nezmiňuje |
-| 4 | ¬1. scan do 9:00 ∧ D = dnes → čeká se do Konečného limitu | *(vnitřní mezistav, žádná akce, needávaný jako konfigurovatelný řádek)* | explicitně v zadání |
-| 5 | 1. scan stále nenalezen do Konečného limitu (10:00) | 🚫 Zpožděná zásilka | explicitně v zadání |
-| 6 | 1. scan nalezen do 10:00 (vlastní čas už nerozhoduje) ∧ D se mezitím posunulo | 🚫 Zpožděná zásilka | explicitně v zadání |
-| 7 | 1. scan nalezen do 10:00 ∧ D stále dnes ∧ 2. scan v okně | ✅ Předpoklad dnešního doručení | **dopočteno** — zadání u téhle větve 2. scan vůbec nezmiňuje |
-| 8 | 1. scan nalezen do 10:00 ∧ D stále dnes ∧ ¬2. scan v okně | 🚫 Zpožděná zásilka | **dopočteno** |
+| 3 | ¬1. scan do Limitu pro řádné záznamy (9:00) → čeká se do Konečného limitu | *(vnitřní mezistav, žádná akce, needávaný jako konfigurovatelný řádek — D se v Kontrole 2 vůbec nekontroluje)* | explicitně v zadání |
+| 4 | 1. scan stále nenalezen do Konečného limitu (10:00) | 🚫 Zpožděná zásilka | explicitně v zadání |
+| 5 | 1. scan nalezen do 10:00 (vlastní čas už nerozhoduje) ∧ D se mezitím posunulo | 🚫 Zpožděná zásilka | explicitně v zadání |
+| 6 | 1. scan nalezen do 10:00 ∧ D stále dnes ∧ 2. scan v okně | ✅ Předpoklad dnešního doručení | **dopočteno** — zadání u téhle větve 2. scan vůbec nezmiňuje |
+| 7 | 1. scan nalezen do 10:00 ∧ D stále dnes ∧ ¬2. scan v okně | 🚫 Zpožděná zásilka | **dopočteno** |
 
 ### 5.1 Dopočtené předpoklady — potvrdit u klienta
 
-- **Řádek 3:** Pokud D už při kontrole v 9:00 neodpovídá dnešku (v budoucnosti i minulosti), bereme to jako
-  okamžité zpoždění bez čekání do Konečného limitu. Zadání tenhle stav vůbec neřeší.
-- **Řádek 7/8:** Ve větvi rekontroly v 10:00 zadání mluví jen o 1. scanu + D, bez zmínky o 2. scanu. Přidáváme
+- **Žádná kontrola D v Kontrole 2 (9:00).** Zadání popisuje D-větvení jen pro stav „čeká se do 10:00" (D=dnes) —
+  co se stane, když D už v 9:00 neodpovídá dnešku, text vůbec neřeší. Dřívější verze téhle specifikace sem
+  přidávala domněnku „D≠dnes už v 9:00 → okamžité zpoždění" — to bylo **omylem přidané zpřísnění nad rámec
+  zadání** a bylo odstraněno. Podle doslovného zadání se D poprvé vyhodnocuje až v Kontrole 3 (10:00).
+- **Řádek 6/7:** Ve větvi rekontroly v 10:00 zadání mluví jen o 1. scanu + D, bez zmínky o 2. scanu. Přidáváme
   požadavek na 2. scan kvůli konzistenci s řádkem 1/2 — v zadání to explicitně není.
 - **D v minulosti** (přepravce tvrdí, že mělo být doručeno už dřív) je traktováno stejně jako D v budoucnosti —
   zadání tenhle případ vůbec neřeší.
