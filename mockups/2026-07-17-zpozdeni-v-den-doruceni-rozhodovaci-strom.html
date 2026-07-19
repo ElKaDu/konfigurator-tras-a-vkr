@@ -1,0 +1,523 @@
+<style>
+  :root {
+    --bg: #eef1f5;
+    --surface: #ffffff;
+    --surface-2: #e7ebf1;
+    --ink: #131720;
+    --ink-muted: #545e6e;
+    --border: #d3d9e1;
+    --accent: #2a5ea8;
+    --accent-soft: #e1ebf7;
+    --good: #17734f;
+    --good-soft: #e2f3ea;
+    --warn: #93630a;
+    --warn-soft: #fbf0dc;
+    --bad: #a5332f;
+    --bad-soft: #fbe7e5;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1319;
+      --surface: #161b23;
+      --surface-2: #1e2530;
+      --ink: #e7ebf2;
+      --ink-muted: #97a1b3;
+      --border: #2b3341;
+      --accent: #7fa8dd;
+      --accent-soft: #1c2735;
+      --good: #5cbf94;
+      --good-soft: #17281f;
+      --warn: #dcab52;
+      --warn-soft: #2c2412;
+      --bad: #e18784;
+      --bad-soft: #2c1918;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1319; --surface: #161b23; --surface-2: #1e2530; --ink: #e7ebf2; --ink-muted: #97a1b3;
+    --border: #2b3341; --accent: #7fa8dd; --accent-soft: #1c2735; --good: #5cbf94; --good-soft: #17281f;
+    --warn: #dcab52; --warn-soft: #2c2412; --bad: #e18784; --bad-soft: #2c1918;
+  }
+  :root[data-theme="light"] {
+    --bg: #eef1f5; --surface: #ffffff; --surface-2: #e7ebf1; --ink: #131720; --ink-muted: #545e6e;
+    --border: #d3d9e1; --accent: #2a5ea8; --accent-soft: #e1ebf7; --good: #17734f; --good-soft: #e2f3ea;
+    --warn: #93630a; --warn-soft: #fbf0dc; --bad: #a5332f; --bad-soft: #fbe7e5;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { background: var(--bg); }
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+    display: flex;
+    flex-direction: column;
+    gap: 44px;
+  }
+
+  header.hero {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 28px;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  h1 {
+    font-size: 30px;
+    line-height: 1.15;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .lede {
+    font-size: 15.5px;
+    line-height: 1.6;
+    color: var(--ink-muted);
+    max-width: 62ch;
+  }
+  .status-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+  .status-chip {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--ink-muted);
+    background: var(--surface);
+  }
+
+  section { display: flex; flex-direction: column; gap: 14px; }
+  h2 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-family: var(--mono);
+    color: var(--ink-muted);
+    margin: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  h2::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  h3 {
+    font-size: 17px;
+    margin: 0;
+    font-weight: 650;
+  }
+  p { line-height: 1.6; font-size: 14.5px; margin: 0; }
+  p + p { margin-top: 8px; }
+
+  /* legend */
+  .legend {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+  }
+  .legend-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .legend-key {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 6px;
+    padding: 2px 7px;
+    flex-shrink: 0;
+  }
+  .legend-text { font-size: 13px; line-height: 1.5; color: var(--ink-muted); }
+  .legend-text b { color: var(--ink); font-weight: 600; }
+
+  /* diagram container */
+  .diagram-frame {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    overflow-x: auto;
+  }
+  .diagram-frame pre.mermaid { margin: 0; min-width: 640px; }
+
+  .diagram-key {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    padding: 0 4px;
+  }
+  .diagram-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .dot.ok { background: var(--good); }
+  .dot.wait { background: var(--warn); }
+  .dot.bad { background: var(--bad); }
+
+  /* decision table */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; background: var(--surface); }
+  thead th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-muted);
+    background: var(--surface-2);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  .cond-cell { font-family: var(--mono); font-size: 12.5px; color: var(--ink-muted); }
+  .outcome {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 650;
+    font-size: 13px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .outcome.ok { background: var(--good-soft); color: var(--good); }
+  .outcome.wait { background: var(--warn-soft); color: var(--warn); }
+  .outcome.bad { background: var(--bad-soft); color: var(--bad); }
+  .src-tag {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    padding: 2px 7px;
+    border-radius: 5px;
+    white-space: nowrap;
+    display: inline-block;
+  }
+  .src-tag.explicit { background: var(--surface-2); color: var(--ink-muted); }
+  .src-tag.assumed { background: var(--warn-soft); color: var(--warn); }
+
+  /* assumption list */
+  .assumptions { display: flex; flex-direction: column; gap: 10px; }
+  .assumption {
+    background: var(--warn-soft);
+    border: 1px solid color-mix(in srgb, var(--warn) 35%, var(--border));
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+  .assumption b { color: var(--ink); }
+
+  /* bug list */
+  .bug-list { display: flex; flex-direction: column; gap: 10px; counter-reset: bug; }
+  .bug {
+    counter-increment: bug;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--bad);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 14px 12px 16px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    display: flex;
+    gap: 12px;
+  }
+  .bug::before {
+    content: counter(bug);
+    font-family: var(--mono);
+    font-weight: 700;
+    color: var(--bad);
+    flex-shrink: 0;
+  }
+  .bug code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--surface-2);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+
+  /* schema sketch */
+  pre.code {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--ink);
+    margin: 0;
+  }
+  .code-caption { font-size: 12.5px; color: var(--ink-muted); }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    line-height: 1.6;
+  }
+</style>
+
+<div class="page">
+
+  <header class="hero">
+    <div class="eyebrow">Analýza logiky · Kontrola na bodu trasy</div>
+    <h1>Zpoždění v den doručení — vyhodnocení prvního a druhého fyzického scanu</h1>
+    <p class="lede">
+      Schéma pro bod „1. Fyzický scan v cílové zemi" a „2. Fyzický scan v cílové zemi"
+      (dnešní R30/R97/R39/R14). Cíl: rozhodnout mezi „předpoklad dnešního doručení",
+      „zpožděná zásilka" a čekacím stavem — a porovnat to se stávajícím artefaktem.
+    </p>
+    <div class="status-row">
+      <span class="status-chip">Stav: k diskuzi, needimplementováno</span>
+      <span class="status-chip">Zdroj: artefakt „Kontrola na bodu trasy" (worktree)</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Legenda</h2>
+    <div class="legend">
+      <div class="legend-item">
+        <span class="legend-key">Z1</span>
+        <span class="legend-text"><b>První fyzický scan.</b> Záznam z lokace v cílové zemi, typ lokace „FedEx Facility". Rozhoduje jeho vlastní místní čas.</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-key">Z2</span>
+        <span class="legend-text"><b>Druhý status.</b> Záznam z cílové země, typ lokace „Destination Facility", PSČ začíná stejně jako PSČ adresy doručení.</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-key">D</span>
+        <span class="legend-text"><b>Datum doručení od přepravce.</b> Pole z trackingových dat, nezávislé na Z1/Z2 (dnes <code style="font-family:var(--mono)">datumDoruceniOdPrepravce</code>).</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Rozhodovací strom</h2>
+    <div class="diagram-frame">
+<pre class="mermaid">
+flowchart TD
+  A["Dnešek = plánovaný den doručení<br/>v systému"] --> B["9:00 místního času cíle"]
+  B -->|"Z1 nalezen<br/>(vlastní čas ≤ 8:00)"| C{"Z2 do 2h od Z1<br/>(vlastní čas), s 1h tolerancí?"}
+  B -->|"Z1 nenalezen"| D{"D = dnes?"}
+
+  C -->|"Ano"| OK1(["✅ Předpoklad<br/>dnešního doručení"])
+  C -->|"Ne"| BAD1(["🚫 Zpožděná zásilka"])
+
+  D -->|"Ano"| WAIT["⏳ Čekat do 10:00<br/>— žádná akce"]
+  D -.->|"Ne (dopočteno)"| BAD2(["🚫 Zpožděná zásilka"])
+
+  WAIT --> E["10:00 místního času cíle"]
+  E -->|"Z1 stále nenalezen"| BAD3(["🚫 Zpožděná zásilka"])
+  E -->|"Z1 nalezen<br/>(čas už nerozhoduje)"| F{"D stále = dnes?"}
+
+  F -->|"Ne, D se posunulo"| BAD4(["🚫 Zpožděná zásilka"])
+  F -.->|"Ano (Z2 dopočteno)"| G{"Z2 v okně od Z1?"}
+
+  G -.->|"Ano"| OK2(["✅ Předpoklad<br/>dnešního doručení"])
+  G -.->|"Ne"| BAD5(["🚫 Zpožděná zásilka"])
+</pre>
+    </div>
+    <div class="diagram-key">
+      <span><span class="dot ok"></span> předpoklad doručení</span>
+      <span><span class="dot wait"></span> čekací stav, bez akce</span>
+      <span><span class="dot bad"></span> akce „zpožděná zásilka"</span>
+      <span>tečkovaná hrana = dopočteno, není v zadání explicitně</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>Rozhodovací tabulka</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Kontrolní bod</th>
+            <th>Podmínka</th>
+            <th>Výsledek</th>
+            <th>Zdroj</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>9:00</td>
+            <td class="cond-cell">Z1 (čas ≤ 8:00) ∧ Z2 do +2h (±1h tolerance)</td>
+            <td><span class="outcome ok">✅ Předpoklad doručení</span></td>
+            <td><span class="src-tag explicit">explicitně</span></td>
+          </tr>
+          <tr>
+            <td>9:00</td>
+            <td class="cond-cell">Z1 (čas ≤ 8:00) ∧ ¬Z2 v okně</td>
+            <td><span class="outcome bad">🚫 Zpožděná zásilka</span></td>
+            <td><span class="src-tag explicit">explicitně</span></td>
+          </tr>
+          <tr>
+            <td>9:00</td>
+            <td class="cond-cell">¬Z1 ∧ D = dnes</td>
+            <td><span class="outcome wait">⏳ Čekat do 10:00</span></td>
+            <td><span class="src-tag explicit">explicitně</span></td>
+          </tr>
+          <tr>
+            <td>9:00</td>
+            <td class="cond-cell">¬Z1 ∧ D ≠ dnes (budoucnost i minulost)</td>
+            <td><span class="outcome bad">🚫 Zpožděná zásilka</span></td>
+            <td><span class="src-tag assumed">dopočteno</span></td>
+          </tr>
+          <tr>
+            <td>10:00</td>
+            <td class="cond-cell">Z1 stále nenalezen</td>
+            <td><span class="outcome bad">🚫 Zpožděná zásilka</span></td>
+            <td><span class="src-tag explicit">explicitně</span></td>
+          </tr>
+          <tr>
+            <td>10:00</td>
+            <td class="cond-cell">Z1 nalezen (čas libovolný) ∧ D se posunulo</td>
+            <td><span class="outcome bad">🚫 Zpožděná zásilka</span></td>
+            <td><span class="src-tag explicit">explicitně</span></td>
+          </tr>
+          <tr>
+            <td>10:00</td>
+            <td class="cond-cell">Z1 nalezen ∧ D = dnes ∧ Z2 v okně od Z1</td>
+            <td><span class="outcome ok">✅ Předpoklad doručení</span></td>
+            <td><span class="src-tag assumed">dopočteno</span></td>
+          </tr>
+          <tr>
+            <td>10:00</td>
+            <td class="cond-cell">Z1 nalezen ∧ D = dnes ∧ ¬Z2 v okně</td>
+            <td><span class="outcome bad">🚫 Zpožděná zásilka</span></td>
+            <td><span class="src-tag assumed">dopočteno</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Dopočtené předpoklady — potvrdit u klienta</h2>
+    <div class="assumptions">
+      <div class="assumption">
+        <b>D ≠ dnes už v 9:00 checku (dřív, než se čeká do 10:00):</b> bereme jako okamžité
+        „zpožděná zásilka", bez čekání do 10:00. Zadání tenhle stav vůbec nezmiňuje —
+        dovozeno z vaší poznámky, že jakýkoli posun D znamená jisté zpoždění.
+      </div>
+      <div class="assumption">
+        <b>D v minulosti</b> (přepravce tvrdí, že mělo být doručeno už dřív): traktováno stejně
+        jako D v budoucnosti — „zpožděná zásilka". Zadání tenhle případ vůbec neřeší.
+      </div>
+      <div class="assumption">
+        <b>Větev 10:00 vyžaduje i Z2:</b> doslovné zadání po úspěšném nálezu Z1 + D=dnes v 10:00
+        rovnou mluví o „předpokladu doručení", bez zmínky o druhém statusu. Přidáváme
+        požadavek na Z2 kvůli konzistenci s 9:00 větví — v zadání to explicitně není.
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Nesrovnalosti proti stávajícímu artefaktu</h2>
+    <p>Porovnáno s <code style="font-family:var(--mono)">nastroje/kontrola-na-bodu-trasy.data.mjs</code> a
+    <code style="font-family:var(--mono)">.logic.mjs</code> ve worktree <code style="font-family:var(--mono)">artefakt-kontrola-trasy</code>:</p>
+    <div class="bug-list">
+      <div class="bug">
+        <div>
+          <code>bod_1_scan</code> a <code>bod_2_scan</code> mají identické <code>match: { status: ['Destination facility'] }</code> —
+          nerozlišují Z1 (FedEx Facility) od Z2 (Destination Facility) a vůbec nepoužívají pole <code>locationType</code>
+          k tomuto rozlišení.
+        </div>
+      </div>
+      <div class="bug">
+        <div>
+          Neexistuje mechanismus pro dynamické porovnání PSČ vůči zásilce (Z2 musí mít PSČ se stejnou
+          předčíslím jako adresa doručení) — <code>recordMatchesBod</code> umí jen pevné seznamy povolených hodnot,
+          ne porovnání proti poli konkrétní zásilky.
+        </div>
+      </div>
+      <div class="bug">
+        <div>
+          Kontrola 1 (R30, <code>fixed_clock 08:00</code>) se vyhodnocuje přímo v 8:00 — v přímém rozporu
+          s požadavkem nevyhodnocovat dřív než v 9:00 kvůli zpoždění dat z trackingu.
+        </div>
+      </div>
+      <div class="bug">
+        <div>
+          <code>evaluateKontrola</code> slučuje „deadline vlastního času záznamu" (8:00) a „čas vyhodnocení" (9:00)
+          do jednoho <code>triggerTime</code> — porovnává <code>matchedRecord.time &lt;= triggerTime</code>, takže
+          Kontrola v 9:00 by dnes propustila i scan v 8:45, což zadání nepovoluje.
+        </div>
+      </div>
+      <div class="bug">
+        <div>
+          Větev „sev_early_warning" (Kontrola 2 nesplněna, D=dnes) dnes rovnou zakládá VkŘ — podle zadání
+          jde ale o čistě čekací stav bez jakékoli akce až do rekontroly v 10:00.
+        </div>
+      </div>
+      <div class="bug">
+        <div>
+          Bod 2 (druhý scan) dnes vůbec neřeší, že se D mezi kontrolami mohlo posunout — chybí
+          opakované vyhodnocení D v 10:00 větvi.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Návrh úpravy datového tvaru (k diskuzi, needimplementováno)</h2>
+    <p class="code-caption">Hlavní změna: rozdělit „deadline vlastního času záznamu" od „kdy se to smí poprvé vyhodnotit" a přidat dynamické porovnání pole zásilky.</p>
+    <pre class="code">kontrola.timing = {
+  recordDeadline: { mode: 'fixed_clock', time: '08:00' },   // vlastní čas Z1 musí být ≤ toto
+  evaluateAt:      { mode: 'fixed_clock', time: '09:00' },  // kdy se to poprvé smí zkontrolovat
+}
+
+bod.match = {
+  locationType: ['FEDEX_FACILITY'],
+  locationCountryCode: { equalsShipmentField: 'destCountryCode' },   // NOVÉ — dynamické porovnání
+  postalCode:           { prefixEqualsShipmentField: 'destPostalCode', digits: 2 }, // NOVÉ
+}</pre>
+  </section>
+
+  <footer>
+    Needimplementováno — čeká na vaše rozhodnutí k „dopočteným předpokladům" a na instrukce,
+    kam a jak logiku promítnout do artefaktu.
+  </footer>
+
+</div>

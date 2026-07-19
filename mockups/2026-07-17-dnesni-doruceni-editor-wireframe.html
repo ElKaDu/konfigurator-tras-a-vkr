@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Wireframe: editor bodu „Dnešní doručení" (v3)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-primary: #f5f5f7;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #e5e5e7;
+    --border: #d1d1d6;
+    --text-primary: #1d1d1f;
+    --text-secondary: #86868b;
+    --text-tertiary: #aeaeb2;
+    --accent: #0071e3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-primary: #1d1d1f;
+      --bg-secondary: #2d2d2f;
+      --bg-tertiary: #3d3d3f;
+      --border: #424245;
+      --text-primary: #f5f5f7;
+      --text-secondary: #86868b;
+      --text-tertiary: #636366;
+      --accent: #0a84ff;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg-primary: #1d1d1f; --bg-secondary: #2d2d2f; --bg-tertiary: #3d3d3f; --border: #424245;
+    --text-primary: #f5f5f7; --text-secondary: #86868b; --text-tertiary: #636366; --accent: #0a84ff;
+  }
+  :root[data-theme="light"] {
+    --bg-primary: #f5f5f7; --bg-secondary: #ffffff; --bg-tertiary: #e5e5e7; --border: #d1d1d6;
+    --text-primary: #1d1d1f; --text-secondary: #86868b; --text-tertiary: #aeaeb2; --accent: #0071e3;
+  }
+
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.5;
+    padding: 2rem;
+  }
+
+  h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; }
+  h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem; }
+  .subtitle { color: var(--text-secondary); margin-bottom: 1.5rem; }
+  .section { margin-bottom: 2rem; }
+  .label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+
+  .mockup { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 1.5rem; }
+  .mockup-header { background: var(--bg-tertiary); padding: 0.5rem 1rem; font-size: 0.75rem; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
+  .mockup-body { padding: 1.5rem; }
+
+  .placeholder { background: var(--bg-tertiary); border: 2px dashed var(--border); border-radius: 8px; padding: 0.75rem 1rem; color: var(--text-tertiary); font-size: 0.9rem; }
+
+  .mock-nav { background: var(--accent); color: white; padding: 0.75rem 1rem; display: flex; gap: 1.5rem; font-size: 0.9rem; }
+  .mock-sidebar { background: var(--bg-tertiary); padding: 1rem; min-width: 180px; }
+  .mock-content { padding: 1.5rem; flex: 1; }
+  .mock-input { background: var(--bg-primary); border: 1px solid var(--border); border-radius: 6px; padding: 0.5rem; width: 100%; color: var(--text-primary); }
+</style>
+</head>
+<body>
+
+<h2>Wireframe v3: časová nastavení přesunuta pod scany</h2>
+<p class="subtitle">Termín/Limit pro řádné záznamy/Konečný limit patří k 1. scanu, Termín/Konečný limit k 2. scanu —
+žádná samostatná sekce navíc. ADD je vstupní brána (mimo tento wireframe), D se čte uvnitř vyhodnocení.
+Uloženo jako referenční stav před doladěním UX a wordingu — viz
+<code>docs/superpowers/specs/2026-07-17-dnesni-doruceni-bod-design.md</code>.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Kontrola na bodu trasy — vybraný bod: „Dnešní doručení"</div>
+  <div class="mockup-body">
+    <div class="mock-nav">Kontrola na bodu trasy | Konfigurace | Test</div>
+    <div style="display:flex; gap:0;">
+      <div class="mock-sidebar">
+        <div class="label">Úsek: Paříž – USA</div>
+        <div class="placeholder" style="margin:8px 0;">Export - celní odbavení</div>
+        <div class="placeholder" style="margin:8px 0; font-weight:bold;">→ Dnešní doručení</div>
+      </div>
+      <div class="mock-content" style="flex:1;">
+
+        <div class="section">
+          <h3>1. fyzický scan</h3>
+          <input class="mock-input" placeholder="Match: status, typ lokace (FedEx Facility), země" style="width:100%;">
+          <input class="mock-input" placeholder="Termín: kotva + čas (08:00)" style="width:100%; margin-top:6px;">
+          <div style="display:flex; gap:12px; margin-top:6px;">
+            <input class="mock-input" placeholder="Limit pro řádné záznamy: 09:00" style="flex:1;">
+            <input class="mock-input" placeholder="Konečný limit: 10:00" style="flex:1;">
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>2. fyzický scan</h3>
+          <input class="mock-input" placeholder="Match: status, typ lokace (Destination Facility), PSČ (shoda se zásilkou: 1. číslice)" style="width:100%;">
+          <input class="mock-input" placeholder="Termín: kotva na 1. scan + 2 h" style="width:100%; margin-top:6px;">
+          <input class="mock-input" placeholder="Konečný limit: +1 h" style="width:100%; margin-top:6px;">
+        </div>
+
+        <div class="section">
+          <h3>Výsledné stavy → Situace / Závažnost</h3>
+          <p class="label">Rozhodnutí o dívání se na D (datum od přepravce) je vestavěné v enginu — tady se jen klasifikuje výsledek. ADD je vstupní brána, řeší se mimo tuhle sekci.</p>
+          <div class="placeholder" style="margin-bottom:6px;">1. i 2. scan v pořádku → Situace: [vybrat]</div>
+          <div class="placeholder" style="margin-bottom:6px;">1. scan OK, 2. scan v okně nenalezen → Situace: [vybrat]</div>
+          <div class="placeholder" style="margin-bottom:6px;">1. scan nenalezen do Limitu pro řádné záznamy, D už dnes není → Situace: [vybrat]</div>
+          <div class="placeholder" style="margin-bottom:6px;">1. scan nenalezen ani do Konečného limitu → Situace: [vybrat]</div>
+          <div class="placeholder" style="margin-bottom:6px;">1. scan dorazil do Konečného limitu, ale D se posunulo → Situace: [vybrat]</div>
+          <div class="placeholder" style="margin-bottom:6px;">1. scan dorazil do Konečného limitu, D stále dnes, 2. scan OK → Situace: [vybrat]</div>
+          <div class="placeholder">1. scan dorazil do Konečného limitu, D stále dnes, 2. scan chybí → Situace: [vybrat]</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

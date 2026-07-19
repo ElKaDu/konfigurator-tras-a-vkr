@@ -1,0 +1,137 @@
+<style>
+  :root {
+    --bg: #eef1f5;
+    --surface: #ffffff;
+    --surface-2: #e7ebf1;
+    --ink: #131720;
+    --ink-muted: #545e6e;
+    --border: #d3d9e1;
+    --accent: #2a5ea8;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1319; --surface: #161b23; --surface-2: #1e2530; --ink: #e7ebf2; --ink-muted: #97a1b3; --border: #2b3341; --accent: #7fa8dd; }
+  }
+  :root[data-theme="dark"] { --bg: #0f1319; --surface: #161b23; --surface-2: #1e2530; --ink: #e7ebf2; --ink-muted: #97a1b3; --border: #2b3341; --accent: #7fa8dd; }
+  :root[data-theme="light"] { --bg: #eef1f5; --surface: #ffffff; --surface-2: #e7ebf1; --ink: #131720; --ink-muted: #545e6e; --border: #d3d9e1; --accent: #2a5ea8; }
+
+  * { box-sizing: border-box; }
+  html, body { background: var(--bg); }
+  body { font-family: var(--sans); color: var(--ink); max-width: 100%; overflow-x: hidden; }
+
+  .page { max-width: 1080px; margin: 0 auto; padding: 40px 24px 80px; display: flex; flex-direction: column; gap: 20px; }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+  h1 { font-size: 24px; line-height: 1.2; margin: 0; font-weight: 700; letter-spacing: -0.01em; }
+  h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.06em; font-family: var(--mono); color: var(--ink-muted); margin: 8px 0 0; }
+  p.lede { color: var(--ink-muted); font-size: 14.5px; line-height: 1.6; max-width: 80ch; margin: 0 0 8px; }
+
+  .field-legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+  .field-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.5; }
+  .field-card b { font-family: var(--mono); color: var(--accent); }
+
+  .note { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.55; }
+  .note b { color: var(--ink); }
+
+  .diagram-frame { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; overflow-x: auto; }
+  .diagram-frame pre.mermaid { margin: 0; min-width: 1000px; }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; background: var(--surface); }
+  thead th { text-align: left; font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-muted); background: var(--surface-2); padding: 10px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  tbody td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+  tbody tr:last-child td { border-bottom: none; }
+</style>
+
+<div class="page">
+  <div class="eyebrow">Společný flowchart · obě situace, finální verze</div>
+  <h1>Termín, Limit pro řádné záznamy, Konečný limit — a zjednodušený model pro Problém na trase</h1>
+  <p class="lede">
+    1. a 2. fyzický scan používají finální UI názvosloví (Termín / Limit pro řádné záznamy / Konečný limit).
+    Problém na trase (odlet Brno, přílet Paříž) je teď zjednodušený model — jediná časovaná kontrola v termínu,
+    bez rekontrol, plus doplňkový reaktivní mechanismus pro pozdní příchod.
+  </p>
+
+  <div class="field-legend">
+    <div class="field-card"><b>ADD</b> — avizované datum doručení zákazníkovi. Čte se jednou — vstupní brána
+    pro celý bod „1. fyzický scan". Neposouvá se v rámci dne. U problému na trase se nepoužívá vůbec.</div>
+    <div class="field-card"><b>D</b> — datum doručení od přepravce, živý odhad z trackingu. Čte se opakovaně
+    uvnitř vyhodnocení 1. scanu a je to jediné pole, které se může posunout. U 2. scanu a u problému na trase
+    se D vůbec nekontroluje.</div>
+  </div>
+
+  <div class="diagram-frame">
+<pre class="mermaid">
+flowchart TD
+  subgraph G_SCAN1["1. fyzický scan - Spoustec"]
+    G1{"ADD = dnes?"}
+    G1 -.->|"Ne"| NORUN1(["Bod se dnes vubec<br/>nevyhodnocuje"])
+    G1 -->|"Ano"| T1["reaktivne dorazi status,<br/>nebo casovac"]
+  end
+
+  subgraph V_SCAN1["1. fyzicky scan - Vysledek"]
+    T1 --> S1A{"Limit pro radne zaznamy (9:00):<br/>nalezen, vlastni cas <= Termin (8:00)?"}
+    S1A -->|"Ano"| S1OK[["pokracuje na 2. scan"]]
+    S1A -->|"Ne, chybi nebo neni radny<br/>(napr. pozdejsi vlastni cas)"| S1WAIT["Ceka se do Konecneho limitu<br/>vnitrni stav, bez VkR<br/>D se tady jeste nekontroluje"]
+    S1WAIT --> S1B{"Konecny limit (10:00):<br/>nalezen, cas uz nerozhoduje?"}
+    S1B -->|"Ne"| S1F2(["Zpozdena zasilka<br/>final"])
+    S1B -->|"Ano"| S1D2{"D stale dnes?"}
+    S1D2 -->|"Ano"| S1OK
+    S1D2 -.->|"Ne, D se posunulo"| S1F3(["Zpozdena zasilka<br/>final"])
+  end
+
+  subgraph V_SCAN2["2. fyzicky scan - jednostupnove"]
+    S1OK --> S2A{"Termin (scan1 plus 2h):<br/>nalezen do Konecneho limitu<br/>(Termin plus 1h)?"}
+    S2A -->|"Ano"| S2OK(["Predpoklad<br/>dnesniho doruceni"])
+    S2A -->|"Ne"| S2F(["Zpozdena zasilka<br/>final"])
+  end
+
+  subgraph G_BRNO["Odlet Brno - zjednoduseny model"]
+    TB["zadna vstupni brana,<br/>bez ADD a bez D"]
+    TB --> B1{"Konecny limit (v terminu, 22:00):<br/>nalezen do terminu?"}
+  end
+
+  subgraph V_BRNO["Odlet Brno - vysledek"]
+    B1 -->|"Ano"| BOK[["pokracuje na prilet Pariz"]]
+    B1 -->|"Ne"| BVKR(["Problem na trase"])
+    BVKR -->|"retezec pokracuje<br/>i pres VkŘ"| BOK
+    B1 -.->|"pozdeji se objevi<br/>zaznam s pozdejsim casem"| BINFO(["informativni VkR<br/>nizsi zavaznost"])
+  end
+
+  subgraph V_PARIZ["Prilet Pariz - vysledek (spoustec = uspech odletu)"]
+    BOK --> P1{"Konecny limit (v terminu,<br/>dalsi prac. den 3:00):<br/>nalezen do terminu?"}
+    P1 -->|"Ano"| POK(["Splneno<br/>pokracuje dalsi bod"])
+    P1 -->|"Ne"| PVKR(["Problem na trase"])
+    PVKR -->|"retezec pokracuje<br/>i pres VkŘ"| POK
+    P1 -.->|"pozdeji se objevi<br/>zaznam s pozdejsim casem"| PINFO(["informativni VkR<br/>nizsi zavaznost"])
+  end
+</pre>
+  </div>
+
+  <div class="note">
+    <b>Vědomá mezera u problému na trase:</b> Termíny (22:00, 3:00...) jsou podle zadání vázané na pevné datum
+    a čas vyzvednutí, ne kaskádovitě na skutečný čas předchozího bodu. Jakmile je jeden bod zpožděný, každý
+    další bod v řetězci nevyhnutelně taky vyhodnotí Nesplněno a pošle vlastní VkŘ za tentýž kořenový problém —
+    i když operátor mezitím ručně upraví ADD, navazující kontroly to nereflektují. <b>Otázka pro klienta:</b>
+    dá se termín navazujících bodů odvodit/odečítat od ADD?
+  </div>
+
+  <h2>Možné situace — souhrn</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Zdroj</th><th>Fáze</th><th>Výsledná situace</th><th>Kdy nastane</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1. scan</td><td>Spouštěč</td><td>Bod se dnes vůbec nevyhodnocuje</td><td>ADD ≠ dnes</td></tr>
+        <tr><td>1./2. scan</td><td>Výsledek</td><td>Předpoklad dnešního doručení</td><td>1. scan v pořádku (do Limitu pro řádné záznamy, nebo do Konečného limitu s D stále dnes) a 2. scan v okně</td></tr>
+        <tr><td>1./2. scan</td><td>Výsledek</td><td>Zpožděná zásilka (final)</td><td>D se posune (kdykoli), nebo 1. scan chybí i do Konečného limitu, nebo 2. scan v okně nenalezen</td></tr>
+        <tr><td>1. scan</td><td>Výsledek</td><td>vnitřní čekací stav, bez VkŘ</td><td>1. scan do Limitu pro řádné záznamy chybí, nebo se objevil, ale není řádný (např. pozdější vlastní čas než Termín) — a D je stále dnes</td></tr>
+        <tr><td>Brno → Paříž</td><td>Spouštěč</td><td>vždy aktivní</td><td>žádná vstupní brána, bez ADD i bez D</td></tr>
+        <tr><td>Brno → Paříž</td><td>Výsledek</td><td>Problém na trase</td><td>bod nenalezen do Konečného limitu (v termínu) — <b>řetězec i tak pokračuje</b> na další bod</td></tr>
+        <tr><td>Brno → Paříž</td><td>Výsledek</td><td>Splněno, pokračuje řetězec</td><td>bod nalezen do Konečného limitu</td></tr>
+        <tr><td>Brno → Paříž</td><td>Výsledek</td><td>informativní VkŘ (nižší závažnost)</td><td>záznam se objeví až po Konečném limitu, jinak splňuje podmínky</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>

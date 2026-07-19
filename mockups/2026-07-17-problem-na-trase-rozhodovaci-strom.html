@@ -1,0 +1,48 @@
+<style>
+  :root {
+    --bg: #eef1f5;
+    --surface: #ffffff;
+    --ink: #131720;
+    --ink-muted: #545e6e;
+    --border: #d3d9e1;
+    --accent: #2a5ea8;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1319; --surface: #161b23; --ink: #e7ebf2; --ink-muted: #97a1b3; --border: #2b3341; --accent: #7fa8dd; }
+  }
+  :root[data-theme="dark"] { --bg: #0f1319; --surface: #161b23; --ink: #e7ebf2; --ink-muted: #97a1b3; --border: #2b3341; --accent: #7fa8dd; }
+  :root[data-theme="light"] { --bg: #eef1f5; --surface: #ffffff; --ink: #131720; --ink-muted: #545e6e; --border: #d3d9e1; --accent: #2a5ea8; }
+
+  * { box-sizing: border-box; }
+  html, body { background: var(--bg); }
+  body { font-family: var(--sans); color: var(--ink); max-width: 100%; overflow-x: hidden; }
+
+  .page { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; display: flex; flex-direction: column; gap: 18px; }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+  h1 { font-size: 24px; line-height: 1.2; margin: 0; font-weight: 700; letter-spacing: -0.01em; }
+
+  .diagram-frame { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; overflow-x: auto; }
+  .diagram-frame pre.mermaid { margin: 0; min-width: 560px; }
+</style>
+
+<div class="page">
+  <div class="eyebrow">Rozhodovací strom · Problém na trase</div>
+  <h1>Spouštěč, vyhodnocení a rekontrola bodu</h1>
+  <div class="diagram-frame">
+<pre class="mermaid">
+flowchart TD
+  A["Bod v řetězci<br/>(např. odlet Praha/Brno)"] --> B{"Dorazil záznam<br/>se správným statusem?"}
+  B -->|"Ano — reaktivní spouštěč"| C{"Čas záznamu ≤ termín bodu?"}
+  B -.->|"Ne, ani do termínu<br/>— časovač jako pojistka"| D(["🚫 Nesplněno"])
+  C -->|"Ano"| OK(["✅ Splněno<br/>žádná akce"])
+  C -->|"Ne, dorazil pozdě"| D
+  D --> VKR["nová VkŘ<br/>„Problém na trase“"]
+  VKR --> WAIT["⏳ čeká se +N hodin"]
+  WAIT --> RECHECK{"Záznam mezitím dorazil?"}
+  RECHECK -->|"Ano, i když pozdě"| DONE(["Konec sledování bodu<br/>— řetězec pokračuje dál"])
+  RECHECK -.->|"Ne — kolikrát se to smí opakovat?"| WAIT
+</pre>
+  </div>
+</div>
