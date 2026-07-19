@@ -1,6 +1,7 @@
 import type { Checkpoint, Segment } from "@/lib/model/types";
 import { ROUTE_COMPLIANCE_SITUATIONS } from "@/lib/model/routeComplianceSituations";
 import { formatTimeLimit } from "@/lib/model/formatTimeLimit";
+import { defaultVyzvednutiTermin } from "@/lib/model/defaults";
 import { SituaceCard } from "./SituaceCard";
 import { MatchEditor } from "./MatchEditor";
 import { TerminEditor } from "./TerminEditor";
@@ -71,7 +72,7 @@ export function BodDetailPanel({
             <TerminEditor
               segment={segment}
               currentCheckpointId={checkpoint.id}
-              value={checkpoint.correctness[0] ?? { id: "corr_" + checkpoint.id, aspect: "record_event_time", mode: "fixed", anchorKind: "system_event", anchorLabel: "Vyzvednutí zásilky", operator: "within", fixedOp: "before", fixedTime: "12:00", fixedTz: "local" }}
+              value={checkpoint.correctness[0] ?? defaultVyzvednutiTermin("corr_" + checkpoint.id)}
               onChange={(corr) => onUpdate({ ...checkpoint, correctness: [corr] })}
             />
           </div>

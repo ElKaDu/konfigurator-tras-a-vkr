@@ -4,6 +4,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { useSegments, segmentsStore } from "@/lib/model/store";
 import { cn } from "@/lib/utils";
 import type { Checkpoint, Segment } from "@/lib/model/types";
+import { defaultVyzvednutiTermin } from "@/lib/model/defaults";
 import { BodDetailPanel } from "./BodDetailPanel";
 
 function createBlankCheckpoint(): Checkpoint {
@@ -13,9 +14,7 @@ function createBlankCheckpoint(): Checkpoint {
     note: "Nový bod",
     kind: "generic",
     match: {},
-    correctness: [
-      { id: "corr_" + Date.now(), aspect: "record_event_time", mode: "fixed", anchorKind: "system_event", anchorLabel: "Vyzvednutí zásilky", operator: "within", fixedOp: "before", fixedTime: "12:00", fixedTz: "local" },
-    ],
+    correctness: [defaultVyzvednutiTermin("corr_" + Date.now())],
     konecnyLimit: { mode: "offset", offsetHours: 0 },
   };
 }
