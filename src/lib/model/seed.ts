@@ -33,7 +33,7 @@ export const ACTION_TAGS: ActionTag[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Situace (3 situace, 7 závažností — viz spec bod 7)
+// Situace (viz spec bod 7)
 // ---------------------------------------------------------------------------
 export const SITUATIONS: Situation[] = [
   {
@@ -169,7 +169,7 @@ export const SITUATIONS: Situation[] = [
         priority: "urgent",
         actions: [
           { id: "sa_zpozdena_zasilka_1", actionTagId: "at_mark_delayed", description: "Označit zásilku jako zpožděnou." },
-          { id: "sa_zpozdena_zasilka_2", actionTagId: "at_shift_date", description: "Posun avizované datum doručení." },
+          { id: "sa_zpozdena_zasilka_2", actionTagId: "at_shift_date", description: "Posuň avizované datum doručení." },
         ],
       },
     ],
