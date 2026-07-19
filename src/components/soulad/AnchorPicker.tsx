@@ -26,9 +26,17 @@ export function AnchorPicker({
   const checkpointTypes = useCheckpointTypes();
   const ctMap = new Map(checkpointTypes.map((ct) => [ct.id, ct.name]));
 
+  const selectValue =
+    value.anchorKind === "checkpoint"
+      ? `checkpoint:${value.anchorCheckpointTypeId}`
+      : value.anchorKind === "system_event"
+        ? `system:${value.anchorLabel}`
+        : "unsupported";
+
   return (
     <select
-      value={value.anchorKind === "checkpoint" ? `checkpoint:${value.anchorCheckpointTypeId}` : `system:${value.anchorLabel}`}
+      aria-label="kotva"
+      value={selectValue}
       onChange={(e) => {
         const raw = e.target.value;
         if (raw.startsWith("system:")) {
@@ -40,6 +48,11 @@ export function AnchorPicker({
       }}
       className="rounded border border-border bg-background px-2 py-1 text-xs"
     >
+      {selectValue === "unsupported" && (
+        <option value="unsupported" disabled hidden>
+          {value.anchorLabel || "nepodporovaná kotva"}
+        </option>
+      )}
       <optgroup label="Systémové kotvy">
         {SYSTEM_ANCHORS.map((a) => (
           <option key={a.label} value={`system:${a.label}`}>{a.label}</option>

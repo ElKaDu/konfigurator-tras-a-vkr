@@ -25,6 +25,7 @@ export function TerminEditor({
           onChange={(anchor) => onChange({ ...value, ...anchor })}
         />
         <select
+          aria-label="režim Termínu"
           value={value.mode ?? "fixed"}
           onChange={(e) => onChange({ ...value, mode: e.target.value as "fixed" | "offset" })}
           className="rounded border border-border bg-background px-2 py-1 text-xs"
@@ -35,12 +36,13 @@ export function TerminEditor({
         {isFixed ? (
           <input
             type="time"
+            aria-label="pevný čas"
             value={value.fixedTime ?? "08:00"}
             onChange={(e) => onChange({ ...value, fixedTime: e.target.value })}
             className="rounded border border-border bg-background px-2 py-1 text-xs"
           />
         ) : (
-          <>
+          <label className="flex items-center gap-2">
             <input
               type="number"
               min={0}
@@ -49,7 +51,7 @@ export function TerminEditor({
               className="w-16 rounded border border-border bg-background px-2 py-1 text-xs"
             />
             <span className="text-muted-foreground">h</span>
-          </>
+          </label>
         )}
       </div>
     </div>
