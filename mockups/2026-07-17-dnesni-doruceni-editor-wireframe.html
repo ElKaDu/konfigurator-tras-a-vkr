@@ -66,7 +66,8 @@
 <body>
 
 <h2>Wireframe v3: časová nastavení přesunuta pod scany</h2>
-<p class="subtitle">Limitní čas a celkový limit patří k 1. scanu, tolerance k 2. scanu — žádná samostatná sekce navíc.
+<p class="subtitle">Termín/Limit pro řádné záznamy/Konečný limit patří k 1. scanu, Termín/Konečný limit k 2. scanu —
+žádná samostatná sekce navíc. ADD je vstupní brána (mimo tento wireframe), D se čte uvnitř vyhodnocení.
 Uloženo jako referenční stav před doladěním UX a wordingu — viz
 <code>docs/superpowers/specs/2026-07-17-dnesni-doruceni-bod-design.md</code>.</p>
 
@@ -87,28 +88,28 @@ Uloženo jako referenční stav před doladěním UX a wordingu — viz
           <input class="mock-input" placeholder="Match: status, typ lokace (FedEx Facility), země" style="width:100%;">
           <input class="mock-input" placeholder="Termín: kotva + čas (08:00)" style="width:100%; margin-top:6px;">
           <div style="display:flex; gap:12px; margin-top:6px;">
-            <input class="mock-input" placeholder="Limitní čas kontroly: 09:00" style="flex:1;">
-            <input class="mock-input" placeholder="Celkový limit: 10:00" style="flex:1;">
+            <input class="mock-input" placeholder="Limit pro řádné záznamy: 09:00" style="flex:1;">
+            <input class="mock-input" placeholder="Konečný limit: 10:00" style="flex:1;">
           </div>
         </div>
 
         <div class="section">
           <h3>2. fyzický scan</h3>
-          <input class="mock-input" placeholder="Match: status, typ lokace (Destination Facility), PSČ" style="width:100%;">
+          <input class="mock-input" placeholder="Match: status, typ lokace (Destination Facility), PSČ (shoda se zásilkou: 1. číslice)" style="width:100%;">
           <input class="mock-input" placeholder="Termín: kotva na 1. scan + 2 h" style="width:100%; margin-top:6px;">
-          <input class="mock-input" placeholder="Tolerance 2. scanu: +1 h" style="width:100%; margin-top:6px;">
+          <input class="mock-input" placeholder="Konečný limit: +1 h" style="width:100%; margin-top:6px;">
         </div>
 
         <div class="section">
           <h3>Výsledné stavy → Situace / Závažnost</h3>
-          <p class="label">Rozhodnutí o dívání se na datum od přepravce je vestavěné v enginu — tady se jen klasifikuje výsledek.</p>
+          <p class="label">Rozhodnutí o dívání se na D (datum od přepravce) je vestavěné v enginu — tady se jen klasifikuje výsledek. ADD je vstupní brána, řeší se mimo tuhle sekci.</p>
           <div class="placeholder" style="margin-bottom:6px;">1. i 2. scan v pořádku → Situace: [vybrat]</div>
           <div class="placeholder" style="margin-bottom:6px;">1. scan OK, 2. scan v okně nenalezen → Situace: [vybrat]</div>
-          <div class="placeholder" style="margin-bottom:6px;">1. scan nenalezen do 9:00, datum přepravce už dnes není → Situace: [vybrat]</div>
-          <div class="placeholder" style="margin-bottom:6px;">1. scan nenalezen ani do 10:00 → Situace: [vybrat]</div>
-          <div class="placeholder" style="margin-bottom:6px;">1. scan dorazil do 10:00, ale datum přepravce se posunulo → Situace: [vybrat]</div>
-          <div class="placeholder" style="margin-bottom:6px;">1. scan dorazil do 10:00, datum stále dnes, 2. scan OK → Situace: [vybrat]</div>
-          <div class="placeholder">1. scan dorazil do 10:00, datum stále dnes, 2. scan chybí → Situace: [vybrat]</div>
+          <div class="placeholder" style="margin-bottom:6px;">1. scan nenalezen do Limitu pro řádné záznamy, D už dnes není → Situace: [vybrat]</div>
+          <div class="placeholder" style="margin-bottom:6px;">1. scan nenalezen ani do Konečného limitu → Situace: [vybrat]</div>
+          <div class="placeholder" style="margin-bottom:6px;">1. scan dorazil do Konečného limitu, ale D se posunulo → Situace: [vybrat]</div>
+          <div class="placeholder" style="margin-bottom:6px;">1. scan dorazil do Konečného limitu, D stále dnes, 2. scan OK → Situace: [vybrat]</div>
+          <div class="placeholder">1. scan dorazil do Konečného limitu, D stále dnes, 2. scan chybí → Situace: [vybrat]</div>
         </div>
 
       </div>
