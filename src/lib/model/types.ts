@@ -62,6 +62,37 @@ export interface CheckpointCorrectness {
   fixedDayDirection?: "before" | "after";
 }
 
+/** Rozlišuje generický bod (jedna kontrola, hardcoded Situace "Problém na trase") od
+ *  specializovaného typu "Dnešní doručení" (dva navazující scany, ADD brána, D-větvení). */
+export type BodKind = "generic" | "dnesni_doruceni";
+
+/** Kdy se má kontrola spustit — buď pevný čas, nebo posun v hodinách od Termínu (CheckpointCorrectness). */
+export interface TimeLimit {
+  mode: "absolute" | "offset";
+  absoluteTime?: string;   // "HH:MM", jen mode "absolute"
+  offsetHours?: number;    // posun v hodinách od Termínu, jen mode "offset"
+}
+
+/** Jeden fyzický scan uvnitř bodu "Dnešní doručení" — vlastní match + Termín (vlastní čas záznamu). */
+export interface DnesniDoruceniScan {
+  match: CheckpointMatch;
+  deadline: CheckpointCorrectness;
+}
+
+/** Nastavení celého bodu "Dnešní doručení" — dva scany + tři časové limity.
+ *  D (datum doručení od přepravce) se vyhodnocuje POUZE v konecnyLimitScan1 — viz
+ *  docs/superpowers/specs/2026-07-17-dnesni-doruceni-bod-design.md §3.2. */
+export interface DnesniDoruceniConfig {
+  scan1: DnesniDoruceniScan;
+  /** Kontrola 2 — jen u scan1. Posuzuje jen řádnost záznamu, D se tady nekontroluje. */
+  limitProRadneZaznamy: TimeLimit;
+  /** Kontrola 3 — jen u scan1. Tady se poprvé vyhodnocuje D. */
+  konecnyLimitScan1: TimeLimit;
+  scan2: DnesniDoruceniScan;
+  /** Jednostupňové — jediná kontrola scan2, žádný Limit pro řádné záznamy. */
+  konecnyLimitScan2: TimeLimit;
+}
+
 export interface Checkpoint {
   id: string; checkpointTypeId: string; note?: string;
   match: CheckpointMatch;
@@ -72,6 +103,13 @@ export interface Checkpoint {
   /** @deprecated */
   criticalAfterHours?: number;
   correctness: CheckpointCorrectness[];   // prázdné = jen "musí nastat"
+
+  /** NOVÉ — typ bodu, default "generic" pro zpětnou kompatibilitu se stávajícími seed daty. */
+  kind?: BodKind;
+  /** NOVÉ — jen kind "generic". Jediná kontrola bodu — Nesplněno vede na hardcoded Situaci "Problém na trase". */
+  konecnyLimit?: TimeLimit;
+  /** NOVÉ — jen kind "dnesni_doruceni". */
+  dnesniDoruceni?: DnesniDoruceniConfig;
 }
 
 export interface Segment {
