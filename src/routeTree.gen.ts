@@ -10,17 +10,24 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TestRouteImport } from './routes/test'
+import { Route as SouladSTrasouRouteImport } from './routes/soulad-s-trasou'
 import { Route as SituaceRouteImport } from './routes/situace'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SituaceIdRouteImport } from './routes/situace_.$id'
 import { Route as RulesNewRouteImport } from './routes/rules.new'
 import { Route as RulesNewIndexRouteImport } from './routes/rules.new.index'
+import { Route as SouladSTrasouUsekIdRouteImport } from './routes/soulad-s-trasou_.usek.$id'
 import { Route as RulesNewEditRouteImport } from './routes/rules.new.edit'
 import { Route as RulesRuleIdEditRouteImport } from './routes/rules.$ruleId.edit'
 
 const TestRoute = TestRouteImport.update({
   id: '/test',
   path: '/test',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SouladSTrasouRoute = SouladSTrasouRouteImport.update({
+  id: '/soulad-s-trasou',
+  path: '/soulad-s-trasou',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SituaceRoute = SituaceRouteImport.update({
@@ -48,6 +55,11 @@ const RulesNewIndexRoute = RulesNewIndexRouteImport.update({
   path: '/',
   getParentRoute: () => RulesNewRoute,
 } as any)
+const SouladSTrasouUsekIdRoute = SouladSTrasouUsekIdRouteImport.update({
+  id: '/soulad-s-trasou_/usek/$id',
+  path: '/soulad-s-trasou/usek/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RulesNewEditRoute = RulesNewEditRouteImport.update({
   id: '/edit',
   path: '/edit',
@@ -62,31 +74,37 @@ const RulesRuleIdEditRoute = RulesRuleIdEditRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/situace': typeof SituaceRoute
+  '/soulad-s-trasou': typeof SouladSTrasouRoute
   '/test': typeof TestRoute
   '/rules/new': typeof RulesNewRouteWithChildren
   '/situace/$id': typeof SituaceIdRoute
   '/rules/$ruleId/edit': typeof RulesRuleIdEditRoute
   '/rules/new/edit': typeof RulesNewEditRoute
+  '/soulad-s-trasou/usek/$id': typeof SouladSTrasouUsekIdRoute
   '/rules/new/': typeof RulesNewIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/situace': typeof SituaceRoute
+  '/soulad-s-trasou': typeof SouladSTrasouRoute
   '/test': typeof TestRoute
   '/situace/$id': typeof SituaceIdRoute
   '/rules/$ruleId/edit': typeof RulesRuleIdEditRoute
   '/rules/new/edit': typeof RulesNewEditRoute
+  '/soulad-s-trasou/usek/$id': typeof SouladSTrasouUsekIdRoute
   '/rules/new': typeof RulesNewIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/situace': typeof SituaceRoute
+  '/soulad-s-trasou': typeof SouladSTrasouRoute
   '/test': typeof TestRoute
   '/rules/new': typeof RulesNewRouteWithChildren
   '/situace_/$id': typeof SituaceIdRoute
   '/rules/$ruleId/edit': typeof RulesRuleIdEditRoute
   '/rules/new/edit': typeof RulesNewEditRoute
+  '/soulad-s-trasou_/usek/$id': typeof SouladSTrasouUsekIdRoute
   '/rules/new/': typeof RulesNewIndexRoute
 }
 export interface FileRouteTypes {
@@ -94,40 +112,48 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/situace'
+    | '/soulad-s-trasou'
     | '/test'
     | '/rules/new'
     | '/situace/$id'
     | '/rules/$ruleId/edit'
     | '/rules/new/edit'
+    | '/soulad-s-trasou/usek/$id'
     | '/rules/new/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/situace'
+    | '/soulad-s-trasou'
     | '/test'
     | '/situace/$id'
     | '/rules/$ruleId/edit'
     | '/rules/new/edit'
+    | '/soulad-s-trasou/usek/$id'
     | '/rules/new'
   id:
     | '__root__'
     | '/'
     | '/situace'
+    | '/soulad-s-trasou'
     | '/test'
     | '/rules/new'
     | '/situace_/$id'
     | '/rules/$ruleId/edit'
     | '/rules/new/edit'
+    | '/soulad-s-trasou_/usek/$id'
     | '/rules/new/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SituaceRoute: typeof SituaceRoute
+  SouladSTrasouRoute: typeof SouladSTrasouRoute
   TestRoute: typeof TestRoute
   RulesNewRoute: typeof RulesNewRouteWithChildren
   SituaceIdRoute: typeof SituaceIdRoute
   RulesRuleIdEditRoute: typeof RulesRuleIdEditRoute
+  SouladSTrasouUsekIdRoute: typeof SouladSTrasouUsekIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -137,6 +163,13 @@ declare module '@tanstack/react-router' {
       path: '/test'
       fullPath: '/test'
       preLoaderRoute: typeof TestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/soulad-s-trasou': {
+      id: '/soulad-s-trasou'
+      path: '/soulad-s-trasou'
+      fullPath: '/soulad-s-trasou'
+      preLoaderRoute: typeof SouladSTrasouRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/situace': {
@@ -174,6 +207,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RulesNewIndexRouteImport
       parentRoute: typeof RulesNewRoute
     }
+    '/soulad-s-trasou_/usek/$id': {
+      id: '/soulad-s-trasou_/usek/$id'
+      path: '/soulad-s-trasou/usek/$id'
+      fullPath: '/soulad-s-trasou/usek/$id'
+      preLoaderRoute: typeof SouladSTrasouUsekIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rules/new/edit': {
       id: '/rules/new/edit'
       path: '/edit'
@@ -208,10 +248,12 @@ const RulesNewRouteWithChildren = RulesNewRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SituaceRoute: SituaceRoute,
+  SouladSTrasouRoute: SouladSTrasouRoute,
   TestRoute: TestRoute,
   RulesNewRoute: RulesNewRouteWithChildren,
   SituaceIdRoute: SituaceIdRoute,
   RulesRuleIdEditRoute: RulesRuleIdEditRoute,
+  SouladSTrasouUsekIdRoute: SouladSTrasouUsekIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
