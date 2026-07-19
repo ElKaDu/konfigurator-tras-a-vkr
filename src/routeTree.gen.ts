@@ -9,23 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TrasyRouteImport } from './routes/trasy'
 import { Route as TestRouteImport } from './routes/test'
 import { Route as SituaceRouteImport } from './routes/situace'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as UsekIdRouteImport } from './routes/usek.$id'
-import { Route as TrasaIdRouteImport } from './routes/trasa.$id'
 import { Route as SituaceIdRouteImport } from './routes/situace_.$id'
 import { Route as RulesNewRouteImport } from './routes/rules.new'
 import { Route as RulesNewIndexRouteImport } from './routes/rules.new.index'
 import { Route as RulesNewEditRouteImport } from './routes/rules.new.edit'
 import { Route as RulesRuleIdEditRouteImport } from './routes/rules.$ruleId.edit'
 
-const TrasyRoute = TrasyRouteImport.update({
-  id: '/trasy',
-  path: '/trasy',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const TestRoute = TestRouteImport.update({
   id: '/test',
   path: '/test',
@@ -39,16 +31,6 @@ const SituaceRoute = SituaceRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const UsekIdRoute = UsekIdRouteImport.update({
-  id: '/usek/$id',
-  path: '/usek/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TrasaIdRoute = TrasaIdRouteImport.update({
-  id: '/trasa/$id',
-  path: '/trasa/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SituaceIdRoute = SituaceIdRouteImport.update({
@@ -81,11 +63,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/situace': typeof SituaceRoute
   '/test': typeof TestRoute
-  '/trasy': typeof TrasyRoute
   '/rules/new': typeof RulesNewRouteWithChildren
   '/situace/$id': typeof SituaceIdRoute
-  '/trasa/$id': typeof TrasaIdRoute
-  '/usek/$id': typeof UsekIdRoute
   '/rules/$ruleId/edit': typeof RulesRuleIdEditRoute
   '/rules/new/edit': typeof RulesNewEditRoute
   '/rules/new/': typeof RulesNewIndexRoute
@@ -94,10 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/situace': typeof SituaceRoute
   '/test': typeof TestRoute
-  '/trasy': typeof TrasyRoute
   '/situace/$id': typeof SituaceIdRoute
-  '/trasa/$id': typeof TrasaIdRoute
-  '/usek/$id': typeof UsekIdRoute
   '/rules/$ruleId/edit': typeof RulesRuleIdEditRoute
   '/rules/new/edit': typeof RulesNewEditRoute
   '/rules/new': typeof RulesNewIndexRoute
@@ -107,11 +83,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/situace': typeof SituaceRoute
   '/test': typeof TestRoute
-  '/trasy': typeof TrasyRoute
   '/rules/new': typeof RulesNewRouteWithChildren
   '/situace_/$id': typeof SituaceIdRoute
-  '/trasa/$id': typeof TrasaIdRoute
-  '/usek/$id': typeof UsekIdRoute
   '/rules/$ruleId/edit': typeof RulesRuleIdEditRoute
   '/rules/new/edit': typeof RulesNewEditRoute
   '/rules/new/': typeof RulesNewIndexRoute
@@ -122,11 +95,8 @@ export interface FileRouteTypes {
     | '/'
     | '/situace'
     | '/test'
-    | '/trasy'
     | '/rules/new'
     | '/situace/$id'
-    | '/trasa/$id'
-    | '/usek/$id'
     | '/rules/$ruleId/edit'
     | '/rules/new/edit'
     | '/rules/new/'
@@ -135,10 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/situace'
     | '/test'
-    | '/trasy'
     | '/situace/$id'
-    | '/trasa/$id'
-    | '/usek/$id'
     | '/rules/$ruleId/edit'
     | '/rules/new/edit'
     | '/rules/new'
@@ -147,11 +114,8 @@ export interface FileRouteTypes {
     | '/'
     | '/situace'
     | '/test'
-    | '/trasy'
     | '/rules/new'
     | '/situace_/$id'
-    | '/trasa/$id'
-    | '/usek/$id'
     | '/rules/$ruleId/edit'
     | '/rules/new/edit'
     | '/rules/new/'
@@ -161,23 +125,13 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SituaceRoute: typeof SituaceRoute
   TestRoute: typeof TestRoute
-  TrasyRoute: typeof TrasyRoute
   RulesNewRoute: typeof RulesNewRouteWithChildren
   SituaceIdRoute: typeof SituaceIdRoute
-  TrasaIdRoute: typeof TrasaIdRoute
-  UsekIdRoute: typeof UsekIdRoute
   RulesRuleIdEditRoute: typeof RulesRuleIdEditRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/trasy': {
-      id: '/trasy'
-      path: '/trasy'
-      fullPath: '/trasy'
-      preLoaderRoute: typeof TrasyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/test': {
       id: '/test'
       path: '/test'
@@ -197,20 +151,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/usek/$id': {
-      id: '/usek/$id'
-      path: '/usek/$id'
-      fullPath: '/usek/$id'
-      preLoaderRoute: typeof UsekIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/trasa/$id': {
-      id: '/trasa/$id'
-      path: '/trasa/$id'
-      fullPath: '/trasa/$id'
-      preLoaderRoute: typeof TrasaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/situace_/$id': {
@@ -269,11 +209,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SituaceRoute: SituaceRoute,
   TestRoute: TestRoute,
-  TrasyRoute: TrasyRoute,
   RulesNewRoute: RulesNewRouteWithChildren,
   SituaceIdRoute: SituaceIdRoute,
-  TrasaIdRoute: TrasaIdRoute,
-  UsekIdRoute: UsekIdRoute,
   RulesRuleIdEditRoute: RulesRuleIdEditRoute,
 }
 export const routeTree = rootRouteImport
