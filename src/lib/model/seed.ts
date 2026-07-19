@@ -27,6 +27,9 @@ export const ACTION_TAGS: ActionTag[] = [
   { id: "at_email_customer", label: "Informovat e-mailem", icon: "Mail" },
   { id: "at_check_carrier", label: "Prověřit u dopravce", icon: "Search" },
   { id: "at_shift_date", label: "Posunout datum doručení", icon: "CalendarClock" },
+  { id: "at_mark_delayed", label: "Zásilka se zpozdí", icon: "AlertTriangle" },
+  { id: "at_mark_today", label: "Zásilka dorazí dnes", icon: "CheckCircle2" },
+  { id: "at_create_task", label: "Vytvořit věc k řešení", icon: "ListTodo" },
 ];
 
 // ---------------------------------------------------------------------------
@@ -115,6 +118,75 @@ export const SITUATIONS: Situation[] = [
         actions: [
           { id: "sa_lost_1", actionTagId: "at_check_carrier", description: "Zahaj šetření ztráty u dopravce." },
           { id: "sa_lost_2", actionTagId: "at_call_customer", description: "Informuj zákazníka o možném zpoždění." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "sit_problem_na_trase",
+    code: "SIT-ROUTE-PROBLEM",
+    name: "Problém na trase",
+    description: "Bod na trase nebyl nalezen do svého Konečného limitu.",
+    area: "route_compliance",
+    severities: [
+      {
+        id: "sev_problem_na_trase",
+        name: "běžné",
+        priority: "medium",
+        actions: [
+          { id: "sa_problem_na_trase_1", actionTagId: "at_create_task", description: "Řetězec bodů i tak pokračuje na další bod." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "sit_problem_na_trase_pozde",
+    code: "SIT-ROUTE-PROBLEM-LATE",
+    name: "Problém na trase — záznam se objevil",
+    description: "Bod se objevil až po Konečném limitu, jinak splňuje podmínky. Čistě informativní.",
+    area: "route_compliance",
+    severities: [
+      {
+        id: "sev_problem_na_trase_pozde",
+        name: "informativní",
+        priority: "low",
+        actions: [
+          { id: "sa_problem_na_trase_pozde_1", actionTagId: "at_create_task", description: "Jen informativní — zpoždění se samo vyřešilo." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "sit_zpozdena_zasilka",
+    code: "SIT-DELAYED-SHIPMENT",
+    name: "Zpožděná zásilka",
+    description: "Bod „Dnešní doručení“ vyhodnotil, že zásilka dnes nedorazí.",
+    area: "route_compliance",
+    severities: [
+      {
+        id: "sev_zpozdena_zasilka",
+        name: "kritické",
+        priority: "urgent",
+        actions: [
+          { id: "sa_zpozdena_zasilka_1", actionTagId: "at_mark_delayed", description: "Označit zásilku jako zpožděnou." },
+          { id: "sa_zpozdena_zasilka_2", actionTagId: "at_shift_date", description: "Posun avizované datum doručení." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "sit_dnesni_doruceni",
+    code: "SIT-DELIVERY-TODAY",
+    name: "Dnešní doručení",
+    description: "Bod „Dnešní doručení“ vyhodnotil, že zásilka dnes dorazí.",
+    area: "route_compliance",
+    severities: [
+      {
+        id: "sev_dnesni_doruceni",
+        name: "informativní",
+        priority: "low",
+        actions: [
+          { id: "sa_dnesni_doruceni_1", actionTagId: "at_mark_today", description: "Jen informativní." },
         ],
       },
     ],
