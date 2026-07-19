@@ -60,9 +60,15 @@ neproběhne vůbec.
 
 **Kontrola 1 — výsledek:** vlastní čas ≤ Termín → **pozitivní** (žádná kontrola D zde — vědomě, viz níže).
 
+**Kontrola 2 sama o sobě posuzuje jen řádnost záznamu** (nalezen, vlastní čas ≤ Termín?) — je to tatáž otázka
+jako u Kontroly 1, jen s časovačem jako pojistkou v 9:00. **D se neposuzuje v rámci Kontroly 2** — je to
+samostatný, navazující krok, který nastává až když Kontrola 2 vyjde negativně:
+
 **Kontrola 2 — výsledek:**
-- D = dnes → zatím žádná akce, vnitřní stav „čeká se do 10:00", **bez VkŘ**.
-- D ≠ dnes (posunulo se do budoucna) → rovnou **final negativní výsledek** „Zpožděná zásilka".
+- Záznam řádný (nalezen do Termínu) → stejně jako u Kontroly 1, pokračuje se na 2. scan.
+- Záznam neřádný (chybí, nebo nalezen s pozdějším vlastním časem) → **teprve teď** se kontroluje D:
+  - D = dnes → zatím žádná akce, vnitřní stav „čeká se do 10:00", **bez VkŘ**.
+  - D ≠ dnes (posunulo se do budoucna) → rovnou **final negativní výsledek** „Zpožděná zásilka".
 
 **Kontrola 3 — výsledek, dva kroky postupně:**
 1. Objevil se záznam vůbec (kdykoli, i mezi 9:00–10:00 — vlastní čas záznamu už nerozhoduje)? Ne → **final

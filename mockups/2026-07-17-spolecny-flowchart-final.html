@@ -70,9 +70,9 @@ flowchart TD
   end
 
   subgraph V_SCAN1["1. fyzicky scan - Vysledek"]
-    T1 --> S1A{"Termin (8:00):<br/>nalezen, cas <= Termin?"}
+    T1 --> S1A{"Limit pro radne zaznamy (9:00):<br/>nalezen, vlastni cas <= Termin (8:00)?"}
     S1A -->|"Ano"| S1OK[["pokracuje na 2. scan"]]
-    S1A -->|"Ne"| S1D{"Limit pro radne zaznamy (9:00):<br/>D = dnes?"}
+    S1A -->|"Ne, chybi nebo neni radny<br/>(napr. pozdejsi vlastni cas)"| S1D{"D = dnes?"}
     S1D -->|"Ano"| S1WAIT["Ceka se do Konecneho limitu<br/>vnitrni stav, bez VkR"]
     S1D -.->|"Ne"| S1F1(["Zpozdena zasilka<br/>final"])
     S1WAIT --> S1B{"Konecny limit (10:00):<br/>nalezen, cas uz nerozhoduje?"}
@@ -96,6 +96,7 @@ flowchart TD
   subgraph V_BRNO["Odlet Brno - vysledek"]
     B1 -->|"Ano"| BOK[["pokracuje na prilet Pariz"]]
     B1 -->|"Ne"| BVKR(["Problem na trase"])
+    BVKR -->|"retezec pokracuje<br/>i pres VkŘ"| BOK
     B1 -.->|"pozdeji se objevi<br/>zaznam s pozdejsim casem"| BINFO(["informativni VkR<br/>nizsi zavaznost"])
   end
 
@@ -103,6 +104,7 @@ flowchart TD
     BOK --> P1{"Konecny limit (v terminu,<br/>dalsi prac. den 3:00):<br/>nalezen do terminu?"}
     P1 -->|"Ano"| POK(["Splneno<br/>pokracuje dalsi bod"])
     P1 -->|"Ne"| PVKR(["Problem na trase"])
+    PVKR -->|"retezec pokracuje<br/>i pres VkŘ"| POK
     P1 -.->|"pozdeji se objevi<br/>zaznam s pozdejsim casem"| PINFO(["informativni VkR<br/>nizsi zavaznost"])
   end
 </pre>
@@ -126,9 +128,9 @@ flowchart TD
         <tr><td>1. scan</td><td>Spouštěč</td><td>Bod se dnes vůbec nevyhodnocuje</td><td>ADD ≠ dnes</td></tr>
         <tr><td>1./2. scan</td><td>Výsledek</td><td>Předpoklad dnešního doručení</td><td>1. scan v pořádku (do Limitu pro řádné záznamy, nebo do Konečného limitu s D stále dnes) a 2. scan v okně</td></tr>
         <tr><td>1./2. scan</td><td>Výsledek</td><td>Zpožděná zásilka (final)</td><td>D se posune (kdykoli), nebo 1. scan chybí i do Konečného limitu, nebo 2. scan v okně nenalezen</td></tr>
-        <tr><td>1. scan</td><td>Výsledek</td><td>vnitřní čekací stav, bez VkŘ</td><td>1. scan chybí do Limitu pro řádné záznamy, ale D je stále dnes</td></tr>
+        <tr><td>1. scan</td><td>Výsledek</td><td>vnitřní čekací stav, bez VkŘ</td><td>1. scan do Limitu pro řádné záznamy chybí, nebo se objevil, ale není řádný (např. pozdější vlastní čas než Termín) — a D je stále dnes</td></tr>
         <tr><td>Brno → Paříž</td><td>Spouštěč</td><td>vždy aktivní</td><td>žádná vstupní brána, bez ADD i bez D</td></tr>
-        <tr><td>Brno → Paříž</td><td>Výsledek</td><td>Problém na trase</td><td>bod nenalezen do Konečného limitu (v termínu)</td></tr>
+        <tr><td>Brno → Paříž</td><td>Výsledek</td><td>Problém na trase</td><td>bod nenalezen do Konečného limitu (v termínu) — <b>řetězec i tak pokračuje</b> na další bod</td></tr>
         <tr><td>Brno → Paříž</td><td>Výsledek</td><td>Splněno, pokračuje řetězec</td><td>bod nalezen do Konečného limitu</td></tr>
         <tr><td>Brno → Paříž</td><td>Výsledek</td><td>informativní VkŘ (nižší závažnost)</td><td>záznam se objeví až po Konečném limitu, jinak splňuje podmínky</td></tr>
       </tbody>
