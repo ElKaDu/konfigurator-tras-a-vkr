@@ -133,12 +133,28 @@ export type Condition =
   | {
       kind: "tracking_aggregate";
       trackingFieldId: string;
-      valueMode: "same_repeats" | "specific";
+      valueMode: "same_repeats";
+      /** Číselná hodnota časového prahu, např. 24. */
+      durationValue: number;
+      durationUnit: "h" | "d";
+      /** true = "musí to být nepřerušeně" (reset na jakoukoli změnu hodnoty). false = souhrnné sčítání i s přestávkami. */
+      continuous: boolean;
+      /** Volitelný reset bod podle statusu (typicky clění) — takový záznam pravidlo nikdy nespustí, jen posune počátek měřené série. */
+      resetOn?: { fieldId: string; operator: "contains" | "not_contains"; value: string };
+    }
+  | {
+      kind: "tracking_aggregate";
+      trackingFieldId: string;
+      valueMode: "specific";
       expectedValue?: string;
-      /** "contains" (default) = Obsahuje, "not_contains" = Neobsahuje. Only meaningful when valueMode is "specific". */
+      /** "contains" (default) = je, "not_contains" = není. */
       mode?: "contains" | "not_contains";
       count: number;
+      /** "any" = "nerozhoduje" (pole count je v UI neaktivní). */
+      countOperator: "gt" | "lt" | "eq" | "any";
       occurrence: "consecutive" | "any";
+      /** "recent" = jde o poslední záznamy (omezeno na posledních `count`). "anywhere" = kdekoliv v historii. */
+      scope: "recent" | "anywhere";
     }
   | { kind: "route_compliance"; mode: "checkpoint_type" | "general"; checkpointTypeId?: string; generalCheck?: "unrecognized_location" | "unrecognized_status" };
 
