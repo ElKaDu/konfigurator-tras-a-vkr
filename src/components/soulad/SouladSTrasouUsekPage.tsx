@@ -5,7 +5,11 @@ import { useSegments, segmentsStore } from "@/lib/model/store";
 import { cn } from "@/lib/utils";
 import type { Checkpoint, Segment } from "@/lib/model/types";
 import { defaultVyzvednutiTermin } from "@/lib/model/defaults";
+import { TRANSPORT_VARIANTS } from "@/lib/routes/types";
 import { BodDetailPanel } from "./BodDetailPanel";
+import { KontrolyPanel } from "./KontrolyPanel";
+
+const CARRIER_OPTIONS = ["FedEx", "UPS", "DHL", "PPL", "GLS"];
 
 function createBlankCheckpoint(): Checkpoint {
   return {
@@ -39,6 +43,24 @@ export function SouladSTrasouUsekPage({ segmentId }: { segmentId: string }) {
     segmentsStore.upsert(next);
   }
 
+  function toggleCarrier(c: string) {
+    updateSegment({
+      ...segment!,
+      carriers: segment!.carriers.includes(c)
+        ? segment!.carriers.filter((x) => x !== c)
+        : [...segment!.carriers, c],
+    });
+  }
+
+  function toggleServiceType(v: string) {
+    updateSegment({
+      ...segment!,
+      serviceTypes: segment!.serviceTypes.includes(v)
+        ? segment!.serviceTypes.filter((x) => x !== v)
+        : [...segment!.serviceTypes, v],
+    });
+  }
+
   function updateCheckpoint(updated: Checkpoint) {
     updateSegment({ ...segment!, checkpoints: segment!.checkpoints.map((cp) => (cp.id === updated.id ? updated : cp)) });
   }
@@ -60,26 +82,106 @@ export function SouladSTrasouUsekPage({ segmentId }: { segmentId: string }) {
         <span className="text-foreground font-medium">{segment.name}</span>
       </div>
       <div className="flex flex-1 min-h-0">
-        <div className="w-[280px] shrink-0 border-r border-border overflow-y-auto p-4">
+        <div className="w-[300px] shrink-0 border-r border-border overflow-y-auto p-4">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+            Základní info
+          </div>
+          <div className="flex flex-col gap-3 mb-5">
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">Název úseku</label>
+              <input
+                value={segment.name}
+                onChange={(e) => updateSegment({ ...segment, name: e.target.value })}
+                className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">Popis (volitelný)</label>
+              <textarea
+                value={segment.description ?? ""}
+                onChange={(e) => updateSegment({ ...segment, description: e.target.value || undefined })}
+                rows={2}
+                placeholder="Krátký popis…"
+                className="w-full resize-none rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">Dopravci</label>
+              <div className="flex flex-wrap gap-1.5">
+                {CARRIER_OPTIONS.map((c) => {
+                  const selected = segment.carriers.includes(c);
+                  return (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => toggleCarrier(c)}
+                      className={cn(
+                        "rounded-full px-2.5 py-0.5 text-xs transition-colors border",
+                        selected
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "border-border text-muted-foreground hover:bg-muted"
+                      )}
+                    >
+                      {c}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">Typ služby</label>
+              <div className="flex flex-wrap gap-1.5">
+                {TRANSPORT_VARIANTS.map((v) => {
+                  const selected = segment.serviceTypes.includes(v.value);
+                  return (
+                    <button
+                      key={v.value}
+                      type="button"
+                      onClick={() => toggleServiceType(v.value)}
+                      className={cn(
+                        "rounded-full px-2.5 py-0.5 text-xs transition-colors border",
+                        selected
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "border-border text-muted-foreground hover:bg-muted"
+                      )}
+                    >
+                      {v.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
           <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
             Body úseku ({segment.checkpoints.length})
           </div>
-          <div className="flex flex-col gap-0.5 mb-2">
-            {segment.checkpoints.map((cp) => (
-              <button
-                key={cp.id}
-                onClick={() => setSelectedBodId(cp.id)}
-                className={cn(
-                  "flex items-center justify-between rounded-md px-2.5 py-2 text-left text-sm",
-                  cp.id === selectedBodId ? "bg-primary-soft text-primary font-medium" : "hover:bg-muted",
-                )}
-              >
-                <span>{cp.note ?? cp.checkpointTypeId}</span>
-                <span className="text-[10px] text-muted-foreground shrink-0 ml-2">
-                  {cp.kind === "dnesni_doruceni" ? "Dnešní doručení" : "Běžný bod"}
-                </span>
-              </button>
-            ))}
+          <div className="relative flex flex-col gap-0.5 mb-2">
+            <div className="absolute left-[15px] top-3.5 bottom-3.5 w-px bg-border" />
+            {segment.checkpoints.map((cp) => {
+              const isSelected = cp.id === selectedBodId;
+              return (
+                <button
+                  key={cp.id}
+                  onClick={() => setSelectedBodId(cp.id)}
+                  className={cn(
+                    "relative flex items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm",
+                    isSelected ? "bg-primary-soft text-primary font-medium" : "hover:bg-muted",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "z-10 size-2.5 shrink-0 rounded-full",
+                      isSelected ? "bg-primary ring-4 ring-primary-soft" : "bg-muted-foreground/40",
+                    )}
+                  />
+                  <span className="flex-1 min-w-0 truncate">{cp.note ?? cp.checkpointTypeId}</span>
+                  <span className="text-[10px] text-muted-foreground shrink-0">
+                    {cp.kind === "dnesni_doruceni" ? "Dnešní doručení" : "Běžný bod"}
+                  </span>
+                </button>
+              );
+            })}
           </div>
           <button
             onClick={addCheckpoint}
@@ -88,11 +190,18 @@ export function SouladSTrasouUsekPage({ segmentId }: { segmentId: string }) {
             + Přidat bod
           </button>
         </div>
-        <div className="flex-1 min-w-0 overflow-y-auto">
+        <div className="w-[380px] shrink-0 border-r border-border overflow-y-auto">
           {selectedBod ? (
             <BodDetailPanel segment={segment} checkpoint={selectedBod} onUpdate={updateCheckpoint} />
           ) : (
             <div className="p-8 text-sm text-muted-foreground">Vyberte bod vlevo, nebo přidejte nový.</div>
+          )}
+        </div>
+        <div className="flex-1 min-w-0 overflow-y-auto bg-muted/40 p-6">
+          {selectedBod ? (
+            <KontrolyPanel checkpoint={selectedBod} />
+          ) : (
+            <div className="text-sm text-muted-foreground">Vyberte bod vlevo.</div>
           )}
         </div>
       </div>

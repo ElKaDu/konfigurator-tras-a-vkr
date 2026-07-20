@@ -1,8 +1,5 @@
 import type { Checkpoint, Segment } from "@/lib/model/types";
-import { ROUTE_COMPLIANCE_SITUATIONS } from "@/lib/model/routeComplianceSituations";
-import { formatTimeLimit } from "@/lib/model/formatTimeLimit";
 import { defaultVyzvednutiTermin } from "@/lib/model/defaults";
-import { SituaceCard } from "./SituaceCard";
 import { MatchEditor } from "./MatchEditor";
 import { TerminEditor } from "./TerminEditor";
 import { TimeLimitEditor } from "./TimeLimitEditor";
@@ -20,7 +17,7 @@ export function BodDetailPanel({
   const isDnesniDoruceni = checkpoint.kind === "dnesni_doruceni";
 
   return (
-    <div className="p-6 flex flex-col gap-6 max-w-3xl">
+    <div className="p-6 flex flex-col gap-6">
       <div>
         <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Typ bodu</div>
         <div className="inline-flex rounded-md border border-border overflow-hidden text-sm">
@@ -68,7 +65,6 @@ export function BodDetailPanel({
           </div>
 
           <div className="rounded-lg border border-border bg-card p-4">
-            <div className="text-sm font-semibold mb-3">Termín</div>
             <TerminEditor
               segment={segment}
               currentCheckpointId={checkpoint.id}
@@ -84,28 +80,6 @@ export function BodDetailPanel({
               value={checkpoint.konecnyLimit ?? { mode: "offset", offsetHours: 0 }}
               onChange={(limit) => onUpdate({ ...checkpoint, konecnyLimit: limit })}
             />
-            <div className="text-xs text-muted-foreground mt-2">{formatTimeLimit(checkpoint.konecnyLimit ?? { mode: "offset", offsetHours: 0 })} — jediná kontrola tohoto bodu, žádná vazba na ADD/D.</div>
-          </div>
-
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-              Situace, které z tohoto bodu mohou vzniknout
-            </div>
-            <div className="flex flex-col gap-3">
-              <div className="rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">
-                <b className="text-foreground">Řádně nalezen do Termínu</b> — žádná věc k řešení, řetězec pokračuje na další bod.
-              </div>
-              <SituaceCard
-                headline="Nenalezen do Termínu"
-                situationId={ROUTE_COMPLIANCE_SITUATIONS.problemNaTrase.situationId}
-                severityId={ROUTE_COMPLIANCE_SITUATIONS.problemNaTrase.severityId}
-              />
-              <SituaceCard
-                headline="Objeví se později (reaktivně, po Konečném limitu)"
-                situationId={ROUTE_COMPLIANCE_SITUATIONS.problemNaTrasePozde.situationId}
-                severityId={ROUTE_COMPLIANCE_SITUATIONS.problemNaTrasePozde.severityId}
-              />
-            </div>
           </div>
         </>
       )}
