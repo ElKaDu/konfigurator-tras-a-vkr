@@ -17,6 +17,7 @@ import { Route as SituaceIdRouteImport } from './routes/situace_.$id'
 import { Route as RulesNewRouteImport } from './routes/rules.new'
 import { Route as RulesNewIndexRouteImport } from './routes/rules.new.index'
 import { Route as SouladSTrasouUsekIdRouteImport } from './routes/soulad-s-trasou_.usek.$id'
+import { Route as SouladSTrasouTrasaIdRouteImport } from './routes/soulad-s-trasou_.trasa.$id'
 import { Route as RulesNewEditRouteImport } from './routes/rules.new.edit'
 import { Route as RulesRuleIdEditRouteImport } from './routes/rules.$ruleId.edit'
 
@@ -60,6 +61,11 @@ const SouladSTrasouUsekIdRoute = SouladSTrasouUsekIdRouteImport.update({
   path: '/soulad-s-trasou/usek/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SouladSTrasouTrasaIdRoute = SouladSTrasouTrasaIdRouteImport.update({
+  id: '/soulad-s-trasou_/trasa/$id',
+  path: '/soulad-s-trasou/trasa/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RulesNewEditRoute = RulesNewEditRouteImport.update({
   id: '/edit',
   path: '/edit',
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/situace/$id': typeof SituaceIdRoute
   '/rules/$ruleId/edit': typeof RulesRuleIdEditRoute
   '/rules/new/edit': typeof RulesNewEditRoute
+  '/soulad-s-trasou/trasa/$id': typeof SouladSTrasouTrasaIdRoute
   '/soulad-s-trasou/usek/$id': typeof SouladSTrasouUsekIdRoute
   '/rules/new/': typeof RulesNewIndexRoute
 }
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/situace/$id': typeof SituaceIdRoute
   '/rules/$ruleId/edit': typeof RulesRuleIdEditRoute
   '/rules/new/edit': typeof RulesNewEditRoute
+  '/soulad-s-trasou/trasa/$id': typeof SouladSTrasouTrasaIdRoute
   '/soulad-s-trasou/usek/$id': typeof SouladSTrasouUsekIdRoute
   '/rules/new': typeof RulesNewIndexRoute
 }
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/situace_/$id': typeof SituaceIdRoute
   '/rules/$ruleId/edit': typeof RulesRuleIdEditRoute
   '/rules/new/edit': typeof RulesNewEditRoute
+  '/soulad-s-trasou_/trasa/$id': typeof SouladSTrasouTrasaIdRoute
   '/soulad-s-trasou_/usek/$id': typeof SouladSTrasouUsekIdRoute
   '/rules/new/': typeof RulesNewIndexRoute
 }
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/situace/$id'
     | '/rules/$ruleId/edit'
     | '/rules/new/edit'
+    | '/soulad-s-trasou/trasa/$id'
     | '/soulad-s-trasou/usek/$id'
     | '/rules/new/'
   fileRoutesByTo: FileRoutesByTo
@@ -129,6 +139,7 @@ export interface FileRouteTypes {
     | '/situace/$id'
     | '/rules/$ruleId/edit'
     | '/rules/new/edit'
+    | '/soulad-s-trasou/trasa/$id'
     | '/soulad-s-trasou/usek/$id'
     | '/rules/new'
   id:
@@ -141,6 +152,7 @@ export interface FileRouteTypes {
     | '/situace_/$id'
     | '/rules/$ruleId/edit'
     | '/rules/new/edit'
+    | '/soulad-s-trasou_/trasa/$id'
     | '/soulad-s-trasou_/usek/$id'
     | '/rules/new/'
   fileRoutesById: FileRoutesById
@@ -153,6 +165,7 @@ export interface RootRouteChildren {
   RulesNewRoute: typeof RulesNewRouteWithChildren
   SituaceIdRoute: typeof SituaceIdRoute
   RulesRuleIdEditRoute: typeof RulesRuleIdEditRoute
+  SouladSTrasouTrasaIdRoute: typeof SouladSTrasouTrasaIdRoute
   SouladSTrasouUsekIdRoute: typeof SouladSTrasouUsekIdRoute
 }
 
@@ -214,6 +227,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SouladSTrasouUsekIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/soulad-s-trasou_/trasa/$id': {
+      id: '/soulad-s-trasou_/trasa/$id'
+      path: '/soulad-s-trasou/trasa/$id'
+      fullPath: '/soulad-s-trasou/trasa/$id'
+      preLoaderRoute: typeof SouladSTrasouTrasaIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rules/new/edit': {
       id: '/rules/new/edit'
       path: '/edit'
@@ -253,6 +273,7 @@ const rootRouteChildren: RootRouteChildren = {
   RulesNewRoute: RulesNewRouteWithChildren,
   SituaceIdRoute: SituaceIdRoute,
   RulesRuleIdEditRoute: RulesRuleIdEditRoute,
+  SouladSTrasouTrasaIdRoute: SouladSTrasouTrasaIdRoute,
   SouladSTrasouUsekIdRoute: SouladSTrasouUsekIdRoute,
 }
 export const routeTree = rootRouteImport
