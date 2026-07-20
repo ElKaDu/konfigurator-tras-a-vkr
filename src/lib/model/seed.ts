@@ -202,7 +202,7 @@ export const SEGMENTS: Segment[] = [
     name: "ČR → Příchod na clení",
     description: "Sdílený vstup do CZ.",
     carriers: ["FedEx"],
-    serviceTypes: ["ECONOMY"],
+    serviceTypes: ["Economy"],
     checkpoints: [
       {
         id: "cp_departure",
@@ -243,7 +243,7 @@ export const SEGMENTS: Segment[] = [
     name: "Příchod na clení → Doručeno",
     description: "Poslední míle v CZ.",
     carriers: ["FedEx"],
-    serviceTypes: ["ECONOMY"],
+    serviceTypes: ["Economy"],
     checkpoints: [
       {
         id: "cp_first_scan",
@@ -353,7 +353,7 @@ export const ROUTES: Route[] = [
     name: "FedEx Air — CZ",
     active: true,
     carriers: ["FedEx"],
-    serviceTypes: ["ECONOMY"],
+    serviceTypes: ["Economy"],
     destCountries: ["CZ"],
     segmentIds: ["seg_cz_arrival", "seg_cz_lastmile"],
   },
