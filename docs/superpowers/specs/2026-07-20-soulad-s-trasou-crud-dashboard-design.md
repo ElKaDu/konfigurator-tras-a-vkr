@@ -154,8 +154,9 @@ pouze:
 
 - Tlačítko **smazat úsek** (respektuje §2 — disabled + tooltip, když je použit na trase).
 - Malá ikonka **smazat bod** u každého řádku v levém seznamu bodů (bez omezení, §2).
-- Route soubor `soulad-s-trasou.usek.$id.tsx` přijme volitelný `search: { from?: routeId }` (vzor `main`),
-  aby „← Zpět" a přesměrování po uložení/smazání vědělo, jestli se vrátit na `/soulad-s-trasou` nebo na
+- Route soubor `soulad-s-trasou_.usek.$id.tsx` přijme volitelný `search: { from?: routeId }`
+  (přesně vzor `main`'s `usek.$id.tsx` — `validateSearch` + `Route.useSearch()`), aby „← Zpět" a
+  přesměrování po uložení/smazání vědělo, jestli se vrátit na `/soulad-s-trasou` nebo na
   `/soulad-s-trasou/trasa/$id`.
 
 ---
@@ -180,15 +181,21 @@ jen CDN, ať funguje i offline/bez připojení) a inicializaci na `DOMContentLoa
 
 ## 9. Soubory (orientačně)
 
-- `src/routes/soulad-s-trasou.trasa.$id.tsx` — **nová** route.
+- `src/routes/soulad-s-trasou_.trasa.$id.tsx` — **nová** route (vzor `soulad-s-trasou_.usek.$id.tsx`,
+  stejná `_` notace, aby nedědila layout `soulad-s-trasou.tsx`).
 - `src/components/soulad/SouladSTrasouListPage.tsx` — přepsat na dvousloupcový layout (§4).
+- `src/components/soulad/RouteRow.tsx`, `SegmentRow.tsx`, `BodRow.tsx` — **nové**, sdílené řádkové
+  komponenty pro vnořený seznam (§3, §4), použité v obou sloupcích dashboardu.
+- `src/components/soulad/AddExistingSegmentPicker.tsx` — **nová**, sdílený picker eligible úseků (§6),
+  použitý v dashboardu i editoru trasy.
 - `src/components/soulad/RouteEditorPage.tsx` — **nová** komponenta pro editor trasy (§5), inspirovaná
   `main`'s `RouteEditorPage.tsx`, ale bez validačního panelu a bez katalogu typů milníků.
 - `src/lib/model/routeEligibility.ts` — **nová**, trimovaná `eligibleSegments` (§6).
-- `src/components/soulad/SouladSTrasouUsekPage.tsx` — doplnit mazání úseku/bodu a `search.from` (§7),
-  jinak beze změny.
-- `src/routes/soulad-s-trasou.usek.$id.tsx` — doplnit `search` schema pro `from`.
-- `src/components/soulad/KontrolyPanel.tsx`, `SouladSTrasouUsekPage.tsx` — úpravy z §8.1.
+- `src/components/soulad/SouladSTrasouUsekPage.tsx` — doplnit mazání úseku/bodu, `fromRouteId` prop (§7)
+  a rozšíření prostředního sloupce (§8.1), jinak beze změny.
+- `src/routes/soulad-s-trasou_.usek.$id.tsx` — doplnit `validateSearch` schema pro `from`
+  (přesně vzor `main`'s `usek.$id.tsx`).
+- `src/components/soulad/KontrolyPanel.tsx` — úpravy z §8.1 (přejmenování, ztlumený vzhled).
 - `public/zadani-pro-programatory.html` — oprava z §8.2.
 
 ---
