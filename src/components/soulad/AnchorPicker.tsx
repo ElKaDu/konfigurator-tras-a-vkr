@@ -1,16 +1,20 @@
 import type { CheckpointCorrectness, Segment } from "@/lib/model/types";
-import { useCheckpointTypes } from "@/lib/model/store";
+import { useCheckpointTypes, useRoutes, useSegments } from "@/lib/model/store";
 
 type AnchorValue = Pick<CheckpointCorrectness, "anchorKind" | "anchorLabel" | "anchorCheckpointTypeId">;
 
 const SYSTEM_ANCHORS: { label: string }[] = [
-  { label: "Avizované doručení zákazníkovi (ADD)" },
+  { label: "Vytvoření zásilky" },
   { label: "Vyzvednutí zásilky" },
+  { label: "Vytvoření objednávky" },
+  { label: "Avizované doručení zákazníkovi (ADD)" },
+  { label: "Doručení hlášené dopravcem" },
 ];
 
 /**
- * Nabízí tři skupiny kotev: systémové (ADD, Vyzvednutí zásilky), a PRIMÁRNĚ body právě
- * otevřeného úseku (segment.checkpoints) — ne všechny body všech tras.
+ * Nabízí systémové kotvy, body aktuálního úseku, a PŘIDÁVÁ body ostatních úseků, které patří
+ * do stejné trasy (tras) jako aktuální úsek — viz docs/superpowers/specs/2026-07-20-usek-detail-v2-design.md §4.
+ * Úsek bez trasy se chová jako dřív (jen "Body tohoto úseku").
  */
 export function AnchorPicker({
   segment,
@@ -24,7 +28,17 @@ export function AnchorPicker({
   onChange: (next: AnchorValue) => void;
 }) {
   const checkpointTypes = useCheckpointTypes();
+  const routes = useRoutes();
+  const segments = useSegments();
   const ctMap = new Map(checkpointTypes.map((ct) => [ct.id, ct.name]));
+
+  const siblingSegmentIds = new Set(
+    routes
+      .filter((r) => r.segmentIds.includes(segment.id))
+      .flatMap((r) => r.segmentIds)
+      .filter((id) => id !== segment.id)
+  );
+  const siblingSegments = segments.filter((s) => siblingSegmentIds.has(s.id));
 
   const selectValue =
     value.anchorKind === "checkpoint"
@@ -67,6 +81,15 @@ export function AnchorPicker({
             </option>
           ))}
       </optgroup>
+      {siblingSegments.map((sib) => (
+        <optgroup key={sib.id} label={`Body úseku: ${sib.name}`}>
+          {sib.checkpoints.map((cp) => (
+            <option key={cp.id} value={`checkpoint:${cp.checkpointTypeId}`}>
+              {cp.note ?? ctMap.get(cp.checkpointTypeId) ?? cp.checkpointTypeId}
+            </option>
+          ))}
+        </optgroup>
+      ))}
     </select>
   );
 }
