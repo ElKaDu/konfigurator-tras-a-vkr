@@ -8,8 +8,13 @@ import { DnesniDoruceniKontroly } from "./DnesniDoruceniKontroly";
 
 export function KontrolyPanel({ checkpoint }: { checkpoint: Checkpoint }) {
   return (
-    <div className="flex flex-col gap-3.5">
-      <div className="text-sm font-semibold">Plán spuštění</div>
+    <div className="flex flex-col gap-3.5 opacity-90">
+      <div className="flex items-center gap-2">
+        <div className="text-sm font-semibold text-muted-foreground">Jak to bude fungovat</div>
+        <span className="rounded-full border border-dashed border-border px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+          jen náhled
+        </span>
+      </div>
       <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-[11px] text-muted-foreground">
         <span>🔒 Situace, Závažnost a Akce se needitují tady — nastavují se v Django adminu.</span>
         <a
