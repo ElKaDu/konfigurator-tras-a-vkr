@@ -403,8 +403,10 @@ export const RULES: Rule[] = [
         kind: "tracking_aggregate",
         trackingFieldId: "location_city",
         valueMode: "same_repeats",
-        count: 3,
-        occurrence: "consecutive",
+        // 24 h je provizorní hodnota — přesný práh je na doladění s byznysem
+        durationValue: 24,
+        durationUnit: "h",
+        continuous: true,
       },
     ],
     actions: [
@@ -455,7 +457,9 @@ export const RULES: Rule[] = [
         valueMode: "specific",
         expectedValue: "DELIVERY_ATTEMPTED",
         count: 2,
+        countOperator: "eq",
         occurrence: "any",
+        scope: "recent",
       },
     ],
     actions: [
