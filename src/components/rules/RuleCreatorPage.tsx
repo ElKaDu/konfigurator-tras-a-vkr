@@ -9,8 +9,9 @@ import { cn } from "@/lib/utils";
 import type { Area, Priority, Rule, Situation, Severity, Condition } from "@/lib/model/types";
 import { VkrConditionsBuilder } from "@/components/rules/editors/VkrConditionsBuilder";
 import type { VkrCondition } from "@/lib/vkr/vkrConditionCatalog";
-import { TrackingConditionsBuilder } from "@/components/rules/editors/TrackingConditionsBuilder";
-import { isHistoryCondition } from "@/lib/model/trackingFields";
+import { TrackingIncomingConditionsBuilder } from "@/components/rules/editors/TrackingIncomingConditionsBuilder";
+import { TrackingHistoricalConditionsBuilder } from "@/components/rules/editors/TrackingHistoricalConditionsBuilder";
+import { isHistoricalConditionRow } from "@/lib/model/trackingFields";
 import { ActionTagPicker } from "@/components/situations/ActionTagPicker";
 
 
@@ -236,7 +237,7 @@ export function RuleCreatorPage({
 
                 const trackingConditionsOut: Rule["conditions"] =
                   triggerType === "timer"
-                    ? trackingConditions.filter(isHistoryCondition)
+                    ? trackingConditions.filter(isHistoricalConditionRow)
                     : trackingConditions;
 
                 const trackingActionsOut: Rule["actions"] = severityActions
@@ -426,14 +427,25 @@ export function RuleCreatorPage({
                     Podmínky
                   </div>
 
+                  {triggerType === "automatic" && (
+                    <div className="mb-4">
+                      <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                        Podmínky pro příchozí záznam
+                      </div>
+                      <TrackingIncomingConditionsBuilder
+                        conditions={trackingConditions}
+                        onChange={setTrackingConditions}
+                      />
+                    </div>
+                  )}
+
                   <div className="mb-4">
                     <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                      Co platí o záznamech v trackingu
+                      Podmínky pro historické záznamy
                     </div>
-                    <TrackingConditionsBuilder
+                    <TrackingHistoricalConditionsBuilder
                       conditions={trackingConditions}
                       onChange={setTrackingConditions}
-                      allowCurrentRecord={triggerType === "automatic"}
                     />
                   </div>
 
