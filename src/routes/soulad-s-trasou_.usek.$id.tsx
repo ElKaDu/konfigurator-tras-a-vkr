@@ -11,5 +11,6 @@ export const Route = createFileRoute("/soulad-s-trasou_/usek/$id")({
 
 function UsekRoute() {
   const { id } = Route.useParams();
-  return <SouladSTrasouUsekPage segmentId={id} />;
+  const { from } = Route.useSearch();
+  return <SouladSTrasouUsekPage segmentId={id} fromRouteId={from} />;
 }
