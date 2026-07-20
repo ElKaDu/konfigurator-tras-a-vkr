@@ -81,6 +81,10 @@ export function AnchorPicker({
             </option>
           ))}
       </optgroup>
+      {/* Pozn.: hodnota kotvy je klíčovaná jen checkpointTypeId, ne konkrétním úsekem — pokud
+          se stejný typ bodu objeví ve dvou sourozeneckých úsecích, výběr mezi nimi se ve
+          <select> nerozliší (obě možnosti mají stejnou value). Známé omezení, neřeší se v
+          tomto tasku — viz code review Task 1, docs/superpowers/plans/2026-07-20-usek-detail-v2.md. */}
       {siblingSegments.map((sib) => (
         <optgroup key={sib.id} label={`Body úseku: ${sib.name}`}>
           {sib.checkpoints.map((cp) => (
