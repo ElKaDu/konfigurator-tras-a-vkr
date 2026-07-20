@@ -29,6 +29,8 @@ export function RouteRow({
     routesStore.upsert({ ...route, segmentIds: [...route.segmentIds, segmentId] });
   }
 
+  // Deliberately stays on the dashboard — unlike the route editor's create+attach
+  // (Task 9), which navigates to the new segment's own page. Don't "fix" this.
   function createAndAttachSegment() {
     const segment = createBlankSegment();
     segmentsStore.upsert(segment);
