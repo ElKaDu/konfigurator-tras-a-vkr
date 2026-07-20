@@ -27,19 +27,26 @@ export const REPEATABLE_FIELDS: TrackingFieldDef[] = TRACKING_FIELDS.filter((f) 
   ["locationId", "city", "countryCode"].includes(f.value)
 );
 
-export type RowKind = "is" | "is_not" | "repeats" | "history";
+type IncomingCondition =
+  | Extract<Condition, { kind: "field" }>
+  | Extract<Condition, { kind: "tracking_aggregate"; valueMode: "same_repeats" }>;
 
-export function isTrackingConditionRow(c: Condition): boolean {
-  return c.kind === "field" || c.kind === "tracking_aggregate";
+type HistoricalCondition = Extract<Condition, { kind: "tracking_aggregate"; valueMode: "specific" }>;
+
+/** Řádek v boxu "Podmínky pro příchozí záznam". */
+export type IncomingRowKind = "is" | "is_not" | "repeats";
+
+/** True pro řádky boxu "Podmínky pro příchozí záznam" (je/není/opakuje se). */
+export function isIncomingConditionRow(c: Condition): c is IncomingCondition {
+  return c.kind === "field" || (c.kind === "tracking_aggregate" && c.valueMode === "same_repeats");
 }
 
-export function rowKindOf(c: Condition): RowKind {
+export function incomingRowKindOf(c: IncomingCondition): IncomingRowKind {
   if (c.kind === "field") return c.operator === "není" ? "is_not" : "is";
-  if (c.kind === "tracking_aggregate" && c.valueMode === "same_repeats") return "repeats";
-  return "history";
+  return "repeats";
 }
 
-/** True for conditions valid regardless of Spouštěč (i.e. "bylo v historii" rows) — used by RuleCreatorPage to filter out-of-scope rows at save time when Spouštěč = Časovač. */
-export function isHistoryCondition(c: Condition): boolean {
-  return isTrackingConditionRow(c) && rowKindOf(c) === "history";
+/** True pro řádky boxu "Podmínky pro historické záznamy". */
+export function isHistoricalConditionRow(c: Condition): c is HistoricalCondition {
+  return c.kind === "tracking_aggregate" && c.valueMode === "specific";
 }
