@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 import type { Checkpoint, Segment } from "@/lib/model/types";
 import { defaultVyzvednutiTermin } from "@/lib/model/defaults";
 import { BodDetailPanel } from "./BodDetailPanel";
-import { KontrolyPanel } from "./KontrolyPanel";
 import { SegmentMetaEditor } from "./SegmentMetaEditor";
 
 function createBlankCheckpoint(): Checkpoint {
@@ -32,8 +31,9 @@ export function SouladSTrasouUsekPage({
   const segments = useSegments();
   const segment = segments.find((s) => s.id === segmentId) ?? null;
   const navigate = useNavigate();
+  const visibleCheckpoints = segment?.checkpoints.filter((cp) => cp.kind !== "dnesni_doruceni") ?? [];
   const [selectedBodId, setSelectedBodId] = useState<string | null>(
-    segment?.checkpoints[0]?.id ?? null,
+    visibleCheckpoints[0]?.id ?? null,
   );
 
   if (!segment) {
@@ -62,7 +62,9 @@ export function SouladSTrasouUsekPage({
   function removeCheckpoint(id: string) {
     const next = segment!.checkpoints.filter((cp) => cp.id !== id);
     updateSegment({ ...segment!, checkpoints: next });
-    setSelectedBodId((prev) => (prev === id ? next[0]?.id ?? null : prev));
+    setSelectedBodId((prev) =>
+      prev === id ? next.find((cp) => cp.kind !== "dnesni_doruceni")?.id ?? null : prev,
+    );
   }
 
   function deleteSegment() {
@@ -71,7 +73,8 @@ export function SouladSTrasouUsekPage({
     else navigate({ to: "/soulad-s-trasou" });
   }
 
-  const selectedBod = segment.checkpoints.find((cp) => cp.id === selectedBodId) ?? null;
+  const usekVisibleCheckpoints = segment.checkpoints.filter((cp) => cp.kind !== "dnesni_doruceni");
+  const selectedBod = usekVisibleCheckpoints.find((cp) => cp.id === selectedBodId) ?? null;
   const { used, count } = isSegmentUsed(segment.id);
 
   return (
@@ -111,11 +114,11 @@ export function SouladSTrasouUsekPage({
           <SegmentMetaEditor segment={segment} onUpdate={updateSegment} />
 
           <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-            Body úseku ({segment.checkpoints.length})
+            Body úseku ({usekVisibleCheckpoints.length})
           </div>
           <div className="relative flex flex-col gap-0.5 mb-2">
             <div className="absolute left-[15px] top-3.5 bottom-3.5 w-px bg-border" />
-            {segment.checkpoints.map((cp) => {
+            {usekVisibleCheckpoints.map((cp) => {
               const isSelected = cp.id === selectedBodId;
               return (
                 <div
@@ -136,9 +139,6 @@ export function SouladSTrasouUsekPage({
                       )}
                     />
                     <span className="flex-1 min-w-0 truncate">{cp.note ?? cp.checkpointTypeId}</span>
-                    <span className="text-[10px] text-muted-foreground shrink-0">
-                      {cp.kind === "dnesni_doruceni" ? "Dnešní doručení" : "Běžný bod"}
-                    </span>
                   </button>
                   <button
                     onClick={() => removeCheckpoint(cp.id)}
@@ -158,18 +158,11 @@ export function SouladSTrasouUsekPage({
             + Přidat bod
           </button>
         </div>
-        <div className="w-[460px] shrink-0 border-r border-border overflow-y-auto">
+        <div className="flex-1 min-w-0 overflow-y-auto">
           {selectedBod ? (
             <BodDetailPanel segment={segment} checkpoint={selectedBod} onUpdate={updateCheckpoint} />
           ) : (
             <div className="p-8 text-sm text-muted-foreground">Vyberte bod vlevo, nebo přidejte nový.</div>
-          )}
-        </div>
-        <div className="flex-1 min-w-0 overflow-y-auto bg-muted/40 p-6">
-          {selectedBod ? (
-            <KontrolyPanel checkpoint={selectedBod} />
-          ) : (
-            <div className="text-sm text-muted-foreground">Vyberte bod vlevo.</div>
           )}
         </div>
       </div>

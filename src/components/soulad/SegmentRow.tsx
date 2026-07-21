@@ -17,6 +17,7 @@ export function SegmentRow({
 }) {
   const [expanded, setExpanded] = useState(false);
   const { used, count } = isSegmentUsed(segment.id);
+  const visibleCheckpoints = segment.checkpoints.filter((cp) => cp.kind !== "dnesni_doruceni");
 
   return (
     <div className={cn("border-t border-border first:border-t-0", highlighted && "bg-primary-soft/10")}>
@@ -36,7 +37,7 @@ export function SegmentRow({
         >
           {segment.name}
         </Link>
-        <span className="shrink-0 text-xs text-muted-foreground">{segment.checkpoints.length} bodů</span>
+        <span className="shrink-0 text-xs text-muted-foreground">{visibleCheckpoints.length} bodů</span>
         <button
           disabled={used}
           onClick={() => segmentsStore.remove(segment.id)}
@@ -51,10 +52,10 @@ export function SegmentRow({
       </div>
       {expanded && (
         <div className="pb-2">
-          {segment.checkpoints.length === 0 ? (
+          {visibleCheckpoints.length === 0 ? (
             <div className="pl-[26px] pr-2 text-xs text-muted-foreground italic">Zatím žádné body.</div>
           ) : (
-            segment.checkpoints.map((cp) => <BodRow key={cp.id} checkpoint={cp} />)
+            visibleCheckpoints.map((cp) => <BodRow key={cp.id} checkpoint={cp} />)
           )}
         </div>
       )}

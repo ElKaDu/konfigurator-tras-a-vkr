@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { AppHeader } from "@/components/AppHeader";
 import { DataMenu } from "@/components/common/DataMenu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRoutes, useSegments, routesStore, segmentsStore } from "@/lib/model/store";
 import type { Route, Segment } from "@/lib/model/types";
 import { RouteRow } from "./RouteRow";
@@ -25,11 +26,6 @@ export function SouladSTrasouListPage() {
   const navigate = useNavigate();
   const [expandedRouteId, setExpandedRouteId] = useState<string | null>(null);
 
-  const expandedRoute = expandedRouteId ? routes.find((r) => r.id === expandedRouteId) ?? null : null;
-  const routeSegmentIds = expandedRoute ? new Set(expandedRoute.segmentIds) : null;
-  const highlightedSegments = routeSegmentIds ? segments.filter((s) => routeSegmentIds.has(s.id)) : [];
-  const otherSegments = routeSegmentIds ? segments.filter((s) => !routeSegmentIds.has(s.id)) : segments;
-
   function addRoute() {
     const route = createBlankRoute();
     routesStore.upsert(route);
@@ -45,9 +41,13 @@ export function SouladSTrasouListPage() {
   return (
     <div className="flex h-screen w-screen flex-col bg-background text-foreground">
       <AppHeader current="soulad" extras={<DataMenu />} />
-      <div className="flex flex-1 min-h-0 gap-0">
-        {/* LEFT — Trasy */}
-        <div className="flex flex-col min-h-0 w-1/2 border-r border-border">
+      <Tabs defaultValue="trasy" className="flex flex-1 min-h-0 flex-col">
+        <TabsList className="mx-4 mt-3 grid w-fit grid-cols-2">
+          <TabsTrigger value="trasy" className="text-xs">Trasy</TabsTrigger>
+          <TabsTrigger value="useky" className="text-xs">Úseky</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="trasy" className="flex flex-1 min-h-0 flex-col mt-0">
           <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border">
             <h2 className="text-sm font-semibold">Trasy</h2>
             <button
@@ -72,10 +72,9 @@ export function SouladSTrasouListPage() {
               ))
             )}
           </div>
-        </div>
+        </TabsContent>
 
-        {/* RIGHT — Úseky */}
-        <div className="flex flex-col min-h-0 w-1/2">
+        <TabsContent value="useky" className="flex flex-1 min-h-0 flex-col mt-0">
           <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border">
             <h2 className="text-sm font-semibold">Úseky</h2>
             <button
@@ -89,25 +88,11 @@ export function SouladSTrasouListPage() {
             {segments.length === 0 ? (
               <div className="p-6 text-center text-sm text-muted-foreground italic">Zatím žádné úseky.</div>
             ) : (
-              <>
-                {highlightedSegments.map((seg) => (
-                  <SegmentRow key={seg.id} segment={seg} fromRouteId={expandedRoute?.id} highlighted />
-                ))}
-                {expandedRoute && highlightedSegments.length > 0 && otherSegments.length > 0 && (
-                  <div className="mx-4 my-2 flex items-center gap-2 text-xs text-muted-foreground">
-                    <div className="flex-1 h-px bg-border" />
-                    <span>ostatní úseky</span>
-                    <div className="flex-1 h-px bg-border" />
-                  </div>
-                )}
-                {otherSegments.map((seg) => (
-                  <SegmentRow key={seg.id} segment={seg} />
-                ))}
-              </>
+              segments.map((seg) => <SegmentRow key={seg.id} segment={seg} />)
             )}
           </div>
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

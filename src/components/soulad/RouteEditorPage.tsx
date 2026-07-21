@@ -291,26 +291,26 @@ export function RouteEditorPage({ routeId }: { routeId: string }) {
             )}
             {selectedSegment && (
               <div className="space-y-2">
-                {selectedSegment.checkpoints.length === 0 && (
-                  <div className="text-xs text-muted-foreground italic">Úsek zatím nemá žádné body.</div>
-                )}
-                {selectedSegment.checkpoints.map((cp, i) => {
-                  const matchCount = Object.values(cp.match).filter(
-                    (v) => v !== undefined && (Array.isArray(v) ? v.length > 0 : true),
-                  ).length;
-                  return (
-                    <div key={cp.id} className="rounded-lg border border-border bg-background p-3">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="tabular-nums text-xs text-muted-foreground">{i + 1}</span>
-                        <span className="text-sm font-medium">{cp.note ?? cp.checkpointTypeId}</span>
-                        <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                          {cp.kind === "dnesni_doruceni" ? "Dnešní doručení" : "Běžný bod"}
-                        </span>
+                {(() => {
+                  const visibleCheckpoints = selectedSegment.checkpoints.filter((cp) => cp.kind !== "dnesni_doruceni");
+                  if (visibleCheckpoints.length === 0) {
+                    return <div className="text-xs text-muted-foreground italic">Úsek zatím nemá žádné body.</div>;
+                  }
+                  return visibleCheckpoints.map((cp, i) => {
+                    const matchCount = Object.values(cp.match).filter(
+                      (v) => v !== undefined && (Array.isArray(v) ? v.length > 0 : true),
+                    ).length;
+                    return (
+                      <div key={cp.id} className="rounded-lg border border-border bg-background p-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="tabular-nums text-xs text-muted-foreground">{i + 1}</span>
+                          <span className="text-sm font-medium">{cp.note ?? cp.checkpointTypeId}</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground">{matchCount} match podmínek</div>
                       </div>
-                      <div className="text-xs text-muted-foreground">{matchCount} match podmínek</div>
-                    </div>
-                  );
-                })}
+                    );
+                  });
+                })()}
                 <Link
                   to="/soulad-s-trasou/usek/$id"
                   params={{ id: selectedSegment.id }}
