@@ -31,9 +31,6 @@ export function TrackingHistoricalConditionsBuilder({
         valueMode: "specific",
         expectedValue: "",
         mode: "contains",
-        count: 1,
-        countOperator: "eq",
-        occurrence: "any",
         scope: "recent",
       },
     ]);
@@ -53,26 +50,14 @@ export function TrackingHistoricalConditionsBuilder({
                 <option key={f.value} value={f.value}>{f.label}</option>
               ))}
             </select>
-            <div className="flex gap-1">
-              <button
-                onClick={() => updateAt(i, { ...row, mode: "contains" })}
-                className={cn(
-                  "rounded-md px-2 py-1 text-[11px] font-medium",
-                  (row.mode ?? "contains") === "contains" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                )}
-              >
-                je
-              </button>
-              <button
-                onClick={() => updateAt(i, { ...row, mode: "not_contains" })}
-                className={cn(
-                  "rounded-md px-2 py-1 text-[11px] font-medium",
-                  row.mode === "not_contains" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                )}
-              >
-                není
-              </button>
-            </div>
+            <select
+              value={row.mode ?? "contains"}
+              onChange={(e) => updateAt(i, { ...row, mode: e.target.value as "contains" | "not_contains" })}
+              className="rounded border border-border bg-background px-2 py-1.5 text-xs"
+            >
+              <option value="contains">je</option>
+              <option value="not_contains">není</option>
+            </select>
             <button onClick={() => removeAt(i)} className="ml-auto text-muted-foreground hover:text-foreground">
               <X className="size-3.5" />
             </button>
@@ -85,45 +70,30 @@ export function TrackingHistoricalConditionsBuilder({
             className="w-full rounded border border-border bg-background px-2 py-1.5 text-xs"
           />
 
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-muted-foreground">počet záznamů</span>
-            <select
-              value={row.countOperator}
-              onChange={(e) => updateAt(i, { ...row, countOperator: e.target.value as typeof row.countOperator })}
-              className="rounded border border-border bg-background px-2 py-1.5 text-xs"
-            >
-              <option value="gt">větší než</option>
-              <option value="lt">menší než</option>
-              <option value="eq">rovno</option>
-              <option value="any">nerozhoduje</option>
-            </select>
-            <input
-              type="number"
-              min={1}
-              disabled={row.countOperator === "any"}
-              value={row.count}
-              onChange={(e) => updateAt(i, { ...row, count: Number(e.target.value) })}
-              className="w-16 rounded border border-border bg-background px-2 py-1.5 text-xs text-center disabled:opacity-40"
-            />
-          </div>
-
-          <div className="flex items-center gap-4 text-xs flex-wrap">
-            <label className="flex items-center gap-1.5">
-              <input
-                type="checkbox"
-                checked={row.scope === "recent"}
-                onChange={(e) => updateAt(i, { ...row, scope: e.target.checked ? "recent" : "anywhere" })}
-              />
-              jde o poslední záznamy
-            </label>
-            <label className="flex items-center gap-1.5">
-              <input
-                type="checkbox"
-                checked={row.occurrence === "consecutive"}
-                onChange={(e) => updateAt(i, { ...row, occurrence: e.target.checked ? "consecutive" : "any" })}
-              />
-              musí být za sebou
-            </label>
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+              Kde hledat
+            </div>
+            <div className="inline-flex gap-1 rounded-lg bg-muted/40 p-1">
+              <button
+                onClick={() => updateAt(i, { ...row, scope: "recent" })}
+                className={cn(
+                  "rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors",
+                  row.scope === "recent" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                jen poslední záznam
+              </button>
+              <button
+                onClick={() => updateAt(i, { ...row, scope: "anywhere" })}
+                className={cn(
+                  "rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors",
+                  row.scope === "anywhere" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                kdekoliv v historii
+              </button>
+            </div>
           </div>
         </div>
       ))}

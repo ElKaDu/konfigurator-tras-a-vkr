@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { X } from "lucide-react";
+import { Lock, X } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/AppHeader";
@@ -418,6 +418,13 @@ export function RuleCreatorPage({
                         <option value="bd">pracovních dní</option>
                       </select>
                       <span className="text-xs text-muted-foreground">od posledního záznamu</span>
+                    </div>
+                    <div className="mt-2.5 flex items-start gap-2 rounded-lg border border-dashed border-emerald-600/40 bg-emerald-600/5 px-2.5 py-2">
+                      <Lock className="size-3.5 shrink-0 mt-0.5 text-emerald-700" />
+                      <p className="text-[11px] leading-relaxed text-foreground">
+                        <span className="font-medium">Administrativní statusy (např. clení) se do „posledního záznamu" nepočítají</span>
+                        {" "}— natvrdo, bez možnosti nastavení.
+                      </p>
                     </div>
                   </div>
                 )}

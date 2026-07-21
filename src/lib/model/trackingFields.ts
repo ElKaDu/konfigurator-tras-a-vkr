@@ -8,8 +8,8 @@ export interface TrackingFieldDef {
 
 export const TRACKING_FIELDS: TrackingFieldDef[] = [
   { value: "eventType", label: "Typ záznamu (eventType)", group: "Typ a status" },
-  { value: "derivedStatus", label: "Odvozený status", group: "Typ a status" },
-  { value: "derivedStatusCode", label: "Kód odvozeného statusu", group: "Typ a status" },
+  { value: "derivedStatus", label: "Stav", group: "Typ a status" },
+  { value: "derivedStatusCode", label: "Kód stavu", group: "Typ a status" },
   { value: "eventDescription", label: "Popis události", group: "Typ a status" },
   { value: "exceptionCode", label: "Kód výjimky", group: "Výjimka" },
   { value: "exceptionDescription", label: "Popis výjimky", group: "Výjimka" },
@@ -22,28 +22,20 @@ export const TRACKING_FIELDS: TrackingFieldDef[] = [
   { value: "eventTime", label: "Čas záznamu (eventTime)", group: "Čas" },
 ];
 
-/** Podmnožina polí, u kterých dává smysl "stejná hodnota se opakuje" (režim Opakuje se). */
-export const REPEATABLE_FIELDS: TrackingFieldDef[] = TRACKING_FIELDS.filter((f) =>
-  ["locationId", "city", "countryCode"].includes(f.value)
-);
-
-type IncomingCondition =
-  | Extract<Condition, { kind: "field" }>
-  | Extract<Condition, { kind: "tracking_aggregate"; valueMode: "same_repeats" }>;
+type IncomingCondition = Extract<Condition, { kind: "field" }>;
 
 type HistoricalCondition = Extract<Condition, { kind: "tracking_aggregate"; valueMode: "specific" }>;
 
 /** Řádek v boxu "Podmínky pro příchozí záznam". */
-export type IncomingRowKind = "is" | "is_not" | "repeats";
+export type IncomingRowKind = "is" | "is_not";
 
-/** True pro řádky boxu "Podmínky pro příchozí záznam" (je/není/opakuje se). */
+/** True pro řádky boxu "Podmínky pro příchozí záznam" (je/není). */
 export function isIncomingConditionRow(c: Condition): c is IncomingCondition {
-  return c.kind === "field" || (c.kind === "tracking_aggregate" && c.valueMode === "same_repeats");
+  return c.kind === "field";
 }
 
 export function incomingRowKindOf(c: IncomingCondition): IncomingRowKind {
-  if (c.kind === "field") return c.operator === "není" ? "is_not" : "is";
-  return "repeats";
+  return c.operator === "není" ? "is_not" : "is";
 }
 
 /** True pro řádky boxu "Podmínky pro historické záznamy". */
