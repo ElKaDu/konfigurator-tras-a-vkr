@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import type { CheckpointType, Route, Rule, SampleShipment, Segment } from "./types";
+import type { ActionTag, CheckpointType, Route, Rule, SampleShipment, Segment, Situation } from "./types";
 import {
+  ACTION_TAGS,
   CHECKPOINT_TYPES,
   ROUTES,
   RULES,
   SAMPLE_SHIPMENTS,
   SEGMENTS,
+  SITUATIONS,
 } from "./seed";
 
 // ---------------------------------------------------------------------------
@@ -110,6 +112,60 @@ export const rulesStore = {
     _rules.setState(next);
   },
 };
+
+// ---------------------------------------------------------------------------
+// Action Tags store
+// ---------------------------------------------------------------------------
+
+const _actionTags = makeStore<ActionTag>(ACTION_TAGS, "model_action_tags_v1");
+
+export function useActionTags(): ActionTag[] {
+  return _actionTags.useItems();
+}
+
+export const actionTagsStore = {
+  all: (): ActionTag[] => _actionTags.getState(),
+  byId: (id: string): ActionTag | undefined => _actionTags.getState().find((t) => t.id === id),
+  upsert(tag: ActionTag): void {
+    const cur = _actionTags.getState();
+    const idx = cur.findIndex((t) => t.id === tag.id);
+    _actionTags.setState(idx >= 0 ? cur.map((t) => (t.id === tag.id ? tag : t)) : [...cur, tag]);
+  },
+  remove(id: string): void {
+    _actionTags.setState(_actionTags.getState().filter((t) => t.id !== id));
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Situace store
+// ---------------------------------------------------------------------------
+
+const _situations = makeStore<Situation>(SITUATIONS, "model_situations_v1");
+
+export function useSituations(): Situation[] {
+  return _situations.useItems();
+}
+
+export const situationsStore = {
+  all: (): Situation[] => _situations.getState(),
+  byId: (id: string): Situation | undefined => _situations.getState().find((s) => s.id === id),
+  upsert(situation: Situation): void {
+    const cur = _situations.getState();
+    const idx = cur.findIndex((s) => s.id === situation.id);
+    _situations.setState(idx >= 0 ? cur.map((s) => (s.id === situation.id ? situation : s)) : [...cur, situation]);
+  },
+  remove(id: string): void {
+    _situations.setState(_situations.getState().filter((s) => s.id !== id));
+  },
+  replaceAll(next: Situation[]): void {
+    _situations.setState(next);
+  },
+};
+
+/** Kolik pravidel je navázáno na danou závažnost — použij pro guard při mazání. */
+export function severityUsageCount(severityId: string): number {
+  return _rules.getState().filter((r) => r.severityId === severityId).length;
+}
 
 // ---------------------------------------------------------------------------
 // Routes store

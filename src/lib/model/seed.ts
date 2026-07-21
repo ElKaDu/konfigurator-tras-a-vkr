@@ -1,9 +1,11 @@
 import type {
+  ActionTag,
   CheckpointType,
   Route,
   Rule,
   SampleShipment,
   Segment,
+  Situation,
 } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -15,6 +17,234 @@ export const CHECKPOINT_TYPES: CheckpointType[] = [
   { id: "ct_first_scan",    name: "První scan v cíli",        description: "První scan zásilky po průjezdu celnicí." },
   { id: "ct_dest_facility", name: "Destination Facility",    description: "Zásilka přijata na cílovém depu." },
   { id: "ct_delivered",     name: "Doručeno",                 description: "Zásilka předána příjemci." },
+  { id: "ct_hub_arrival",   name: "Přílet do přestupního hubu", description: "Zásilka dorazila do přestupního leteckého hubu." },
+  { id: "ct_hub_departure", name: "Odlet z přestupního hubu",   description: "Zásilka odletěla z přestupního leteckého hubu." },
+  { id: "ct_dest_hub_arrival", name: "Přílet do cílového hubu", description: "Zásilka dorazila do cílového hubu v zemi doručení." },
+];
+
+// ---------------------------------------------------------------------------
+// Action Tags (katalog Akcí)
+// ---------------------------------------------------------------------------
+export const ACTION_TAGS: ActionTag[] = [
+  { id: "at_call_customer", label: "Zavolat zákazníkovi", icon: "Phone" },
+  { id: "at_email_customer", label: "Informovat e-mailem", icon: "Mail" },
+  { id: "at_check_carrier", label: "Prověřit u dopravce", icon: "Search" },
+  { id: "at_shift_date", label: "Posunout datum doručení", icon: "CalendarClock" },
+  { id: "at_mark_delayed", label: "Zásilka se zpozdí", icon: "AlertTriangle" },
+  { id: "at_mark_today", label: "Zásilka dorazí dnes", icon: "CheckCircle2" },
+  { id: "at_create_task", label: "Vytvořit věc k řešení", icon: "ListTodo" },
+];
+
+// ---------------------------------------------------------------------------
+// Situace (viz spec bod 7)
+// ---------------------------------------------------------------------------
+export const SITUATIONS: Situation[] = [
+  {
+    id: "sit_undelivered",
+    code: "SIT-UNDELIVERED",
+    name: "Nedoručeno",
+    description: "Zásilka byla doručována, ale příjemce nebyl zastižen.",
+    area: "tracking_records",
+    severities: [
+      {
+        id: "sev_undelivered_normal",
+        name: "běžné",
+        priority: "low",
+        actions: [
+          { id: "sa_undelivered_normal_1", actionTagId: "at_email_customer", description: "Informuj zákazníka o neúspěšném pokusu a domluv nový termín." },
+        ],
+      },
+      {
+        id: "sev_undelivered_problem",
+        name: "problémové",
+        priority: "medium",
+        actions: [
+          { id: "sa_undelivered_problem_1", actionTagId: "at_email_customer", description: "Informuj zákazníka o druhém neúspěšném pokusu." },
+          { id: "sa_undelivered_problem_2", actionTagId: "at_check_carrier", description: "Ověř u dopravce důvod opakovaného nedoručení." },
+        ],
+      },
+      {
+        id: "sev_undelivered_critical",
+        name: "kritické",
+        priority: "high",
+        actions: [
+          { id: "sa_undelivered_critical_1", actionTagId: "at_call_customer", description: "Zavolej zákazníkovi, domluv individuální doručení." },
+          { id: "sa_undelivered_critical_2", actionTagId: "at_check_carrier", description: "Ověř u dopravce, proč se opakovaně nedaří doručit." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "sit_damage",
+    code: "SIT-DAMAGE",
+    name: "Poškození zásilky",
+    description: "Tracking hlásí zjištěné poškození zásilky.",
+    area: "tracking_records",
+    severities: [
+      {
+        id: "sev_damage_default",
+        name: "zjištěno poškození",
+        priority: "high",
+        actions: [
+          { id: "sa_damage_1", actionTagId: "at_call_customer", description: "Informuj zákazníka o poškození a domluv další postup (výměna/reklamace)." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "sit_transport_issue",
+    code: "SIT-TRANSPORT",
+    name: "Problém v přepravě",
+    description: "Zásilka vykazuje známky problému v přepravě.",
+    area: "tracking_records",
+    severities: [
+      {
+        id: "sev_transport_possible",
+        name: "možný problém",
+        priority: "low",
+        actions: [
+          { id: "sa_transport_possible_1", actionTagId: "at_check_carrier", description: "Ověř kontext statusu (místo, čas) a rozhodni, zda jde o skutečný problém." },
+        ],
+      },
+      {
+        id: "sev_transport_stuck",
+        name: "zaseknutá na místě",
+        priority: "medium",
+        actions: [
+          { id: "sa_transport_stuck_1", actionTagId: "at_check_carrier", description: "Ověř u dopravce, proč se zásilka nehýbe." },
+        ],
+      },
+      {
+        id: "sev_transport_lost_suspect",
+        name: "podezření na ztrátu",
+        priority: "high",
+        actions: [
+          { id: "sa_lost_1", actionTagId: "at_check_carrier", description: "Zahaj šetření ztráty u dopravce." },
+          { id: "sa_lost_2", actionTagId: "at_call_customer", description: "Informuj zákazníka o možném zpoždění." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "sit_problem_na_trase",
+    code: "SIT-ROUTE-PROBLEM",
+    name: "Problém na trase",
+    description: "Bod na trase nebyl nalezen do svého Konečného limitu.",
+    area: "route_compliance",
+    severities: [
+      {
+        id: "sev_problem_na_trase",
+        name: "běžné",
+        priority: "medium",
+        actions: [
+          { id: "sa_problem_na_trase_1", actionTagId: "at_create_task", description: "Řetězec bodů i tak pokračuje na další bod." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "sit_problem_na_trase_pozde",
+    code: "SIT-ROUTE-PROBLEM-LATE",
+    name: "Problém na trase — záznam se objevil",
+    description: "Bod se objevil až po Konečném limitu, jinak splňuje podmínky. Čistě informativní.",
+    area: "route_compliance",
+    severities: [
+      {
+        id: "sev_problem_na_trase_pozde",
+        name: "informativní",
+        priority: "low",
+        actions: [
+          { id: "sa_problem_na_trase_pozde_1", actionTagId: "at_create_task", description: "Jen informativní — zpoždění se samo vyřešilo." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "sit_zpozdena_zasilka",
+    code: "SIT-DELAYED-SHIPMENT",
+    name: "Zpožděná zásilka",
+    description: "Bod „Dnešní doručení“ vyhodnotil, že zásilka dnes nedorazí.",
+    area: "route_compliance",
+    severities: [
+      {
+        id: "sev_zpozdena_zasilka",
+        name: "kritické",
+        priority: "urgent",
+        actions: [
+          { id: "sa_zpozdena_zasilka_1", actionTagId: "at_mark_delayed", description: "Označit zásilku jako zpožděnou." },
+          { id: "sa_zpozdena_zasilka_2", actionTagId: "at_shift_date", description: "Posuň avizované datum doručení." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "sit_dnesni_doruceni",
+    code: "SIT-DELIVERY-TODAY",
+    name: "Dnešní doručení",
+    description: "Bod „Dnešní doručení“ vyhodnotil, že zásilka dnes dorazí.",
+    area: "route_compliance",
+    severities: [
+      {
+        id: "sev_dnesni_doruceni",
+        name: "informativní",
+        priority: "low",
+        actions: [
+          { id: "sa_dnesni_doruceni_1", actionTagId: "at_mark_today", description: "Jen informativní." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "sit_return_to_sender",
+    code: "SIT-RETURN-TO-SENDER",
+    name: "Zásilka se vrací odesílateli",
+    description: "Tracking hlásí, že se zásilka vrací zpět odesílateli.",
+    area: "tracking_records",
+    severities: [
+      {
+        id: "sev_return_to_sender",
+        name: "běžné",
+        priority: "medium",
+        actions: [
+          { id: "sa_return_to_sender_1", actionTagId: "at_check_carrier", description: "Ověř u dopravce důvod vrácení a informuj odesílatele." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "sit_dangerous_goods",
+    code: "SIT-DANGEROUS-GOODS",
+    name: "Zásilka zastavena — nebezpečné zboží",
+    description: "Tracking hlásí zastavení zásilky kvůli zjištěnému nebezpečnému zboží.",
+    area: "tracking_records",
+    severities: [
+      {
+        id: "sev_dangerous_goods",
+        name: "běžné",
+        priority: "high",
+        actions: [
+          { id: "sa_dangerous_goods_1", actionTagId: "at_check_carrier", description: "Ověř u dopravce povahu zásilky a další postup (celní/bezpečnostní řízení)." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "sit_long_no_movement",
+    code: "SIT-LONG-NO-MOVEMENT",
+    name: "Zásilka dlouho bez pohybu",
+    description: "Zásilce dlouho nepřišel žádný nový tracking záznam (mimo administrativní statusy jako clení).",
+    area: "tracking_records",
+    severities: [
+      {
+        id: "sev_long_no_movement",
+        name: "běžné",
+        priority: "medium",
+        actions: [
+          { id: "sa_long_no_movement_1", actionTagId: "at_check_carrier", description: "Ověř u dopravce, kde se zásilka nachází a proč dlouho nepřišel nový záznam." },
+        ],
+      },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -26,7 +256,7 @@ export const SEGMENTS: Segment[] = [
     name: "ČR → Příchod na clení",
     description: "Sdílený vstup do CZ.",
     carriers: ["FedEx"],
-    serviceTypes: ["ECONOMY"],
+    serviceTypes: ["Economy"],
     checkpoints: [
       {
         id: "cp_departure",
@@ -67,7 +297,7 @@ export const SEGMENTS: Segment[] = [
     name: "Příchod na clení → Doručeno",
     description: "Poslední míle v CZ.",
     carriers: ["FedEx"],
-    serviceTypes: ["ECONOMY"],
+    serviceTypes: ["Economy"],
     checkpoints: [
       {
         id: "cp_first_scan",
@@ -101,6 +331,179 @@ export const SEGMENTS: Segment[] = [
         },
         correctness: [],
       },
+      {
+        id: "cp_odlet_brno_demo",
+        checkpointTypeId: "ct_departure",
+        note: "Demo bod typu Běžný bod — Odlet Praha/Brno.",
+        kind: "generic",
+        match: { status: ["Left FedEx origin facility"], location_type: ["ORIGIN_FEDEX_FACILITY"] },
+        correctness: [
+          {
+            id: "corr_odlet_brno_termin",
+            aspect: "record_event_time",
+            mode: "fixed",
+            anchorKind: "system_event",
+            anchorLabel: "den vyzvednutí",
+            operator: "within",
+            fixedOp: "before",
+            fixedTime: "22:00",
+            fixedTz: "local",
+          },
+        ],
+        konecnyLimit: { mode: "offset", offsetHours: 0 },
+      },
+      {
+        id: "cp_dnesni_doruceni_demo",
+        checkpointTypeId: "ct_first_scan",
+        note: "Demo bod typu Dnešní doručení — 1./2. fyzický scan v cílové zemi.",
+        kind: "dnesni_doruceni",
+        match: { status: ["FedEx Facility"], location_type: ["FEDEX_FACILITY"] },
+        correctness: [],
+        dnesniDoruceni: {
+          scan1: {
+            match: { location_type: ["FEDEX_FACILITY"] },
+            deadline: {
+              id: "corr_scan1_termin",
+              aspect: "record_event_time",
+              mode: "fixed",
+              anchorKind: "system_event",
+              anchorLabel: "ADD (avizované doručení zákazníkovi)",
+              operator: "within",
+              fixedOp: "before",
+              fixedTime: "08:00",
+              fixedTz: "local",
+            },
+          },
+          limitProRadneZaznamy: { mode: "offset", offsetHours: 1 },
+          konecnyLimitScan1: { mode: "offset", offsetHours: 2 },
+          scan2: {
+            match: { location_type: ["DESTINATION_FACILITY"], zip_matches_destination: true },
+            deadline: {
+              id: "corr_scan2_termin",
+              aspect: "record_event_time",
+              mode: "offset",
+              anchorKind: "checkpoint",
+              anchorLabel: "od 1. fyzického scanu",
+              anchorCheckpointTypeId: "ct_first_scan",
+              operator: "within",
+              value: 2,
+              unit: "h",
+            },
+          },
+          konecnyLimitScan2: { mode: "offset", offsetHours: 1 },
+        },
+      },
+    ],
+  },
+  {
+    id: "seg_usa_pickup",
+    name: "Praha/Brno → Paříž",
+    description: "Vyzvednutí v ČR, let do přestupního hubu Paříž/CDG. Podle TRASA-05/06 ze zadání.",
+    carriers: ["FedEx"],
+    serviceTypes: ["Economy"],
+    checkpoints: [
+      {
+        id: "cp_usa_odlet_praha_brno",
+        checkpointTypeId: "ct_departure",
+        note: "TRASA-05 — odlet z odesílacího FedEx terminálu. ID místa je nutné upřesnit dle číselníku dopravce (v zadání jen placeholder „ABCD“).",
+        kind: "generic",
+        match: { status: ["Left FedEx origin facility"], location_type: ["ORIGIN_FEDEX_FACILITY"] },
+        correctness: [
+          {
+            id: "corr_usa_odlet_termin",
+            aspect: "record_event_time",
+            mode: "fixed",
+            anchorKind: "system_event",
+            anchorLabel: "Vyzvednutí zásilky",
+            operator: "within",
+            fixedOp: "before",
+            fixedTime: "22:00",
+            fixedTz: "Europe/Prague",
+          },
+        ],
+        konecnyLimit: { mode: "offset", offsetHours: 0 },
+      },
+      {
+        id: "cp_usa_prilet_paris_hub",
+        checkpointTypeId: "ct_hub_arrival",
+        note: "TRASA-06 — přílet do přestupního hubu Paříž/CDG (ID místa: CDG_HUB). D+1 = +1 pracovní den od vyzvednutí; alternativně lze kotvit vůči checkpointu „odlet z místa odeslání“.",
+        kind: "generic",
+        match: { status: ["Arrived at hub"], location_type: ["FEDEX_HUB"] },
+        correctness: [
+          {
+            id: "corr_usa_prilet_paris_termin",
+            aspect: "record_event_time",
+            mode: "fixed",
+            anchorKind: "system_event",
+            anchorLabel: "Vyzvednutí zásilky",
+            operator: "within",
+            fixedOp: "before",
+            fixedTime: "03:00",
+            fixedTz: "Europe/Prague",
+            fixedDayOffset: 1,
+            fixedDayMode: "business",
+            fixedDayDirection: "after",
+          },
+        ],
+        konecnyLimit: { mode: "offset", offsetHours: 0 },
+      },
+    ],
+  },
+  {
+    id: "seg_usa_paris_to_usa",
+    name: "Paříž → USA",
+    description: "Odlet z přestupního hubu Paříž/CDG, přílet do cílového hubu v USA a doručení. Podle TRASA-07/08 a bodu Dnešní doručení ze zadání.",
+    carriers: ["FedEx"],
+    serviceTypes: ["Economy"],
+    checkpoints: [
+      {
+        id: "cp_usa_odlet_paris_hub",
+        checkpointTypeId: "ct_hub_departure",
+        note: "TRASA-07 — odlet z přestupního hubu Paříž/CDG (ID místa: CDG_HUB). Navazuje na předchozí checkpoint (přílet do hubu) — lze řešit i kotvou vůči jeho záznamu + offset.",
+        kind: "generic",
+        match: { status: ["Departed from hub"], location_type: ["FEDEX_HUB"] },
+        correctness: [
+          {
+            id: "corr_usa_odlet_paris_termin",
+            aspect: "record_event_time",
+            mode: "fixed",
+            anchorKind: "system_event",
+            anchorLabel: "Vyzvednutí zásilky",
+            operator: "within",
+            fixedOp: "before",
+            fixedTime: "06:00",
+            fixedTz: "Europe/Prague",
+            fixedDayOffset: 1,
+            fixedDayMode: "business",
+            fixedDayDirection: "after",
+          },
+        ],
+        konecnyLimit: { mode: "offset", offsetHours: 0 },
+      },
+      {
+        id: "cp_usa_prilet_dest_hub",
+        checkpointTypeId: "ct_dest_hub_arrival",
+        note: "TRASA-08 — přílet do cílového hubu v USA. ID místa je jedno z: EWR_HUB, MEM_HUB, CVG_HUB (více povolených hodnot). Deadline je v EST (America/New_York), ne CET jako u předchozích kroků.",
+        kind: "generic",
+        match: { status: ["Arrived at destination hub"] },
+        correctness: [
+          {
+            id: "corr_usa_prilet_dest_termin",
+            aspect: "record_event_time",
+            mode: "fixed",
+            anchorKind: "system_event",
+            anchorLabel: "Vyzvednutí zásilky",
+            operator: "within",
+            fixedOp: "before",
+            fixedTime: "08:00",
+            fixedTz: "America/New_York",
+            fixedDayOffset: 1,
+            fixedDayMode: "business",
+            fixedDayDirection: "after",
+          },
+        ],
+        konecnyLimit: { mode: "offset", offsetHours: 0 },
+      },
     ],
   },
 ];
@@ -110,14 +513,14 @@ export const SEGMENTS: Segment[] = [
 // ---------------------------------------------------------------------------
 export const ROUTES: Route[] = [
   {
-    id: "route_fx_air_cz",
-    code: "R-FX-AIR-CZ",
-    name: "FedEx Air — CZ",
+    id: "route_fx_air_us",
+    code: "R-FX-AIR-US",
+    name: "FedEx Air — USA (přes Paříž)",
     active: true,
     carriers: ["FedEx"],
-    serviceTypes: ["ECONOMY"],
-    destCountries: ["CZ"],
-    segmentIds: ["seg_cz_arrival", "seg_cz_lastmile"],
+    serviceTypes: ["Economy"],
+    destCountries: ["US"],
+    segmentIds: ["seg_usa_pickup", "seg_usa_paris_to_usa"],
   },
 ];
 
@@ -126,106 +529,206 @@ export const ROUTES: Route[] = [
 // ---------------------------------------------------------------------------
 export const RULES: Rule[] = [
   {
-    id: "rule_r10",
-    code: "R10",
-    name: "Příchod na clení neproběhl správně",
-    area: "route_compliance",
-    active: true,
-    priority: "high",
-    trigger: { kind: "condition_met", label: "při každé nové tracking události" },
-    conditions: [
-      {
-        kind: "route_compliance",
-        mode: "checkpoint_type",
-        checkpointTypeId: "ct_customs",
-      },
-    ],
-    actions: [
-      {
-        id: "act_r10_vkr",
-        type: "create_vkr",
-        runWhenRouteCondition: "not_fulfilled",
-        title: "Clení v prodlení · {{shipment_number}}",
-        priority: "high",
-      },
-    ],
-  },
-  {
-    id: "rule_t01",
-    code: "T01",
-    name: "Zásilka se zasekla na jednom místě",
+    id: "rule_t03",
+    code: "T03",
+    name: "Zásilka na první pokus nedoručena",
     area: "tracking_records",
     active: true,
     priority: "low",
-    trigger: { kind: "condition_met", label: "při každé nové tracking události" },
+    trigger: { kind: "condition_met", label: "Reaktivní — při každém novém tracking záznamu" },
     conditions: [
-      {
-        kind: "tracking_aggregate",
-        trackingFieldId: "location_city",
-        valueMode: "same_repeats",
-        count: 3,
-        occurrence: "consecutive",
-      },
+      { kind: "field", fieldId: "derivedStatus", operator: "je", value: "Delivery Attempted, Customer Not Available, Business Closed" },
+      { kind: "field", fieldId: "deliveryAttempts", operator: "je", value: "1" },
     ],
+    situationId: "sit_undelivered",
+    severityId: "sev_undelivered_normal",
     actions: [
-      {
-        id: "act_t01_vkr",
-        type: "create_vkr",
-        title: "Zaseklá zásilka · {{shipment_number}}",
-        priority: "low",
-      },
+      { id: "sa_1784665806892", type: "create_vkr", title: "Zásilka na první pokus nedoručena", actionTagId: "at_call_customer" },
     ],
+    uiState: {
+      selectedSituationId: "sit_undelivered",
+      selectedSeverityId: "sev_undelivered_normal",
+      triggerType: "automatic",
+      trackingConditions: [
+        { kind: "field", fieldId: "derivedStatus", operator: "je", value: "Delivery Attempted, Customer Not Available, Business Closed" },
+        { kind: "field", fieldId: "deliveryAttempts", operator: "je", value: "1" },
+      ],
+      noMovementDuration: 72,
+      noMovementUnit: "h",
+      severityActions: [
+        { id: "sa_1784665806892", actionTagId: "at_call_customer", enabled: true, description: "" },
+      ],
+      vkrConditions: [],
+    },
   },
   {
-    id: "rule_r11",
-    code: "R11",
-    name: "Doručeno mimo předepsanou trasu",
-    area: "route_compliance",
+    id: "rule_t04",
+    code: "T04",
+    name: "Nedoručeno na druhý pokus",
+    area: "tracking_records",
     active: true,
     priority: "medium",
-    trigger: { kind: "condition_met", label: "při každé nové tracking události" },
+    trigger: { kind: "condition_met", label: "Reaktivní — při každém novém tracking záznamu" },
     conditions: [
-      {
-        kind: "route_compliance",
-        mode: "general",
-        generalCheck: "unrecognized_location",
-      },
+      { kind: "field", fieldId: "derivedStatus", operator: "je", value: "Delivery Attempted, Customer Not Available, Business Closed" },
+      { kind: "field", fieldId: "deliveryAttempts", operator: "je", value: "2" },
     ],
-    actions: [
-      {
-        id: "act_r11_vkr",
-        type: "create_vkr",
-        title: "Mimo trasu · {{shipment_number}}",
-        priority: "medium",
-      },
-    ],
+    situationId: "sit_undelivered",
+    severityId: "sev_undelivered_problem",
+    actions: [],
+    uiState: {
+      selectedSituationId: "sit_undelivered",
+      selectedSeverityId: "sev_undelivered_problem",
+      triggerType: "automatic",
+      trackingConditions: [
+        { kind: "field", fieldId: "derivedStatus", operator: "je", value: "Delivery Attempted, Customer Not Available, Business Closed" },
+        { kind: "field", fieldId: "deliveryAttempts", operator: "je", value: "2" },
+      ],
+      noMovementDuration: 72,
+      noMovementUnit: "h",
+      severityActions: [],
+      vkrConditions: [],
+    },
   },
   {
-    id: "rule_t02",
-    code: "T02",
-    name: "Opakovaný pokus o doručení",
+    id: "rule_t05",
+    code: "T05",
+    name: "Nedoručeno na 3. pokus",
     area: "tracking_records",
-    active: false,
-    priority: "low",
-    trigger: { kind: "condition_met", label: "při každé nové tracking události" },
+    active: true,
+    priority: "high",
+    trigger: { kind: "condition_met", label: "Reaktivní — při každém novém tracking záznamu" },
     conditions: [
-      {
-        kind: "tracking_aggregate",
-        trackingFieldId: "status_code",
-        valueMode: "specific",
-        expectedValue: "DELIVERY_ATTEMPTED",
-        count: 2,
-        occurrence: "any",
-      },
+      { kind: "field", fieldId: "derivedStatus", operator: "je", value: "Delivery Attempted nebo Customer Not Available or Business Closed" },
+      { kind: "field", fieldId: "deliveryAttempts", operator: "je", value: "3" },
     ],
+    situationId: "sit_undelivered",
+    severityId: "sev_undelivered_critical",
     actions: [
-      {
-        id: "act_t02_vkr",
-        type: "create_vkr",
-        title: "Opakovaný pokus · {{shipment_number}}",
-        priority: "low",
-      },
+      { id: "sa_1784665925424", type: "create_vkr", title: "Nedoručeno na 3. pokus", actionTagId: "at_call_customer" },
+      { id: "sa_1784665927574", type: "create_vkr", title: "Nedoručeno na 3. pokus", actionTagId: "at_check_carrier" },
     ],
+    uiState: {
+      selectedSituationId: "sit_undelivered",
+      selectedSeverityId: "sev_undelivered_critical",
+      triggerType: "automatic",
+      trackingConditions: [
+        { kind: "field", fieldId: "derivedStatus", operator: "je", value: "Delivery Attempted nebo Customer Not Available or Business Closed" },
+        { kind: "field", fieldId: "deliveryAttempts", operator: "je", value: "3" },
+      ],
+      noMovementDuration: 72,
+      noMovementUnit: "h",
+      severityActions: [
+        { id: "sa_1784665925424", actionTagId: "at_call_customer", enabled: true, description: "" },
+        { id: "sa_1784665927574", actionTagId: "at_check_carrier", enabled: true, description: "" },
+      ],
+      vkrConditions: [],
+    },
+  },
+  {
+    id: "rule_t06",
+    code: "T06",
+    name: "Poškození zásilky",
+    area: "tracking_records",
+    active: true,
+    priority: "high",
+    trigger: { kind: "condition_met", label: "Reaktivní — při každém novém tracking záznamu" },
+    conditions: [
+      { kind: "field", fieldId: "derivedStatus", operator: "je", value: "Package damaged" },
+    ],
+    situationId: "sit_damage",
+    severityId: "sev_damage_default",
+    actions: [],
+    uiState: {
+      selectedSituationId: "sit_damage",
+      selectedSeverityId: "sev_damage_default",
+      triggerType: "automatic",
+      trackingConditions: [
+        { kind: "field", fieldId: "derivedStatus", operator: "je", value: "Package damaged" },
+      ],
+      noMovementDuration: 72,
+      noMovementUnit: "h",
+      severityActions: [],
+      vkrConditions: [],
+    },
+  },
+  {
+    id: "rule_t07",
+    code: "T07",
+    name: "Zásilka se vrací odesílateli",
+    area: "tracking_records",
+    active: true,
+    priority: "medium",
+    trigger: { kind: "condition_met", label: "Reaktivní — při každém novém tracking záznamu" },
+    conditions: [
+      { kind: "field", fieldId: "derivedStatus", operator: "je", value: "Return to sender" },
+    ],
+    situationId: "sit_return_to_sender",
+    severityId: "sev_return_to_sender",
+    actions: [],
+    uiState: {
+      selectedSituationId: "sit_return_to_sender",
+      selectedSeverityId: "sev_return_to_sender",
+      triggerType: "automatic",
+      trackingConditions: [
+        { kind: "field", fieldId: "derivedStatus", operator: "je", value: "Return to sender" },
+      ],
+      noMovementDuration: 72,
+      noMovementUnit: "h",
+      severityActions: [],
+      vkrConditions: [],
+    },
+  },
+  {
+    id: "rule_t08",
+    code: "T08",
+    name: "Zásilka zastavena — nebezpečné zboží",
+    description: "Text statusu je příklad — přesná hodnota od dopravce potřeba ověřit.",
+    area: "tracking_records",
+    active: true,
+    priority: "high",
+    trigger: { kind: "condition_met", label: "Reaktivní — při každém novém tracking záznamu" },
+    conditions: [
+      { kind: "field", fieldId: "derivedStatus", operator: "je", value: "Held - dangerous goods identified" },
+    ],
+    situationId: "sit_dangerous_goods",
+    severityId: "sev_dangerous_goods",
+    actions: [],
+    uiState: {
+      selectedSituationId: "sit_dangerous_goods",
+      selectedSeverityId: "sev_dangerous_goods",
+      triggerType: "automatic",
+      trackingConditions: [
+        { kind: "field", fieldId: "derivedStatus", operator: "je", value: "Held - dangerous goods identified" },
+      ],
+      noMovementDuration: 72,
+      noMovementUnit: "h",
+      severityActions: [],
+      vkrConditions: [],
+    },
+  },
+  {
+    id: "rule_t09",
+    code: "T09",
+    name: "Zásilka dlouho bez pohybu",
+    area: "tracking_records",
+    active: true,
+    priority: "medium",
+    trigger: { kind: "schedule", label: "Časový plán — kontroluje periodicky" },
+    conditions: [],
+    situationId: "sit_long_no_movement",
+    severityId: "sev_long_no_movement",
+    actions: [],
+    uiState: {
+      selectedSituationId: "sit_long_no_movement",
+      selectedSeverityId: "sev_long_no_movement",
+      triggerType: "timer",
+      trackingConditions: [],
+      noMovementDuration: 48,
+      noMovementUnit: "h",
+      severityActions: [],
+      vkrConditions: [],
+    },
   },
 ];
 

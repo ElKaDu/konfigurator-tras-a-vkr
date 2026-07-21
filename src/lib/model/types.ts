@@ -1,3 +1,5 @@
+import type { VkrCondition } from "@/lib/vkr/vkrConditionCatalog";
+
 export type Area = "tracking_records" | "route_compliance" | "order_eval" | "unpickup" | "params_price";
 
 export type Priority = "low" | "medium" | "high" | "urgent";
@@ -60,6 +62,37 @@ export interface CheckpointCorrectness {
   fixedDayDirection?: "before" | "after";
 }
 
+/** Rozlišuje generický bod (jedna kontrola, hardcoded Situace "Problém na trase") od
+ *  specializovaného typu "Dnešní doručení" (dva navazující scany, ADD brána, D-větvení). */
+export type BodKind = "generic" | "dnesni_doruceni";
+
+/** Kdy se má kontrola spustit — buď pevný čas, nebo posun v hodinách od Termínu (CheckpointCorrectness). */
+export interface TimeLimit {
+  mode: "absolute" | "offset";
+  absoluteTime?: string;   // "HH:MM", jen mode "absolute"
+  offsetHours?: number;    // posun v hodinách od Termínu, jen mode "offset"
+}
+
+/** Jeden fyzický scan uvnitř bodu "Dnešní doručení" — vlastní match + Termín (vlastní čas záznamu). */
+export interface DnesniDoruceniScan {
+  match: CheckpointMatch;
+  deadline: CheckpointCorrectness;
+}
+
+/** Nastavení celého bodu "Dnešní doručení" — dva scany + tři časové limity.
+ *  D (datum doručení od přepravce) se vyhodnocuje POUZE v konecnyLimitScan1 — viz
+ *  docs/superpowers/specs/2026-07-17-dnesni-doruceni-bod-design.md §3.2. */
+export interface DnesniDoruceniConfig {
+  scan1: DnesniDoruceniScan;
+  /** Kontrola 2 — jen u scan1. Posuzuje jen řádnost záznamu, D se tady nekontroluje. */
+  limitProRadneZaznamy: TimeLimit;
+  /** Kontrola 3 — jen u scan1. Tady se poprvé vyhodnocuje D. */
+  konecnyLimitScan1: TimeLimit;
+  scan2: DnesniDoruceniScan;
+  /** Jednostupňové — jediná kontrola scan2, žádný Limit pro řádné záznamy. */
+  konecnyLimitScan2: TimeLimit;
+}
+
 export interface Checkpoint {
   id: string; checkpointTypeId: string; note?: string;
   match: CheckpointMatch;
@@ -70,6 +103,13 @@ export interface Checkpoint {
   /** @deprecated */
   criticalAfterHours?: number;
   correctness: CheckpointCorrectness[];   // prázdné = jen "musí nastat"
+
+  /** NOVÉ — typ bodu, default "generic" pro zpětnou kompatibilitu se stávajícími seed daty. */
+  kind?: BodKind;
+  /** NOVÉ — jen kind "generic". Jediná kontrola bodu — Nesplněno vede na hardcoded Situaci "Problém na trase". */
+  konecnyLimit?: TimeLimit;
+  /** NOVÉ — jen kind "dnesni_doruceni". */
+  dnesniDoruceni?: DnesniDoruceniConfig;
 }
 
 export interface Segment {
@@ -90,7 +130,16 @@ export interface Route {
 
 export type Condition =
   | { kind: "field"; fieldId: string; operator: string; value?: string }
-  | { kind: "tracking_aggregate"; trackingFieldId: string; valueMode: "same_repeats" | "specific"; expectedValue?: string; count: number; occurrence: "consecutive" | "any" }
+  | {
+      kind: "tracking_aggregate";
+      trackingFieldId: string;
+      valueMode: "specific";
+      expectedValue?: string;
+      /** "contains" (default) = je, "not_contains" = není. */
+      mode?: "contains" | "not_contains";
+      /** "recent" = jen poslední záznam. "anywhere" = kdekoliv v historii. */
+      scope: "recent" | "anywhere";
+    }
   | { kind: "route_compliance"; mode: "checkpoint_type" | "general"; checkpointTypeId?: string; generalCheck?: "unrecognized_location" | "unrecognized_status" };
 
 export type ActionType = "create_vkr" | "send_email" | "set_field" | "change_phase" | "update_vkr" | "add_note" | "request_field_from_operator";
@@ -99,6 +148,8 @@ export interface Action {
   runWhenRouteCondition?: "fulfilled" | "not_fulfilled";
   title?: string; body?: string; fieldId?: string; value?: string; priority?: Priority;
   vkrText?: string; // Text věci k řešení (volitelný popis akce pro operátora)
+  /** Pro akce vzniklé z katalogu Akcí (tracking_records) — odkaz na ActionTag. */
+  actionTagId?: string;
 }
 
 export interface Rule {
@@ -109,6 +160,46 @@ export interface Rule {
   actions: Action[];
   // Volitelný snapshot UI stavu z RuleCreatorPage, slouží k prefillu při editaci.
   uiState?: Record<string, unknown>;
+  /** Odkaz na Situaci/Závažnost — jen pro klasifikaci a zobrazení. Needitovatelné po založení pravidla. */
+  situationId?: string;
+  severityId?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Situace / Závažnost / Akce
+// ---------------------------------------------------------------------------
+
+/** Jednoduchý tag z katalogu Akcí — zatím bez vlastního chování (viz spec 3.3). */
+export interface ActionTag {
+  id: string;
+  label: string;
+  icon?: string; // lucide icon name
+}
+
+/** Jedna akce přiřazená k závažnosti — výchozí text/podmínka pro tento kontext. */
+export interface SeverityAction {
+  id: string;
+  actionTagId: string;
+  description?: string;
+  condition?: VkrCondition[];
+}
+
+/** Úroveň uvnitř Situace — nese výchozí šablonu VkŘ (název/popis VkŘ se propisují z Pravidla, ne odsud). */
+export interface Severity {
+  id: string;
+  name: string;
+  priority: Priority;
+  actions: SeverityAction[];
+}
+
+/** Byznysová kategorie (např. "Nedoručeno"). */
+export interface Situation {
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
+  area: Area;
+  severities: Severity[];
 }
 
 export interface SampleActivity { status?: string; status_code?: string; location_city?: string; location_country_code?: string; location_postal_code?: string; latest?: boolean; status_datetime?: string }
