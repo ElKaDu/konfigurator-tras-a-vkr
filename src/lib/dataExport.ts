@@ -11,12 +11,14 @@ import {
   rulesStore,
   segmentsStore,
   checkpointTypesStore,
+  situationsStore,
 } from "./model/store";
 import type {
   CheckpointType,
   Route,
   Rule,
   Segment,
+  Situation,
 } from "./model/types";
 
 export const EXPORT_KIND = "bytorp-export" as const;
@@ -30,6 +32,7 @@ export interface BytorpExport {
   segments: Segment[];
   checkpointTypes: CheckpointType[];
   rules: Rule[];
+  situations: Situation[];
 }
 
 export function buildExport(): BytorpExport {
@@ -41,6 +44,7 @@ export function buildExport(): BytorpExport {
     segments: segmentsStore.all(),
     checkpointTypes: checkpointTypesStore.all(),
     rules: rulesStore.all(),
+    situations: situationsStore.all(),
   };
 }
 
@@ -62,7 +66,7 @@ function validate(raw: unknown): asserts raw is BytorpExport {
   if (!raw || typeof raw !== "object") throw new Error("Soubor není JSON objekt.");
   const r = raw as Record<string, unknown>;
   if (r.kind !== EXPORT_KIND) throw new Error(`Neznámý formát souboru (kind != "${EXPORT_KIND}").`);
-  for (const k of ["routes", "segments", "checkpointTypes", "rules"] as const) {
+  for (const k of ["routes", "segments", "checkpointTypes", "rules", "situations"] as const) {
     if (!Array.isArray(r[k])) throw new Error(`Pole \`${k}\` chybí nebo není seznam.`);
   }
 }
@@ -74,6 +78,7 @@ export async function importFromFile(file: File): Promise<void> {
   // Pořadí nezáleží — všechny stores jsou nezávislé.
   checkpointTypesStore.replaceAll(parsed.checkpointTypes);
   segmentsStore.replaceAll(parsed.segments);
+  situationsStore.replaceAll(parsed.situations);
   routesStore.replaceAll(parsed.routes);
   rulesStore.replaceAll(parsed.rules);
 }

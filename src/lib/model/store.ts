@@ -157,6 +157,9 @@ export const situationsStore = {
   remove(id: string): void {
     _situations.setState(_situations.getState().filter((s) => s.id !== id));
   },
+  replaceAll(next: Situation[]): void {
+    _situations.setState(next);
+  },
 };
 
 /** Kolik pravidel je navázáno na danou závažnost — použij pro guard při mazání. */
