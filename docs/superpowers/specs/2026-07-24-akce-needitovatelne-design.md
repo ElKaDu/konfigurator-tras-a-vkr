@@ -46,15 +46,15 @@ Při ukládání pravidla (`RuleCreatorPage` → `rulesStore.upsert`) se `rule.a
 
 ## 4. Dotčená místa v appce
 
-Konzistentně všude, kde se dnes čte `rule.actions`/`r.actions` pro zobrazení, se přechází na `resolveRuleActions(rule)`:
+Konzistentně všude, kde se dnes čte `rule.actions` pro zobrazení v aktuálním datovém modelu (`@/lib/model/types`), se přechází na `resolveRuleActions(rule)`:
 
 | Soubor | Dnešní použití |
 |---|---|
 | `src/components/rules/RuleCreatorPage.tsx` | pravý sloupec „Akce" (bod 2 výše) |
 | `src/components/rules/RulesList.tsx:369` | odznaky akcí v seznamu pravidel |
-| `src/components/vkr/RuleDetailPanel.tsx:123,167,168,260` | detail pravidla na stránce `/test` |
-| `src/components/vkr/RulesTable.tsx:59,122` | odvození priority ze seznamu akcí na `/test` |
 | `src/components/test/TestPanel.tsx:39` | titulek VkŘ ze simulace na `/test` |
+
+`src/components/vkr/RuleDetailPanel.tsx` a `src/components/vkr/RulesTable.tsx` **se netýkají** — jsou to nepoužívané pozůstatky staršího datového modelu (`@/lib/vkr/types`, ne `@/lib/model/types`), nic je dnes neimportuje mimo sebe navzájem. Netřeba upravovat.
 
 Interní stav `SeverityActionRow` / `severityActions` (checkbox `enabled`, lokální edit popisu) se z `RuleCreatorPage.tsx` odstraňuje — už není potřeba, sloupec renderuje `selectedSeverityObj.actions` přímo.
 
