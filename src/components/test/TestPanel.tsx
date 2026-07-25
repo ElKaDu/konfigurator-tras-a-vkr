@@ -3,6 +3,7 @@ import { PlayCircle, AlertTriangle, CircleCheck } from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
 import { AreaBadge } from "@/components/common/AreaBadge";
 import { useSampleShipments, useRules } from "@/lib/model/store";
+import { resolveRuleActions } from "@/lib/model/ruleDisplay";
 import { cn } from "@/lib/utils";
 import type { Rule, SampleShipment } from "@/lib/model/types";
 
@@ -36,7 +37,7 @@ function stubLines(
     .filter(Boolean)
     .join(" ");
   const dest = shipment.country_import;
-  const vkrTitle = rule.actions[0]?.title ?? rule.name;
+  const vkrTitle = resolveRuleActions(rule)[0]?.title ?? rule.name;
 
   if (rule.area === "route_compliance") {
     const lines: string[] = [

@@ -6,7 +6,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { DataMenu } from "@/components/common/DataMenu";
 import { AreaBadge } from "@/components/common/AreaBadge";
 import { useRules, rulesStore } from "@/lib/model/store";
-import { triggerLabel, priorityLabel, isPriorityHigh } from "@/lib/model/ruleDisplay";
+import { triggerLabel, priorityLabel, isPriorityHigh, resolveRuleActions } from "@/lib/model/ruleDisplay";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Rule } from "@/lib/model/types";
 
@@ -366,7 +366,7 @@ function RuleSummaryTab({ rule }: { rule: Rule }) {
 
       <SummarySection label="Akce">
         <div className="space-y-2">
-          {rule.actions.map((a) => (
+          {resolveRuleActions(rule).map((a) => (
             <div key={a.id} className="rounded-lg border border-border bg-background p-2.5">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-medium">{actionTypeLabel[a.type] ?? a.type}</span>
