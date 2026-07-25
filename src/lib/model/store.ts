@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { ActionTag, CheckpointType, Route, Rule, SampleShipment, Segment, Situation } from "./types";
+import type { ActionTag, CheckpointType, Route, Rule, SampleShipment, Segment, Severity, Situation } from "./types";
 import {
   ACTION_TAGS,
   CHECKPOINT_TYPES,
@@ -165,6 +165,15 @@ export const situationsStore = {
 /** Kolik pravidel je navázáno na danou závažnost — použij pro guard při mazání. */
 export function severityUsageCount(severityId: string): number {
   return _rules.getState().filter((r) => r.severityId === severityId).length;
+}
+
+/** Najde Závažnost podle id napříč všemi Situacemi. */
+export function findSeverityById(severityId: string): Severity | undefined {
+  for (const situation of _situations.getState()) {
+    const severity = situation.severities.find((s) => s.id === severityId);
+    if (severity) return severity;
+  }
+  return undefined;
 }
 
 // ---------------------------------------------------------------------------
