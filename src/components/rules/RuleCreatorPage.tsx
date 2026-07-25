@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Lock, X } from "lucide-react";
+import { Lock } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/AppHeader";
@@ -12,17 +12,9 @@ import type { VkrCondition } from "@/lib/vkr/vkrConditionCatalog";
 import { TrackingIncomingConditionsBuilder } from "@/components/rules/editors/TrackingIncomingConditionsBuilder";
 import { TrackingHistoricalConditionsBuilder } from "@/components/rules/editors/TrackingHistoricalConditionsBuilder";
 import { isHistoricalConditionRow } from "@/lib/model/trackingFields";
-import { ActionTagPicker } from "@/components/situations/ActionTagPicker";
 
 
 type TrackingTriggerType = "automatic" | "timer";
-
-interface SeverityActionRow {
-  id: string;
-  actionTagId: string;
-  enabled: boolean;
-  description: string;
-}
 
 interface RuleCreatorUiState {
   selectedSituationId: string | null;
@@ -31,7 +23,6 @@ interface RuleCreatorUiState {
   trackingConditions: Condition[];
   noMovementDuration: number;
   noMovementUnit: "h" | "d" | "bd";
-  severityActions: SeverityActionRow[];
   vkrConditions: VkrCondition[];
 }
 
@@ -53,13 +44,6 @@ function trackingConditionsFromRule(rule?: Rule): Condition[] {
   return rule.conditions.filter((c) => c.kind === "field" || c.kind === "tracking_aggregate");
 }
 
-function severityActionRowsFromRule(rule?: Rule): SeverityActionRow[] {
-  if (!rule || rule.area !== "tracking_records") return [];
-  return rule.actions
-    .filter((a) => a.actionTagId)
-    .map((a) => ({ id: a.id, actionTagId: a.actionTagId!, enabled: true, description: a.vkrText ?? "" }));
-}
-
 function getInitialFormState(rule?: Rule): RuleCreatorInitialState {
   const ui = (rule?.uiState ?? {}) as Partial<RuleCreatorUiState>;
 
@@ -75,7 +59,6 @@ function getInitialFormState(rule?: Rule): RuleCreatorInitialState {
     trackingConditions: ui.trackingConditions ?? trackingConditionsFromRule(rule),
     noMovementDuration: ui.noMovementDuration ?? 72,
     noMovementUnit: ui.noMovementUnit ?? "h",
-    severityActions: ui.severityActions ?? severityActionRowsFromRule(rule),
     vkrConditions: (ui.vkrConditions as VkrCondition[] | undefined) ?? [],
   };
 }
@@ -105,7 +88,6 @@ export function RuleCreatorPage({
   const [trackingConditions, setTrackingConditions] = useState<Condition[]>(initialState.trackingConditions);
   const [noMovementDuration, setNoMovementDuration] = useState(initialState.noMovementDuration);
   const [noMovementUnit, setNoMovementUnit] = useState<"h" | "d" | "bd">(initialState.noMovementUnit);
-  const [severityActions, setSeverityActions] = useState<SeverityActionRow[]>(initialState.severityActions);
   const [ruleName, setRuleName] = useState(initialState.ruleName);
   const [ruleDescription, setRuleDescription] = useState(initialState.ruleDescription);
   const [priority, setPriority] = useState<Priority>(initialState.priority);
@@ -119,7 +101,6 @@ export function RuleCreatorPage({
     setTrackingConditions(initialState.trackingConditions);
     setNoMovementDuration(initialState.noMovementDuration);
     setNoMovementUnit(initialState.noMovementUnit);
-    setSeverityActions(initialState.severityActions);
     setRuleName(initialState.ruleName);
     setRuleDescription(initialState.ruleDescription);
     setPriority(initialState.priority);
@@ -136,9 +117,6 @@ export function RuleCreatorPage({
 
   function applySeverityTemplate(severity: Severity) {
     setPriority(severity.priority);
-    setSeverityActions(
-      severity.actions.map((a) => ({ id: a.id, actionTagId: a.actionTagId, enabled: true, description: a.description ?? "" }))
-    );
   }
 
   function handleSelectSituation(situationId: string) {
@@ -213,9 +191,6 @@ export function RuleCreatorPage({
                         );
                       })}
                     </div>
-                    <p className="mt-3 text-[10px] italic text-muted-foreground leading-relaxed">
-                      Předvyplní prioritu a akce vpravo — dál nezávisle editovatelné.
-                    </p>
                   </>
                 )}
               </div>
@@ -240,15 +215,13 @@ export function RuleCreatorPage({
                     ? trackingConditions.filter(isHistoricalConditionRow)
                     : trackingConditions;
 
-                const trackingActionsOut: Rule["actions"] = severityActions
-                  .filter((a) => a.enabled)
-                  .map((a) => ({
-                    id: a.id,
-                    type: "create_vkr",
-                    title: ruleName,
-                    vkrText: a.description || undefined,
-                    actionTagId: a.actionTagId,
-                  }));
+                const trackingActionsOut: Rule["actions"] = (selectedSeverityObj?.actions ?? []).map((a) => ({
+                  id: a.id,
+                  type: "create_vkr",
+                  title: ruleName,
+                  vkrText: a.description || undefined,
+                  actionTagId: a.actionTagId,
+                }));
 
                 rulesStore.upsert({
                   id,
@@ -270,7 +243,6 @@ export function RuleCreatorPage({
                     trackingConditions,
                     noMovementDuration,
                     noMovementUnit,
-                    severityActions,
                     vkrConditions,
                   },
                 });
@@ -472,55 +444,40 @@ export function RuleCreatorPage({
           </div>
         </div>
 
-        {/* RIGHT COLUMN — Akce */}
+        {/* RIGHT COLUMN — Akce (needitovatelné, jen zobrazení ze Závažnosti) */}
         <div className="flex w-[340px] shrink-0 flex-col">
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Akce</div>
 
+            {isTrackingRecords && !selectedSeverityObj && (
+              <div className="rounded-xl border border-dashed border-border p-8 text-center">
+                <div className="text-sm text-muted-foreground">Vyber situaci a závažnost v levém sloupci.</div>
+              </div>
+            )}
 
-            {isTrackingRecords && (
+            {isTrackingRecords && selectedSeverityObj && selectedSeverityObj.actions.length === 0 && (
+              <div className="rounded-xl border border-dashed border-border p-8 text-center">
+                <div className="text-sm text-muted-foreground">Tato závažnost nemá žádné výchozí akce.</div>
+              </div>
+            )}
+
+            {isTrackingRecords && selectedSeverityObj && selectedSeverityObj.actions.length > 0 && (
               <div className="space-y-2">
-                {severityActions.map((row) => {
-                  const tag = actionTags.find((t) => t.id === row.actionTagId);
+                {selectedSeverityObj.actions.map((a) => {
+                  const tag = actionTags.find((t) => t.id === a.actionTagId);
                   return (
-                    <div key={row.id} className="rounded-lg border border-border bg-background p-2.5">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <input
-                          type="checkbox"
-                          checked={row.enabled}
-                          onChange={(e) =>
-                            setSeverityActions((prev) => prev.map((a) => (a.id === row.id ? { ...a, enabled: e.target.checked } : a)))
-                          }
-                        />
-                        <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary flex-1">
-                          {tag?.label ?? row.actionTagId}
-                        </span>
-                        <button
-                          onClick={() => setSeverityActions((prev) => prev.filter((a) => a.id !== row.id))}
-                          className="text-muted-foreground hover:text-foreground"
-                        >
-                          <X className="size-3.5" />
-                        </button>
-                      </div>
-                      <Textarea
-                        value={row.description}
-                        onChange={(e) =>
-                          setSeverityActions((prev) => prev.map((a) => (a.id === row.id ? { ...a, description: e.target.value } : a)))
-                        }
-                        placeholder="Co má operátor udělat…"
-                        rows={2}
-                        className="resize-none text-xs"
-                        disabled={!row.enabled}
-                      />
+                    <div key={a.id} className="rounded-lg border border-border bg-muted/20 p-2.5">
+                      <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary">
+                        {tag?.label ?? a.actionTagId}
+                      </span>
+                      {a.description && (
+                        <p className="mt-1.5 rounded-md bg-muted/30 px-2 py-1.5 text-xs text-muted-foreground">
+                          {a.description}
+                        </p>
+                      )}
                     </div>
                   );
                 })}
-                <ActionTagPicker
-                  excludeIds={severityActions.map((a) => a.actionTagId)}
-                  onPick={(tag) =>
-                    setSeverityActions((prev) => [...prev, { id: "sa_" + Date.now(), actionTagId: tag.id, enabled: true, description: "" }])
-                  }
-                />
               </div>
             )}
 
