@@ -1,0 +1,267 @@
+<title>checklist_architektura</title>
+<style>
+  :root{
+    --bg:#f2f0ea;
+    --paper:#faf9f5;
+    --grid-line:#dcd8cc;
+    --ink:#23241f;
+    --ink-muted:#63645b;
+    --rule:#c9c5b6;
+    --accent-flow:#b2551b;
+    --accent-hier:#1f5c8c;
+    --accent-existing:#5a5645;
+    --tag-template:#8a6d1f;
+    --tag-instance:#1f5c8c;
+    --tag-existing:#5a5645;
+  }
+  :root[data-theme="dark"]{
+    --bg:#14161a;
+    --paper:#1b1e23;
+    --grid-line:#2a2e35;
+    --ink:#e9e7dd;
+    --ink-muted:#9a9c95;
+    --rule:#3a3d44;
+    --accent-flow:#e08a4e;
+    --accent-hier:#6fb2e6;
+    --accent-existing:#b7b39f;
+    --tag-template:#d4ac3f;
+    --tag-instance:#6fb2e6;
+    --tag-existing:#b7b39f;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#14161a;
+      --paper:#1b1e23;
+      --grid-line:#2a2e35;
+      --ink:#e9e7dd;
+      --ink-muted:#9a9c95;
+      --rule:#3a3d44;
+      --accent-flow:#e08a4e;
+      --accent-hier:#6fb2e6;
+      --accent-existing:#b7b39f;
+      --tag-template:#d4ac3f;
+      --tag-instance:#6fb2e6;
+      --tag-existing:#b7b39f;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body{
+    background:
+      linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0/100% 28px,
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0/28px 100%,
+      var(--bg);
+    background-attachment: local;
+    color: var(--ink);
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Consolas, monospace;
+  }
+
+  .wrap{
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  .kicker{
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-flow);
+    margin: 0 0 10px;
+    font-weight: 600;
+  }
+
+  h1{
+    font-family: -apple-system, "Neue Haas Grotesk", "Helvetica Neue", Arial, sans-serif;
+    font-weight: 700;
+    font-size: clamp(26px, 4vw, 36px);
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+
+  .lede{
+    font-family: -apple-system, "Neue Haas Grotesk", "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink-muted);
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 62ch;
+    margin: 0 0 32px;
+  }
+
+  .panel{
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    padding: 20px 20px 8px;
+    margin-bottom: 28px;
+    overflow-x: auto;
+  }
+
+  .panel-label{
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin: 0 0 14px;
+    border-bottom: 1px dashed var(--rule);
+    padding-bottom: 10px;
+  }
+
+  pre.mermaid{
+    background: transparent;
+    min-width: 760px;
+  }
+
+  .legend{
+    font-family: -apple-system, "Neue Haas Grotesk", "Helvetica Neue", Arial, sans-serif;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px 20px;
+    margin-bottom: 36px;
+  }
+  .legend-item{
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink-muted);
+  }
+  .legend-item b{ color: var(--ink); font-weight: 600; }
+  .swatch{
+    flex: none;
+    width: 28px;
+    height: 2px;
+    margin-top: 8px;
+  }
+  .swatch.flow{ background: repeating-linear-gradient(90deg, var(--accent-flow) 0 6px, transparent 6px 10px); }
+  .swatch.hier{ background: var(--accent-hier); height: 3px; }
+  .swatch.rel{ background: var(--ink-muted); }
+  .tag{
+    display:inline-block;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 1px 6px;
+    border: 1px solid currentColor;
+    border-radius: 2px;
+  }
+  .tag.template{ color: var(--tag-template); }
+  .tag.instance{ color: var(--tag-instance); }
+  .tag.existing{ color: var(--tag-existing); }
+
+  h2{
+    font-family: -apple-system, "Neue Haas Grotesk", "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink);
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 8px;
+    margin: 0 0 16px;
+  }
+
+  ol.flow{
+    font-family: -apple-system, "Neue Haas Grotesk", "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--ink);
+    padding-left: 20px;
+    margin: 0;
+  }
+  ol.flow li::marker{ color: var(--accent-flow); font-weight: 600; }
+  ol.flow b { font-weight: 600; }
+  ol.flow .muted{ color: var(--ink-muted); }
+
+  footer{
+    margin-top: 40px;
+    font-size: 12px;
+    color: var(--ink-muted);
+    border-top: 1px dashed var(--rule);
+    padding-top: 14px;
+  }
+</style>
+
+<div class="wrap">
+  <p class="kicker">Bytorp &middot; Checklist &bdquo;Vyhodnocení a kontrola&ldquo;</p>
+  <h1>Objekty, vztahy a tok dat v jednom grafu</h1>
+  <p class="lede">
+    Entity-relationship diagram s vyznačenou hierarchií (follow-up položky) a směrem toku dat od
+    vstupu obchodního případu do fáze Objednávka až po VkŘ na dashboardu operátora.
+  </p>
+
+  <div class="legend">
+    <div class="legend-item"><span class="swatch rel"></span><span><b>tenká čára</b> &mdash; vztah / cizí klíč (1:1, 1:N, N:N)</span></div>
+    <div class="legend-item"><span class="swatch hier"></span><span><b>tlustá čára</b> &mdash; hierarchie (follow-up rodič&nbsp;&rarr;&nbsp;dítě, stejná entita)</span></div>
+    <div class="legend-item"><span class="swatch flow"></span><span><b>čárkovaná</b> &mdash; šablona generuje/kopíruje se do instance</span></div>
+    <div class="legend-item"><span><span class="tag template">šablona</span></span><span>konfiguruje admin jednou</span></div>
+    <div class="legend-item"><span><span class="tag instance">instance</span></span><span>vzniká za běhu na obchodním případu</span></div>
+    <div class="legend-item"><span><span class="tag existing">existující</span></span><span>už je v produkčním kódu</span></div>
+  </div>
+
+  <div class="panel" style="overflow-x:visible; border-color: var(--accent-flow);">
+    <p class="panel-label" style="border:none; padding:0; margin:0; color: var(--accent-flow);">rozsah v1</p>
+    <p style="font-family: -apple-system, sans-serif; font-size: 14px; line-height: 1.6; color: var(--ink); margin: 10px 0 0;">
+      Žádné automatické vyhodnocování a žádné automatické generování VkŘ &mdash; s výjimkou
+      <b>Oprávněnosti přiřazení</b> a <b>Vyřešení platby</b>, kde VkŘ mechanismus <b>už existuje</b> v produkci.
+      Všech ostatních ~14 položek: čistě <b>ruční posouzení a odškrtnutí</b> operátorem, bez Podmínky,
+      bez Závažnosti, bez nové VkŘ. Podmínka/auto-vyhodnocení zůstává jako budoucí rozšíření &mdash; v grafu
+      záměrně chybí, ať se nestaví nic navíc.
+    </p>
+  </div>
+
+  <div class="panel">
+    <p class="panel-label">graf &mdash; objekty · vztahy · hierarchie · tok</p>
+    <pre class="mermaid">
+flowchart TD
+  classDef template stroke:#8a6d1f,stroke-width:1.5px;
+  classDef instance stroke:#1f5c8c,stroke-width:1.5px;
+  classDef existing stroke:#5a5645,stroke-width:1px,stroke-dasharray: 3 2;
+  classDef special stroke:#b2551b,stroke-width:2px;
+
+  ZAK["Zákazník<br/><i>existující</i>"]:::existing
+  OP["Obchodní případ<br/><i>Shipment, existující</i><br/>fáze = Objednávka"]:::existing
+
+  KO["KontrolníOblast<br/><small>šablona, ~14 z 16</small><br/>krok · kategorie · pořadí<br/>podmínka viditelnosti<br/><i>bez Podmínky/Závažnosti &mdash; v1</i>"]:::template
+  KOS["KontrolníOblast &mdash; speciální<br/><small>šablona, jen 2: Přiřazení + Platba</small>"]:::special
+  VYJ["ZákaznickáVýjimka<br/><small>šablona</small>"]:::template
+
+  LIMIT["ZpracovacíLimit<br/><small>instance</small>"]:::instance
+  KP["KontrolníPoložka<br/><small>instance</small><br/>stav: NEVYHODNOCENO / OK / K ŘEŠENÍ / PŘESKOČENO<br/>nastavuje ručně operátor"]:::instance
+  KPS["KontrolníPoložka &mdash; speciální<br/><small>instance, jen 2</small><br/>stav se zrcadlí od VkŘ"]:::special
+  VKR["VkŘ / ActionItem<br/><i>existující mechanismus</i><br/>ActionItemCreationRule &rarr; ActionItem"]:::existing
+
+  ZAK -- "1:N" --> OP
+  ZAK -- "N:N" --> VYJ
+  VYJ -- "N" --> KO
+
+  KO == "follow-up" ==> KO
+
+  OP -- "1:1" --> LIMIT
+  OP -- "1:N" --> KP
+  OP -- "1:N (2)" --> KPS
+  KO -.->|"kopíruje se při vstupu do kroku"| KP
+  KOS -.->|"kopíruje se při vstupu"| KPS
+  KP == "follow-up" ==> KP
+  KPS -- "stav se odvozuje od" --> VKR
+    </pre>
+  </div>
+
+  <div class="panel" style="overflow-x:visible;">
+    <p class="panel-label">tok dat &mdash; čtení grafu shora dolů v čase</p>
+    <h2 style="border:none;padding:0;margin:0 0 12px;">Sekvence</h2>
+    <ol class="flow">
+      <li>Obchodní případ (<b>OP</b>) vstoupí do fáze Objednávka.</li>
+      <li><b>Krok&nbsp;1 &mdash; Oprávněnost přiřazení</b>: řeší <span class="muted">existující</span> VkŘ mechanismus (beze změny) &mdash; <b>KPS</b> jen zrcadlí jeho stav, <span class="muted">viditelné na dashboardu, ještě bez přiřazeného operátora</span>.</li>
+      <li>Operátor si <b>OP</b> přiřadí (vyřeší VkŘ z kroku 1, nebo žádné nevznikly).</li>
+      <li>Vygeneruje se <b>ZpracovacíLimit</b> (1:1) a sada <b>KontrolníPoložka</b> (1:N) &mdash; kopírují se jen ty <b>KontrolníOblasti</b> s krok=2, jejichž podmínka viditelnosti platí, a které nemá <b>Zákazník</b> vyjmuté přes <b>ZákaznickáVýjimka</b>. Položka <b>Vyřešení platby</b> se kopíruje jako <b>KPS</b>.</li>
+      <li><b>Vyřešení platby</b> (<b>KPS</b>): stav se zrcadlí od existujícího VkŘ &mdash; žádná nová logika. <span class="muted">Všechny ostatní</span> <b>KontrolníPoložky</b> vznikají ve stavu NEVYHODNOCENO a čekají na <b>ruční posouzení a odškrtnutí</b> operátorem &mdash; v1 bez Podmínky, bez automatiky, bez nové VkŘ.</li>
+      <li>Vyřešení některé položky může odemknout <b>follow-up KontrolníPoložku</b> (hierarchie rodič&nbsp;&rarr;&nbsp;dítě) &mdash; opět ruční krok.</li>
+      <li>Když jsou všechny Krok-2 položky OK/PŘESKOČENO &mdash; včetně finální &bdquo;Celkové zhodnocení s odstupem&ldquo; &mdash; <b>OP</b> může přejít do stavu Zpracování.</li>
+    </ol>
+  </div>
+
+  <footer>Návrh k připomínkování &middot; konfigurator-tras-a-vkr &middot; brainstorming session</footer>
+</div>

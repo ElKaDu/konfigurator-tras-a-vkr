@@ -1,0 +1,418 @@
+<style>
+  :root {
+    --bg: #eef1f5;
+    --surface: #ffffff;
+    --surface-2: #e7ebf1;
+    --ink: #131720;
+    --ink-muted: #545e6e;
+    --border: #d3d9e1;
+    --accent: #2a5ea8;
+    --accent-soft: #e1ebf7;
+    --good: #17734f;
+    --good-soft: #e2f3ea;
+    --warn: #93630a;
+    --warn-soft: #fbf0dc;
+    --bad: #a5332f;
+    --bad-soft: #fbe7e5;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1319; --surface: #161b23; --surface-2: #1e2530; --ink: #e7ebf2; --ink-muted: #97a1b3; --border: #2b3341; --accent: #7fa8dd; --accent-soft: #1c2735; --good: #5cbf94; --good-soft: #17281f; --warn: #dcab52; --warn-soft: #2c2412; --bad: #e18784; --bad-soft: #2c1918; }
+  }
+  :root[data-theme="dark"] { --bg: #0f1319; --surface: #161b23; --surface-2: #1e2530; --ink: #e7ebf2; --ink-muted: #97a1b3; --border: #2b3341; --accent: #7fa8dd; --accent-soft: #1c2735; --good: #5cbf94; --good-soft: #17281f; --warn: #dcab52; --warn-soft: #2c2412; --bad: #e18784; --bad-soft: #2c1918; }
+  :root[data-theme="light"] { --bg: #eef1f5; --surface: #ffffff; --surface-2: #e7ebf1; --ink: #131720; --ink-muted: #545e6e; --border: #d3d9e1; --accent: #2a5ea8; --accent-soft: #e1ebf7; --good: #17734f; --good-soft: #e2f3ea; --warn: #93630a; --warn-soft: #fbf0dc; --bad: #a5332f; --bad-soft: #fbe7e5; }
+
+  * { box-sizing: border-box; }
+  html, body { background: var(--bg); }
+  body { font-family: var(--sans); color: var(--ink); max-width: 100%; overflow-x: hidden; }
+
+  .page { max-width: 880px; margin: 0 auto; padding: 48px 24px 100px; display: flex; flex-direction: column; gap: 52px; counter-reset: q; }
+
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+  h1 { font-size: 27px; line-height: 1.2; margin: 0; font-weight: 700; letter-spacing: -0.01em; }
+  .lede { color: var(--ink-muted); font-size: 15px; line-height: 1.65; max-width: 68ch; }
+
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; }
+  .toc-title { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-muted); margin-bottom: 8px; }
+  .toc ol { margin: 0; padding-left: 20px; font-size: 13.5px; line-height: 1.7; }
+  .toc ol ol { margin-top: 2px; padding-left: 18px; font-size: 13px; }
+  .toc a { color: var(--ink); text-decoration: none; }
+  .toc a:hover { color: var(--accent); }
+  .toc .chapter-link { font-weight: 650; }
+
+  .chapter { display: flex; flex-direction: column; gap: 26px; padding-top: 40px; border-top: 2px solid var(--border); scroll-margin-top: 20px; }
+  .chapter:first-of-type { padding-top: 0; border-top: none; }
+  .chapter-head { display: flex; flex-direction: column; gap: 6px; }
+  .chapter-title { font-size: 22px; font-weight: 700; margin: 0; letter-spacing: -0.005em; }
+  .chapter-intro { color: var(--ink-muted); font-size: 14px; line-height: 1.6; max-width: 66ch; }
+
+  .sub { display: flex; flex-direction: column; gap: 12px; scroll-margin-top: 20px; }
+  h3 { font-size: 16px; font-weight: 650; margin: 0; }
+  p { line-height: 1.65; font-size: 14.5px; margin: 0; }
+  p + p { margin-top: 8px; }
+  ul, ol { line-height: 1.65; font-size: 14.5px; padding-left: 22px; }
+  li + li { margin-top: 4px; }
+
+  .question-box { counter-increment: q; background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border)); border-radius: 10px; padding: 14px 16px; font-size: 13.5px; line-height: 1.6; }
+  .question-box::before { content: "Otázka " counter(q) ""; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); display: block; margin-bottom: 6px; }
+  .question-box b { color: var(--ink); }
+  .question-box p + p { margin-top: 6px; }
+  .question-box ul { margin-top: 6px; }
+  .question-group { display: flex; flex-direction: column; gap: 10px; }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; background: var(--surface); }
+  thead th { text-align: left; font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-muted); background: var(--surface-2); padding: 10px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  tbody td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+  tbody tr:last-child td { border-bottom: none; }
+  .outcome { display: inline-flex; align-items: center; gap: 6px; font-weight: 650; font-size: 13px; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+  .outcome.ok { background: var(--good-soft); color: var(--good); }
+  .outcome.wait { background: var(--warn-soft); color: var(--warn); }
+  .outcome.bad { background: var(--bad-soft); color: var(--bad); }
+
+  .steps { display: flex; flex-direction: column; gap: 10px; }
+  .step { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; gap: 14px; }
+  .step .badge { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 4px 10px; height: fit-content; flex-shrink: 0; white-space: nowrap; }
+  .step .body { display: flex; flex-direction: column; gap: 6px; }
+  .outputs { list-style: none; padding-left: 0; margin: 2px 0 0; display: flex; flex-direction: column; gap: 4px; }
+  .outputs li { display: flex; gap: 8px; align-items: baseline; font-size: 13.5px; }
+  .outputs li .outcome { flex-shrink: 0; }
+
+  .cond-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+  .cond-group { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .cond-group ul { margin: 0; }
+
+  .wireframe { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .wireframe-title { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-muted); }
+  .wf-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .wf-label { font-size: 12.5px; color: var(--ink-muted); flex: 1; min-width: 140px; }
+  .wf-value-wrap { display: flex; align-items: center; gap: 6px; }
+  .wf-value { font-family: var(--mono); font-size: 12px; padding: 4px 9px; border-radius: 6px; white-space: nowrap; }
+  .wf-value.editable { border: 1px solid var(--accent); background: var(--accent-soft); color: var(--ink); }
+  .wf-value.fixed { border: 1px dashed var(--border); background: var(--surface-2); color: var(--ink-muted); }
+  .wf-tag { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+  .wf-tag.editable { background: var(--accent-soft); color: var(--accent); }
+  .wf-tag.fixed { background: var(--surface-2); color: var(--ink-muted); }
+  .wireframe-caption { font-size: 12px; color: var(--ink-muted); font-style: italic; }
+  .cond-group li { font-size: 13.5px; }
+
+  footer { border-top: 1px solid var(--border); padding-top: 20px; font-size: 12.5px; color: var(--ink-muted); line-height: 1.7; }
+</style>
+
+<div class="page">
+
+  <header>
+    <div class="eyebrow">Soulad s trasou · k ověření s klientem</div>
+    <h1>Vyhodnocení zásilky na trase — tři situace</h1>
+    <p class="lede">
+      Tenhle dokument slouží k upřesnění tří situací, které na trase zásilky sledujeme, a k ověření, do jaké
+      míry jsou příklady, se kterými pracujeme, univerzální.
+    </p>
+  </header>
+
+  <div class="toc">
+    <div class="toc-title">Obsah</div>
+    <ol>
+      <li><a class="chapter-link" href="#den-doruceni">Den doručení</a>
+        <ol>
+          <li><a href="#dd-proces">Jak proces funguje</a></li>
+          <li><a href="#dd-vystupy">Kdy vznikne věc k řešení a kdy ne</a></li>
+          <li><a href="#dd-podminky">Podmínky na záznamech u obou scanů</a></li>
+          <li><a href="#dd-krajni">Krajní případy</a></li>
+        </ol>
+      </li>
+      <li><a class="chapter-link" href="#bezny-bod">Běžný bod</a>
+        <ol>
+          <li><a href="#bb-dnes">Jak to funguje</a></li>
+          <li><a href="#bb-problem">Problém</a></li>
+          <li><a href="#bb-tolerance">Tolerance po čase na záznamu</a></li>
+          <li><a href="#bb-krajni">Krajní případy</a></li>
+        </ol>
+      </li>
+      <li><a class="chapter-link" href="#zasekle">Zásilka zaseknutá na jednom místě</a></li>
+    </ol>
+  </div>
+
+  <div class="chapter" id="den-doruceni">
+    <div class="chapter-head">
+      <div class="eyebrow">Situace 1</div>
+      <h2 class="chapter-title">Den doručení</h2>
+    </div>
+
+    <div class="sub" id="dd-proces">
+      <h3>Jak proces funguje</h3>
+      <div class="steps">
+        <div class="step">
+          <span class="badge">čas na záznamu<br/>do 8:00</span>
+          <div class="body">
+            <p>Průběžně se sleduje, jestli se objevil záznam prvního fyzického scanu, který splňuje podmínky
+            popsané níže (cílová země, typ místa) a má čas na záznamu nejpozději do 8:00 — tedy jestli
+            <b>dorazil řádně</b>.</p>
+            <ul class="outputs">
+              <li><span class="outcome ok">dorazil řádně</span> žádná věc k řešení — pokračuje se rovnou na kontrolu druhého scanu (poslední krok níže)</li>
+              <li><span class="outcome wait">zatím ne</span> žádný výstup — jen se čeká na Limit pro řádné záznamy</li>
+            </ul>
+          </div>
+        </div>
+        <div class="step">
+          <span class="badge">Limit pro<br/>řádné záznamy<br/>např. 9:00</span>
+          <div class="body">
+            <p>V tomto čase se stejná otázka položí znovu: dorazil první scan řádně (tedy objevil se záznam
+            splňující podmínky ze sekce Podmínky, s časem na záznamu nejpozději do 8:00)?</p>
+            <ul class="outputs">
+              <li><span class="outcome ok">ano</span> žádná věc k řešení — pokračuje se na kontrolu druhého scanu</li>
+              <li><span class="outcome bad">ne, a datum doručení od přepravce už neodpovídá dnešku</span> věc k řešení „Zpožděná zásilka", ihned</li>
+              <li><span class="outcome wait">ne, ale datum doručení od přepravce pořád odpovídá dnešku</span> žádný výstup — jen se čeká do Konečného limitu</li>
+            </ul>
+          </div>
+        </div>
+        <div class="step">
+          <span class="badge">Konečný limit<br/>např. 10:00</span>
+          <div class="body">
+            <p>Týká se jen zásilek, které v předchozím kroku čekaly dál. Tady už nerozhoduje čas uvedený na
+            záznamu — jen to, jestli se takový záznam vůbec objevil.</p>
+            <ul class="outputs">
+              <li><span class="outcome bad">záznam splňující ostatní podmínky se vůbec neobjevil</span> věc k řešení „Zpožděná zásilka"</li>
+              <li><span class="outcome bad">objevil se, ale datum doručení od přepravce už neodpovídá dnešku</span> věc k řešení „Zpožděná zásilka"</li>
+              <li><span class="outcome ok">objevil se a datum doručení od přepravce odpovídá dnešku</span> žádná věc k řešení — pokračuje se na kontrolu druhého scanu</li>
+            </ul>
+          </div>
+        </div>
+        <div class="step">
+          <span class="badge">kontrola<br/>druhého scanu</span>
+          <div class="body">
+            <p>
+              Čas na záznamu druhého scanu musí být nejpozději 2 hodiny po čase na záznamu prvního fyzického
+              scanu. Kontrolujeme to přesně v tento okamžik (2 hodiny po prvním scanu) a pak ještě průběžně
+              další hodinu navíc — pro případ, že by data o scanu z trackingu dorazila se zpožděním. Hledáme
+              tedy záznam druhého scanu s časem na záznamu nejpozději 2 hodiny po prvním scanu, a hledáme ho
+              až do 3 hodin po prvním scanu.
+            </p>
+            <ul class="outputs">
+              <li><span class="outcome ok">dorazil řádně</span> žádná věc k řešení — „Předpoklad dnešního doručení"</li>
+              <li><span class="outcome bad">nedorazil řádně</span> věc k řešení „Zpožděná zásilka"</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-box">Chápeme správně, jak to chodí? Odpovídá tento popis, včetně výstupů u
+        každého kroku, vašemu zadání?</div>
+        <div class="question-box">
+          Byl by pro vás tento proces funkční, kdybychom <b>úplně všechny časy napevno naprogramovali</b>
+          stejně pro všechny trasy — tedy čas na záznamu (8:00 pro první scan, 2 hodiny po prvním scanu pro
+          druhý scan), Limit pro řádné záznamy (9:00) i Konečný limit (10:00 pro první scan, 3 hodiny po
+          prvním scanu pro druhý scan) by byly pevně dané v kódu a nešly by se v aplikaci nijak měnit?
+          <div class="wireframe">
+            <div class="wireframe-title">Varianta 1 — vše napevno</div>
+            <div class="wf-row"><span class="wf-label">Čas na záznamu — 1. scan</span><span class="wf-value-wrap"><span class="wf-value fixed">8:00</span><span class="wf-tag fixed">napevno</span></span></div>
+            <div class="wf-row"><span class="wf-label">Limit pro řádné záznamy</span><span class="wf-value-wrap"><span class="wf-value fixed">9:00</span><span class="wf-tag fixed">napevno</span></span></div>
+            <div class="wf-row"><span class="wf-label">Konečný limit — 1. scan</span><span class="wf-value-wrap"><span class="wf-value fixed">10:00</span><span class="wf-tag fixed">napevno</span></span></div>
+            <div class="wf-row"><span class="wf-label">Čas na záznamu — 2. scan</span><span class="wf-value-wrap"><span class="wf-value fixed">+2 hod od 1. scanu</span><span class="wf-tag fixed">napevno</span></span></div>
+            <div class="wf-row"><span class="wf-label">Konečný limit — 2. scan</span><span class="wf-value-wrap"><span class="wf-value fixed">+3 hod od 1. scanu</span><span class="wf-tag fixed">napevno</span></span></div>
+            <div class="wireframe-caption">Žádné nastavení v aplikaci — všechno pevně dané v kódu.</div>
+          </div>
+          <p>Pokud ne: bylo by funkční, kdyby šly nastavovat jen <b>časy kontrol</b> — tedy kdy se má znovu
+          zkontrolovat (Limit pro řádné záznamy, např. 9:00) a do kdy se má nejpozději čekat (Konečný limit,
+          např. 10:00 u prvního scanu, resp. 3 hodiny po prvním scanu u druhého scanu) — ale čas na záznamu
+          (do kdy musí scan reálně nastat, aby byl v pořádku) zůstal pevně daný: 8:00 pro první scan, 2 hodiny
+          po prvním scanu pro druhý scan?</p>
+          <div class="wireframe">
+            <div class="wireframe-title">Varianta 2 — nastavitelné jen časy kontrol</div>
+            <div class="wf-row"><span class="wf-label">Čas na záznamu — 1. scan</span><span class="wf-value-wrap"><span class="wf-value fixed">8:00</span><span class="wf-tag fixed">napevno</span></span></div>
+            <div class="wf-row"><span class="wf-label">Limit pro řádné záznamy</span><span class="wf-value-wrap"><span class="wf-value editable">9:00</span><span class="wf-tag editable">nastavitelné</span></span></div>
+            <div class="wf-row"><span class="wf-label">Konečný limit — 1. scan</span><span class="wf-value-wrap"><span class="wf-value editable">10:00</span><span class="wf-tag editable">nastavitelné</span></span></div>
+            <div class="wf-row"><span class="wf-label">Čas na záznamu — 2. scan</span><span class="wf-value-wrap"><span class="wf-value fixed">+2 hod od 1. scanu</span><span class="wf-tag fixed">napevno</span></span></div>
+            <div class="wf-row"><span class="wf-label">Konečný limit — 2. scan</span><span class="wf-value-wrap"><span class="wf-value editable">+3 hod od 1. scanu</span><span class="wf-tag editable">nastavitelné</span></span></div>
+          </div>
+          <p>Pokud ani to ne: bylo by funkční, kdyby šel nastavovat i čas na záznamu (tedy 8:00 pro první scan
+          a 2hodinový odstup pro druhý scan by taky šly měnit)?</p>
+          <div class="wireframe">
+            <div class="wireframe-title">Varianta 3 — nastavitelné i časy na záznamu</div>
+            <div class="wf-row"><span class="wf-label">Čas na záznamu — 1. scan</span><span class="wf-value-wrap"><span class="wf-value editable">8:00</span><span class="wf-tag editable">nastavitelné</span></span></div>
+            <div class="wf-row"><span class="wf-label">Limit pro řádné záznamy</span><span class="wf-value-wrap"><span class="wf-value editable">9:00</span><span class="wf-tag editable">nastavitelné</span></span></div>
+            <div class="wf-row"><span class="wf-label">Konečný limit — 1. scan</span><span class="wf-value-wrap"><span class="wf-value editable">10:00</span><span class="wf-tag editable">nastavitelné</span></span></div>
+            <div class="wf-row"><span class="wf-label">Čas na záznamu — 2. scan</span><span class="wf-value-wrap"><span class="wf-value editable">+2 hod od 1. scanu</span><span class="wf-tag editable">nastavitelné</span></span></div>
+            <div class="wf-row"><span class="wf-label">Konečný limit — 2. scan</span><span class="wf-value-wrap"><span class="wf-value editable">+3 hod od 1. scanu</span><span class="wf-tag editable">nastavitelné</span></span></div>
+          </div>
+          <p>Pokud zvolíte některou z možností, kde se něco nastavuje (tedy druhou nebo třetí) — nastavovali
+          byste to podle cílové země, přepravce a varianty přepravy? Například by „trasa do Francie přes DHL"
+          mohla mít jiné časy než „trasa do Německa přes FedEx". Ostatní logika (pořadí kroků, podmínky na
+          záznamech, kdy se kontroluje datum doručení od přepravce, jak se výsledek promítne do věci k řešení)
+          by zůstala stejná, přesně jak je popsáno výše, bez ohledu na to, kterou možnost zvolíte.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub" id="dd-vystupy">
+      <h3>Kdy vznikne věc k řešení a kdy ne</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kontrola</th><th>Situace</th><th>Věc k řešení?</th></tr></thead>
+          <tbody>
+            <tr><td>Čas na záznamu (do 8:00)</td><td>první scan dorazil řádně</td><td><span class="outcome ok">ne, pokračuje dál</span></td></tr>
+            <tr><td>Čas na záznamu (do 8:00)</td><td>první scan zatím nedorazil</td><td><span class="outcome wait">ne, jen se čeká</span></td></tr>
+            <tr><td>Limit pro řádné záznamy</td><td>první scan dorazil řádně (zachyceno až v tomto kroku)</td><td><span class="outcome ok">ne, pokračuje dál</span></td></tr>
+            <tr><td>Limit pro řádné záznamy</td><td>nedorazil řádně, datum od přepravce ≠ dnes</td><td><span class="outcome bad">ano, Zpožděná zásilka</span></td></tr>
+            <tr><td>Limit pro řádné záznamy</td><td>nedorazil řádně, datum od přepravce = dnes</td><td><span class="outcome wait">ne, jen se čeká</span></td></tr>
+            <tr><td>Konečný limit</td><td>záznam se vůbec neobjevil</td><td><span class="outcome bad">ano, Zpožděná zásilka</span></td></tr>
+            <tr><td>Konečný limit</td><td>záznam se objevil, datum od přepravce ≠ dnes</td><td><span class="outcome bad">ano, Zpožděná zásilka</span></td></tr>
+            <tr><td>Konečný limit</td><td>záznam se objevil, datum od přepravce = dnes</td><td><span class="outcome ok">ne, pokračuje na druhý scan</span></td></tr>
+            <tr><td>Kontrola druhého scanu</td><td>druhý scan dorazil řádně</td><td><span class="outcome ok">ne, Předpoklad dnešního doručení</span></td></tr>
+            <tr><td>Kontrola druhého scanu</td><td>druhý scan nedorazil řádně</td><td><span class="outcome bad">ano, Zpožděná zásilka</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="question-box">Souhlasí tento přehled — tedy přesně tyto případy, kdy věc k řešení
+      „Zpožděná zásilka" vznikne, a tyto, kdy nevznikne (jen se čeká, nebo proces pokračuje dál)?</div>
+    </div>
+
+    <div class="sub" id="dd-podminky">
+      <h3>Podmínky na záznamech u obou scanů</h3>
+      <p>Kromě času uvedeného na záznamu počítáme u obou scanů ještě s těmito podmínkami:</p>
+      <div class="cond-groups">
+        <div class="cond-group">
+          <h3>První fyzický scan</h3>
+          <ul>
+            <li>lokace záznamu je v cílové zemi zásilky (shoda se zemí doručení),</li>
+            <li>typ lokace odpovídá místu příjezdu do cílové země — dnes v datech označeno jako
+            „FedEx Facility".</li>
+          </ul>
+        </div>
+        <div class="cond-group">
+          <h3>Druhý fyzický scan</h3>
+          <ul>
+            <li>lokace záznamu je v cílové zemi zásilky (stejně jako u prvního scanu),</li>
+            <li>typ lokace odpovídá cílovému depu — dnes označeno jako „Destination Facility" (jiná hodnota
+            než u prvního scanu),</li>
+            <li>poštovní směrovací číslo lokace začíná stejnou první číslicí jako směrovací číslo adresy
+            doručení té konkrétní zásilky.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="question-box">Je toto přesné? Jaké přesné hodnoty (názvy typů míst, případně jiné
+      identifikátory) máme nastavit — a liší se podle přepravce?</div>
+    </div>
+
+    <div class="sub" id="dd-krajni">
+      <h3>Krajní případy</h3>
+      <div class="question-group">
+        <div class="question-box">Může se vůbec stát, že se záznam o prvním scanu objeví v systému až po
+        Konečném limitu, ale čas uvedený na něm je dřívější než 8:00 (data z trackingu dorazila se
+        zpožděním)? Pokud ano — do té doby už ale mohla vzniknout věc k řešení „Zpožděná zásilka". Má se tento
+        pozdě přišlý záznam nějak promítnout zpátky, nebo zůstává věc k řešení beze změny?</div>
+        <div class="question-box">Záznam o prvním scanu se objeví o den dříve, než je avizované datum
+        doručení (zásilka je zjevně napřed). Předpokládáme, že to je v pořádku a nic zvláštního se neděje —
+        proces se spustí až v den avizovaného doručení. Souhlasí to?</div>
+        <div class="question-box">Datum doručení od přepravce ten den chybí úplně (dopravce ho nevyplnil) —
+        jak se má vyhodnotit krok, kde se ptáme, jestli „odpovídá dnešku"?</div>
+        <div class="question-box">Je potřeba sledovat příchod záznamů průběžně, hned jak dorazí (aby šlo
+        poslat věc k řešení co nejdřív), nebo by stačilo vždy vyhodnotit až v daných časech (Limit pro řádné
+        záznamy, Konečný limit) — tedy podívat se na výsledek jen v těchto pevně daných okamžicích, ne hned
+        jak záznam přijde?</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chapter" id="bezny-bod">
+    <div class="chapter-head">
+      <div class="eyebrow">Situace 2</div>
+      <h2 class="chapter-title">Běžný bod</h2>
+      <p class="chapter-intro">
+        Týká se běžných bodů na trase (odlety, přílety, mezisklady...) — mimo specializovaný bod „Den
+        doručení" z předchozí kapitoly.
+      </p>
+    </div>
+
+    <div class="sub" id="bb-dnes">
+      <h3>Jak to funguje</h3>
+      <p>
+        Příklad: úsek trasy ČR – Paříž se skládá z několika bodů za sebou — „Odlet Praha/Brno" (čas na záznamu
+        22:00 v den vyzvednutí zásilky), „Přílet Paříž" (čas na záznamu 3:00 následující pracovní den) a
+        další. Pro každý bod v řetězci zvlášť platí stejná kontrola:
+      </p>
+      <div class="steps">
+        <div class="step">
+          <span class="badge">Konečný limit<br/>např. 23:00</span>
+          <div class="body">
+            <p>V tomto čase (u bodu „Odlet Praha/Brno" tedy 23:00) se kontroluje, jestli bod dorazil řádně —
+            tedy jestli se objevil záznam splňující podmínky bodu (konkrétní status a místo) s časem na
+            záznamu nejpozději do stanoveného limitu (22:00).</p>
+            <ul class="outputs">
+              <li><span class="outcome ok">dorazil řádně</span> žádná věc k řešení — řetězec pokračuje na další bod</li>
+              <li><span class="outcome bad">nedorazil řádně</span> věc k řešení „Problém na trase" — řetězec pokračuje na další bod i přes tuto věc k řešení</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="question-box">Chápeme správně, jak to funguje, včetně výstupů (žádná věc k řešení, nebo
+      „Problém na trase")?</div>
+    </div>
+
+    <div class="sub" id="bb-problem">
+      <h3>Problém</h3>
+      <p>
+        Čas na záznamu každého bodu je dnes vázaný na pevné datum a čas vyzvednutí zásilky, ne na skutečný
+        čas předchozího bodu. Důsledek: jakmile je jeden bod v řetězci zpožděný, každý další bod nevyhnutelně
+        taky vyhodnotí Nesplněno a pošle vlastní věc k řešení za tentýž kořenový problém — i když mezitím
+        operátor ručně posune avizované datum doručení zákazníkovi, navazující kontroly to nijak nereflektují,
+        protože se vůči avizovanému datu doručení vůbec nekontrolují.
+      </p>
+      <div class="question-box">
+        Můžeme body navázat na avizované datum doručení místo pevného data/času vyzvednutí? Například bod
+        „Přílet do Paříže" by místo pevného data (dnes: pevný počet hodin po vyzvednutí) měl čas na záznamu
+        odvozený od avizovaného data doručení — třeba „avizované datum doručení minus 1 den, 3:00". Pak by se
+        při posunu avizovaného data doručení automaticky posunul i tento bod a nevznikala by duplicitní věc
+        k řešení za tentýž kořenový problém.
+      </div>
+    </div>
+
+    <div class="sub" id="bb-tolerance">
+      <h3>Tolerance po čase na záznamu</h3>
+      <p>
+        Příklad: bod „Odlet Brno" má čas na záznamu 22:00 v den vyzvednutí. Kontrolu bychom pustili až o
+        hodinu později, v Konečném limitu 23:00 — do té doby se čeká, jestli se záznam objeví. Pokud ne, v
+        23:00 vznikne věc k řešení „Problém na trase".
+      </p>
+      <div class="question-box">
+        Je to tak — tedy že se po čase na záznamu ještě čeká zadanou dobu (Konečný limit), než vznikne věc k
+        řešení? A co když se záznam objeví mnohem později, třeba až druhý den — pošleme kromě už vzniklé věci
+        k řešení ještě samostatnou informativní (méně závažnou) věc k řešení, jen na vědomí, že záznam nakonec
+        dorazil?
+      </div>
+    </div>
+
+    <div class="sub" id="bb-krajni">
+      <h3>Krajní případy</h3>
+      <div class="question-group">
+        <div class="question-box">Pro jeden bod se objeví víc záznamů se stejným statusem (duplicity) — bere
+        se první, nebo poslední?</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chapter" id="zasekle">
+    <div class="chapter-head">
+      <div class="eyebrow">Situace 3</div>
+      <h2 class="chapter-title">Zásilka zaseknutá na jednom místě</h2>
+    </div>
+
+    <div class="sub" id="sz-jak">
+      <h3>Jak to poznáme</h3>
+      <p>
+        Že se zásilka zasekla, poznáváme podle toho, že místo uvedené na záznamu se po určitém časovém odstupu
+        opakuje — tedy stejné místo se objevuje znovu a znovu, aniž by zásilka postoupila dál.
+      </p>
+      <div class="question-box">
+        Na čem závisí tento časový odstup? Víme, že se liší podle varianty přepravy — liší se i podle země,
+        ve které se dané místo nachází?
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Odpovědi na otázky výše prosím pište do přiloženého sdíleného dokumentu.
+  </footer>
+
+</div>

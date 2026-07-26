@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Podmínka: Soulad s trasou — průvodce</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  color: #1a1a2e;
+  background: #f0f0f5;
+  padding: 0;
+  line-height: 1.5;
+}
+
+/* ─── LAYOUT ─── */
+.shell {
+  max-width: 740px;
+  margin: 32px auto;
+  padding: 0 16px 60px;
+}
+
+.page-title { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+.page-sub { font-size: 12px; color: #888; margin-bottom: 28px; }
+
+/* ─── STEP INDICATOR ─── */
+.steps {
+  display: flex;
+  gap: 0;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #aaa;
+  font-weight: 500;
+}
+.step-item.active { color: #6c47d4; }
+.step-item.done { color: #1e7d45; }
+.step-num {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: #e5e5ee;
+  color: #aaa;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.step-item.active .step-num { background: #6c47d4; color: white; }
+.step-item.done .step-num { background: #1e7d45; color: white; }
+.step-arrow {
+  width: 28px; height: 1px; background: #ddd; flex-shrink: 0;
+  margin: 0 4px;
+}
+
+/* ─── SECTION ─── */
+.section {
+  background: white;
+  border: 1px solid #e5e5ee;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.section-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 18px;
+  background: #fafafa;
+  border-bottom: 1px solid #e5e5ee;
+}
+.section-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #6c47d4; color: white;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.section-title { font-weight: 600; font-size: 13px; }
+.section-body { padding: 16px 18px; }
+
+/* ─── SITUATION CARDS ─── */
+.cards { display: flex; flex-direction: column; gap: 10px; }
+
+.card {
+  border: 2px solid #e5e5ee;
+  border-radius: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, box-shadow .15s;
+  display: flex; align-items: flex-start; gap: 14px;
+  position: relative;
+}
+.card:hover { border-color: #b8a0f0; background: #fdfcff; }
+.card.selected {
+  border-color: #6c47d4;
+  background: #f7f4ff;
+  box-shadow: 0 0 0 3px #ede8ff;
+}
+
+.card-icon {
+  width: 38px; height: 38px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.card-icon.calendar { background: #e8f4ff; }
+.card-icon.pin      { background: #fff0f0; }
+.card-icon.clock    { background: #fff8ee; }
+
+.card-text { flex: 1; }
+.card-title { font-weight: 600; font-size: 13px; margin-bottom: 3px; }
+.card-desc { font-size: 12px; color: #666; line-height: 1.5; }
+
+.card-trigger {
+  margin-top: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.trigger-label { font-size: 11px; color: #aaa; }
+.trigger-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #f4f4f7; border: 1px solid #ddd;
+  border-radius: 20px; padding: 2px 9px;
+  font-size: 11px; font-weight: 500; color: #555;
+}
+.trigger-pill.sched { background: #e8f4ff; border-color: #b8d8f8; color: #1565c0; }
+.trigger-pill.react { background: #edfaf3; border-color: #a8e6c0; color: #1e7d45; }
+
+.card-radio {
+  width: 18px; height: 18px;
+  border: 2px solid #ddd;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 10px;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color .15s;
+}
+.card.selected .card-radio {
+  border-color: #6c47d4;
+  background: #6c47d4;
+}
+.card.selected .card-radio::after {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: white;
+}
+
+/* ─── MILESTONE PICKER (step 2 for DD) ─── */
+.milestone-picker {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.ml-option {
+  border: 2px solid #e5e5ee;
+  border-radius: 8px;
+  padding: 11px 14px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 12px;
+  transition: border-color .15s, background .15s;
+}
+.ml-option:hover { border-color: #b8a0f0; background: #fdfcff; }
+.ml-option.selected { border-color: #6c47d4; background: #f7f4ff; }
+.ml-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #e5e5ee; flex-shrink: 0;
+  transition: background .15s;
+}
+.ml-option.selected .ml-dot { background: #6c47d4; }
+.ml-name { font-weight: 500; font-size: 13px; }
+.ml-detail { font-size: 11px; color: #999; }
+
+/* ─── AUTO CONDITION SUMMARY ─── */
+.auto-summary {
+  background: #f7f4ff;
+  border: 1px solid #d0c0f8;
+  border-radius: 9px;
+  padding: 13px 15px;
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.auto-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.auto-text { font-size: 12px; color: #444; line-height: 1.55; }
+.auto-text strong { color: #1a1a2e; }
+
+/* ─── TRIGGER SUMMARY ─── */
+.trigger-summary {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 15px;
+  background: #fafafa;
+  border: 1px solid #e5e5ee;
+  border-radius: 9px;
+}
+.trigger-key { font-size: 12px; color: #666; min-width: 110px; }
+.trigger-val {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 500;
+}
+.trigger-lock { font-size: 11px; color: #bbb; margin-left: auto; }
+
+/* ─── SKIP IF PRIOR ─── */
+.skip-block {
+  background: #fffaee; border: 1px solid #f0d88a;
+  border-radius: 8px; padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.skip-title { font-size: 11px; font-weight: 700; color: #a07800; text-transform: uppercase; letter-spacing: .5px; }
+.skip-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+select, input[type=text] {
+  border: 1px solid #d8d8e5;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  color: #1a1a2e;
+  background: white;
+  outline: none;
+  cursor: pointer;
+}
+select:focus { border-color: #6c47d4; box-shadow: 0 0 0 2px #ede8ff; }
+
+.btn-add {
+  display: inline-flex; align-items: center; gap: 5px;
+  border: 1.5px dashed #c8b8f8; border-radius: 6px;
+  padding: 5px 12px; font-size: 12px; color: #7c5cc4;
+  background: transparent; cursor: pointer; font-weight: 500;
+}
+.btn-add:hover { background: #f7f4ff; }
+
+/* ─── ACTIONS ─── */
+.action-block {
+  border: 1px solid #e5e5ee; border-radius: 8px; overflow: hidden;
+  margin-bottom: 8px;
+}
+.action-head {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 14px; background: #f9f9fc; border-bottom: 1px solid #e5e5ee;
+}
+.action-badge {
+  width: 18px; height: 18px; border-radius: 4px;
+  background: #6c47d4; color: white; font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.action-title { font-weight: 600; font-size: 12px; }
+.action-body { padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+.action-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.action-lbl { font-size: 11px; color: #999; min-width: 120px; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #f0ecff; border: 1px solid #c8b8f8;
+  color: #5a36b0; border-radius: 6px; padding: 3px 10px;
+  font-size: 12px; font-weight: 500;
+}
+.chip.green { background: #edfaf3; border-color: #a8e6c0; color: #1e7d45; }
+.chip.red { background: #fff0f0; border-color: #f8b8b8; color: #c0392b; }
+.chip.gray { background: #f4f4f7; border-color: #d8d8e5; color: #555; }
+
+/* ─── HIDDEN ─── */
+.hidden { display: none !important; }
+
+/* ─── STEP SECTION ANIMATION ─── */
+.step-section { transition: opacity .2s; }
+
+/* ─── CONDITIONAL ROWS ─── */
+.dd-extra { display: none; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <div class="page-title">Editor pravidla</div>
+  <p class="page-sub">Oblast: Soulad s trasou</p>
+
+  <!-- STEP INDICATOR -->
+  <div class="steps">
+    <div class="step-item active" id="si1">
+      <div class="step-num" id="sn1">1</div>
+      Co chcete sledovat?
+    </div>
+    <div class="step-arrow"></div>
+    <div class="step-item" id="si2">
+      <div class="step-num" id="sn2">2</div>
+      Upřesnění
+    </div>
+    <div class="step-arrow"></div>
+    <div class="step-item" id="si3">
+      <div class="step-num" id="sn3">3</div>
+      Akce &amp; přeskočení
+    </div>
+  </div>
+
+  <!-- ══════════════════ KROK 1: VÝBĚR SITUACE ══════════════════ -->
+  <div class="section" id="step1">
+    <div class="section-head">
+      <div class="section-num">1</div>
+      <div class="section-title">Co chcete u zásilky sledovat?</div>
+    </div>
+    <div class="section-body">
+      <div class="cards">
+
+        <!-- KARTA A: Den doručení -->
+        <div class="card" id="card-dd" onclick="selectCard('dd')">
+          <div class="card-icon calendar">📅</div>
+          <div class="card-text">
+            <div class="card-title">Kontrola v den doručení</div>
+            <div class="card-desc">
+              Zásilka by dnes měla být doručena. Zkontrolujeme, zda se v cílové zemi
+              objevil očekávaný tracking scan — a pokud ne, vytvoříme věc k řešení.
+            </div>
+            <div class="card-trigger">
+              <span class="trigger-label">Spouštěč:</span>
+              <span class="trigger-pill sched">🕐 Časový plán — dnes v nastavené hodiny</span>
+            </div>
+          </div>
+          <div class="card-radio"></div>
+        </div>
+
+        <!-- KARTA B: Neočekávaná lokace -->
+        <div class="card" id="card-loc" onclick="selectCard('loc')">
+          <div class="card-icon pin">📍</div>
+          <div class="card-text">
+            <div class="card-title">Zásilka v neočekávané lokaci</div>
+            <div class="card-desc">
+              Zásilce přišel tracking scan ze země nebo místa, přes které standardně
+              tato trasa nevede. Pravidlo reaguje okamžitě při příchodu takového záznamu.
+            </div>
+            <div class="card-trigger">
+              <span class="trigger-label">Spouštěč:</span>
+              <span class="trigger-pill react">⚡ Reaktivní — při každém novém tracking záznamu</span>
+            </div>
+          </div>
+          <div class="card-radio"></div>
+        </div>
+
+        <!-- KARTA C: Zmeškaný milník -->
+        <div class="card" id="card-late" onclick="selectCard('late')">
+          <div class="card-icon clock">⏰</div>
+          <div class="card-text">
+            <div class="card-title">Zásilka zmeškala milník</div>
+            <div class="card-desc">
+              Zásilka nedorazila do bodu na trase v očekávaném čase — například
+              nezachytili jsme odlet z hubového letiště nebo příjezd do depa.
+              Časové limity jsou nastaveny na trase, nemusíte je zadávat zde.
+            </div>
+            <div class="card-trigger">
+              <span class="trigger-label">Spouštěč:</span>
+              <span class="trigger-pill react">⚡ Reaktivní — při uplynutí limitu milníku na trase</span>
+            </div>
+          </div>
+          <div class="card-radio"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ KROK 2: UPŘESNĚNÍ ══════════════════ -->
+  <div class="section hidden" id="step2">
+    <div class="section-head">
+      <div class="section-num">2</div>
+      <div class="section-title" id="step2-title">Upřesnění</div>
+    </div>
+    <div class="section-body">
+
+      <!-- DD: výběr milníku + časy -->
+      <div id="detail-dd" class="hidden">
+        <div style="font-size:12px; color:#555; margin-bottom:12px;">
+          Vyberte tracking milník, jehož přítomnost chcete v den doručení ověřovat:
+        </div>
+        <div class="milestone-picker">
+          <div class="ml-option selected" onclick="selectMilestone(this)">
+            <div class="ml-dot"></div>
+            <div>
+              <div class="ml-name">První scan v cílové zemi (CP1)</div>
+              <div class="ml-detail">FedEx Facility v zemi doručení · deadline dle nastavení trasy</div>
+            </div>
+          </div>
+          <div class="ml-option" onclick="selectMilestone(this)">
+            <div class="ml-dot"></div>
+            <div>
+              <div class="ml-name">Příjezd na cílové depo (CP2)</div>
+              <div class="ml-detail">Destination Facility · shoda PSČ s adresou doručení</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px; border-top:1px solid #eee; padding-top:14px;">
+          <div style="font-size:12px; color:#555; margin-bottom:10px;">
+            V kolik hodin kontrolovat? <span style="color:#aaa">(v časové zóně cílové země zásilky)</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span class="chip">08:00</span>
+            <span class="chip">09:00</span>
+            <span class="chip">10:00</span>
+            <button class="btn-add">＋ přidat čas</button>
+          </div>
+          <div style="font-size:11px; color:#aaa; margin-top:8px;">
+            Kontrola proběhne pouze v den, kdy carrier avizuje doručení zásilky.
+            Pokud předchozí kontrola uspěla, pozdější se přeskočí automaticky.
+          </div>
+        </div>
+      </div>
+
+      <!-- LOC: auto summary -->
+      <div id="detail-loc" class="hidden">
+        <div class="auto-summary">
+          <div class="auto-icon">🔍</div>
+          <div class="auto-text">
+            <strong>Podmínka je nastavena automaticky.</strong><br>
+            Systém při každém příchozím tracking záznamu zkontroluje, zda země nebo
+            lokace záznamu odpovídá některému bodu na standardní trase zásilky.
+            Pokud ne, podmínka je splněna a spustí se nastavené akce.
+          </div>
+        </div>
+      </div>
+
+      <!-- LATE: auto summary -->
+      <div id="detail-late" class="hidden">
+        <div class="auto-summary">
+          <div class="auto-icon">⏱</div>
+          <div class="auto-text">
+            <strong>Podmínka je nastavena automaticky.</strong><br>
+            Systém sleduje každý milník definovaný na trase zásilky. Jakmile uplyne
+            časový limit milníku a zásilka u něj stále nemá platný tracking záznam,
+            podmínka se splní a spustí se nastavené akce. Časy limitů nastavujete
+            v editoru trasy — zde je není třeba opisovat.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════ TRIGGER (read-only) ══════════════════ -->
+  <div class="section hidden" id="step-trigger">
+    <div class="section-head">
+      <div class="section-num" style="background:#6c8cd4">⚙</div>
+      <div class="section-title">Spouštěč <span style="font-size:11px; font-weight:400; color:#aaa; margin-left:6px">— nastaven automaticky podle volby situace</span></div>
+    </div>
+    <div class="section-body">
+      <div class="trigger-summary">
+        <span class="trigger-key">Typ spouštěče</span>
+        <span class="trigger-val" id="trig-val">—</span>
+        <span class="trigger-lock">🔒 nastaveno automaticky</span>
+      </div>
+      <div id="trig-extra-dd" class="hidden" style="margin-top:10px; font-size:12px; color:#666;">
+        Aktivní jen v den, kdy carrier avizuje doručení zásilky
+        <span style="color:#6c47d4; font-weight:500">(carrier_announced_delivery_at = dnes)</span>.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ KROK 3: PŘESKOČENÍ + AKCE ══════════════════ -->
+  <div class="section hidden" id="step3-skip">
+    <div class="section-head">
+      <div class="section-num">3</div>
+      <div class="section-title">Přeskočení běhu <span style="font-size:11px; font-weight:400; color:#aaa">— volitelné</span></div>
+    </div>
+    <div class="section-body">
+      <div class="skip-block">
+        <div class="skip-title">Přeskočit pokud</div>
+        <div class="skip-row">
+          <span style="font-size:12px; color:#555;">pravidlo</span>
+          <select><option>— nevybráno —</option><option selected>E10 · Den D 8:00</option></select>
+          <span style="font-size:12px; color:#555;">dnes dopadlo</span>
+          <select><option selected>pozitivně</option><option>negativně</option><option>jakkoliv</option></select>
+        </div>
+      </div>
+      <button class="btn-add" style="margin-top:8px">＋ přidat pravidlo</button>
+    </div>
+  </div>
+
+  <div class="section hidden" id="step3-actions">
+    <div class="section-head">
+      <div class="section-num">4</div>
+      <div class="section-title">Akce</div>
+    </div>
+    <div class="section-body">
+
+      <div class="action-block">
+        <div class="action-head">
+          <div class="action-badge">A</div>
+          <span class="action-title" id="act-a-title">—</span>
+          <span class="chip green" style="margin-left:auto">✓ podmínka splněna</span>
+        </div>
+        <div class="action-body">
+          <div class="action-row">
+            <span class="action-lbl">Typ akce</span>
+            <select><option selected>Vytvořit VkŘ</option><option>Poslat e-mail</option></select>
+          </div>
+          <div class="action-row">
+            <span class="action-lbl">Název VkŘ</span>
+            <input type="text" style="width:280px" id="act-a-name" value="">
+          </div>
+          <!-- DD extra row -->
+          <div class="action-row dd-extra hidden" id="act-a-dd-extra">
+            <span class="action-lbl">Vyhodnotit jen v čas</span>
+            <span class="chip gray">08:00</span>
+            <span class="chip gray">09:00</span>
+            <span class="chip gray">10:00</span>
+            <span style="font-size:11px; color:#aaa">(runAtScheduleTime)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-block">
+        <div class="action-head">
+          <div class="action-badge">B</div>
+          <span class="action-title" id="act-b-title">—</span>
+          <span class="chip red" style="margin-left:auto">✗ podmínka nesplněna</span>
+        </div>
+        <div class="action-body">
+          <div class="action-row">
+            <span class="action-lbl">Typ akce</span>
+            <select><option selected>Vytvořit VkŘ</option></select>
+          </div>
+          <div class="action-row">
+            <span class="action-lbl">Název VkŘ</span>
+            <input type="text" style="width:280px" id="act-b-name" value="">
+          </div>
+          <!-- DD extra row for fallback -->
+          <div class="action-row dd-extra hidden" id="act-b-dd-extra">
+            <span class="action-lbl">Vyhodnotit jen v čas</span>
+            <span class="chip gray">10:00</span>
+            <span style="font-size:11px; color:#aaa">— poslední kontrola (runAtScheduleTime)</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-add">＋ přidat akci</button>
+    </div>
+  </div>
+
+</div><!-- /shell -->
+
+<script>
+let selected = null;
+
+const CONFIGS = {
+  dd: {
+    step2title: 'Který milník a kdy kontrolovat?',
+    trigVal: '<span style="background:#e8f4ff;border:1px solid #b8d8f8;color:#1565c0;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:500">🕐 Časový plán (schedule)</span>',
+    trigExtraDd: true,
+    actATitle: 'VkŘ — scan nalezen (zásilka dorazila v čas)',
+    actAName: 'CP1 OK — {{shipment.tracking_number}}',
+    actBTitle: 'VkŘ — scan chybí (zásilka může mít problém)',
+    actBName: '⚠ CP1 chybí v {{run_time}} — {{shipment.tracking_number}}',
+    showDdExtras: true,
+    showSkip: true,
+  },
+  loc: {
+    step2title: 'Podmínka',
+    trigVal: '<span style="background:#edfaf3;border:1px solid #a8e6c0;color:#1e7d45;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:500">⚡ Reaktivní (condition_met)</span>',
+    trigExtraDd: false,
+    actATitle: 'VkŘ — zásilka v neočekávané lokaci',
+    actAName: '⚠ Zásilka mimo trasu — {{tracking.location_country}} — {{shipment.tracking_number}}',
+    actBTitle: '(zásilka zpět na trase — volitelné)',
+    actBName: 'Zásilka zpět na standardní trase — {{shipment.tracking_number}}',
+    showDdExtras: false,
+    showSkip: false,
+  },
+  late: {
+    step2title: 'Podmínka',
+    trigVal: '<span style="background:#edfaf3;border:1px solid #a8e6c0;color:#1e7d45;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:500">⚡ Reaktivní — při uplynutí limitu milníku</span>',
+    trigExtraDd: false,
+    actATitle: 'VkŘ — milník splněn (zásilka dorazila v čas)',
+    actAName: 'Milník splněn: {{route.milestone_name}} — {{shipment.tracking_number}}',
+    actBTitle: 'VkŘ — milník zmeškán (zásilka se opozdila)',
+    actBName: '⚠ Zmeškán milník: {{route.milestone_name}} — {{shipment.tracking_number}}',
+    showDdExtras: false,
+    showSkip: false,
+  }
+};
+
+function selectCard(type) {
+  // Update cards
+  ['dd','loc','late'].forEach(t => {
+    document.getElementById('card-' + t).classList.toggle('selected', t === type);
+  });
+
+  selected = type;
+  const cfg = CONFIGS[type];
+
+  // Step 2
+  document.getElementById('step2').classList.remove('hidden');
+  document.getElementById('step2-title').textContent = cfg.step2title;
+  ['dd','loc','late'].forEach(t => {
+    document.getElementById('detail-' + t).classList.toggle('hidden', t !== type);
+  });
+
+  // Trigger
+  document.getElementById('step-trigger').classList.remove('hidden');
+  document.getElementById('trig-val').innerHTML = cfg.trigVal;
+  document.getElementById('trig-extra-dd').classList.toggle('hidden', !cfg.trigExtraDd);
+
+  // Skip
+  document.getElementById('step3-skip').classList.toggle('hidden', !cfg.showSkip);
+
+  // Actions
+  document.getElementById('step3-actions').classList.remove('hidden');
+  document.getElementById('act-a-title').textContent = cfg.actATitle;
+  document.getElementById('act-a-name').value = cfg.actAName;
+  document.getElementById('act-b-title').textContent = cfg.actBTitle;
+  document.getElementById('act-b-name').value = cfg.actBName;
+
+  document.querySelectorAll('.dd-extra').forEach(el => {
+    el.classList.toggle('hidden', !cfg.showDdExtras);
+  });
+
+  // Step indicator
+  document.getElementById('si1').className = 'step-item done';
+  document.getElementById('sn1').textContent = '✓';
+  document.getElementById('si2').className = 'step-item active';
+  document.getElementById('si3').className = 'step-item active';
+}
+
+function selectMilestone(el) {
+  document.querySelectorAll('.ml-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+</script>
+</body>
+</html>

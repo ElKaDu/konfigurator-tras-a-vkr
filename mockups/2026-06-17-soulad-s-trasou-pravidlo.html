@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schéma pravidla — Soulad s trasou</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px;
+    color: #1a1a2e;
+    background: #f0f0f5;
+    padding: 32px 24px;
+    line-height: 1.5;
+  }
+
+  h1 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #1a1a2e;
+  }
+  .subtitle {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 28px;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e0e0ea;
+  }
+  .tab {
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #888;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    border-radius: 4px 4px 0 0;
+  }
+  .tab.active {
+    color: #6c47d4;
+    border-bottom-color: #6c47d4;
+    background: #f7f4ff;
+  }
+
+  /* SECTION CARD */
+  .section {
+    background: white;
+    border-radius: 10px;
+    border: 1px solid #e5e5ee;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    background: #fafafa;
+    border-bottom: 1px solid #e5e5ee;
+  }
+  .section-badge {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #6c47d4;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-weight: 600;
+    font-size: 13px;
+    color: #1a1a2e;
+  }
+  .section-desc {
+    font-size: 11px;
+    color: #999;
+    margin-left: auto;
+  }
+  .section-body {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* ROW */
+  .row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .row-label {
+    font-size: 12px;
+    color: #666;
+    min-width: 140px;
+    padding-top: 7px;
+    flex-shrink: 0;
+  }
+  .row-content {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+  }
+
+  /* CONTROLS */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #f0ecff;
+    border: 1px solid #c8b8f8;
+    color: #5a36b0;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .chip.gray {
+    background: #f4f4f7;
+    border-color: #d8d8e5;
+    color: #555;
+  }
+  .chip.green {
+    background: #edfaf3;
+    border-color: #a8e6c0;
+    color: #1e7d45;
+  }
+  .chip.red {
+    background: #fff0f0;
+    border-color: #f8b8b8;
+    color: #c0392b;
+  }
+  .chip.orange {
+    background: #fff8ee;
+    border-color: #f8daa8;
+    color: #b06000;
+  }
+  .chip svg { width: 12px; height: 12px; }
+
+  select, input[type=text], input[type=time] {
+    border: 1px solid #d8d8e5;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    color: #1a1a2e;
+    background: white;
+    outline: none;
+    cursor: pointer;
+  }
+  select:focus, input:focus {
+    border-color: #6c47d4;
+    box-shadow: 0 0 0 2px #ede8ff;
+  }
+
+  .text-muted { font-size: 12px; color: #999; padding-top: 7px; }
+  .text-between { font-size: 12px; color: #555; padding-top: 7px; }
+
+  /* CONNECTOR */
+  .connector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 2px 0;
+  }
+  .connector-line {
+    flex: 1;
+    height: 1px;
+    background: #e5e5ee;
+  }
+  .connector-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #aaa;
+    letter-spacing: 0.5px;
+  }
+
+  /* CONDITION BLOCK */
+  .condition-block {
+    background: #fafafa;
+    border: 1px solid #e5e5ee;
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .condition-block.highlight {
+    background: #f7f4ff;
+    border-color: #d0c0f8;
+  }
+
+  .condition-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .condition-row .kind-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 80px;
+  }
+
+  /* ACTION BLOCK */
+  .action-block {
+    border: 1px solid #e5e5ee;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .action-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    background: #f9f9fc;
+    border-bottom: 1px solid #e5e5ee;
+  }
+  .action-badge {
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    background: #6c47d4;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .action-title { font-weight: 600; font-size: 12px; }
+  .action-body {
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .action-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .action-row .lbl {
+    font-size: 11px;
+    color: #999;
+    min-width: 120px;
+  }
+
+  /* ADD BUTTON */
+  .btn-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 1.5px dashed #c8b8f8;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    color: #7c5cc4;
+    background: transparent;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .btn-add:hover { background: #f7f4ff; }
+
+  /* SKIP IF PRIOR */
+  .skip-block {
+    background: #fffaee;
+    border: 1px solid #f0d88a;
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .skip-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #a07800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .skip-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  /* DIVIDER */
+  hr { border: none; border-top: 1px solid #eee; }
+
+  /* ANNOTATION */
+  .note {
+    font-size: 11px;
+    color: #aaa;
+    font-style: italic;
+    padding-left: 4px;
+  }
+
+  /* SCENARIO SWITCHER */
+  .scenario-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .scenario-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1.5px solid #d0c0f8;
+    background: white;
+    color: #6c47d4;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .scenario-btn.active {
+    background: #6c47d4;
+    color: white;
+    border-color: #6c47d4;
+  }
+
+  /* LABEL PILL */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .pill.trigger { background: #e8f4ff; color: #1565c0; }
+  .pill.cond    { background: #f0ecff; color: #5a36b0; }
+  .pill.action  { background: #edfaf3; color: #1e7d45; }
+  .pill.skip    { background: #fff8e0; color: #a07800; }
+</style>
+</head>
+<body>
+
+<h1>Editor pravidla — Soulad s trasou</h1>
+<p class="subtitle">Schematický náčrt nastavení. Tři scénáře: milník na trase · den doručení (DD) · zásilka mimo trasu</p>
+
+<!-- SCENARIO SWITCHER -->
+<div class="scenario-bar">
+  <button class="scenario-btn active" onclick="show('milestone')">① Milník na trase (cas + místo)</button>
+  <button class="scenario-btn" onclick="show('dd')">② Den doručení (DD)</button>
+  <button class="scenario-btn" onclick="show('offroute')">③ Zásilka mimo trasu</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SCÉNÁŘ 1: MILNÍK NA TRASE -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="scene-milestone">
+
+  <!-- TRIGGER -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-badge">1</div>
+      <div class="section-title">Spouštěč <span class="pill trigger">condition_met</span></div>
+      <div class="section-desc">Časy deadline jsou definovány na milnících trasy — zde nic nenastavuješ</div>
+    </div>
+    <div class="section-body">
+      <div class="row">
+        <div class="row-label">Typ spouštěče</div>
+        <div class="row-content">
+          <select>
+            <option selected>Reaktivní (condition_met)</option>
+            <option>Časový plán (schedule)</option>
+            <option>Manuální</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-label"></div>
+        <div class="row-content">
+          <span class="note">Engine vyhodnotí pravidlo při každém příchozím tracking záznamu nebo uplynutí deadline milníku na trase zásilky. Časy jsou čteny z trasy — není třeba je zadávat zde.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONDITIONS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-badge">2</div>
+      <div class="section-title">Podmínky <span class="pill cond">AND</span></div>
+    </div>
+    <div class="section-body">
+
+      <!-- Condition: route_compliance -->
+      <div class="condition-block highlight">
+        <div class="condition-row">
+          <span class="kind-label">Soulad s trasou</span>
+          <select>
+            <option selected>Milník splněn / nesplněn včas</option>
+            <option>Zásilka v neočekávané lokaci</option>
+            <option>Zásilka na konkrétním checkpointu (ad-hoc)</option>
+          </select>
+          <span class="text-between">→ milník</span>
+          <select>
+            <option>Odlet z místa odeslání</option>
+            <option selected>Přílet do přestupního hubu</option>
+            <option>Odlet z přestupního hubu</option>
+            <option>Přílet do cílové země</option>
+          </select>
+          <select>
+            <option selected>nebyl splněn</option>
+            <option>byl splněn</option>
+          </select>
+          <span class="note">(deadline a anchor definovány na trase)</span>
+        </div>
+      </div>
+
+      <button class="btn-add">＋ Přidat podmínku</button>
+    </div>
+  </div>
+
+  <!-- SKIP IF PRIOR -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-badge">3</div>
+      <div class="section-title">Přeskočení běhu <span class="pill skip">skipIfPrior</span></div>
+      <div class="section-desc">volitelné</div>
+    </div>
+    <div class="section-body">
+      <div class="skip-block">
+        <div class="skip-title">Přeskočit pokud</div>
+        <div class="skip-row">
+          <span class="text-between">pravidlo</span>
+          <select><option>— nevybráno —</option><option>E10 · Den D 8:00</option><option>E11 · Den D 9:00</option></select>
+          <span class="text-between">dnes dopadlo</span>
+          <select><option selected>pozitivně</option><option>negativně</option><option>jakkoliv</option></select>
+        </div>
+      </div>
+      <button class="btn-add">＋ Přidat pravidlo</button>
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-badge">4</div>
+      <div class="section-title">Akce</div>
+    </div>
+    <div class="section-body">
+
+      <div class="action-block">
+        <div class="action-header">
+          <div class="action-badge">A</div>
+          <span class="action-title">Vytvořit VkŘ — milník splněn</span>
+          <span class="chip green" style="margin-left:auto">✓ splněn</span>
+        </div>
+        <div class="action-body">
+          <div class="action-row">
+            <span class="lbl">Typ akce</span>
+            <select><option selected>Vytvořit VkŘ</option><option>Poslat e-mail</option><option>Nastavit pole</option></select>
+          </div>
+          <div class="action-row">
+            <span class="lbl">Název VkŘ</span>
+            <input type="text" style="width:260px" value="Přílet CDG OK — {{shipment.tracking_number}}">
+          </div>
+          <div class="action-row">
+            <span class="lbl">Vyhodnotit jen pokud</span>
+            <span class="chip green">milník splněn</span>
+            <span class="note">(runWhenRouteCondition: fulfilled)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-block">
+        <div class="action-header">
+          <div class="action-badge">B</div>
+          <span class="action-title">Vytvořit VkŘ — milník nesplněn / zpožděn</span>
+          <span class="chip red" style="margin-left:auto">✗ nesplněn</span>
+        </div>
+        <div class="action-body">
+          <div class="action-row">
+            <span class="lbl">Typ akce</span>
+            <select><option selected>Vytvořit VkŘ</option></select>
+          </div>
+          <div class="action-row">
+            <span class="lbl">Název VkŘ</span>
+            <input type="text" style="width:260px" value="⚠ Přílet CDG chybí — {{shipment.tracking_number}}">
+          </div>
+          <div class="action-row">
+            <span class="lbl">Vyhodnotit jen pokud</span>
+            <span class="chip red">milník nesplněn</span>
+            <span class="note">(runWhenRouteCondition: not_fulfilled)</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-add">＋ Přidat akci</button>
+    </div>
+  </div>
+
+</div><!-- /scene-milestone -->
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SCÉNÁŘ 2: DEN DORUČENÍ (DD) -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="scene-dd" style="display:none">
+
+  <!-- TRIGGER -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-badge">1</div>
+      <div class="section-title">Spouštěč <span class="pill trigger">schedule</span></div>
+    </div>
+    <div class="section-body">
+      <div class="row">
+        <div class="row-label">Typ spouštěče</div>
+        <div class="row-content">
+          <select>
+            <option>Reaktivní (condition_met)</option>
+            <option selected>Časový plán (schedule)</option>
+            <option>Manuální</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-label">Časy kontroly</div>
+        <div class="row-content">
+          <span class="chip">08:00</span>
+          <span class="chip">09:00</span>
+          <span class="chip">10:00</span>
+          <button class="btn-add">＋ čas</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-label">Časová zóna</div>
+        <div class="row-content">
+          <select>
+            <option selected>TZ cílové země zásilky</option>
+            <option>Europe/Prague</option>
+            <option>America/New_York</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-label">Aktivní jen v den</div>
+        <div class="row-content">
+          <select>
+            <option>— vždy —</option>
+            <option>Hodnota pole zásilky</option>
+            <option selected>carrier_announced_delivery_at</option>
+            <option>promised_delivery_at</option>
+          </select>
+          <select>
+            <option selected>± 0 dní</option>
+            <option>– 1 den</option>
+            <option>+ 1 den</option>
+          </select>
+          <span class="note">(activeOnDay — spustí se jen v den, kdy carrier EDD = dnes)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONDITIONS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-badge">2</div>
+      <div class="section-title">Podmínky <span class="pill cond">AND</span></div>
+    </div>
+    <div class="section-body">
+
+      <!-- Condition 1: route_compliance CP1 -->
+      <div class="condition-block highlight">
+        <div class="condition-row">
+          <span class="kind-label">Soulad s trasou</span>
+          <select><option selected>Milník splněn / nesplněn včas</option></select>
+          <span class="text-between">→ milník</span>
+          <select><option selected>První scan v cílové zemi (CP1)</option></select>
+          <select><option selected>nebyl splněn</option><option>byl splněn</option></select>
+        </div>
+      </div>
+
+      <button class="btn-add">＋ Přidat podmínku</button>
+    </div>
+  </div>
+
+  <!-- SKIP IF PRIOR -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-badge">3</div>
+      <div class="section-title">Přeskočení běhu <span class="pill skip">skipIfPrior</span></div>
+      <div class="section-desc">volitelné</div>
+    </div>
+    <div class="section-body">
+      <div class="skip-block">
+        <div class="skip-title">Přeskočit pokud</div>
+        <div class="skip-row">
+          <span class="text-between">pravidlo</span>
+          <select><option>E10 · Den D 8:00</option></select>
+          <span class="text-between">dnes dopadlo</span>
+          <select><option selected>pozitivně</option></select>
+        </div>
+        <div class="skip-row" style="margin-top:6px">
+          <span class="text-between" style="margin-left:0">nebo pravidlo</span>
+          <select><option>E11 · Den D 9:00</option></select>
+          <span class="text-between">dnes dopadlo</span>
+          <select><option selected>pozitivně</option></select>
+        </div>
+        <span class="note" style="margin-top:4px">= přeskočit, pokud kterékoli z těchto pravidel dnes uspělo</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-badge">4</div>
+      <div class="section-title">Akce</div>
+    </div>
+    <div class="section-body">
+
+      <div class="action-block">
+        <div class="action-header">
+          <div class="action-badge">A</div>
+          <span class="action-title">VkŘ — CP1 scan včas</span>
+          <span class="chip green" style="margin-left:auto">✓ splněn</span>
+        </div>
+        <div class="action-body">
+          <div class="action-row">
+            <span class="lbl">Vyhodnotit jen pokud</span>
+            <span class="chip green">milník splněn</span>
+          </div>
+          <div class="action-row">
+            <span class="lbl">Název VkŘ</span>
+            <input type="text" style="width:280px" value="CP1 OK v čas — {{shipment.tracking_number}}">
+          </div>
+        </div>
+      </div>
+
+      <div class="action-block">
+        <div class="action-header">
+          <div class="action-badge">B</div>
+          <span class="action-title">VkŘ — CP1 chybí, rozhodnutí dle carrier EDD</span>
+          <span class="chip red" style="margin-left:auto">✗ nesplněn</span>
+        </div>
+        <div class="action-body">
+          <div class="action-row">
+            <span class="lbl">Vyhodnotit jen pokud</span>
+            <span class="chip red">milník nesplněn</span>
+          </div>
+          <div class="action-row">
+            <span class="lbl">+ jen v čas</span>
+            <span class="chip gray">10:00</span>
+            <span class="note">(runAtScheduleTime)</span>
+          </div>
+          <div class="action-row">
+            <span class="lbl">+ jen pokud pole</span>
+            <select style="width:220px"><option selected>carrier_announced_delivery_at</option></select>
+            <select><option selected>je dnes</option></select>
+            <span class="note">(runWhenField)</span>
+          </div>
+          <div class="action-row">
+            <span class="lbl">Název VkŘ</span>
+            <input type="text" style="width:280px" value="⚠ CP1 stále chybí v 10:00 — {{shipment.tracking_number}}">
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-add">＋ Přidat akci</button>
+    </div>
+  </div>
+
+</div><!-- /scene-dd -->
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SCÉNÁŘ 3: ZÁSILKA MIMO TRASU -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="scene-offroute" style="display:none">
+
+  <!-- TRIGGER -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-badge">1</div>
+      <div class="section-title">Spouštěč <span class="pill trigger">condition_met</span></div>
+    </div>
+    <div class="section-body">
+      <div class="row">
+        <div class="row-label">Typ spouštěče</div>
+        <div class="row-content">
+          <select>
+            <option selected>Reaktivní (condition_met)</option>
+            <option>Časový plán (schedule)</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-label"></div>
+        <div class="row-content">
+          <span class="note">Spustí se okamžitě při příchodu každého nového tracking záznamu.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONDITIONS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-badge">2</div>
+      <div class="section-title">Podmínky <span class="pill cond">AND</span></div>
+    </div>
+    <div class="section-body">
+
+      <div class="condition-block highlight">
+        <div class="condition-row">
+          <span class="kind-label">Soulad s trasou</span>
+          <select>
+            <option>Milník splněn / nesplněn včas</option>
+            <option selected>Zásilka v neočekávané lokaci</option>
+            <option>Zásilka na konkrétním checkpointu (ad-hoc)</option>
+          </select>
+          <span class="note">— tracking záznam pochází ze země / lokace, která neodpovídá žádnému bodu standardní trasy zásilky</span>
+        </div>
+      </div>
+
+      <div class="condition-block">
+        <div class="condition-row">
+          <span class="kind-label">Pole zásilky</span>
+          <select style="width:200px"><option selected>tracking.activities.location_country_code</option></select>
+          <select><option selected>se nerovná</option></select>
+          <input type="text" style="width:80px" value="CZ, FR, US">
+          <span class="note">(volitelný dodatečný filtr)</span>
+        </div>
+      </div>
+
+      <button class="btn-add">＋ Přidat podmínku</button>
+    </div>
+  </div>
+
+  <!-- NO SKIP IF PRIOR for this scenario -->
+
+  <!-- ACTIONS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-badge">3</div>
+      <div class="section-title">Akce</div>
+    </div>
+    <div class="section-body">
+
+      <div class="action-block">
+        <div class="action-header">
+          <div class="action-badge">A</div>
+          <span class="action-title">VkŘ — zásilka v neočekávané lokaci</span>
+          <span class="chip orange" style="margin-left:auto">⚡ okamžitě</span>
+        </div>
+        <div class="action-body">
+          <div class="action-row">
+            <span class="lbl">Typ akce</span>
+            <select><option selected>Vytvořit VkŘ</option></select>
+          </div>
+          <div class="action-row">
+            <span class="lbl">Název VkŘ</span>
+            <input type="text" style="width:300px" value="⚠ Zásilka mimo trasu — {{tracking.activities.location_country}} — {{shipment.tracking_number}}">
+          </div>
+          <div class="action-row">
+            <span class="lbl">Priorita</span>
+            <select><option selected>Vysoká</option><option>Střední</option></select>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-add">＋ Přidat akci</button>
+    </div>
+  </div>
+
+</div><!-- /scene-offroute -->
+
+<script>
+function show(scene) {
+  ['milestone','dd','offroute'].forEach(s => {
+    document.getElementById('scene-' + s).style.display = s === scene ? '' : 'none';
+  });
+  document.querySelectorAll('.scenario-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', ['milestone','dd','offroute'][i] === scene);
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Podmínka: Záznamy z trackingu — průvodce</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  color: #1a1a2e;
+  background: #f0f0f5;
+  padding: 0;
+  line-height: 1.5;
+}
+
+.shell {
+  max-width: 740px;
+  margin: 32px auto;
+  padding: 0 16px 60px;
+}
+
+.page-title { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+.page-sub { font-size: 12px; color: #888; margin-bottom: 28px; }
+
+/* STEP INDICATOR */
+.steps { display: flex; gap: 0; align-items: center; margin-bottom: 24px; }
+.step-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #aaa; font-weight: 500; }
+.step-item.active { color: #6c47d4; }
+.step-item.done { color: #1e7d45; }
+.step-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #e5e5ee; color: #aaa;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.step-item.active .step-num { background: #6c47d4; color: white; }
+.step-item.done .step-num { background: #1e7d45; color: white; }
+.step-arrow { width: 28px; height: 1px; background: #ddd; flex-shrink: 0; margin: 0 4px; }
+
+/* SECTION */
+.section {
+  background: white;
+  border: 1px solid #e5e5ee;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.section-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 18px;
+  background: #fafafa;
+  border-bottom: 1px solid #e5e5ee;
+}
+.section-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #6c47d4; color: white;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.section-title { font-weight: 600; font-size: 13px; }
+.section-body { padding: 16px 18px; }
+
+/* CARDS */
+.cards { display: flex; flex-direction: column; gap: 10px; }
+
+.card {
+  border: 2px solid #e5e5ee;
+  border-radius: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.card:hover { border-color: #b8a0f0; background: #fdfcff; }
+.card.selected { border-color: #6c47d4; background: #faf8ff; }
+
+.card-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.card-body { flex: 1; }
+.card-title { font-weight: 700; font-size: 13px; margin-bottom: 3px; }
+.card-desc { font-size: 12px; color: #666; margin-bottom: 8px; }
+.card-trigger {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; color: #888;
+  background: #f5f5fa;
+  border: 1px solid #e5e5ee;
+  border-radius: 5px;
+  padding: 2px 8px;
+}
+.card.selected .card-trigger { background: #f0ebff; border-color: #c4b5f5; color: #6c47d4; }
+.card-radio {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid #ddd;
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex; align-items: center; justify-content: center;
+}
+.card.selected .card-radio { border-color: #6c47d4; background: #6c47d4; }
+.card.selected .card-radio::after { content:''; width:6px; height:6px; border-radius:50%; background:white; }
+
+/* STEP 2 panels */
+.step2-panel { display: none; }
+.step2-panel.visible { display: block; }
+
+/* Condition builder */
+.cond-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.cond-connector {
+  font-size: 11px; font-weight: 700;
+  color: #6c47d4;
+  background: #f0ebff;
+  border: 1px solid #c4b5f5;
+  border-radius: 5px;
+  padding: 3px 8px;
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+  width: 46px;
+  text-align: center;
+  transition: background .1s;
+}
+.cond-connector:hover { background: #e0d5ff; }
+.cond-connector.and-style { color: #555; background: #f5f5fa; border-color: #ddd; }
+
+select.cond-select, input.cond-val {
+  border: 1px solid #d5d5e8;
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 12px;
+  background: white;
+  color: #1a1a2e;
+  outline: none;
+}
+select.cond-select:focus, input.cond-val:focus {
+  border-color: #6c47d4;
+  box-shadow: 0 0 0 2px #e8e0ff;
+}
+select.cond-field { min-width: 155px; }
+select.cond-op { min-width: 110px; }
+input.cond-val { min-width: 130px; flex: 1; }
+.cond-del {
+  border: none; background: none;
+  color: #bbb; cursor: pointer; font-size: 16px; padding: 0 2px;
+  flex-shrink: 0;
+}
+.cond-del:hover { color: #e53e3e; }
+
+.add-cond-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  border: 1px dashed #ccc;
+  background: none;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: #888;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.add-cond-btn:hover { border-color: #6c47d4; color: #6c47d4; background: #faf8ff; }
+
+/* Duration inputs for Karta B */
+.dur-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 12px;
+}
+.dur-label { font-size: 12px; color: #555; min-width: 240px; }
+input.dur-num {
+  border: 1px solid #d5d5e8;
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 13px;
+  width: 70px;
+  text-align: center;
+  outline: none;
+}
+input.dur-num:focus { border-color: #6c47d4; box-shadow: 0 0 0 2px #e8e0ff; }
+select.dur-unit {
+  border: 1px solid #d5d5e8;
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 12px;
+  background: white;
+  outline: none;
+}
+
+/* Toggle */
+.toggle-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.toggle {
+  position: relative;
+  width: 36px; height: 20px;
+  background: #ddd;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background .15s;
+  flex-shrink: 0;
+}
+.toggle.on { background: #6c47d4; }
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 16px; height: 16px;
+  background: white;
+  border-radius: 50%;
+  transition: left .15s;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+.toggle.on::after { left: 18px; }
+.toggle-label { font-size: 12px; color: #555; }
+
+/* Trigger row */
+.trigger-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  background: #fafafa;
+  border: 1px solid #e5e5ee;
+  border-radius: 8px;
+  margin-top: 16px;
+}
+.trigger-lock { font-size: 14px; color: #aaa; flex-shrink: 0; }
+.trigger-label { font-size: 11px; color: #aaa; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; margin-right: 4px; }
+.trigger-value { font-size: 12px; color: #555; font-weight: 500; }
+.trigger-note { font-size: 11px; color: #aaa; margin-left: auto; }
+
+/* Info note */
+.info-note {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #0369a1;
+  margin-top: 12px;
+  display: flex; gap: 8px;
+}
+
+/* Chips */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  border: 1px solid #e5e5ee;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  background: white;
+  transition: all .1s;
+}
+.chip:hover { border-color: #6c47d4; color: #6c47d4; }
+
+/* Subsection label */
+.sub-label {
+  font-size: 11px; font-weight: 600; color: #888;
+  text-transform: uppercase; letter-spacing: .4px;
+  margin-bottom: 8px;
+  margin-top: 14px;
+}
+.sub-label:first-child { margin-top: 0; }
+
+/* nav buttons */
+.nav-row {
+  display: flex; justify-content: flex-end; gap: 8px;
+  margin-top: 20px;
+}
+.btn-back {
+  padding: 8px 18px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  font-size: 13px;
+  cursor: pointer;
+  color: #555;
+}
+.btn-next {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #6c47d4;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-next:hover { background: #5a38b8; }
+.btn-back:hover { background: #f5f5f5; }
+
+/* Match mode */
+.match-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.match-opt {
+  flex: 1;
+  border: 2px solid #e5e5ee;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: #555;
+  text-align: center;
+  transition: all .1s;
+}
+.match-opt:hover { border-color: #b8a0f0; color: #6c47d4; }
+.match-opt.sel { border-color: #6c47d4; background: #faf8ff; color: #6c47d4; }
+
+.section-divider {
+  border: none;
+  border-top: 1px solid #f0f0f5;
+  margin: 14px 0;
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="page-title">Záznamy z trackingu</div>
+  <div class="page-sub">Podmínka pravidla · Editor pravidla E12</div>
+
+  <!-- STEP INDICATOR -->
+  <div class="steps" id="steps">
+    <div class="step-item active" id="si1">
+      <div class="step-num">1</div>
+      Typ situace
+    </div>
+    <div class="step-arrow"></div>
+    <div class="step-item" id="si2">
+      <div class="step-num">2</div>
+      Upřesnění
+    </div>
+  </div>
+
+  <!-- === KROK 1 === -->
+  <div id="step1">
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">1</div>
+        <div class="section-title">Co se má zkontrolovat?</div>
+      </div>
+      <div class="section-body">
+        <div class="cards">
+
+          <div class="card" id="card-a" onclick="selectCard('a')">
+            <div class="card-radio" id="radio-a"></div>
+            <div class="card-icon">📡</div>
+            <div class="card-body">
+              <div class="card-title">Přišel konkrétní tracking záznam</div>
+              <div class="card-desc">Zásilka dostala nový stav z trackingu, který splňuje nastavené podmínky — typ, status, výjimka, lokace, počet pokusů o doručení a další.</div>
+              <div class="card-trigger">⚡ Reaktivní — při každém novém záznamu z trackingu</div>
+            </div>
+          </div>
+
+          <div class="card" id="card-b" onclick="selectCard('b')">
+            <div class="card-radio" id="radio-b"></div>
+            <div class="card-icon">⏸</div>
+            <div class="card-body">
+              <div class="card-title">Zásilka je bez pohybu po stanovenou dobu</div>
+              <div class="card-desc">Od posledního tracking záznamu uplynul nastavený čas, aniž by přišel nový záznam. Systém kontroluje v pravidelných intervalech.</div>
+              <div class="card-trigger">🕐 Časový plán (schedule) — systém kontroluje periodicky</div>
+            </div>
+          </div>
+
+          <div class="card" id="card-c" onclick="selectCard('c')">
+            <div class="card-radio" id="radio-c"></div>
+            <div class="card-icon">📍</div>
+            <div class="card-body">
+              <div class="card-title">Zásilka zaseknutá na jednom místě</div>
+              <div class="card-desc">Zásilka má tracking záznamy, ale N po sobě jdoucích pochází ze stejného místa — fyzicky se nepohybuje.</div>
+              <div class="card-trigger">⚡ Reaktivní — při každém novém záznamu z trackingu</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-next" onclick="goStep2()" id="btn-next-1" disabled style="opacity:.4;cursor:not-allowed">Dál →</button>
+    </div>
+  </div>
+
+  <!-- === KROK 2 === -->
+  <div id="step2" style="display:none">
+
+    <!-- KARTA A: tracking status builder -->
+    <div class="step2-panel" id="panel-a">
+      <div class="section">
+        <div class="section-head">
+          <div class="section-num">2</div>
+          <div class="section-title">Podmínky záznamu z trackingu</div>
+        </div>
+        <div class="section-body">
+          <div class="sub-label">Nový záznam musí splňovat</div>
+          <div id="cond-list-a">
+            <div class="cond-row" id="crow-a-1">
+              <select class="cond-select cond-field">
+                <option value="">— pole —</option>
+                <optgroup label="Typ a status">
+                  <option value="eventType">Typ záznamu (eventType)</option>
+                  <option value="derivedStatus" selected>Odvozený status</option>
+                  <option value="derivedStatusCode">Kód odvozeného statusu</option>
+                  <option value="eventDescription">Popis události</option>
+                </optgroup>
+                <optgroup label="Výjimka">
+                  <option value="exceptionCode">Kód výjimky</option>
+                  <option value="exceptionDescription">Popis výjimky</option>
+                </optgroup>
+                <optgroup label="Lokace">
+                  <option value="locationType">Typ místa</option>
+                  <option value="locationId">ID místa</option>
+                  <option value="city">Město</option>
+                  <option value="countryCode">Kód země</option>
+                  <option value="postalCode">PSČ</option>
+                </optgroup>
+                <optgroup label="Doručení">
+                  <option value="deliveryAttempts">Počet pokusů o doručení</option>
+                </optgroup>
+                <optgroup label="Čas">
+                  <option value="eventTime">Čas záznamu (eventTime)</option>
+                </optgroup>
+              </select>
+              <select class="cond-select cond-op">
+                <option>je jedním z</option>
+                <option>není žádným z</option>
+                <option>je</option>
+                <option>není</option>
+                <option>obsahuje</option>
+              </select>
+              <input class="cond-val" type="text" placeholder="hodnota…">
+              <button class="cond-del" onclick="delCond('cond-list-a','crow-a-1')">×</button>
+            </div>
+          </div>
+          <button class="add-cond-btn" onclick="addCond('cond-list-a','a')">+ přidat podmínku</button>
+
+          <div class="info-note">
+            ℹ️ Více podmínek se vyhodnocuje jako <strong>A (AND)</strong>. Chceš-li <em>alternativy</em> (např. status A <em>nebo</em> status B), zadej je do jedné podmínky jako seznam hodnot oddělený čárkou.
+          </div>
+        </div>
+      </div>
+
+      <div class="trigger-row">
+        <span class="trigger-lock">🔒</span>
+        <span class="trigger-label">Spouštěč</span>
+        <span class="trigger-value">⚡ Reaktivní — při každém novém tracking záznamu</span>
+      </div>
+    </div>
+
+    <!-- KARTA B: bez pohybu -->
+    <div class="step2-panel" id="panel-b">
+      <div class="section">
+        <div class="section-head">
+          <div class="section-num">2</div>
+          <div class="section-title">Nastavení doby bez pohybu</div>
+        </div>
+        <div class="section-body">
+          <div class="sub-label">Zásilka nemá nový záznam déle než</div>
+          <div class="dur-row">
+            <input class="dur-num" type="number" value="72" min="1">
+            <select class="dur-unit">
+              <option>hodin</option>
+              <option>dní</option>
+              <option>pracovních dní</option>
+            </select>
+            <span style="font-size:12px;color:#888">od posledního záznamu</span>
+          </div>
+
+          <hr class="section-divider">
+
+          <div class="toggle-row" onclick="toggleEl('tog-clen')">
+            <div class="toggle on" id="tog-clen"></div>
+            <span class="toggle-label">Ignorovat dobu na celním řízení (stav = Celní řízení se nezapočítává)</span>
+          </div>
+
+          <div class="info-note">
+            ℹ️ Systém nemá pro tuto situaci přirozený spouštěč. Podmínka se kontroluje v pravidelném časovém plánu — typicky 2× denně.
+          </div>
+        </div>
+      </div>
+
+      <div class="trigger-row">
+        <span class="trigger-lock">🔒</span>
+        <span class="trigger-label">Spouštěč</span>
+        <span class="trigger-value">🕐 Časový plán (schedule) — systém kontroluje periodicky</span>
+        <span class="trigger-note">Typicky 2× denně</span>
+      </div>
+    </div>
+
+    <!-- KARTA C: zaseknutá na místě -->
+    <div class="step2-panel" id="panel-c">
+      <div class="section">
+        <div class="section-head">
+          <div class="section-num">2</div>
+          <div class="section-title">Nastavení opakující se lokace</div>
+        </div>
+        <div class="section-body">
+          <div class="sub-label">Počet po sobě jdoucích záznamů ze stejného místa</div>
+          <div class="dur-row" style="margin-bottom:16px">
+            <input class="dur-num" type="number" value="4" min="2">
+            <span style="font-size:12px;color:#555">po sobě jdoucích záznamů</span>
+          </div>
+
+          <div class="sub-label">Shoda místa podle</div>
+          <div class="match-row">
+            <div class="match-opt" onclick="pickMatch(this)">ID místa<br><span style="font-size:11px;color:#aaa">locationId</span></div>
+            <div class="match-opt sel" onclick="pickMatch(this)">Město<br><span style="font-size:11px;color:#6c47d4">city</span></div>
+            <div class="match-opt" onclick="pickMatch(this)">Kód země<br><span style="font-size:11px;color:#aaa">countryCode</span></div>
+          </div>
+
+          <hr class="section-divider">
+
+          <div class="sub-label">Záznamy obsahují statusy (volitelně)</div>
+          <div id="cond-list-c-inc">
+            <!-- prázdné, přidat lze -->
+          </div>
+          <button class="add-cond-btn" onclick="addCondSimple('cond-list-c-inc','c-inc')" style="margin-bottom:12px">+ přidat status k zahrnutí</button>
+
+          <div class="sub-label">Záznamy neobsahují statusy (volitelně)</div>
+          <div id="cond-list-c-exc">
+          </div>
+          <button class="add-cond-btn" onclick="addCondSimple('cond-list-c-exc','c-exc')">+ přidat status k vyloučení</button>
+
+          <div class="info-note" style="margin-top:12px">
+            ℹ️ Systém porovnává posledních N záznamů. Záznamy bez lokace (např. „Label created") se přeskakují.
+          </div>
+        </div>
+      </div>
+
+      <div class="trigger-row">
+        <span class="trigger-lock">🔒</span>
+        <span class="trigger-label">Spouštěč</span>
+        <span class="trigger-value">⚡ Reaktivní — při každém novém tracking záznamu</span>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goStep1()">← Zpět</button>
+      <button class="btn-next">Uložit podmínku</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let selected = null;
+let condCounterA = 1;
+let condCounterCI = 0;
+let condCounterCE = 0;
+
+function selectCard(id) {
+  ['a','b','c'].forEach(x => {
+    document.getElementById('card-'+x).classList.remove('selected');
+    document.getElementById('radio-'+x).innerHTML = '';
+  });
+  document.getElementById('card-'+id).classList.add('selected');
+  const r = document.getElementById('radio-'+id);
+  r.innerHTML = '';
+  selected = id;
+  const btn = document.getElementById('btn-next-1');
+  btn.disabled = false;
+  btn.style.opacity = '1';
+  btn.style.cursor = 'pointer';
+}
+
+function goStep2() {
+  if (!selected) return;
+  document.getElementById('step1').style.display = 'none';
+  document.getElementById('step2').style.display = 'block';
+  document.getElementById('si1').className = 'step-item done';
+  document.getElementById('si1').querySelector('.step-num').textContent = '✓';
+  document.getElementById('si2').className = 'step-item active';
+  document.querySelectorAll('.step2-panel').forEach(p => p.classList.remove('visible'));
+  document.getElementById('panel-'+selected).classList.add('visible');
+}
+
+function goStep1() {
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step1').style.display = 'block';
+  document.getElementById('si1').className = 'step-item active';
+  document.getElementById('si1').querySelector('.step-num').textContent = '1';
+  document.getElementById('si2').className = 'step-item';
+}
+
+function delCond(listId, rowId) {
+  const list = document.getElementById(listId);
+  const row = document.getElementById(rowId);
+  if (list.children.length <= 1) return; // keep at least one
+  if (row) row.remove();
+}
+
+function addCond(listId, prefix) {
+  condCounterA++;
+  const id = 'crow-'+prefix+'-'+condCounterA;
+  const div = document.createElement('div');
+  div.className = 'cond-row';
+  div.id = id;
+  div.innerHTML = `
+    <select class="cond-select cond-field">
+      <option value="">— pole —</option>
+      <optgroup label="Typ a status">
+        <option value="eventType">Typ záznamu (eventType)</option>
+        <option value="derivedStatus">Odvozený status</option>
+        <option value="derivedStatusCode">Kód odvozeného statusu</option>
+        <option value="eventDescription">Popis události</option>
+      </optgroup>
+      <optgroup label="Výjimka">
+        <option value="exceptionCode">Kód výjimky</option>
+        <option value="exceptionDescription">Popis výjimky</option>
+      </optgroup>
+      <optgroup label="Lokace">
+        <option value="locationType">Typ místa</option>
+        <option value="locationId">ID místa</option>
+        <option value="city">Město</option>
+        <option value="countryCode">Kód země</option>
+        <option value="postalCode">PSČ</option>
+      </optgroup>
+      <optgroup label="Doručení">
+        <option value="deliveryAttempts">Počet pokusů o doručení</option>
+      </optgroup>
+      <optgroup label="Čas">
+        <option value="eventTime">Čas záznamu (eventTime)</option>
+      </optgroup>
+    </select>
+    <select class="cond-select cond-op">
+      <option>je jedním z</option>
+      <option>není žádným z</option>
+      <option>je</option>
+      <option>není</option>
+      <option>obsahuje</option>
+      <option>je větší než</option>
+      <option>je menší než nebo rovno</option>
+    </select>
+    <input class="cond-val" type="text" placeholder="hodnota…">
+    <button class="cond-del" onclick="delCond('${listId}','${id}')">×</button>
+  `;
+  document.getElementById(listId).appendChild(div);
+}
+
+function addCondSimple(listId, prefix) {
+  const counter = listId.includes('inc') ? ++condCounterCI : ++condCounterCE;
+  const id = 'crow-'+prefix+'-'+counter;
+  const div = document.createElement('div');
+  div.className = 'cond-row';
+  div.id = id;
+  div.innerHTML = `
+    <select class="cond-select cond-field" style="min-width:155px">
+      <option value="eventType">Typ záznamu (eventType)</option>
+      <option value="derivedStatus" selected>Odvozený status</option>
+      <option value="derivedStatusCode">Kód odvozeného statusu</option>
+      <option value="eventDescription">Popis události</option>
+    </select>
+    <select class="cond-select cond-op" style="min-width:110px">
+      <option>je jedním z</option>
+      <option>není žádným z</option>
+      <option>je</option>
+      <option>není</option>
+    </select>
+    <input class="cond-val" type="text" placeholder="hodnota…">
+    <button class="cond-del" onclick="delCond('${listId}','${id}')">×</button>
+  `;
+  document.getElementById(listId).appendChild(div);
+}
+
+function toggleEl(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('on');
+}
+
+function pickMatch(el) {
+  document.querySelectorAll('#panel-c .match-opt').forEach(x => x.classList.remove('sel'));
+  el.classList.add('sel');
+  // update span color
+  el.querySelector('span').style.color = '#6c47d4';
+  document.querySelectorAll('#panel-c .match-opt:not(.sel) span').forEach(s => s.style.color = '#aaa');
+}
+</script>
+</body>
+</html>

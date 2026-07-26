@@ -1,0 +1,193 @@
+<meta charset="utf-8">
+<title>Zásilka — Věci k řešení (VkŘ karty pro operátora)</title>
+<style>
+  :root {
+    --radius: 0.625rem;
+    --background: oklch(0.985 0.005 280);
+    --foreground: oklch(0.18 0.03 280);
+    --surface: oklch(1 0 0);
+    --card: oklch(1 0 0);
+    --primary: oklch(0.56 0.22 295);
+    --primary-foreground: oklch(0.99 0 0);
+    --primary-soft: oklch(0.96 0.04 295);
+    --secondary: oklch(0.97 0.01 280);
+    --secondary-foreground: oklch(0.25 0.03 280);
+    --muted: oklch(0.965 0.008 280);
+    --muted-foreground: oklch(0.5 0.02 280);
+    --accent: oklch(0.96 0.03 295);
+    --accent-foreground: oklch(0.35 0.18 295);
+    --destructive: oklch(0.6 0.22 25);
+    --destructive-foreground: oklch(0.99 0 0);
+    --success: oklch(0.7 0.16 155);
+    --success-foreground: oklch(0.2 0.05 155);
+    --warning: oklch(0.82 0.16 75);
+    --warning-foreground: oklch(0.3 0.08 75);
+    --info: oklch(0.7 0.14 230);
+    --info-foreground: oklch(0.25 0.08 230);
+    --border: oklch(0.92 0.01 280);
+    --success-soft: oklch(0.95 0.04 155);
+    --warning-soft: oklch(0.96 0.05 75);
+    --destructive-soft: oklch(0.95 0.05 25);
+    --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: oklch(0.16 0.02 280); --foreground: oklch(0.96 0.005 280);
+      --surface: oklch(0.2 0.02 280); --card: oklch(0.2 0.02 280);
+      --primary: oklch(0.7 0.2 295); --primary-foreground: oklch(0.15 0.02 280); --primary-soft: oklch(0.3 0.1 295);
+      --secondary: oklch(0.25 0.02 280); --secondary-foreground: oklch(0.96 0.005 280);
+      --muted: oklch(0.25 0.02 280); --muted-foreground: oklch(0.7 0.02 280);
+      --accent: oklch(0.3 0.08 295); --accent-foreground: oklch(0.96 0.005 280);
+      --border: oklch(1 0 0 / 12%);
+      --success-soft: oklch(0.3 0.07 155); --warning-soft: oklch(0.32 0.08 75); --destructive-soft: oklch(0.32 0.1 25);
+      --success-foreground: oklch(0.86 0.13 155); --warning-foreground: oklch(0.88 0.13 75);
+      --info-foreground: oklch(0.84 0.1 230); --destructive: oklch(0.72 0.19 25);
+    }
+  }
+  :root[data-theme="dark"] {
+    --background: oklch(0.16 0.02 280); --foreground: oklch(0.96 0.005 280);
+    --surface: oklch(0.2 0.02 280); --card: oklch(0.2 0.02 280);
+    --primary: oklch(0.7 0.2 295); --primary-foreground: oklch(0.15 0.02 280); --primary-soft: oklch(0.3 0.1 295);
+    --secondary: oklch(0.25 0.02 280); --secondary-foreground: oklch(0.96 0.005 280);
+    --muted: oklch(0.25 0.02 280); --muted-foreground: oklch(0.7 0.02 280);
+    --accent: oklch(0.3 0.08 295); --accent-foreground: oklch(0.96 0.005 280);
+    --border: oklch(1 0 0 / 12%);
+    --success-soft: oklch(0.3 0.07 155); --warning-soft: oklch(0.32 0.08 75); --destructive-soft: oklch(0.32 0.1 25);
+    --success-foreground: oklch(0.86 0.13 155); --warning-foreground: oklch(0.88 0.13 75);
+    --info-foreground: oklch(0.84 0.1 230); --destructive: oklch(0.72 0.19 25);
+  }
+  :root[data-theme="light"] {
+    --background: oklch(0.985 0.005 280); --foreground: oklch(0.18 0.03 280);
+    --surface: oklch(1 0 0); --card: oklch(1 0 0);
+    --primary: oklch(0.56 0.22 295); --primary-foreground: oklch(0.99 0 0); --primary-soft: oklch(0.96 0.04 295);
+    --secondary: oklch(0.97 0.01 280); --secondary-foreground: oklch(0.25 0.03 280);
+    --muted: oklch(0.965 0.008 280); --muted-foreground: oklch(0.5 0.02 280);
+    --accent: oklch(0.96 0.03 295); --accent-foreground: oklch(0.35 0.18 295);
+    --border: oklch(0.92 0.01 280);
+    --success-soft: oklch(0.95 0.04 155); --warning-soft: oklch(0.96 0.05 75); --destructive-soft: oklch(0.95 0.05 25);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--background); font-family: var(--font-sans); color: var(--foreground); -webkit-font-smoothing: antialiased; }
+
+  .page { max-width: 640px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  .crumb { font-size: 12.5px; color: var(--muted-foreground); margin-bottom: 6px; }
+  .crumb .cur { color: var(--foreground); font-weight: 500; }
+  h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 22px; }
+
+  .section-eyebrow {
+    font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--muted-foreground); margin: 0 0 12px;
+  }
+
+  .vkr-list { display: flex; flex-direction: column; gap: 14px; }
+
+  .vkr-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+
+  .vkr-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .vkr-title { font-size: 14px; font-weight: 600; }
+  .vkr-situation { font-size: 11px; color: var(--muted-foreground); text-transform: uppercase; letter-spacing: .03em; margin-top: 2px; }
+
+  /* Sevbadge = 3stupňová škála odvozená ze severity.priority, replika prio-badge z RulesList.tsx */
+  .sevbadge { font-size: 11px; padding: 2px 9px; border-radius: 999px; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
+  .sevbadge.low { background: var(--muted); color: var(--muted-foreground); }
+  .sevbadge.medium { background: var(--warning-soft); color: var(--warning-foreground); }
+  .sevbadge.high, .sevbadge.urgent { background: var(--destructive-soft); color: var(--destructive); }
+
+  .vkr-desc { font-size: 12.5px; margin-top: 10px; line-height: 1.5; }
+
+  .vkr-found {
+    margin-top: 10px; border-radius: 8px; background: var(--muted); padding: 8px 10px;
+  }
+  .vkr-found .lbl {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em;
+    color: var(--muted-foreground); margin-bottom: 3px;
+  }
+  .vkr-found .val { font-size: 12px; font-family: var(--font-mono); color: var(--foreground); }
+
+  .vkr-actions { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+  .vkr-actions label { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; cursor: pointer; }
+  .vkr-actions input[type="checkbox"] { margin-top: 2px; accent-color: var(--primary); }
+
+  .vkr-note { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .vkr-note input {
+    width: 100%; font-size: 12px; font-family: var(--font-sans); color: var(--foreground);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 7px; padding: 7px 10px;
+  }
+  .vkr-note input::placeholder { color: var(--muted-foreground); }
+
+  .footnote { margin-top: 24px; font-size: 12px; color: var(--muted-foreground); line-height: 1.6; }
+  .footnote code { font-family: var(--font-mono); font-size: 11px; background: var(--muted); padding: 1px 5px; border-radius: 4px; }
+</style>
+
+<div class="page">
+  <div class="crumb">Zásilky / <span class="cur">CZ2026071500138</span></div>
+  <h1>Zásilka CZ2026071500138</h1>
+
+  <div class="section-eyebrow">Věci k řešení</div>
+
+  <div class="vkr-list">
+
+    <div class="vkr-card">
+      <div class="vkr-head">
+        <div>
+          <div class="vkr-title">Nedoručená zásilka — 2. pokus</div>
+          <div class="vkr-situation">Nedoručeno</div>
+        </div>
+        <span class="sevbadge medium">problémové</span>
+      </div>
+
+      <div class="vkr-desc">Druhý neúspěšný pokus o doručení.</div>
+
+      <div class="vkr-found">
+        <div class="lbl">Zjištěno na zásilce</div>
+        <div class="val">15. 7. 2026 14:32 · Praha · „Nedoručeno — příjemce nezastižen“</div>
+      </div>
+
+      <div class="vkr-actions">
+        <label><input type="checkbox"> Informuj zákazníka o druhém neúspěšném pokusu.</label>
+        <label><input type="checkbox"> Ověř u dopravce důvod opakovaného nedoručení.</label>
+      </div>
+
+      <div class="vkr-note">
+        <input placeholder="Poznámka k řešení…">
+      </div>
+    </div>
+
+    <div class="vkr-card">
+      <div class="vkr-head">
+        <div>
+          <div class="vkr-title">Zásilka zaseknutá na jednom místě</div>
+          <div class="vkr-situation">Problém v přepravě</div>
+        </div>
+        <span class="sevbadge high">kritické</span>
+      </div>
+
+      <div class="vkr-desc">Několik po sobě jdoucích záznamů ze stejného místa — zásilka se fyzicky nepohybuje.</div>
+
+      <div class="vkr-found">
+        <div class="lbl">Zjištěno na zásilce</div>
+        <div class="val">4× stejná lokace „Frankfurt DHL Hub“ · poslední záznam 16. 7. 2026 06:10</div>
+      </div>
+
+      <div class="vkr-actions">
+        <label><input type="checkbox"> Ověř u dopravce, proč se zásilka nehýbe.</label>
+      </div>
+
+      <div class="vkr-note">
+        <input placeholder="Poznámka k řešení…">
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footnote">
+    Mockup ke <code>docs/superpowers/specs/2026-07-15-situace-zavaznost-akce-design.md</code>, sekce „VkŘ karta pro operátora“.
+    Karty jsou natrvalo rozbalené na stránce zásilky, nejdou rozkliknout. Barva odznaku závažnosti se odvozuje ze <code>severity.priority</code>
+    (low → šedá, medium → žlutá, high/urgent → červená). Blok „Zjištěno na zásilce“ je vize nad rámec dnešního modelu — vyžaduje runtime
+    generování VkŘ, které je mimo rozsah aktuální iterace.
+  </div>
+</div>

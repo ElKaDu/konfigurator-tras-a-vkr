@@ -395,8 +395,8 @@ export function RuleCreatorPage({
                     />
                   </div>
 
-                  <div>
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                  <div className="rounded-xl border border-border bg-muted/10 p-3 space-y-2.5">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                       Co dále platí
                     </div>
                     <VkrConditionsBuilder

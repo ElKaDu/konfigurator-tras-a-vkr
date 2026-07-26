@@ -1,0 +1,528 @@
+<title>Architektura: Kontrola na bodu trasy</title>
+<style>
+  :root {
+    --paper: #f7f5f1;
+    --paper-raised: #ffffff;
+    --ink: #201d2b;
+    --ink-soft: #55506a;
+    --accent: #6d5ae6;
+    --accent-ink: #4c3dc4;
+    --accent-soft: #efeafc;
+    --accent-line: #ddd6f7;
+    --locked: #8a8398;
+    --locked-soft: #f1eff5;
+    --line: #e4e0ee;
+    --ok: #1f7a5c;
+    --ok-soft: #e3f3ec;
+    --warn: #a15a1f;
+    --warn-soft: #f8ecdf;
+    --shadow: 0 1px 2px rgba(32,29,43,.04), 0 8px 24px -12px rgba(32,29,43,.12);
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    --sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #18151f;
+      --paper-raised: #211d2c;
+      --ink: #ede9f7;
+      --ink-soft: #b4adc9;
+      --accent: #9384f2;
+      --accent-ink: #b6abf7;
+      --accent-soft: #2a2440;
+      --accent-line: #3c3459;
+      --locked: #9a92ac;
+      --locked-soft: #27222f;
+      --line: #35304a;
+      --ok: #6fcfa9;
+      --ok-soft: #1c332a;
+      --warn: #e0a768;
+      --warn-soft: #362717;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 30px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #18151f; --paper-raised: #211d2c; --ink: #ede9f7; --ink-soft: #b4adc9;
+    --accent: #9384f2; --accent-ink: #b6abf7; --accent-soft: #2a2440; --accent-line: #3c3459;
+    --locked: #9a92ac; --locked-soft: #27222f; --line: #35304a;
+    --ok: #6fcfa9; --ok-soft: #1c332a; --warn: #e0a768; --warn-soft: #362717;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 30px -14px rgba(0,0,0,.6);
+  }
+  :root[data-theme="light"] {
+    --paper: #f7f5f1; --paper-raised: #ffffff; --ink: #201d2b; --ink-soft: #55506a;
+    --accent: #6d5ae6; --accent-ink: #4c3dc4; --accent-soft: #efeafc; --accent-line: #ddd6f7;
+    --locked: #8a8398; --locked-soft: #f1eff5; --line: #e4e0ee;
+    --ok: #1f7a5c; --ok-soft: #e3f3ec; --warn: #a15a1f; --warn-soft: #f8ecdf;
+    --shadow: 0 1px 2px rgba(32,29,43,.04), 0 8px 24px -12px rgba(32,29,43,.12);
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--paper); }
+  .wrap {
+    font-family: var(--sans);
+    color: var(--ink);
+    background: var(--paper);
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 56px 28px 80px;
+  }
+
+  .eyebrow {
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-size: clamp(26px, 3.4vw, 34px);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+    text-wrap: balance;
+    font-weight: 700;
+  }
+  .lede {
+    font-size: 15px;
+    color: var(--ink-soft);
+    max-width: 62ch;
+    line-height: 1.6;
+    margin: 0 0 40px;
+  }
+  .lede code { font-family: var(--mono); background: var(--accent-soft); color: var(--accent-ink); padding: .1em .4em; border-radius: 4px; font-size: .92em; }
+
+  h2 {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  /* ---------- Legend ---------- */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 18px;
+    margin-bottom: 44px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+  .legend-item { display: flex; align-items: center; gap: 7px; }
+  .swatch { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  .swatch.existing { background: var(--paper-raised); border: 1.5px solid var(--line); }
+  .swatch.new { background: var(--accent-soft); border: 1.5px solid var(--accent-line); }
+  .dot-locked { width: 8px; height: 8px; border-radius: 50%; background: var(--locked); flex-shrink: 0; }
+  .dot-copy { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  /* ---------- Entity diagram ---------- */
+  .diagram { position: relative; margin-bottom: 56px; }
+
+  .entity {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 18px 20px;
+    position: relative;
+  }
+  .entity.new { background: var(--accent-soft); border-color: var(--accent-line); }
+
+  .entity-head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+    margin-bottom: 12px;
+  }
+  .entity-name { font-family: var(--mono); font-size: 15px; font-weight: 600; color: var(--ink); }
+  .entity-tag {
+    font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 20px;
+  }
+  .entity-tag.existing { color: var(--ink-soft); background: var(--locked-soft); }
+  .entity-tag.new { color: var(--accent-ink); background: var(--paper-raised); border: 1px solid var(--accent-line); }
+
+  .fields { display: flex; flex-direction: column; gap: 7px; }
+  .field { display: grid; grid-template-columns: 15px 150px 1fr; gap: 10px; align-items: baseline; font-size: 12.5px; }
+  .field-name { font-family: var(--mono); color: var(--ink); font-weight: 600; }
+  .field-desc { color: var(--ink-soft); line-height: 1.5; }
+  .field-desc b { color: var(--ink); font-weight: 600; }
+
+  .connector {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0 10px 30px;
+    font-size: 11.5px; color: var(--ink-soft);
+  }
+  .connector::before {
+    content: ""; display: block; width: 1.5px; height: 22px; background: var(--accent-line);
+    margin-left: -1px;
+  }
+  .connector-arrow { font-family: var(--mono); color: var(--accent-ink); font-weight: 600; }
+
+  .branch-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px; }
+  .branch-lead {
+    grid-column: 1 / -1;
+    font-size: 11px; color: var(--ink-soft); text-align: center;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .branch-lead::before, .branch-lead::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+  .branch {
+    border: 1px dashed var(--accent-line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    background: var(--paper-raised);
+  }
+  .branch-title { font-size: 11.5px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .branch-title.ok { color: var(--ok); }
+  .branch-title.warn { color: var(--warn); }
+  .branch-title .pip { width: 7px; height: 7px; border-radius: 50%; }
+  .branch-title.ok .pip { background: var(--ok); }
+  .branch-title.warn .pip { background: var(--warn); }
+
+  /* ---------- Variant comparison ---------- */
+  .variants-head { margin-bottom: 6px; }
+  .open-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--warn); background: var(--warn-soft);
+    padding: 4px 10px; border-radius: 20px; margin-bottom: 14px;
+  }
+  .variants-lede { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; max-width: 68ch; margin-bottom: 24px; }
+
+  .variants { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
+  .variant {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 22px 22px 20px;
+    display: flex; flex-direction: column;
+  }
+  .variant-letter {
+    width: 30px; height: 30px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-weight: 700; font-size: 14px;
+    background: var(--accent-soft); color: var(--accent-ink);
+    margin-bottom: 12px;
+  }
+  .variant h3 { font-size: 15px; margin: 0 0 4px; letter-spacing: -0.005em; }
+  .variant .sub { font-size: 12px; color: var(--ink-soft); margin-bottom: 16px; line-height: 1.5; }
+
+  .flow { display: flex; flex-direction: column; gap: 0; margin-bottom: 16px; }
+  .flow-step { display: flex; gap: 10px; padding: 9px 0; position: relative; }
+  .flow-step:not(:last-child)::after {
+    content: ""; position: absolute; left: 10px; top: 30px; bottom: -9px; width: 1.5px; background: var(--line);
+  }
+  .flow-num {
+    width: 21px; height: 21px; border-radius: 50%; flex-shrink: 0; z-index: 1;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 10.5px; font-weight: 700;
+    background: var(--paper-raised); border: 1.5px solid var(--accent-line); color: var(--accent-ink);
+  }
+  .flow-text { font-size: 12.5px; line-height: 1.55; color: var(--ink); padding-top: 2px; }
+  .flow-text .muted { color: var(--ink-soft); }
+
+  .verdict {
+    margin-top: auto;
+    font-size: 11.5px; line-height: 1.5;
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+    color: var(--ink-soft);
+  }
+  .verdict b { color: var(--ink); }
+  .variant.b .verdict b { color: var(--ok); }
+
+  footer {
+    margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--line);
+    font-size: 11.5px; color: var(--ink-soft); font-family: var(--mono);
+  }
+
+  /* ---------- Real example: DNES vs PO ---------- */
+  .example-source {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-soft);
+    background: var(--locked-soft); border-radius: 6px; padding: 3px 9px;
+    display: inline-block; margin-bottom: 14px;
+  }
+  .example-lede { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; max-width: 70ch; margin-bottom: 26px; }
+  .example-lede b { color: var(--ink); }
+
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; margin-bottom: 56px; }
+  .compare-col-head {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+  }
+  .compare-tag {
+    font-size: 10.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 20px;
+  }
+  .compare-tag.dnes { color: var(--warn); background: var(--warn-soft); }
+  .compare-tag.po { color: var(--accent-ink); background: var(--accent-soft); }
+  .compare-sub { font-size: 11.5px; color: var(--ink-soft); }
+
+  .rule-card {
+    background: var(--paper-raised); border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 14px; margin-bottom: 10px;
+  }
+  .rule-card.diff-milestone { border-color: var(--warn); border-style: dashed; }
+  .rule-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
+  .rule-code { font-family: var(--mono); font-size: 10.5px; color: var(--ink-soft); }
+  .rule-name { font-size: 12.5px; font-weight: 600; }
+  .rule-milestone { font-size: 11px; color: var(--ink-soft); margin-bottom: 8px; }
+  .rule-milestone b { color: var(--ink); font-weight: 600; }
+  .rule-timing { font-size: 11px; color: var(--accent-ink); margin-bottom: 8px; font-family: var(--mono); }
+  .rule-cond { font-size: 10.5px; color: var(--warn); background: var(--warn-soft); border-radius: 5px; padding: 2px 7px; display: inline-block; margin-bottom: 8px; }
+  .rule-out { display: flex; flex-direction: column; gap: 4px; }
+  .rule-out-row { display: flex; gap: 6px; font-size: 11px; align-items: flex-start; }
+  .rule-out-row .pip { width: 6px; height: 6px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .rule-out-row.ok .pip { background: var(--ok); }
+  .rule-out-row.warn .pip { background: var(--warn); }
+  .rule-out-text { color: var(--ink-soft); line-height: 1.5; }
+  .rule-out-text .subcond { display: block; font-family: var(--mono); font-size: 9.5px; color: var(--warn); margin-top: 1px; }
+
+  .kontrola-card {
+    background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: 10px;
+    padding: 12px 14px; margin-bottom: 10px;
+  }
+  .kontrola-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+  .kontrola-num { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--accent-ink); }
+  .kontrola-timing { font-family: var(--mono); font-size: 11px; color: var(--accent-ink); background: var(--paper-raised); border: 1px solid var(--accent-line); border-radius: 5px; padding: 2px 8px; }
+  .kontrola-cond { font-size: 10.5px; color: var(--warn); background: var(--warn-soft); border-radius: 5px; padding: 2px 7px; display: inline-block; margin-bottom: 8px; }
+  .kontrola-branches { display: flex; flex-direction: column; gap: 6px; }
+  .kbranch { background: var(--paper-raised); border-radius: 7px; padding: 7px 9px; font-size: 11px; }
+  .kbranch-title { display: flex; align-items: center; gap: 5px; font-weight: 700; margin-bottom: 4px; }
+  .kbranch-title .pip { width: 6px; height: 6px; border-radius: 50%; }
+  .kbranch-title.ok { color: var(--ok); } .kbranch-title.ok .pip { background: var(--ok); }
+  .kbranch-title.warn { color: var(--warn); } .kbranch-title.warn .pip { background: var(--warn); }
+  .kaction { color: var(--ink-soft); line-height: 1.5; padding-left: 11px; margin-top: 2px; }
+  .kaction .subcond { display: block; font-family: var(--mono); font-size: 9.5px; color: var(--warn); }
+
+  .example-callout {
+    font-size: 12px; line-height: 1.6; color: var(--ink-soft);
+    background: var(--locked-soft); border-radius: 10px; padding: 12px 16px; margin-bottom: 56px;
+  }
+  .example-callout b { color: var(--ink); }
+
+  @media (max-width: 720px) { .compare { grid-template-columns: 1fr; } }
+
+  @media (max-width: 720px) {
+    .field { grid-template-columns: 15px 1fr; }
+    .field-name { grid-column: 2; }
+    .field-desc { grid-column: 2; }
+    .branch-row, .variants { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="wrap">
+
+  <p class="eyebrow">Konfigurátor pravidel — sub-projekt 2</p>
+  <h1>Kontrola na bodu trasy</h1>
+  <p class="lede">
+    Nahrazuje ruční tvorbu <code>Rule</code> pro oblast Soulad s trasou. Vyhodnocení souladu zůstává
+    plně odvozené z dat na bodu (<code>match</code> + <code>correctness</code>) — kontrola jen řídí,
+    <b>kdy</b> se má zkontrolovat a <b>co</b> se má stát s výsledkem.
+  </p>
+
+  <div class="legend">
+    <div class="legend-item"><span class="swatch existing"></span> existující entita, beze změny</div>
+    <div class="legend-item"><span class="swatch new"></span> nová entita</div>
+    <div class="legend-item"><span class="dot-locked"></span> needitovatelné (jen klasifikace)</div>
+    <div class="legend-item"><span class="dot-copy"></span> editovatelná kopie (předvyplní se, pak nezávislá)</div>
+  </div>
+
+  <h2>Datový model</h2>
+  <div class="diagram">
+
+    <div class="entity existing">
+      <div class="entity-head">
+        <span class="entity-name">Bod</span>
+        <span class="entity-tag existing">beze změny</span>
+      </div>
+      <div class="fields">
+        <div class="field"><span></span><span class="field-name">match</span><span class="field-desc">co musí být na záznamu — existuje dnes</span></div>
+        <div class="field"><span></span><span class="field-name">correctness</span><span class="field-desc">kdy nejpozději (kotva na jiný bod) — existuje dnes</span></div>
+        <div class="field"><span class="dot-copy"></span><span class="field-name">kontroly</span><span class="field-desc"><b>Kontrola[]</b> — nové, viz níže</span></div>
+      </div>
+    </div>
+
+    <div class="connector"><span class="connector-arrow">└─▶</span> pro každou položku v <code style="font-family:var(--mono);color:var(--accent-ink)">kontroly</code></div>
+
+    <div class="entity new">
+      <div class="entity-head">
+        <span class="entity-name">Kontrola</span>
+        <span class="entity-tag new">nové</span>
+      </div>
+      <div class="fields">
+        <div class="field"><span></span><span class="field-name">časování</span><span class="field-desc">pevný denní čas <span style="color:var(--ink-soft)">nebo</span> před/v/po termínu bodu — výchozí <b>„v termínu"</b></span></div>
+        <div class="field"><span></span><span class="field-name">podmínky</span><span class="field-desc"><span class="field-name" style="font-size:11px">VkrCondition[]</span> — stejný builder jako „Podmínky z ostatních entit" dnes, např. <i>„datum doručení od přepravce je dnes"</i></span></div>
+      </div>
+
+      <div class="branch-row">
+        <div class="branch-lead">obě větve volitelné</div>
+        <div class="branch">
+          <div class="branch-title ok"><span class="pip"></span> kdyžSplněno</div>
+          <div class="field" style="grid-template-columns:15px 1fr;"><span class="dot-locked"></span><span class="field-desc">Větev</span></div>
+        </div>
+        <div class="branch">
+          <div class="branch-title warn"><span class="pip"></span> kdyžNesplněno</div>
+          <div class="field" style="grid-template-columns:15px 1fr;"><span class="dot-locked"></span><span class="field-desc">Větev</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"><span class="connector-arrow">└─▶</span> tvar větve (stejný pro obě)</div>
+
+    <div class="entity new">
+      <div class="entity-head">
+        <span class="entity-name">Větev</span>
+        <span class="entity-tag new">nové</span>
+      </div>
+      <div class="fields">
+        <div class="field"><span class="dot-locked"></span><span class="field-name">situationId</span><span class="field-desc">🔒 odkaz na Situaci — needitovatelné</span></div>
+        <div class="field"><span class="dot-locked"></span><span class="field-name">severityId</span><span class="field-desc">🔒 odkaz na Závažnost — needitovatelné</span></div>
+        <div class="field"><span class="dot-copy"></span><span class="field-name">name, description, priority</span><span class="field-desc">předvyplní se ze Závažnosti, pak vlastní kopie</span></div>
+        <div class="field"><span class="dot-copy"></span><span class="field-name">actions[]</span><span class="field-desc">předvyplní se ze Závažnosti, pak vlastní kopie — stejný mechanismus jako dnešní Rule</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <h2>Reálný příklad z dat — 1. fyzický scan v cílové zemi</h2>
+  <span class="example-source">bytorp-data-2026-06-20.json · pravidla R30, R97, R39</span>
+  <p class="example-lede">
+    Dnešní tři pravidla „DD – Kontrola 1/2/3" kontrolují stejnou věc — jestli dorazil první fyzický scan
+    v cílové zemi — třikrát za sebou s eskalující závažností. Kontrola 3 dokonce musela vzniknout na
+    <b>jiném typu milníku</b> (<code>ct_...699440</code>, „pozdější check — bez času záznamu"), jen aby šlo nastavit
+    jiné časování. S kontrolami na bodu stačí <b>jeden bod</b> a tři běhy plánu spuštění.
+  </p>
+
+  <div class="compare">
+    <div class="compare-col">
+      <div class="compare-col-head">
+        <span class="compare-tag dnes">Dnes</span>
+        <span class="compare-sub">3 pravidla, 2 typy milníků</span>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-head"><span class="rule-name">R30 · DD – Kontrola 1</span><span class="rule-code">route_compliance</span></div>
+        <div class="rule-milestone">milník: <b>1. Fyzický scan v cílové zemi</b></div>
+        <div class="rule-timing">⏱ pevně v 08:00</div>
+        <div class="rule-out">
+          <div class="rule-out-row ok"><span class="pip"></span><span class="rule-out-text">Splněno → „1. fyzický scan – úspěšná kontrola v 8 hod"</span></div>
+          <div class="rule-out-row warn"><span class="pip"></span><span class="rule-out-text">Nesplněno → „1. fyzický scan – NEúspěšná kontrola v 8 hod"</span></div>
+        </div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-head"><span class="rule-name">R97 · DD – Kontrola 2</span><span class="rule-code">route_compliance</span></div>
+        <div class="rule-milestone">milník: <b>1. Fyzický scan v cílové zemi</b> (stejný)</div>
+        <div class="rule-timing">⏱ 1 h po termínu (09:00)</div>
+        <div class="rule-out">
+          <div class="rule-out-row ok"><span class="pip"></span><span class="rule-out-text">Splněno → „…ÚSPĚCH"</span></div>
+          <div class="rule-out-row warn"><span class="pip"></span><span class="rule-out-text">Nesplněno → akce A<span class="subcond">podmínka na akci: datum od přepravce = dnes</span>„…NEÚSPĚCH, ale datum stále dnešní"</span></div>
+          <div class="rule-out-row warn"><span class="pip"></span><span class="rule-out-text">Nesplněno → akce B<span class="subcond">podmínka na akci: datum od přepravce ≠ dnes</span>„Zpožděná zásilka"</span></div>
+        </div>
+      </div>
+
+      <div class="rule-card diff-milestone">
+        <div class="rule-head"><span class="rule-name">R39 · DD – Kontrola 3</span><span class="rule-code">route_compliance</span></div>
+        <div class="rule-milestone">milník: <b>jiný typ!</b> „1. fyzický scan – pozdější check"</div>
+        <div class="rule-timing">⏱ v termínu (10:00)</div>
+        <div class="rule-cond">podmínka na pravidle: datum od přepravce = dnes</div>
+        <div class="rule-out">
+          <div class="rule-out-row ok"><span class="pip"></span><span class="rule-out-text">Splněno → „Při třetí kontrole v pořádku"</span></div>
+          <div class="rule-out-row warn"><span class="pip"></span><span class="rule-out-text">Nesplněno → „Ani při třetí kontrole se scan nenašel"</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="compare-col">
+      <div class="compare-col-head">
+        <span class="compare-tag po">Po</span>
+        <span class="compare-sub">1 bod, 3 kontroly</span>
+      </div>
+
+      <div class="entity new" style="margin-bottom:14px;padding:14px 16px;">
+        <div class="entity-head" style="margin-bottom:8px;">
+          <span class="entity-name" style="font-size:13px;">Bod „1. Fyzický scan v cílové zemi"</span>
+        </div>
+        <div class="field" style="grid-template-columns:15px 1fr;font-size:11.5px;">
+          <span></span><span class="field-desc">termín (beze změny): nejpozději <b>08:00</b> v den ADD</span>
+        </div>
+      </div>
+
+      <div class="kontrola-card">
+        <div class="kontrola-head"><span class="kontrola-num">Kontrola 1</span><span class="kontrola-timing">v termínu</span></div>
+        <div class="kontrola-branches">
+          <div class="kbranch"><div class="kbranch-title ok"><span class="pip"></span>Splněno</div><div class="kaction">„1. scan v pořádku"</div></div>
+          <div class="kbranch"><div class="kbranch-title warn"><span class="pip"></span>Nesplněno</div><div class="kaction">„1. scan zatím nenalezen"</div></div>
+        </div>
+      </div>
+
+      <div class="kontrola-card">
+        <div class="kontrola-head"><span class="kontrola-num">Kontrola 2</span><span class="kontrola-timing">1 h po termínu</span></div>
+        <div class="kontrola-branches">
+          <div class="kbranch"><div class="kbranch-title ok"><span class="pip"></span>Splněno</div><div class="kaction">„…ÚSPĚCH"</div></div>
+          <div class="kbranch">
+            <div class="kbranch-title warn"><span class="pip"></span>Nesplněno</div>
+            <div class="kaction">akce A<span class="subcond">podmínka na akci: datum od přepravce = dnes</span>„…NEÚSPĚCH, ale datum stále dnešní"</div>
+            <div class="kaction">akce B<span class="subcond">podmínka na akci: datum od přepravce ≠ dnes</span>„Zpožděná zásilka"</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="kontrola-card">
+        <div class="kontrola-head"><span class="kontrola-num">Kontrola 3</span><span class="kontrola-timing">2 h po termínu</span></div>
+        <div class="kontrola-cond">podmínka na kontrole: datum od přepravce = dnes</div>
+        <div class="kontrola-branches">
+          <div class="kbranch"><div class="kbranch-title ok"><span class="pip"></span>Splněno</div><div class="kaction">„Při třetí kontrole v pořádku"</div></div>
+          <div class="kbranch"><div class="kbranch-title warn"><span class="pip"></span>Nesplněno</div><div class="kaction">„Zpožděná zásilka"</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-callout">
+    Oba typy podmínek z reálných dat sedí do modelu beze změny: <b>podmínka na kontrole</b> (Kontrola 3 — celý běh je
+    relevantní jen když je dnes datum doručení) = <code style="font-family:var(--mono)">Kontrola.podmínky</code>;
+    <b>podmínka na jednotlivé akci</b> (Kontrola 2 — která ze dvou akcí se použije) = podmínka přímo na akci ve Větvi,
+    stejně jako <code style="font-family:var(--mono)">SeverityAction.condition</code> v návrhu Situace/Závažnost/Akce.
+  </div>
+
+  <h2>Otevřená otázka pro klienta</h2>
+  <div class="variants-head">
+    <span class="open-tag">● k projednání</span>
+  </div>
+  <p class="variants-lede">
+    Nápad: vestavěná situace „Zpoždění v den doručení", která by při přiřazení k bodu sama předvyplnila
+    kontrolu. Dvě varianty k porovnání s klientem — obě jsou nad stejným datovým modelem výše, liší se jen v tom,
+    kolik toho udělá systém automaticky.
+  </p>
+
+  <div class="variants">
+    <div class="variant a">
+      <div class="variant-letter">A</div>
+      <h3>Situace jako šablona kontroly</h3>
+      <p class="sub">Vybraná situace umí sama nastavit celou kontrolu — uživatel jen potvrdí.</p>
+      <div class="flow">
+        <div class="flow-step"><span class="flow-num">1</span><span class="flow-text">Uživatel na bodu vybere situaci <b>„Zpoždění v den doručení"</b>.</span></div>
+        <div class="flow-step"><span class="flow-num">2</span><span class="flow-text">Systém <b>automaticky založí kontrolu</b>: časování, podmínky i obě větve se předvyplní.</span></div>
+        <div class="flow-step"><span class="flow-num">3</span><span class="flow-text">Uživatel může výsledek doladit — stejná editovatelná kopie jako u ruční kontroly.</span></div>
+      </div>
+      <div class="verdict">Rychlejší nastavení pro časté případy, ale situace nese dvě role najednou — klasifikaci <b>i</b> automatizaci. Náročnější na vysvětlení.</div>
+    </div>
+
+    <div class="variant b">
+      <div class="variant-letter">B</div>
+      <h3>Situace jen jako klasifikace</h3>
+      <p class="sub">Situace vždy jen štítkuje výsledek — kontrolu si uživatel vždy staví sám.</p>
+      <div class="flow">
+        <div class="flow-step"><span class="flow-num">1</span><span class="flow-text">Uživatel na bodu ručně přidá kontrolu — časování, podmínky.</span></div>
+        <div class="flow-step"><span class="flow-num">2</span><span class="flow-text">Pro větev Nesplněno vybere situaci <b>„Zpoždění v den doručení"</b> jako běžnou situaci — bez zvláštního chování.</span></div>
+        <div class="flow-step"><span class="flow-num">3</span><span class="flow-text">Actions/name/priority se předvyplní ze závažnosti — stejně jako u kterékoli jiné situace.</span></div>
+      </div>
+      <div class="verdict">Jednodušší mentální model — <b>situace vždy znamená totéž</b> bez ohledu na to, kde se použije. Víc kliků na časté případy.</div>
+    </div>
+  </div>
+
+  <footer>docs/superpowers/specs/2026-07-15-body-trasy-terminologie-design.md · sub-projekt 2 — soulad s trasou přes kontroly</footer>
+</div>

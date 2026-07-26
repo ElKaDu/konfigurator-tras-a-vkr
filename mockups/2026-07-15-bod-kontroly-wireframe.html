@@ -1,0 +1,514 @@
+<meta charset="utf-8">
+<title>Úsek · Paříž → USA — Bod „1. Fyzický scan v cílové zemi“</title>
+<style>
+  :root {
+    --radius: 0.625rem;
+    --background: oklch(0.985 0.005 280);
+    --foreground: oklch(0.18 0.03 280);
+    --surface: oklch(1 0 0);
+    --card: oklch(1 0 0);
+    --primary: oklch(0.56 0.22 295);
+    --primary-foreground: oklch(0.99 0 0);
+    --primary-soft: oklch(0.96 0.04 295);
+    --secondary: oklch(0.97 0.01 280);
+    --secondary-foreground: oklch(0.25 0.03 280);
+    --muted: oklch(0.965 0.008 280);
+    --muted-foreground: oklch(0.5 0.02 280);
+    --accent: oklch(0.96 0.03 295);
+    --accent-foreground: oklch(0.35 0.18 295);
+    --destructive: oklch(0.6 0.22 25);
+    --destructive-foreground: oklch(0.99 0 0);
+    --success: oklch(0.7 0.16 155);
+    --success-foreground: oklch(0.2 0.05 155);
+    --warning: oklch(0.82 0.16 75);
+    --warning-foreground: oklch(0.3 0.08 75);
+    --info: oklch(0.7 0.14 230);
+    --info-foreground: oklch(0.25 0.08 230);
+    --border: oklch(0.92 0.01 280);
+    --success-soft: oklch(0.95 0.04 155);
+    --warning-soft: oklch(0.96 0.05 75);
+    --destructive-soft: oklch(0.95 0.05 25);
+    --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: oklch(0.16 0.02 280);
+      --foreground: oklch(0.96 0.005 280);
+      --surface: oklch(0.2 0.02 280);
+      --card: oklch(0.2 0.02 280);
+      --primary: oklch(0.7 0.2 295);
+      --primary-foreground: oklch(0.15 0.02 280);
+      --primary-soft: oklch(0.3 0.1 295);
+      --secondary: oklch(0.25 0.02 280);
+      --secondary-foreground: oklch(0.96 0.005 280);
+      --muted: oklch(0.25 0.02 280);
+      --muted-foreground: oklch(0.7 0.02 280);
+      --accent: oklch(0.3 0.08 295);
+      --accent-foreground: oklch(0.96 0.005 280);
+      --border: oklch(1 0 0 / 12%);
+      --success-soft: oklch(0.3 0.07 155);
+      --warning-soft: oklch(0.32 0.08 75);
+      --destructive-soft: oklch(0.32 0.1 25);
+      --success-foreground: oklch(0.86 0.13 155);
+      --warning-foreground: oklch(0.88 0.13 75);
+      --info-foreground: oklch(0.84 0.1 230);
+      --destructive: oklch(0.72 0.19 25);
+    }
+  }
+  :root[data-theme="dark"] {
+    --background: oklch(0.16 0.02 280); --foreground: oklch(0.96 0.005 280);
+    --surface: oklch(0.2 0.02 280); --card: oklch(0.2 0.02 280);
+    --primary: oklch(0.7 0.2 295); --primary-foreground: oklch(0.15 0.02 280); --primary-soft: oklch(0.3 0.1 295);
+    --secondary: oklch(0.25 0.02 280); --secondary-foreground: oklch(0.96 0.005 280);
+    --muted: oklch(0.25 0.02 280); --muted-foreground: oklch(0.7 0.02 280);
+    --accent: oklch(0.3 0.08 295); --accent-foreground: oklch(0.96 0.005 280);
+    --border: oklch(1 0 0 / 12%);
+    --success-soft: oklch(0.3 0.07 155); --warning-soft: oklch(0.32 0.08 75); --destructive-soft: oklch(0.32 0.1 25);
+    --success-foreground: oklch(0.86 0.13 155); --warning-foreground: oklch(0.88 0.13 75);
+    --info-foreground: oklch(0.84 0.1 230); --destructive: oklch(0.72 0.19 25);
+  }
+  :root[data-theme="light"] {
+    --background: oklch(0.985 0.005 280); --foreground: oklch(0.18 0.03 280);
+    --surface: oklch(1 0 0); --card: oklch(1 0 0);
+    --primary: oklch(0.56 0.22 295); --primary-foreground: oklch(0.99 0 0); --primary-soft: oklch(0.96 0.04 295);
+    --secondary: oklch(0.97 0.01 280); --secondary-foreground: oklch(0.25 0.03 280);
+    --muted: oklch(0.965 0.008 280); --muted-foreground: oklch(0.5 0.02 280);
+    --accent: oklch(0.96 0.03 295); --accent-foreground: oklch(0.35 0.18 295);
+    --border: oklch(0.92 0.01 280);
+    --success-soft: oklch(0.95 0.04 155); --warning-soft: oklch(0.96 0.05 75); --destructive-soft: oklch(0.95 0.05 25);
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--background); font-family: var(--font-sans); color: var(--foreground); -webkit-font-smoothing: antialiased; }
+  .app { display: flex; flex-direction: column; min-height: 100vh; }
+
+  /* ---- Header (replica of AppHeader.tsx) ---- */
+  header.top {
+    display: flex; align-items: center; gap: 16px; height: 56px; flex-shrink: 0;
+    border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 24px;
+  }
+  .brand { display: flex; align-items: center; gap: 8px; }
+  .brand-mark { width: 28px; height: 28px; border-radius: 6px; background: var(--primary); color: var(--primary-foreground); display: grid; place-items: center; }
+  .brand-name { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+  .brand-name b { color: var(--primary); font-weight: 600; }
+  .divider-v { width: 1px; height: 20px; background: var(--border); }
+  nav.top-nav { display: flex; align-items: center; gap: 4px; font-size: 13.5px; font-weight: 500; }
+  .nav-link { padding: 4px 10px; border-radius: 6px; color: var(--muted-foreground); text-decoration: none; }
+  .nav-link.active { background: var(--primary-soft); color: var(--primary); }
+  .proto-badge { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; background: var(--primary-soft); color: var(--primary); border-radius: 6px; padding: 2px 8px; }
+
+  /* ---- Breadcrumb / page title ---- */
+  .pagehead { padding: 18px 24px 14px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .crumb { font-size: 12.5px; color: var(--muted-foreground); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .crumb a { color: var(--muted-foreground); text-decoration: none; }
+  .crumb .sep { opacity: .5; }
+  .crumb .cur { color: var(--foreground); font-weight: 500; }
+  .pagetitle { display: flex; align-items: baseline; gap: 10px; }
+  .pagetitle h1 { font-size: 19px; font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+  .pagetitle .sub { font-size: 12.5px; color: var(--muted-foreground); }
+
+  /* ---- Body layout ---- */
+  .cols { display: flex; flex: 1; min-height: 0; }
+  .col { display: flex; flex-direction: column; min-width: 0; }
+  .col + .col { border-left: 1px solid var(--border); }
+  .col-scroll { flex: 1; overflow-y: auto; padding: 18px 18px; }
+
+  .col1 { width: 300px; flex-shrink: 0; }
+  .col2 { width: 380px; flex-shrink: 0; }
+  .col3 { flex: 1; min-width: 460px; background: var(--muted); }
+
+  .eyebrow { font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--muted-foreground); margin-bottom: 10px; }
+
+  /* ---- Col 1: segment meta + body list ---- */
+  .meta-card { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 20px; background: var(--card); }
+  .meta-name { font-size: 13.5px; font-weight: 600; margin-bottom: 8px; }
+  .pillrow { display: flex; flex-wrap: wrap; gap: 5px; }
+  .pill { font-size: 10.5px; padding: 2px 8px; border-radius: 20px; background: var(--secondary); color: var(--secondary-foreground); font-weight: 500; }
+
+  .bodylist { position: relative; }
+  .bodylist::before { content: ""; position: absolute; left: 12px; top: 14px; bottom: 14px; width: 1.5px; background: var(--border); }
+  .body-row { display: flex; align-items: flex-start; gap: 10px; padding: 7px 6px; border-radius: 8px; cursor: pointer; position: relative; }
+  .body-row .dot { width: 15px; height: 15px; border-radius: 50%; background: var(--muted-foreground); opacity: .35; flex-shrink: 0; margin-top: 3px; z-index: 1; }
+  .body-row.done .dot { background: var(--success); opacity: 1; }
+  .body-row.active .dot { background: var(--primary); opacity: 1; box-shadow: 0 0 0 3px var(--primary-soft); }
+  .body-row .name { font-size: 12.5px; color: var(--foreground); line-height: 1.4; }
+  .body-row.active .name { font-weight: 600; color: var(--primary); }
+  .body-row .kmeta { font-size: 10.5px; color: var(--muted-foreground); margin-top: 1px; }
+  .body-row:last-child .dot { background: none; border: 1.5px solid var(--muted-foreground); opacity: .5; }
+
+  .addbtn {
+    margin-top: 12px; width: 100%; border: 1px dashed var(--border); border-radius: 8px;
+    background: transparent; color: var(--primary); font-size: 12px; font-weight: 500;
+    padding: 8px; cursor: pointer; font-family: var(--font-sans);
+  }
+
+  /* ---- Col 2: match + correctness (existing UI, unchanged) ---- */
+  .section-card { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; background: var(--card); }
+  .section-title { font-size: 12px; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .cond-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 7px 0; font-size: 12.5px; border-bottom: 1px solid var(--border); }
+  .cond-row:last-child { border-bottom: none; }
+  .token { background: var(--secondary); border-radius: 6px; padding: 3px 8px; font-weight: 500; font-size: 12px; }
+  .token.op { background: transparent; color: var(--muted-foreground); font-weight: 400; padding: 0 2px; }
+  .token.val { background: var(--primary-soft); color: var(--primary); }
+
+  .deadline-box { background: var(--muted); border-radius: 8px; padding: 10px 12px; font-size: 12px; line-height: 1.6; }
+  .deadline-box b { font-weight: 600; }
+  .deadline-summary {
+    margin-top: 8px; display: flex; align-items: flex-start; gap: 7px;
+    font-size: 11.5px; color: var(--muted-foreground); background: var(--success-soft); border-radius: 7px; padding: 8px 10px;
+  }
+  .deadline-summary b { color: var(--foreground); }
+
+  /* ---- Col 3: Kontroly ---- */
+  .kontroly-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .kontroly-head h2 { font-size: 13.5px; font-weight: 600; margin: 0; }
+  .addkontrola {
+    display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500;
+    background: var(--primary); color: var(--primary-foreground); border: none; border-radius: 7px;
+    padding: 6px 11px; cursor: pointer; font-family: var(--font-sans);
+  }
+
+  .kontrola { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 14px; overflow: hidden; }
+  .kontrola-top { display: flex; align-items: center; justify-content: space-between; padding: 11px 15px; border-bottom: 1px solid var(--border); }
+  .kontrola-title { display: flex; align-items: center; gap: 9px; }
+  .kontrola-num {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--accent-foreground);
+    font-size: 11px; font-weight: 700; display: grid; place-items: center; flex-shrink: 0; font-family: var(--font-mono);
+  }
+  .kontrola-name { font-size: 12.5px; font-weight: 600; }
+  .kontrola-timing { font-size: 11px; color: var(--primary); background: var(--primary-soft); border-radius: 20px; padding: 3px 10px; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+  .kontrola-menu { color: var(--muted-foreground); font-size: 14px; cursor: pointer; padding: 2px 4px; }
+
+  .kontrola-cond {
+    margin: 10px 15px 0; font-size: 11px; color: var(--warning-foreground); background: var(--warning-soft);
+    border-radius: 7px; padding: 6px 10px; display: flex; align-items: center; gap: 6px;
+  }
+  .kontrola-cond .lbl { font-weight: 700; text-transform: uppercase; letter-spacing: .04em; font-size: 9.5px; opacity: .75; }
+
+  .branches { padding: 12px 15px 15px; display: flex; flex-direction: column; gap: 10px; }
+  .branch {
+    border-radius: 9px; border: 1px solid var(--border); overflow: hidden;
+  }
+  .branch-head { display: flex; align-items: center; gap: 7px; padding: 7px 11px; font-size: 11.5px; font-weight: 600; }
+  .branch-head.ok { background: var(--success-soft); color: var(--success-foreground); }
+  .branch-head.warn { background: var(--warning-soft); color: var(--warning-foreground); }
+  .branch-body { padding: 11px 12px; background: var(--card); }
+
+  /* Situace → Závažnost → Akce, replika reálných komponent (PlainToken, priority badge) */
+  .flow-field { margin-bottom: 9px; }
+  .flow-field:last-child { margin-bottom: 0; }
+  .flow-label {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 9.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+    color: var(--muted-foreground); margin-bottom: 5px;
+  }
+  .inherited-tag {
+    font-size: 9px; font-weight: 500; text-transform: none; letter-spacing: 0;
+    color: var(--primary); background: var(--primary-soft); border-radius: 4px; padding: 1px 5px;
+  }
+  .flow-arrow { text-align: center; color: var(--border); font-size: 11px; line-height: 1; margin: 2px 0; }
+
+  /* PlainToken replika: inline-flex items-center gap-1.5 rounded-md border bg-surface px-2 py-0.5 */
+  .token-chevron {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--border); background: var(--surface); border-radius: 6px;
+    padding: 4px 9px; font-size: 12px; font-weight: 500; color: var(--foreground);
+  }
+  .token-chevron .chev { color: var(--muted-foreground); font-size: 10px; }
+
+  .sev-pills { display: flex; flex-wrap: wrap; gap: 4px; }
+  .sevpill {
+    border-radius: 6px; padding: 4px 9px; font-size: 11px; font-weight: 500;
+    background: var(--muted); color: var(--muted-foreground);
+  }
+  .sevpill.active { background: var(--primary); color: var(--primary-foreground); }
+
+  /* Priority badge — replika RulesList.tsx: rounded-full px-2.5 py-0.5 text-xs font-semibold */
+  .prio-badge { border-radius: 20px; padding: 2px 10px; font-size: 10.5px; font-weight: 600; display: inline-block; }
+  .prio-badge.elevated { background: color-mix(in oklch, var(--destructive) 15%, transparent); color: var(--destructive); }
+  .prio-badge.normal { background: var(--muted); color: var(--muted-foreground); }
+
+  .action-item { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; padding: 4px 0; line-height: 1.5; }
+  .action-item .adot { width: 5px; height: 5px; border-radius: 50%; background: var(--muted-foreground); margin-top: 6px; flex-shrink: 0; }
+  .action-item .atext { color: var(--foreground); }
+  .action-item .acond {
+    display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; font-size: 10px; font-weight: 500;
+    color: var(--muted-foreground); background: var(--muted); border-radius: 5px; padding: 1px 6px; font-family: var(--font-mono);
+  }
+
+  .empty-branch { font-size: 11.5px; color: var(--muted-foreground); font-style: italic; padding: 3px 0; }
+
+  footer.note {
+    padding: 14px 15px 4px; font-size: 11px; color: var(--muted-foreground); line-height: 1.6;
+  }
+</style>
+
+<div class="app">
+
+  <header class="top">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+      </div>
+      <span class="brand-name">By<b>torp</b></span>
+    </div>
+    <div class="divider-v"></div>
+    <nav class="top-nav">
+      <a class="nav-link" href="#">Konfigurátor pravidel</a>
+      <a class="nav-link active" href="#">Trasy zásilek</a>
+    </nav>
+    <span class="proto-badge">prototyp</span>
+  </header>
+
+  <div class="pagehead">
+    <div class="crumb">
+      <a href="#">Trasy</a><span class="sep">/</span>
+      <a href="#">ČR – USA (Endevel)</a><span class="sep">/</span>
+      <span class="cur">Paříž → USA</span>
+    </div>
+    <div class="pagetitle">
+      <h1>Úsek · Paříž → USA</h1>
+      <span class="sub">bod „1. Fyzický scan v cílové zemi“</span>
+    </div>
+  </div>
+
+  <div class="cols">
+
+    <!-- COL 1 — segment meta + body list -->
+    <div class="col col1">
+      <div class="col-scroll">
+        <div class="eyebrow">Úsek</div>
+        <div class="meta-card">
+          <div class="meta-name">Paříž → USA</div>
+          <div class="pillrow">
+            <span class="pill">FedEx</span>
+            <span class="pill">Economy</span>
+          </div>
+        </div>
+
+        <div class="eyebrow">Body úseku (7)</div>
+        <div class="bodylist">
+          <div class="body-row done"><div class="dot"></div><div><div class="name">Export – odlet z přestupního hubu</div><div class="kmeta">0 kontrol</div></div></div>
+          <div class="body-row done"><div class="dot"></div><div><div class="name">Export – přílet do cílové destinace</div><div class="kmeta">0 kontrol</div></div></div>
+          <div class="body-row done"><div class="dot"></div><div><div class="name">Export – celní odbavení</div><div class="kmeta">0 kontrol</div></div></div>
+          <div class="body-row done"><div class="dot"></div><div><div class="name">Export – celní odbavení dokončeno</div><div class="kmeta">0 kontrol</div></div></div>
+          <div class="body-row active"><div class="dot"></div><div><div class="name">1. Fyzický scan v cílové zemi</div><div class="kmeta">3 kontroly</div></div></div>
+          <div class="body-row"><div class="dot"></div><div><div class="name">2. Fyzický scan v cílové zemi</div><div class="kmeta">0 kontrol</div></div></div>
+          <div class="body-row"><div class="dot"></div><div><div class="name">1. scan – pozdější check</div><div class="kmeta">0 kontrol</div></div></div>
+        </div>
+        <button class="addbtn">+ Přidat bod</button>
+      </div>
+    </div>
+
+    <!-- COL 2 — match + correctness (existing, unchanged) -->
+    <div class="col col2">
+      <div class="col-scroll">
+        <div class="section-card">
+          <div class="section-title">Co musí být na záznamu</div>
+          <div class="cond-row"><span class="token">Typ místa</span><span class="token op">=</span><span class="token val">FedEx Facility</span></div>
+          <div class="cond-row"><span class="token">Čas na záznamu</span><span class="token op">nejpozději</span><span class="token val">08:00</span><span class="token op">v den</span><span class="token val">ADD</span></div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-title">Kdy nejpozději (termín bodu)</div>
+          <div class="deadline-box">
+            Musí nastat nejpozději <b>08:00</b> v den <b>Avizované doručení zákazníkovi (ADD)</b>,
+            místní čas.
+          </div>
+          <div class="deadline-summary">
+            ✓ <span>Tolerance <b>do 09:00</b> se stále počítá jako v pořádku — kontroly vpravo na to reagují eskalací.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 3 — Kontroly (NEW) -->
+    <div class="col col3">
+      <div class="col-scroll">
+        <div class="kontroly-head">
+          <h2>Plán spuštění · 3 kontroly</h2>
+          <button class="addkontrola">+ Přidat kontrolu</button>
+        </div>
+
+        <!-- Kontrola 1 -->
+        <div class="kontrola">
+          <div class="kontrola-top">
+            <div class="kontrola-title">
+              <div class="kontrola-num">1</div>
+              <div class="kontrola-name">Kontrola v termínu</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="kontrola-timing">⏱ v termínu (08:00)</span>
+              <span class="kontrola-menu">⋯</span>
+            </div>
+          </div>
+          <div class="branches">
+            <div class="branch">
+              <div class="branch-head ok">✓ Splněno</div>
+              <div class="branch-body">
+                <div class="flow-field">
+                  <div class="flow-label">Situace <span class="inherited-tag" style="opacity:.75">1 závažnost — přepínač skrytý</span></div>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span class="token-chevron">Doručení podle plánu <span class="chev">▾</span></span>
+                    <span class="prio-badge normal">LOW</span>
+                  </div>
+                </div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-field">
+                  <div class="flow-label">Akce <span class="inherited-tag">zděděno ze závažnosti</span></div>
+                  <div class="action-item"><span class="adot"></span><span class="atext">Vytvořit VkŘ „1. fyzický scan – úspěšná kontrola v 8 hod“</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="branch">
+              <div class="branch-head warn">! Nesplněno</div>
+              <div class="branch-body">
+                <div class="flow-field">
+                  <div class="flow-label">Situace</div>
+                  <span class="token-chevron">Zpoždění v den doručení <span class="chev">▾</span></span>
+                </div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-field">
+                  <div class="flow-label">Závažnost</div>
+                  <div class="sev-pills">
+                    <span class="sevpill active">časná výstraha</span>
+                    <span class="sevpill">možné zpoždění</span>
+                    <span class="sevpill">kritické zpoždění</span>
+                  </div>
+                </div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-field">
+                  <div class="flow-label">Akce <span class="inherited-tag">zděděno ze závažnosti</span><span class="prio-badge normal" style="margin-left:auto;">LOW</span></div>
+                  <div class="action-item"><span class="adot"></span><span class="atext">Vytvořit VkŘ „1. fyzický scan – NEúspěšná kontrola v 8 hod“</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kontrola 2 -->
+        <div class="kontrola">
+          <div class="kontrola-top">
+            <div class="kontrola-title">
+              <div class="kontrola-num">2</div>
+              <div class="kontrola-name">Kontrola 1 h po termínu</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="kontrola-timing">⏱ 1 h po termínu (09:00)</span>
+              <span class="kontrola-menu">⋯</span>
+            </div>
+          </div>
+          <div class="branches">
+            <div class="branch">
+              <div class="branch-head ok">✓ Splněno</div>
+              <div class="branch-body">
+                <div class="flow-field">
+                  <div class="flow-label">Situace</div>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span class="token-chevron">Doručení podle plánu <span class="chev">▾</span></span>
+                    <span class="prio-badge normal">LOW</span>
+                  </div>
+                </div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-field">
+                  <div class="flow-label">Akce <span class="inherited-tag">zděděno ze závažnosti</span></div>
+                  <div class="action-item"><span class="adot"></span><span class="atext">Vytvořit VkŘ „…ÚSPĚCH“</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="branch">
+              <div class="branch-head warn">! Nesplněno</div>
+              <div class="branch-body">
+                <div class="flow-field">
+                  <div class="flow-label">Situace</div>
+                  <span class="token-chevron">Zpoždění v den doručení <span class="chev">▾</span></span>
+                </div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-field">
+                  <div class="flow-label">Závažnost</div>
+                  <div class="sev-pills">
+                    <span class="sevpill">časná výstraha</span>
+                    <span class="sevpill active">možné zpoždění</span>
+                    <span class="sevpill">kritické zpoždění</span>
+                  </div>
+                </div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-field">
+                  <div class="flow-label">Akce <span class="inherited-tag">zděděno ze závažnosti, upraveno</span><span class="prio-badge normal" style="margin-left:auto;">MEDIUM</span></div>
+                  <div class="action-item"><span class="adot"></span><span class="atext">„…NEÚSPĚCH, ale datum stále dnešní“<span class="acond">datum od přepravce = dnes</span></span></div>
+                  <div class="action-item"><span class="adot"></span><span class="atext">„Zpožděná zásilka“<span class="acond">datum od přepravce ≠ dnes</span></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kontrola 3 -->
+        <div class="kontrola">
+          <div class="kontrola-top">
+            <div class="kontrola-title">
+              <div class="kontrola-num">3</div>
+              <div class="kontrola-name">Kontrola 2 h po termínu</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="kontrola-timing">⏱ 2 h po termínu (10:00)</span>
+              <span class="kontrola-menu">⋯</span>
+            </div>
+          </div>
+          <div class="kontrola-cond"><span class="lbl">Podmínka</span> proběhne jen když je datum doručení od přepravce dnes</div>
+          <div class="branches">
+            <div class="branch">
+              <div class="branch-head ok">✓ Splněno</div>
+              <div class="branch-body">
+                <div class="flow-field">
+                  <div class="flow-label">Situace</div>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span class="token-chevron">Doručení podle plánu <span class="chev">▾</span></span>
+                    <span class="prio-badge normal">LOW</span>
+                  </div>
+                </div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-field">
+                  <div class="flow-label">Akce <span class="inherited-tag">zděděno ze závažnosti</span></div>
+                  <div class="action-item"><span class="adot"></span><span class="atext">Vytvořit VkŘ „Při třetí kontrole v pořádku“</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="branch">
+              <div class="branch-head warn">! Nesplněno</div>
+              <div class="branch-body">
+                <div class="flow-field">
+                  <div class="flow-label">Situace</div>
+                  <span class="token-chevron">Zpoždění v den doručení <span class="chev">▾</span></span>
+                </div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-field">
+                  <div class="flow-label">Závažnost</div>
+                  <div class="sev-pills">
+                    <span class="sevpill">časná výstraha</span>
+                    <span class="sevpill">možné zpoždění</span>
+                    <span class="sevpill active">kritické zpoždění</span>
+                  </div>
+                </div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-field">
+                  <div class="flow-label">Akce <span class="inherited-tag">zděděno ze závažnosti, upraveno</span><span class="prio-badge elevated" style="margin-left:auto;">HIGH</span></div>
+                  <div class="action-item"><span class="adot"></span><span class="atext">Vytvořit VkŘ „Zpožděná zásilka“</span></div>
+                  <div class="action-item"><span class="adot"></span><span class="atext">Zavolat zákazníkovi</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="note">
+          Ukázka odpovídá reálným pravidlům R30 / R97 / R39 (viz „Reálný příklad z dat“ v architektuře) — tady
+          přepočítaná na jeden bod se třemi kontrolami místo tří pravidel na dvou typech milníku.
+        </footer>
+      </div>
+    </div>
+
+  </div>
+</div>

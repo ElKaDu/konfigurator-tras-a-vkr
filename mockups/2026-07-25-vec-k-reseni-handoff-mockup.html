@@ -1,0 +1,331 @@
+<meta charset="utf-8">
+<title>Věc k řešení — karta, sidebar, dashboard (handoff mockup)</title>
+<style>
+  :root {
+    --bg: #F4F5F8;
+    --card: #FFFFFF;
+    --border: #E4E6EC;
+    --fg: #1F2430;
+    --muted-fg: #7B8299;
+    --muted-bg: #F0F1F5;
+    --primary: #7C5CFC;
+    --primary-soft: #EFE9FF;
+    --success: #1E9E5A;
+    --success-bg: #E4F7EC;
+    --warning: #A96A00;
+    --warning-bg: #FDF1DA;
+    --danger: #D6394A;
+    --danger-bg: #FBE6E9;
+    --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); font-family: var(--font); color: var(--fg); -webkit-font-smoothing: antialiased; }
+  .page { max-width: 900px; margin: 0 auto; padding: 28px 20px 80px; }
+  h1 { font-size: 18px; font-weight: 700; margin: 0 0 4px; }
+  .lead { font-size: 12.5px; color: var(--muted-fg); margin: 0 0 28px; line-height: 1.6; }
+  h2.section { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted-fg); margin: 36px 0 12px; padding-top: 20px; border-top: 1px solid var(--border); }
+  h2.section:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+  .note { font-size: 12px; color: var(--muted-fg); line-height: 1.6; margin: 8px 0 16px; }
+  .note b { color: var(--fg); }
+  .note code { font-family: var(--mono); font-size: 11px; background: var(--muted-bg); padding: 1px 5px; border-radius: 4px; }
+
+  /* ---- VkR card ---- */
+  .vkr-card {
+    background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--muted-fg);
+    border-radius: 10px; padding: 14px 16px; max-width: 460px; cursor: pointer; transition: box-shadow .15s;
+  }
+  .vkr-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+  .vkr-card.low { border-left-color: var(--success); }
+  .vkr-card.medium { border-left-color: var(--warning); }
+  .vkr-card.high { border-left-color: var(--danger); }
+
+  .vkr-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .vkr-title-wrap { min-width: 0; }
+  .vkr-title { font-size: 13.5px; font-weight: 700; }
+  .vkr-situation { font-size: 11px; color: var(--muted-fg); margin-top: 2px; }
+  .vkr-situation .sep { margin: 0 4px; opacity: .5; }
+  .vkr-eye { color: var(--muted-fg); font-size: 13px; flex-shrink: 0; }
+
+  .vkr-badges { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+  .badge { font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+  .badge.low { background: var(--success-bg); color: var(--success); }
+  .badge.medium { background: var(--warning-bg); color: var(--warning); }
+  .badge.high { background: var(--danger-bg); color: var(--danger); }
+  .badge.overdue { background: var(--danger-bg); color: var(--danger); }
+  .badge.category { background: var(--muted-bg); color: var(--muted-fg); font-weight: 600; }
+
+  .vkr-meta { display: flex; align-items: center; gap: 10px; margin-top: 9px; font-size: 11.5px; flex-wrap: wrap; }
+  .vkr-meta a { color: var(--primary); font-weight: 700; text-decoration: none; }
+  .vkr-meta .customer { color: var(--muted-fg); display: flex; align-items: center; gap: 4px; }
+
+  .vkr-desc { font-size: 12px; margin-top: 9px; line-height: 1.5; color: var(--fg); }
+
+  .vkr-actions { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; }
+  .vkr-actions label { display: flex; align-items: flex-start; gap: 7px; font-size: 12px; }
+  .vkr-actions input[type=checkbox] { margin-top: 2px; }
+  .vkr-actions .action-desc { color: var(--muted-fg); font-size: 11px; display: block; margin-top: 1px; }
+
+  .vkr-toggle { margin-top: 10px; font-size: 11px; color: var(--primary); font-weight: 600; cursor: pointer; }
+
+  .vkr-more { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; font-size: 11.5px; }
+  .vkr-more .lbl { color: var(--muted-fg); font-size: 10px; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 2px; }
+
+  .vkr-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .vkr-due { font-size: 11px; color: var(--muted-fg); }
+  .vkr-due b { color: var(--fg); }
+  .btnrow { display: flex; gap: 6px; }
+  .btn { font-size: 11.5px; font-weight: 600; padding: 5px 11px; border-radius: 7px; border: 1px solid transparent; cursor: pointer; font-family: var(--font); }
+  .btn.primary { background: var(--success); color: #fff; }
+  .btn.outline { background: transparent; border-color: var(--border); color: var(--fg); }
+  .btn.danger-outline { background: transparent; border-color: var(--danger-bg); color: var(--danger); }
+  .btn.reopen { background: var(--warning); color: #fff; }
+
+  /* ---- Sidebar ---- */
+  .sidebar-demo { display: flex; justify-content: flex-end; background: rgba(0,0,0,.25); border-radius: 12px; padding: 0; overflow: hidden; }
+  .sidebar {
+    width: 380px; background: var(--card); padding: 20px; max-height: 640px; overflow-y: auto;
+  }
+  .sidebar h3 { font-size: 15px; margin: 0 0 16px; }
+  .field { margin-bottom: 14px; }
+  .field .lbl { font-size: 11px; font-weight: 600; color: var(--muted-fg); margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
+  .field .lock { font-size: 9px; background: var(--muted-bg); color: var(--muted-fg); padding: 1px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+  .field .locked-val { font-size: 12.5px; padding: 8px 10px; background: var(--muted-bg); border-radius: 7px; color: var(--fg); }
+  .field .locked-val.sub { color: var(--muted-fg); font-size: 11.5px; margin-top: 3px; }
+  .field input, .field textarea {
+    width: 100%; font-size: 12.5px; font-family: var(--font); padding: 8px 10px; border: 1px solid var(--border);
+    border-radius: 7px; background: #fff; color: var(--fg);
+  }
+  .field textarea { resize: vertical; min-height: 56px; }
+  .action-locked { display: flex; align-items: flex-start; gap: 7px; font-size: 12px; padding: 5px 0; }
+  .action-locked .adot { width: 5px; height: 5px; border-radius: 50%; background: var(--muted-fg); margin-top: 6px; flex-shrink: 0; }
+  .sidebar-footer { display: flex; gap: 8px; margin-top: 20px; }
+  .sidebar-footer .btn { flex: 1; padding: 9px; text-align: center; }
+  .sidebar-footer .btn.primary { background: var(--primary); }
+
+  /* ---- Dashboard mini ---- */
+  .dash-cols { display: flex; gap: 20px; align-items: flex-start; }
+  .dash-col { flex: 1; min-width: 0; }
+  .dash-col h4 { font-size: 12px; font-weight: 700; margin: 0 0 10px; display: flex; align-items: center; gap: 6px; }
+  .dash-col h4 .count { color: var(--muted-fg); font-weight: 500; }
+  .dash-col .vkr-card { max-width: none; margin-bottom: 10px; }
+  .readonly-card { opacity: .88; cursor: default; }
+  .readonly-card .vkr-footer { display: none; }
+  .readonly-tag { font-size: 10px; color: var(--muted-fg); font-style: italic; margin-top: 8px; }
+</style>
+
+<div class="page">
+  <h1>Věc k řešení — handoff mockup pro implementaci</h1>
+  <p class="lead">
+    Cílí na existující produkci (<code>bytorp-ps.dev.endevel.cz/action-items</code>) — dashboard i editační sidebar tam už reálně fungují,
+    jen dnešní pravidla pro vznik VkŘ jsou nefunkční. Tenhle mockup ukazuje, jak by karta a sidebar měly vypadat, když je obsah řízený
+    modelem Situace/Závažnost/Akce místo dnešního volného textu. Barvy/rozvržení vycházejí ze zaslaných screenshotů reálné appky,
+    ne z interního prototypu v tomhle repu.
+  </p>
+
+  <h2 class="section">1 — Karta (výchozí stav)</h2>
+  <p class="note">Barevný pruh vlevo + barevný štítek priority — přesně jak dnes vypadá produkce (potvrzeno na screenshotech), ne zjednodušená
+    varianta "jen štítek", o které jsme mluvily dřív. Kliknutí kamkoliv na kartu otevře editační sidebar (viz sekce 3).</p>
+
+  <div class="vkr-card medium">
+    <div class="vkr-top">
+      <div class="vkr-title-wrap">
+        <div class="vkr-title">Nedoručená zásilka — 2. pokus</div>
+        <div class="vkr-situation">Nedoručeno <span class="sep">·</span> problémové</div>
+      </div>
+      <span class="vkr-eye">👁</span>
+    </div>
+
+    <div class="vkr-badges">
+      <span class="badge medium">Vyšší priorita</span>
+      <span class="badge category">Tracking</span>
+    </div>
+
+    <div class="vkr-meta">
+      <a href="#">OP2600233</a>
+      <span class="customer">👤 Jana Nováková</span>
+    </div>
+
+    <div class="vkr-desc">Druhý neúspěšný pokus o doručení.</div>
+
+    <div class="vkr-actions">
+      <label>
+        <input type="checkbox">
+        <span>Informuj zákazníka o druhém neúspěšném pokusu.<span class="action-desc"></span></span>
+      </label>
+      <label>
+        <input type="checkbox">
+        <span>Ověř u dopravce důvod opakovaného nedoručení.<span class="action-desc"></span></span>
+      </label>
+    </div>
+
+    <div class="vkr-toggle">▾ Více informací</div>
+    <div class="vkr-more">
+      <div><div class="lbl">Vytvořeno</div>15. 7. 2026 14:32</div>
+      <div><div class="lbl">Termín splnění</div>18. 7. 2026 12:00</div>
+    </div>
+
+    <div class="vkr-footer">
+      <div class="vkr-due">Termín: <b>18. 7. 2026 12:00</b></div>
+      <div class="btnrow">
+        <button class="btn primary">✓ Vyřešit</button>
+        <button class="btn danger-outline">Smazat</button>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section">2 — Karta se štítkem "Po termínu"</h2>
+  <p class="note">Kritická závažnost (červený pruh), navíc po termínu splnění — zvlášť viditelný červený štítek stejně jako dnes v produkci.</p>
+
+  <div class="vkr-card high">
+    <div class="vkr-top">
+      <div class="vkr-title-wrap">
+        <div class="vkr-title">Zásilka zaseknutá na jednom místě</div>
+        <div class="vkr-situation">Problém v přepravě <span class="sep">·</span> kritické</div>
+      </div>
+      <span class="vkr-eye">👁</span>
+    </div>
+
+    <div class="vkr-badges">
+      <span class="badge high">Vysoká priorita</span>
+      <span class="badge overdue">Po termínu !!!</span>
+      <span class="badge category">Tracking</span>
+    </div>
+
+    <div class="vkr-meta">
+      <a href="#">OP2600301</a>
+      <span class="customer">👤 Martin Zmítko</span>
+    </div>
+
+    <div class="vkr-desc">Několik po sobě jdoucích záznamů ze stejného místa — zásilka se fyzicky nepohybuje.</div>
+
+    <div class="vkr-actions">
+      <label><input type="checkbox"> Ověř u dopravce, proč se zásilka nehýbe.</label>
+    </div>
+
+    <div class="vkr-footer">
+      <div class="vkr-due" style="color:var(--danger)">Termín: <b>20. 7. 2026 09:00</b></div>
+      <div class="btnrow">
+        <button class="btn primary">✓ Vyřešit</button>
+        <button class="btn danger-outline">Smazat</button>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section">3 — Editační sidebar</h2>
+  <p class="note">Needitovatelný kontext (🔒) se v sidebaru zobrazuje celý, jen zamčený — operátor vidí, proč VkŘ vznikla, i když to nejde měnit.
+    Editovatelná jsou jen <b>Termín splnění</b> a <b>Poznámka k vyřešení</b>.</p>
+
+  <div class="sidebar-demo">
+    <div class="sidebar">
+      <h3>Nedoručená zásilka — 2. pokus</h3>
+
+      <div class="field">
+        <div class="lbl">Situace / Závažnost <span class="lock">🔒</span></div>
+        <div class="locked-val">Nedoručeno<div class="locked-val sub" style="background:none;padding:0;margin-top:3px;">problémové · Vyšší priorita</div></div>
+      </div>
+
+      <div class="field">
+        <div class="lbl">Popis <span class="lock">🔒</span></div>
+        <div class="locked-val">Druhý neúspěšný pokus o doručení.</div>
+      </div>
+
+      <div class="field">
+        <div class="lbl">Akce <span class="lock">🔒</span></div>
+        <div class="locked-val">
+          <div class="action-locked"><span class="adot"></span> Informuj zákazníka o druhém neúspěšném pokusu.</div>
+          <div class="action-locked"><span class="adot"></span> Ověř u dopravce důvod opakovaného nedoručení.</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="lbl">Kategorie <span class="lock">🔒</span></div>
+        <div class="locked-val">Tracking</div>
+      </div>
+
+      <div class="field">
+        <div class="lbl">Zákazník <span class="lock">🔒</span></div>
+        <div class="locked-val">Jana Nováková</div>
+      </div>
+
+      <div class="field">
+        <div class="lbl">Obchodní případ <span class="lock">🔒</span></div>
+        <div class="locked-val" style="color:var(--primary); font-weight:700;">OP2600233 →</div>
+      </div>
+
+      <div class="field">
+        <div class="lbl">Vytvořeno <span class="lock">🔒</span></div>
+        <div class="locked-val">15. 7. 2026 14:32</div>
+      </div>
+
+      <div class="field">
+        <div class="lbl">Termín splnění</div>
+        <input value="18.07.2026 12:00">
+      </div>
+
+      <div class="field">
+        <div class="lbl">Poznámka k řešení</div>
+        <textarea placeholder="Poznámka…"></textarea>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="btn primary">Uložit změny</button>
+        <button class="btn outline">Zrušit</button>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section">4 — Dashboard: "Moje" vs. cizí (needitovatelné)</h2>
+  <p class="note">"Moje věci k řešení" jsou plně akční (checkboxy, Vyřešit, Smazat — jen svoje). "Nevyřešené věci k řešení" od jiných operátorů
+    jsou jen náhled — bez checkboxů a bez tlačítek, karta je needitovatelná (klik stále může otevřít sidebar, ale v režimu jen-číst).</p>
+
+  <div class="dash-cols">
+    <div class="dash-col">
+      <h4>Moje věci k řešení <span class="count">(1)</span></h4>
+      <div class="vkr-card medium">
+        <div class="vkr-top">
+          <div class="vkr-title-wrap">
+            <div class="vkr-title">Nedoručená zásilka — 2. pokus</div>
+            <div class="vkr-situation">Nedoručeno <span class="sep">·</span> problémové</div>
+          </div>
+        </div>
+        <div class="vkr-badges"><span class="badge medium">Vyšší priorita</span><span class="badge category">Tracking</span></div>
+        <div class="vkr-meta"><a href="#">OP2600233</a></div>
+        <div class="vkr-actions">
+          <label><input type="checkbox"> Informuj zákazníka o druhém neúspěšném pokusu.</label>
+          <label><input type="checkbox"> Ověř u dopravce důvod opakovaného nedoručení.</label>
+        </div>
+        <div class="vkr-footer">
+          <div class="vkr-due">Termín: <b>18. 7.</b></div>
+          <div class="btnrow"><button class="btn primary">✓</button><button class="btn danger-outline">🗑</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-col">
+      <h4>Nevyřešené věci k řešení <span class="count">(1, cizí)</span></h4>
+      <div class="vkr-card high readonly-card">
+        <div class="vkr-top">
+          <div class="vkr-title-wrap">
+            <div class="vkr-title">Zásilka zaseknutá na jednom místě</div>
+            <div class="vkr-situation">Problém v přepravě <span class="sep">·</span> kritické</div>
+          </div>
+          <span class="vkr-eye">👁</span>
+        </div>
+        <div class="vkr-badges"><span class="badge high">Vysoká priorita</span><span class="badge category">Tracking</span></div>
+        <div class="vkr-meta"><a href="#">OP2600301</a><span class="customer">👤 Martin Zmítko</span></div>
+        <div class="vkr-desc">Několik po sobě jdoucích záznamů ze stejného místa.</div>
+        <div class="readonly-tag">Přiřazeno: Radek Veit — bez oprávnění editovat</div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section">Poznámky a otevřené otázky</h2>
+  <p class="note">
+    • <b>Kategorie</b> = zatím jen "Tracking" (odpovídá dnešnímu poli `Area` na Pravidle), do budoucna dropdown s dalšími hodnotami.<br>
+    • <b>Zákazník</b> se na kartě dovozuje ze zásilky, ke které je VkŘ navázaná — není to nové vlastní pole na VkŘ.<br>
+    • <b>Vyřešené věci k řešení zobrazují se na dashboardu, dokud se zásilka neuzavře</b> — pracovní předpoklad, potřeba ověřit s produktem.<br>
+    • <b>Smazat</b> jde jen u vlastních VkŘ — otevřená otázka, zda to ještě víc omezit (např. jen do určité doby po vytvoření).<br>
+    • Blok <b>„Zjištěno na zásilce"</b> (konkrétní data z trackingu) je pro tuhle iteraci vynechaný, zůstává jako vize do budoucna.
+  </p>
+</div>

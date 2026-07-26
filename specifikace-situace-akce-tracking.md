@@ -267,7 +267,7 @@ Týká se výhradně toho tracking záznamu, který **právě teď** dorazil.
   | Stálost zákazníka | je / není | výběr z „nový" / „dlouhodobý" |
 
 - Vyhledávací „+ Přidat podmínku" — položky seskupené podle kategorie (`Zásilka`, `Zákazník`), s vyhledáváním; už použitá pole mají v nabídce poznámku „již přidáno" (ale dají se v UI vybrat znovu — bez blokace).
-- Prázdný stav: „Žádné podmínky — akce se spustí vždy, když nastane spouštěč." (kurzívou).
+- Blok má jen jeden popisek — „Co dále platí" — bez druhého vnitřního popisku navíc. Bez podmínek se nezobrazuje žádný prázdný stav — jen tlačítko „+ Přidat podmínku".
 - Katalog podporuje i speciální editor pro časové podmínky vázané na konkrétní checkpoint/systémovou událost (tři režimy: konkrétní čas, odstup od minulého záznamu, odstup od záznamu splňujícího zadané podmínky) — v aktuálním katalogu ho zatím žádné pole nevyužívá, mechanismus je připravený pro budoucí rozšíření.
 
 #### 5.5.4 Souhrn dostupnosti bloků podle Spouštěče
@@ -351,6 +351,7 @@ Body, které nejsou touto specifikací rozhodnuté a je potřeba je doladit s by
 5. **Pole „Typ služby" (Express/Economy)** chybí v katalogu polí pro Podmínky (5.5.1/5.5.2) — bude potřeba, pokud budou pravidla muset rozlišovat prahy podle typu přepravy.
 6. **Validace vstupů** (povinnost vyplnění, formát hodnot) není v žádné z popsaných obrazovek řešená nad rámec „Název pravidla je povinný" — doporučujeme doplnit rozumnou validaci podle standardů produkčního vývoje, tahle specifikace ji nevynucuje.
 7. **Hloubka historie běhů Pravidla v detailu** (záložka „Historie", viz 5.7) — až vznikne runtime engine, bude potřeba rozhodnout, jestli a jak dalece appka zobrazí historické běhy Pravidla operátorovi nebo administrátorovi. Zatím nerozhodnuto, mimo rozsah této iterace.
+8. **Blok „Co dále platí" má v aktuálním buildu dva nadpisy nad sebou.** Vnější nadpis „Co dále platí" (viz 5.5) je needitovatelný text nad rámečkem, ale samotný rámeček bloku má navíc svůj vlastní vnitřní nadpis „Podmínky zásilky" — na rozdíl od bloků 5.5.1/5.5.2, kde je nadpis jen jeden, uvnitř rámečku. Vizuálně to působí jako duplicitní/matoucí popisek. Při implementaci sjednotit na jeden nadpis (buď zrušit vnější „Co dále platí" a nechat jen vnitřní přejmenovaný na „Co dále platí", nebo naopak) — netýká se žádné logiky, jen popisku.
 
 Mimo rozsah zcela (viz i kapitola 1): Soulad s trasou / Kontrola na bodu, oblasti „Vyhodnocení objednávky" / „Nevyzvednutá objednávka" / „Parametry a cena", runtime generování a zobrazení VkŘ operátorovi, notifikace, automatizace akcí (technické chování jako auto-e-mail nebo automatický posun data — Akce jsou v tomto rozsahu čistě popisné štítky bez vlastního chování).
 

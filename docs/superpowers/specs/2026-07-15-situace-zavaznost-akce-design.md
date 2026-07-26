@@ -1,7 +1,7 @@
 # Design: Situace, Závažnost a Akce (Konfigurátor pravidel — tracking)
 
-**Datum:** 2026-07-15
-**Status:** Design dokončen a schválen — terminologie, datový model, UI wizardu i správa Situací/Akcí. Čeká na finální review uživatele před přechodem na implementační plán.
+**Datum:** 2026-07-15 (doplněno 2026-07-16 o sekci 9 — vize VkŘ karty)
+**Status:** Design dokončen a schválen — terminologie, datový model, UI wizardu i správa Situací/Akcí. Čeká na finální review uživatele před přechodem na implementační plán. Sekce 9 je samostatná vize/mockup mimo tento rozsah.
 
 > Navazuje na `specifikace-konfigurator-pravidel.md`. Tento dokument popisuje **novou vrstvu** nad stávajícím modelem `Rule` — zavedení entit Situace, Závažnost a Akce pro oblast `tracking_records` (Konfigurátor pravidel — záznamy z trackingu).
 
@@ -162,9 +162,46 @@ Zbytek situací z CSV (clění, zásilka se vrací, atd.) až v další iteraci,
 
 ---
 
-## 9. Co zbývá
+## 9. Vize: VkŘ karta pro operátora (mockup)
 
-Design je hotový — terminologie, datový model, UI wizardu i správa Situací/Akcí jsou probrané a schválené. Zbývá:
+> **Status: vize/mockup, ne specifikace k implementaci.** Runtime generování VkŘ je mimo rozsah (viz bod 8) — tahle sekce jen skicuje, jak by výsledná karta mohla vypadat, až runtime jednou vznikne. Slouží jako ukázka pro kolegy, ne jako zadání k stavbě.
+
+Mockup (skutečné barvy prototypu): **`mockups/2026-07-16-vkr-operator-karta.html`**
+
+### 9.1 Kde karta žije
+
+VkŘ karty visí přímo na **stránce zásilky** — natrvalo rozbalené, nejdou rozkliknout (žádný detail/expand). Jedna zásilka může mít víc karet najednou vedle sebe (1 karta = 1 vytvořená VkŘ instance).
+
+### 9.2 Obsah karty — mapování na datový model
+
+| Pole na kartě | Zdroj v datovém modelu | Poznámka |
+|---|---|---|
+| Nadpis karty | `Rule.name` | Titulek VkŘ — viz spec bod 2, řádek "Pravidlo". |
+| Situace (podnadpis) | `Situation.name` (přes `Rule.situationId`) | Needitovatelné, jen zobrazení. |
+| Odznak závažnosti | `Severity.name` (přes `Rule.severityId`) | Text odznaku. |
+| Barva odznaku | odvozena ze `Severity.priority` | 3stupňová škála, ne stávající 2stupňová konvence z `RulesList` — viz 9.3. |
+| Popis | `Rule`/`Severity.vkrDescription` | Statický text šablony, případně přepsaný na Pravidle. Beze změny modelu. |
+| „Zjištěno na zásilce" | — (neexistuje) | **Vize nad rámec dnešního modelu**, viz 9.4. |
+| Akce (checklist) | `Rule.actions[]` / `SeverityAction.description` | Každá akce = 1 řádek s vlastním checkboxem — viz 9.5. |
+| Poznámka | — (neexistuje) | Jedno volné textové pole na celou kartu, ne na jednotlivou akci. |
+
+### 9.3 Barva odznaku závažnosti — 3stupňová škála
+
+Odvozuje se ze `Severity.priority` (pole existuje už dnes): `low` → neutrální šedá, `medium` → žlutá (warning), `high`/`urgent` → červená (destructive). Je to **nová konvence jen pro tuto kartu** — stávající `RulesList.tsx` dnes barví binárně (jen high/urgent červeně, zbytek šedě). Žádné nové pole na Závažnosti není potřeba, barva je čistě odvozená vlastnost při renderu.
+
+### 9.4 „Zjištěno na zásilce" — vize nad rámec modelu
+
+Blok s konkrétní pozorovanou hodnotou z trackingu té které zásilky (např. `15. 7. 2026 14:32 · Praha · „Nedoručeno — příjemce nezastižen"`). To se liší od pole `Popis`, které je statický text ze šablony beze změny — tenhle blok by vyžadoval **runtime engine**, který v okamžiku vzniku VkŘ dosadí reálná data z tracking záznamu, jenž podmínku pravidla vyhodnotil. To dnes neexistuje (mimo rozsah, viz bod 8, „Runtime generování VkŘ"). V mockupu je zahrnuto jako ukázka žádoucího chování, ne jako připravená specifikace.
+
+### 9.5 Akce — checklist s checkboxem na položku
+
+Když má závažnost/pravidlo víc přiřazených akcí (např. "Nedoručeno — problémové" má dvě: e-mail zákazníkovi + prověřit u dopravce), každá se zobrazí jako vlastní řádek s vlastním checkboxem — ne jeden souhrnný "vyřešeno" za celou kartu. Poznámka zůstává jedna, sdílená pro celou kartu, pod seznamem akcí.
+
+---
+
+## 10. Co zbývá
+
+Design je hotový — terminologie, datový model, UI wizardu i správa Situací/Akcí jsou probrané a schválené. Sekce 9 (VkŘ karta) je čistě vize/mockup pro ukázku kolegům, mimo rozsah aktuální iterace.
 
 - **Spec self-review a finální schválení** od uživatele.
-- Přechod na implementační plán (`writing-plans`).
+- Přechod na implementační plán (`writing-plans`) — pro sekce 1–8 (Situace/Závažnost/Akce, wizard, správa). Sekce 9 do implementace nejde, dokud nevznikne runtime VkŘ.

@@ -1,0 +1,383 @@
+<style>
+  :root {
+    --bg: #eef1f5;
+    --surface: #ffffff;
+    --surface-2: #e7ebf1;
+    --ink: #131720;
+    --ink-muted: #545e6e;
+    --border: #d3d9e1;
+    --accent: #2a5ea8;
+    --accent-soft: #e1ebf7;
+    --good: #17734f;
+    --good-soft: #e2f3ea;
+    --warn: #93630a;
+    --warn-soft: #fbf0dc;
+    --bad: #a5332f;
+    --bad-soft: #fbe7e5;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1319; --surface: #161b23; --surface-2: #1e2530; --ink: #e7ebf2; --ink-muted: #97a1b3; --border: #2b3341; --accent: #7fa8dd; --accent-soft: #1c2735; --good: #5cbf94; --good-soft: #17281f; --warn: #dcab52; --warn-soft: #2c2412; --bad: #e18784; --bad-soft: #2c1918; }
+  }
+  :root[data-theme="dark"] { --bg: #0f1319; --surface: #161b23; --surface-2: #1e2530; --ink: #e7ebf2; --ink-muted: #97a1b3; --border: #2b3341; --accent: #7fa8dd; --accent-soft: #1c2735; --good: #5cbf94; --good-soft: #17281f; --warn: #dcab52; --warn-soft: #2c2412; --bad: #e18784; --bad-soft: #2c1918; }
+  :root[data-theme="light"] { --bg: #eef1f5; --surface: #ffffff; --surface-2: #e7ebf1; --ink: #131720; --ink-muted: #545e6e; --border: #d3d9e1; --accent: #2a5ea8; --accent-soft: #e1ebf7; --good: #17734f; --good-soft: #e2f3ea; --warn: #93630a; --warn-soft: #fbf0dc; --bad: #a5332f; --bad-soft: #fbe7e5; }
+
+  * { box-sizing: border-box; }
+  html, body { background: var(--bg); }
+  body { font-family: var(--sans); color: var(--ink); max-width: 100%; overflow-x: hidden; }
+
+  .page { max-width: 880px; margin: 0 auto; padding: 48px 24px 100px; display: flex; flex-direction: column; gap: 40px; }
+
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+  h1 { font-size: 28px; line-height: 1.2; margin: 0; font-weight: 700; letter-spacing: -0.01em; }
+  .lede { color: var(--ink-muted); font-size: 15px; line-height: 1.65; max-width: 68ch; }
+
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; }
+  .toc-title { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-muted); margin-bottom: 8px; }
+  .toc ol { margin: 0; padding-left: 20px; font-size: 13.5px; line-height: 1.9; }
+  .toc a { color: var(--ink); text-decoration: none; }
+  .toc a:hover { color: var(--accent); }
+
+  section { display: flex; flex-direction: column; gap: 14px; scroll-margin-top: 20px; }
+  h2 { font-size: 20px; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 10px; }
+  h2 .num { font-family: var(--mono); font-size: 13px; color: var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 2px 8px; }
+  h3 { font-size: 15.5px; font-weight: 650; margin: 4px 0 0; }
+  p { line-height: 1.65; font-size: 14.5px; margin: 0; }
+  p + p { margin-top: 8px; }
+  ul, ol { line-height: 1.65; font-size: 14.5px; padding-left: 22px; }
+  li + li { margin-top: 4px; }
+  code { font-family: var(--mono); font-size: 12.5px; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
+
+  .field-legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+  .field-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.55; }
+  .field-card b { font-family: var(--mono); color: var(--accent); }
+
+  .callout { border-radius: 10px; padding: 14px 16px; font-size: 13.5px; line-height: 1.6; border: 1px solid; }
+  .callout.warn { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, var(--border)); }
+  .callout.info { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 35%, var(--border)); }
+  .callout.good { background: var(--good-soft); border-color: color-mix(in srgb, var(--good) 35%, var(--border)); }
+  .callout b { color: var(--ink); }
+
+  .quote { border-left: 3px solid var(--accent); background: var(--surface); border-radius: 0 10px 10px 0; padding: 14px 18px; font-size: 13.5px; line-height: 1.7; color: var(--ink-muted); font-style: italic; }
+
+  .diagram-frame { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; overflow-x: auto; }
+  .diagram-frame pre.mermaid { margin: 0; min-width: 760px; }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; background: var(--surface); }
+  thead th { text-align: left; font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-muted); background: var(--surface-2); padding: 10px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  tbody td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+  tbody tr:last-child td { border-bottom: none; }
+
+  /* Timeline component */
+  .timeline-frame { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 20px 20px; }
+  .timeline-title { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-muted); margin-bottom: 28px; }
+  .timeline { position: relative; height: 60px; margin: 0 10px 30px; }
+  .timeline .rail { position: absolute; top: 22px; left: 0; right: 0; height: 2px; background: var(--border); }
+  .timeline .pt { position: absolute; top: 0; text-align: center; width: 90px; margin-left: -45px; }
+  .timeline .pt .t { font-family: var(--mono); font-size: 11px; font-weight: 600; }
+  .timeline .pt .dot { width: 10px; height: 10px; border-radius: 50%; margin: 4px auto; }
+  .timeline .pt .lbl { font-size: 11.5px; line-height: 1.4; }
+  .timeline .pt .sub { font-size: 10.5px; opacity: .6; }
+  .dot-move { background: var(--accent); }
+  .dot-excl { background: var(--warn); }
+  .dot-reset { background: var(--good); }
+  .dot-fire { background: var(--bad); }
+  .dot-empty { background: var(--border); }
+  .timeline-note { font-size: 13px; line-height: 1.6; }
+  .timeline-note + .timeline-note { margin-top: 6px; }
+
+  /* Widget wireframe */
+  .widget { max-width: 560px; border: 1px solid var(--border); border-radius: 10px; padding: 14px; background: var(--surface); }
+  .widget-row { display: flex; gap: 6px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+  .chip { border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 12.5px; background: var(--surface-2); }
+  .widget-hint { font-size: 11.5px; opacity: .65; margin: 0 0 12px; line-height: 1.5; }
+  .widget label.row { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 10px; }
+  .widget .divider { border-top: 1px dashed var(--border); padding-top: 12px; margin-top: 4px; }
+  .widget .sub-hint { font-size: 11.5px; opacity: .6; padding-left: 26px; margin: 8px 0 0; line-height: 1.5; }
+
+  .kontrola-block { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .kontrola-block h3 { margin-bottom: 6px; }
+
+  footer { border-top: 1px solid var(--border); padding-top: 20px; font-size: 12.5px; color: var(--ink-muted); line-height: 1.7; }
+  footer a { color: var(--accent); }
+</style>
+
+<div class="page">
+
+  <header>
+    <div class="eyebrow">Zadání pro programátory</div>
+    <h1>Tracking pravidla — podmínka „opakuje se" (T01, zaseklá zásilka)</h1>
+    <p class="lede">
+      Tenhle dokument popisuje jednu konkrétní podmínku v editoru tracking pravidel — případ „opakuje se"
+      u pole jako ID místa / Město. Vysvětluje, jak funguje mechanismus časového okna a jak se chová
+      v hraničních případech, které jsme prošli krok za krokem s byznysem.
+    </p>
+  </header>
+
+  <div class="toc">
+    <div class="toc-title">Obsah</div>
+    <ol>
+      <li><a href="#kontext">Co tahle podmínka řeší</a></li>
+      <li><a href="#zadani">Zadání od klienta (doslovně)</a></li>
+      <li><a href="#mechanismus">Mechanismus — časové okno</a></li>
+      <li><a href="#neprerusene">Nepřerušeně vs. souhrnně</a></li>
+      <li><a href="#cleni">Reset bod (clění) — proč ne vyloučení</a></li>
+      <li><a href="#reaktivni">Kdy se pravidlo vůbec vyhodnocuje</a></li>
+      <li><a href="#datovy-model">Datový model — co se mění</a></li>
+      <li><a href="#wireframe">Finální wireframe</a></li>
+      <li><a href="#scope">Mimo scope / otevřené otázky</a></li>
+      <li><a href="#reference">Reference</a></li>
+    </ol>
+  </div>
+
+  <section id="kontext">
+    <h2><span class="num">1</span>Co tahle podmínka řeší</h2>
+    <p>
+      Pravidlo <code>T01 — Zásilka se zasekla na jednom místě</code> (oblast <code>tracking_records</code>,
+      Situace <code>SIT-TRANSPORT</code> / závažnost „zaseknutá na místě") má rozpoznat zásilku, která přestala
+      fyzicky postupovat, i když tracking dál chodí — dopravce dál posílá statusy, ale pořád ze stejného místa.
+    </p>
+    <p>
+      Editor podmínek pro tracking pravidla (<code>TrackingConditionsBuilder.tsx</code>) má pro tohle
+      dedikovaný režim podmínky „opakuje se" — na rozdíl od „je"/„není" (konkrétní hodnota) nebo „bylo v
+      historii" (zpětný pohled) tenhle režim hlídá, že se hodnota pole v čase nemění.
+    </p>
+  </section>
+
+  <section id="zadani">
+    <h2><span class="num">2</span>Zadání od klienta (doslovně)</h2>
+    <div class="quote">
+      „Statusy u kterých se posuzují minulé statusy z pohledu místa a času. Řeší např. zejména, když se
+      zásilka zasekne na jednom místě a zůstane tam. A další den vyskočí nový status z toho samého místa.
+      Posuzuje se tedy předchozí místo a pohyb a čas. Může mít vazbu na variantu přepravy, že u expresní to
+      bude už problém, u economy nemusí, resp. tam budou delší povolené lhůty, kdy je zásilka cyklicky na
+      jednom místě. Je nutné vyloučit zásilky na clení, u kterých je běžné, že jsou delší čas na jednom
+      místě."
+    </div>
+    <p>Tři klíčové věci z tohodle zadání, které mechanismus musí zohlednit:</p>
+    <ul>
+      <li>Jde primárně o <b>čas</b> („další den vyskočí nový status"), ne o počet záznamů.</li>
+      <li>Musí jít <b>vyloučit clění</b> — tam je dlouhý pobyt na stejném místě normální, ne příznak problému.</li>
+      <li>Může mít vazbu na <b>variantu přepravy</b> (Express/Economy) — řešeno mimo tuhle podmínku, viz §9.</li>
+    </ul>
+  </section>
+
+  <section id="mechanismus">
+    <h2><span class="num">3</span>Mechanismus — časové okno</h2>
+    <p>
+      Podmínka se ptá: <b>„hodnota pole [X] platí už alespoň [N] [hodin/dní]?"</b> — vyhodnocováno vždy k
+      času nově příchozího tracking záznamu (viz §6, proč jen reaktivně).
+    </p>
+    <p>
+      Klíčový pojem je <b>reset bod</b> — časová značka, od které se aktuální „série" se stejnou hodnotou
+      počítá. Reset bod se posune na čas nového záznamu, kdykoliv:
+    </p>
+    <ul>
+      <li>hodnota sledovaného pole se změní na jinou (viz §4), nebo</li>
+      <li>záznam odpovídá vyloučenému statusu, např. clění (viz §5).</li>
+    </ul>
+    <p><code>doba = čas aktuálního záznamu − čas posledního reset bodu</code>. Podmínka je splněná, když
+    <code>doba ≥ nastavený práh</code> — a to jen v okamžiku, kdy dorazí nový záznam se stejnou (nevyloučenou)
+    hodnotou.</p>
+
+    <div class="diagram-frame">
+<pre class="mermaid">
+flowchart TD
+  A["Novy tracking zaznam"] --> B{"Hodnota sledovaneho pole<br/>== predchozi hodnota v serii?"}
+  B -->|"Ne"| R1["Reset bod = tento zaznam<br/>(nova serie zacina)"]
+  B -->|"Ano"| C{"Ma tento zaznam<br/>vylouceny status? (napr. cleni)"}
+  C -->|"Ano"| R2["Reset bod = tento zaznam<br/>Pravidlo NESPOUSTI"]
+  C -->|"Ne"| D["Doba = cas zaznamu minus<br/>cas posledniho reset bodu<br/>(rezim neprerusene / souhrnne, viz 5)"]
+  D --> E{"Doba >= prah?"}
+  E -->|"Ano"| F(["Podminka splnena -> VkR"])
+  E -->|"Ne"| G(["Ceka se na dalsi zaznam"])
+</pre>
+    </div>
+  </section>
+
+  <section id="neprerusene">
+    <h2><span class="num">4</span>Nepřerušeně vs. souhrnně</h2>
+    <p>
+      Přepínač určuje, jak se reset bod chová při <i>dočasné</i> změně hodnoty (zásilka na chvíli odjede
+      jinam a vrátí se). Výchozí je „musí to být nepřerušeně".
+    </p>
+
+    <h3>4.1 Nepřerušeně (výchozí) — každá změna resetuje čítač</h3>
+    <p>Příklad: ID místa je Brno (t=0h), na 5 hodin se změní na Praha, pak zpátky na Brno (t=10h) a zůstane
+    tam. Práh 24 h.</p>
+    <div class="timeline-frame">
+      <div class="timeline-title">Sekvence záznamů — režim „nepřerušeně"</div>
+      <div class="timeline">
+        <div class="rail"></div>
+        <div class="pt" style="left:0%;"><div class="t">t=0h</div><div class="dot dot-move"></div><div class="lbl">Brno</div></div>
+        <div class="pt" style="left:17%;"><div class="t">t=5h</div><div class="dot dot-move"></div><div class="lbl">Praha</div></div>
+        <div class="pt" style="left:34%;"><div class="t">t=10h</div><div class="dot dot-reset"></div><div class="lbl">Brno</div><div class="sub">reset bod</div></div>
+        <div class="pt" style="left:67%;"><div class="t">t=30h</div><div class="dot dot-move"></div><div class="lbl">Brno</div><div class="sub">20h od resetu</div></div>
+        <div class="pt" style="left:100%;"><div class="t">t=34h</div><div class="dot dot-fire"></div><div class="lbl">práh splněn</div><div class="sub">24h od t=10h</div></div>
+      </div>
+      <p class="timeline-note">Doba se počítá od t=10h (poslední změna), ne od t=0h. V t=30h je to jen 20h
+      od resetu → nespouští. Spustí až záznam v t≥34h, který pořád hlásí Brno.</p>
+    </div>
+
+    <h3>4.2 Souhrnně — sčítá se i s přestávkami</h3>
+    <p>Stejná sekvence, práh 10 h, ale vypnuté „musí to být nepřerušeně":</p>
+    <div class="timeline-frame">
+      <div class="timeline-title">Sekvence záznamů — režim „souhrnně"</div>
+      <div class="timeline">
+        <div class="rail"></div>
+        <div class="pt" style="left:0%;"><div class="t">t=0h</div><div class="dot dot-move"></div><div class="lbl">Brno</div></div>
+        <div class="pt" style="left:17%;"><div class="t">t=5h</div><div class="dot dot-excl"></div><div class="lbl">Praha</div><div class="sub">nepočítá se</div></div>
+        <div class="pt" style="left:34%;"><div class="t">t=10h</div><div class="dot dot-move"></div><div class="lbl">Brno</div><div class="sub">souhrn 5h</div></div>
+        <div class="pt" style="left:51%;"><div class="t">t=15h</div><div class="dot dot-fire"></div><div class="lbl">práh splněn</div><div class="sub">souhrn 10h</div></div>
+      </div>
+      <p class="timeline-note">5h (t0–t5, Brno) + přestávka v Praze (nepočítá se) + 5h (t10–t15, Brno) =
+      souhrnných 10h → práh splněn v t=15h. V režimu „nepřerušeně" by při stejném prahu spustilo až v t=20h.</p>
+    </div>
+  </section>
+
+  <section id="cleni">
+    <h2><span class="num">5</span>Reset bod (clění)</h2>
+    <p>
+      Vyloučení podle statusu <b>není filtr „ignoruj tenhle záznam"</b> — je to důležité rozlišení, protože
+      kdyby clění záznamy ze série jen mizely, znamenalo by to natrvalo vyřadit tohle místo z detekce, i pro
+      budoucí, opravdu podezřelé zaseknutí <i>po</i> odjezdu z clění.
+    </p>
+    <p>
+      Správný model: záznam s vyloučeným statusem <b>funguje jako reset bod</b> — stejně jako změna hodnoty
+      pole. Sám o sobě pravidlo nikdy nespustí (i kdyby od předchozího záznamu uplynula libovolně dlouhá
+      doba), ale časomíra od něj běží znovu. Jakmile přijde další záznam se stejnou hodnotou pole a jiným
+      (nevyloučeným) statusem, počítání pokračuje od tohohle bodu.
+    </p>
+    <div class="timeline-frame">
+      <div class="timeline-title">ID místa = „Sklad X" po celou dobu, vyloučený status „In customs", práh 24h</div>
+      <div class="timeline" style="height:80px;">
+        <div class="rail"></div>
+        <div class="pt" style="left:0%;"><div class="t">t=0h</div><div class="dot dot-move"></div><div class="lbl">Příjezd</div></div>
+        <div class="pt" style="left:14%;"><div class="t">t=2h</div><div class="dot dot-excl"></div><div class="lbl">In customs</div></div>
+        <div class="pt" style="left:52%;"><div class="t">t=26h</div><div class="dot dot-excl"></div><div class="lbl">In customs</div><div class="sub">nespouští, i&nbsp;přes&nbsp;26h</div></div>
+        <div class="pt" style="left:65%;"><div class="t">t=27h</div><div class="dot dot-reset"></div><div class="lbl">Odjezd z X</div><div class="sub">reset bod</div></div>
+        <div class="pt" style="left:100%;"><div class="t">t=51h</div><div class="dot dot-fire"></div><div class="lbl">práh splněn</div><div class="sub">24h od t=27h</div></div>
+      </div>
+      <p class="timeline-note">Dokud je aktuální záznam „In customs", pravidlo nespustí, bez ohledu na to,
+      kolik hodin uplynulo od příjezdu. Jakmile přijde záznam s jiným statusem (ale stejným ID místa, „Odjezd
+      z X" v t=27h), časomíra běží od tohohle bodu nanovo — pokud zásilka dalších 24h nikam nepohne, v t=51h
+      pravidlo oprávněně spustí, protože už to není o čekání na clení.</p>
+    </div>
+    <div class="callout good">
+      <b>Proč je tohle důležité pro implementaci:</b> vyloučení není filtr „ignoruj tenhle záznam" — je to
+      <b>posun reset bodu</b>. Engine musí při každém novém záznamu zkontrolovat i tenhle případ, ne jen
+      porovnání hodnoty pole s předchozí.
+    </div>
+  </section>
+
+  <section id="reaktivni">
+    <h2><span class="num">6</span>Kdy se pravidlo vůbec vyhodnocuje</h2>
+    <p>
+      Podmínka „opakuje se" je dostupná jen když spouštěč pravidla zahrnuje aktuální (právě příchozí) záznam
+      — tj. reaktivně, „při každé nové tracking události", nikdy jako časovač. Tohle už dnes vynucuje
+      <code>allowCurrentRecord</code> v <code>TrackingConditionsBuilder.tsx:86</code> (řádek „opakuje se" se
+      nabízí jen když <code>allowCurrentRecord</code> je <code>true</code>) — návrh na tomhle staví, nemění
+      to.
+    </p>
+    <div class="callout info">
+      <b>Důsledek:</b> pokud po posledním záznamu nepřijde vůbec žádný další (zásilka přestane tracking
+      hlásit úplně), pravidlo se nikdy znovu nevyhodnotí — bez ohledu na to, kolik reálného času uplyne.
+      „Zásilka dlouho bez jakéhokoliv nového záznamu" je jiná otázka (možná ztráta), řeší ji jiný, časovačový
+      mechanismus mimo scope týhle podmínky.
+    </div>
+  </section>
+
+  <section id="datovy-model">
+    <h2><span class="num">7</span>Datový model</h2>
+    <p>
+      Typ <code>Condition</code> (<code>src/lib/model/types.ts</code>), varianta
+      <code>kind: "tracking_aggregate"</code> — pro <code>valueMode: "same_repeats"</code> (režim „opakuje
+      se") má tahle pole:
+    </p>
+    <div class="field-legend">
+      <div class="field-card"><b>durationValue: number</b> — číselná hodnota prahu (např. 24).</div>
+      <div class="field-card"><b>durationUnit: "h" | "d"</b> — jednotka prahu (hodiny / dny).</div>
+      <div class="field-card"><b>continuous: boolean</b> — odpovídá přepínači „musí to být nepřerušeně" (§4):
+      <code>true</code> = reset na jakoukoli změnu, <code>false</code> = souhrnné sčítání.</div>
+      <div class="field-card"><b>resetOn?: {"{"} fieldId: string; operator: "contains" | "not_contains"; value: string {"}"}</b> —
+      volitelné pravidlo pro reset bod podle statusu (§5). Nepřítomné = žádné dodatečné vyloučení.</div>
+    </div>
+    <p>Pole <code>count</code> a <code>occurrence</code> platí samostatně pro <code>valueMode:
+    "specific"</code> (režim „bylo v historii") — nesouvisí s větví „opakuje se".</p>
+    <div class="callout warn">
+      <b>Pozor při zakládání seed dat:</b> <code>rule_t01</code> v <code>src/lib/model/seed.ts</code>
+      potřebuje <code>durationValue</code>/<code>durationUnit</code>/<code>continuous</code> (konkrétní práh
+      pro T01 je na domluvě s byznysem, tenhle dokument řeší jen mechanismus).
+    </div>
+  </section>
+
+  <section id="wireframe">
+    <h2><span class="num">8</span>Finální wireframe</h2>
+    <p>Horní řádek (výběr pole + přepínač je/není/opakuje se/bylo v historii) beze změny.</p>
+    <div class="widget">
+      <div class="widget-row">
+        <span class="chip">ID místa ▾</span>
+        <span class="chip" style="font-weight:600;">opakuje se ▾</span>
+        <span style="margin-left:auto; opacity:.5;">✕</span>
+      </div>
+      <p class="widget-hint">Bez konkrétní hodnoty — hlídá, jak dlouho pole nemění hodnotu. Vyhodnocuje se
+      jen při nové tracking události.</p>
+      <div class="widget-row">
+        <span>hodnota platí už</span>
+        <span class="chip" style="width:44px; text-align:center;">24</span>
+        <span class="chip">hodin ▾</span>
+      </div>
+      <label class="row"><input type="checkbox" checked> musí to být nepřerušeně
+        <span style="font-size:11px; opacity:.55;">(vypnuto = sčítá se i s přestávkami)</span></label>
+      <div class="divider">
+        <label class="row"><input type="checkbox" checked> resetovat časomíru, když se objeví status</label>
+        <div class="widget-row" style="padding-left:26px; margin-bottom:0;">
+          <span class="chip">Odvozený status ▾</span>
+          <span class="chip">obsahuje ▾</span>
+          <span class="chip" style="width:150px;">In customs</span>
+        </div>
+        <p class="sub-hint">Takový záznam pravidlo samo nikdy nespustí a časomíra od něj počítá znovu —
+        typicky clení.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="scope">
+    <h2><span class="num">9</span>Mimo scope / otevřené otázky</h2>
+    <ul>
+      <li><b>Rozdílné prahy Express/Economy:</b> vědomě neřešeno formálním „rozsahem pravidla" (Pravidlo dnes
+      nemá koncept <code>carriers</code>/<code>serviceTypes</code>, na rozdíl od Trasy/Úseku). Řešení: dvě
+      samostatná pravidla (např. T01-Express, T01-Economy), každé s vlastním prahem, rozlišené běžnou
+      podmínkou „Typ služby je …" vedle „opakuje se".</li>
+      <li><b>Pole „Typ služby" zatím chybí</b> v katalogu tracking podmínek (<code>TRACKING_FIELDS</code> v
+      <code>trackingFields.ts</code> má jen pole z tracking eventů, ne ze zásilky). Bez něj nejde výše
+      popsané řešení Express/Economy postavit — drobný doplněk, potřeba přidat před implementací téhle
+      varianty.</li>
+      <li><b>„Zásilka dlouho bez jakéhokoliv nového záznamu"</b> (možná ztráta) je jiná funkčnost/jiný
+      spouštěč, mimo scope týhle podmínky (viz §6).</li>
+      <li><b>Konkrétní hodnota prahu pro T01</b> (kolik hodin/dní) — mechanismus je hotový, konkrétní číslo
+      je na doladění s byznysem při zakládání seed dat.</li>
+    </ul>
+  </section>
+
+  <section id="reference">
+    <h2><span class="num">10</span>Reference</h2>
+    <ul>
+      <li><code>docs/superpowers/specs/2026-07-19-tracking-opakuje-se-design.md</code> — plná specifikace.</li>
+      <li><code>src/components/rules/editors/TrackingConditionsBuilder.tsx</code> — komponenta, která se
+      mění.</li>
+      <li><code>src/lib/model/trackingFields.ts</code> — katalog polí a pomocné funkce
+      (<code>REPEATABLE_FIELDS</code>, <code>rowKindOf</code>).</li>
+      <li><code>src/lib/model/types.ts</code> — typ <code>Condition</code>, varianta
+      <code>tracking_aggregate</code>.</li>
+      <li><code>src/lib/model/seed.ts</code> — <code>rule_t01</code>, ukázková data.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Needimplementováno. Tento dokument je zadání k implementaci, ne popis hotového stavu.
+  </footer>
+
+</div>

@@ -23,13 +23,9 @@ function parseTimeSpec(value: string | undefined): TrackingTimeSpec {
 export function VkrConditionsBuilder({
   conditions,
   onChange,
-  title,
-  emptyText,
 }: {
   conditions: VkrCondition[];
   onChange: (next: VkrCondition[]) => void;
-  title?: string;
-  emptyText?: string;
 }) {
   function addCondition(field: VkrConditionFieldDef) {
     const firstOp = field.operators[0];
@@ -54,18 +50,8 @@ export function VkrConditionsBuilder({
   }
 
   return (
-    <div className="rounded-xl border border-border bg-muted/10 p-3 space-y-2.5">
-      <div className="flex items-center justify-between">
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          {title ?? "Podmínky zásilky"}
-        </div>
-      </div>
-
-      {conditions.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-border bg-background px-3 py-3 text-xs text-muted-foreground italic">
-          {emptyText ?? "Žádné podmínky — akce se spustí vždy, když nastane spouštěč."}
-        </div>
-      ) : (
+    <>
+      {conditions.length > 0 && (
         <div className="space-y-1.5">
           {conditions.map((c) => (
             <ConditionRow
@@ -82,7 +68,7 @@ export function VkrConditionsBuilder({
         usedFieldIds={conditions.map((c) => c.fieldId)}
         onPick={addCondition}
       />
-    </div>
+    </>
   );
 }
 
