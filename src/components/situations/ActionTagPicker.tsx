@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useActionTags, actionTagsStore } from "@/lib/model/store";
+import { useActionTags, actionTagsStore, actionTagUsageCount } from "@/lib/model/store";
+import { cn } from "@/lib/utils";
 import type { ActionTag } from "@/lib/model/types";
 
 export function ActionTagPicker({
@@ -33,6 +34,12 @@ export function ActionTagPicker({
     pick(tag);
   }
 
+  function removeFromCatalog(e: React.MouseEvent, tagId: string) {
+    e.stopPropagation();
+    if (actionTagUsageCount(tagId) > 0) return;
+    actionTagsStore.remove(tagId);
+  }
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -51,15 +58,30 @@ export function ActionTagPicker({
           />
         </div>
         <div className="max-h-56 overflow-y-auto p-1">
-          {filtered.map((tag) => (
-            <button
-              key={tag.id}
-              onClick={() => pick(tag)}
-              className="w-full rounded-md px-2 py-1.5 text-left text-xs hover:bg-muted/60"
-            >
-              {tag.label}
-            </button>
-          ))}
+          {filtered.map((tag) => {
+            const usageCount = actionTagUsageCount(tag.id);
+            return (
+              <div key={tag.id} className="group flex items-center rounded-md hover:bg-muted/60">
+                <button
+                  onClick={() => pick(tag)}
+                  className="flex-1 min-w-0 truncate px-2 py-1.5 text-left text-xs"
+                >
+                  {tag.label}
+                </button>
+                <button
+                  onClick={(e) => removeFromCatalog(e, tag.id)}
+                  disabled={usageCount > 0}
+                  title={usageCount > 0 ? `Používá se u ${usageCount} závažností` : "Smazat akci z katalogu"}
+                  className={cn(
+                    "shrink-0 mr-1 rounded p-1 text-muted-foreground transition-colors",
+                    usageCount > 0 ? "opacity-20 cursor-not-allowed" : "opacity-0 group-hover:opacity-100 hover:text-red-500"
+                  )}
+                >
+                  <Trash2 className="size-3" />
+                </button>
+              </div>
+            );
+          })}
           {filtered.length === 0 && (
             <div className="px-2 py-3 text-center text-xs text-muted-foreground">Nic nenalezeno</div>
           )}

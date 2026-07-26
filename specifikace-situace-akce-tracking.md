@@ -7,10 +7,9 @@
 
 ## 1. Proč tahle konfigurace vzniká
 
-Appka řeší dvě věci, které spolu úzce souvisí, ale je dobré je od začátku vnímat odděleně:
+Appka dává uživateli appky — tedy byznysu, ne vývojáři — nástroj, kterým si sám nastaví, za jakých podmínek nad tracking daty zásilky se má na problém upozornit (zásilka se nedoručila, uvízla na cestě, poškodila se…) a co má operátor v takovém případě udělat. Tohle nastavování se odehrává přímo v appce, formou konfigurace, ne zásahem do kódu — to je role **Pravidel pro tracking**: uživatel appky si v nich sám poskládá, za jakých podmínek se má pravidlo spustit.
 
-- **Bez konfigurovatelných pravidel** by každou novou situaci, na kterou má appka upozornit operátora (zásilka se nedoručila, uvízla na cestě, poškodila se…), musel naprogramovat vývojář zvlášť. Cílem **Pravidel pro tracking** je dát uživateli appky (ne vývojáři) nástroj, kterým si sám poskládá, za jakých podmínek nad tracking daty zásilky se má na problém upozornit — bez zásahu do kódu.
-- **Bez sdílené vrstvy Situace/Závažnost/Akce** by ale každé takhle poskládané pravidlo muselo samo od nuly určit i to, *co přesně operátor uvidí* a *co má udělat* — a dvě různá pravidla řešící v zásadě stejný problém (např. „zásilka se nedoručila napoprvé" vs. „nedoručila se ani na třetí pokus") by mohla operátorovi ukázat nekonzultní, nesourodý text a jiné kroky, i když jde o tutéž byznysovou kategorii problému. Cílem **Situace a akce** je tohle oddělit: pravidlo řeší jen *kdy*, sdílená šablona (Situace → Závažnost) řeší *co to znamená* a *co se s tím udělá* — a garantuje, že operátor dostane konzistentní zkušenost bez ohledu na to, které konkrétní pravidlo problém odhalilo.
+Nad jednotlivými pravidly stojí sdílená vrstva **Situace → Závažnost → Akce**, která funguje jako klasifikace a šablona: určuje, do jaké byznysové kategorie problém patří (Situace), jak je závažný (Závažnost) a co má operátor konkrétně udělat (Akce). Jedno Pravidlo se na tuhle šablonu jen odkáže. Díky tomu různá pravidla, která ve výsledku patří ke stejné kategorii problému — např. „zásilka se nedoručila napoprvé" a „nedoručila se ani na třetí pokus" spadají obě pod Situaci „Nedoručeno" — dávají operátorovi stejně formulovaný, konzistentní text a kroky, i když je spustilo jiné konkrétní pravidlo.
 
 Tenhle dokument popisuje obě části a jejich propojení:
 
@@ -44,7 +43,7 @@ Appka má i další části, které **záměrně nejsou předmětem tohoto zadá
 | **Spouštěč** | Mechanismus spuštění Pravidla — buď **Automaticky** (reaktivně, při každém novém tracking záznamu), nebo **Časovač** (periodická kontrola). |
 | **Podmínka** | Jedna dílčí testovatelná věc, kterou musí zásilka/záznam splňovat, aby se Pravidlo spustilo. Podmínky v rámci jednoho bloku se vždy kombinují logickým **AND** (musí platit všechny najednou). |
 | **VkŘ (věc k řešení)** | Runtime instance pro operátora, která vznikne, když se Pravidlo spustí a jeho podmínky jsou splněné. Mimo rozsah tohoto dokumentu — řeší se jen její konfigurace. |
-| **Priorita** | Čtyřstupňová škála `LOW / MEDIUM / HIGH / URGENT`, existuje na Závažnosti (výchozí) i na Pravidle (vlastní, editovatelná kopie). |
+| **Priorita** | Čtyřstupňová škála **Nízká / Vyšší / Vysoká / Urgentní**. Nastavuje se jen na Závažnosti — Pravidlo vlastní prioritu nemá, jen ji needitovatelně zobrazuje podle aktuálně vybrané Závažnosti (živý odkaz, stejný princip jako u Akcí — viz 4.5). |
 
 ---
 
@@ -62,11 +61,9 @@ Klíčová myšlenka: **Situace a Závažnost nikdy nic samy nespouští ani nek
 
 - Pravidlo si při založení vybere přesně **jednu** Závažnost (a tím i její Situaci) — to určuje, do jaké kategorie problém patří a jaké akce se s ním pojí.
 - Pravidlo si nezávisle na tom nastavuje vlastní **Spouštěč** a **Podmínky** — dvě různá pravidla mohou mířit na stejnou Závažnost, ale mít úplně jiné podmínky spuštění (typický příklad ze seed dat: „Nedoručeno" má tři pravidla — jedno na 1., druhé na 2. a třetí na 3.+ neúspěšný pokus — každé se svou vlastní podmínkou počtu pokusů, všechna na jinou Závažnost stejné Situace).
-- Jakmile je Pravidlo jednou uložené, volba Situace/Závažnosti se **už nedá změnit** — pokud má později patřit jinam, založí se nové Pravidlo. Název, popis a priorita Pravidla naopak zůstávají volně editovatelné kdykoliv.
+- Volba Situace/Závažnosti zůstává editovatelná i po uložení Pravidla — stejně jako název, popis a priorita, dá se kdykoliv v editaci pravidla přepnout na jinou.
 
 **Proč je to takhle rozdělené:** kdyby Situace/Závažnost sama nesla i časování nebo podmínky (varianta, která byla vědomě zvážena a zamítnuta), ušetřilo by to pár kliků při zakládání typického pravidla, ale platilo by se za to ztrátou flexibility — každé pravidlo je jinak specifické (jiný počet pokusů, jiná lokace, jiný práh) a nutit je do jedné pevné konfigurace na úrovni Situace by uživatele appky brzy limitovalo. Tím, že Situace/Závažnost zůstává **čistě klasifikace**, funguje stejně bez ohledu na to, kolik různě podmíněných pravidel na ni bude nakonec mířit — a stejný princip (situace jako sdílená, ale sama nekonfigurující klasifikační vrstva) se dá použít i pro budoucí zdroje věcí k řešení mimo tracking, ne jen pro tenhle wizard.
-
-> ⚠ **Poznámka k prototypu:** v aktuálním buildu prototypu jde výběr Situace/Závažnosti přepnout i při editaci existujícího Pravidla — selecty a tlačítka nejsou nijak uzamčené. To je z hlediska cílového chování mezera, ne záměr: po založení Pravidla má být tahle volba needitovatelná, přesně podle principu výše.
 
 ---
 
@@ -83,7 +80,7 @@ Tahle kapitola je vlastní **správa šablon** popsaných v kapitole 3 — obraz
 | **Situace** | `název`, `popis` (volitelný) | Byznysová kategorie. Vždy patří do jedné Oblasti — pro tento dokument vždy „Záznamy z trackingu". |
 | | `seznam Závažností` | 1:N, uspořádaný seznam. |
 | **Závažnost** | `název` | Např. „kritické", „problémové", „běžné". |
-| | `priorita` | `LOW / MEDIUM / HIGH / URGENT` — výchozí hodnota, kterou Pravidlo při výběru převezme. |
+| | `priorita` | **Nízká / Vyšší / Vysoká / Urgentní**. Jediné místo, kde se priorita nastavuje — Pravidlo ji jen needitovatelně zobrazuje (živě, stejným mechanismem jako Akce). |
 | | `seznam přiřazených akcí` | 1:N. |
 | **Přiřazená akce** | `odkaz na Akci z katalogu` | Které konkrétní akci (štítku) tahle položka odpovídá. |
 | | `výchozí text pro operátora` (volitelný) | Volný text — co přesně má operátor v rámci téhle akce udělat. |
@@ -91,30 +88,34 @@ Tahle kapitola je vlastní **správa šablon** popsaných v kapitole 3 — obraz
 
 Katalog akcí je **sdílený napříč všemi Situacemi a Závažnostmi** — jedna položka (např. „Prověřit u dopravce") se dá přiřadit k libovolnému počtu Závažností současně, a při úpravě jejího labelu/ikony se tahle změna projeví všude, kde se používá.
 
+**Mazání položky z katalogu akcí** je možné přímo z nabídky pro přidání akce (viz 4.4) — ikona koše u každé položky. **Guard:** needitovatelné (disabled), pokud je akce aktuálně přiřazená k libovolné Závažnosti kdekoliv v appce, ne jen k té, ze které se zrovna přidává — stejný princip jako mazání Závažnosti (viz 4.3), jen na úrovni jednotlivé Akce v katalogu.
+
 ### 4.2 Obrazovka „Situace a závažnosti" (seznam)
 
 Vstupní bod: položka **„Situace a závažnosti"** v hlavní navigaci (dostupná odkudkoliv, ne jen jako podřízený odkaz z Pravidel).
 
 - **Vyhledávání** — jeden textový vstup, filtruje živě (bez potvrzení) podle názvu Situace **i** podle názvu kterékoliv její Závažnosti (case-insensitive). Žádné další filtry (podle Oblasti apod.) nejsou potřeba — v tomto rozsahu existuje jen jedna relevantní oblast.
   - Prázdný výsledek má dva různé texty: „Zatím žádné situace." (opravdu žádná Situace neexistuje) vs. „Žádná situace neodpovídá hledání." (existují, ale filtr nic nenašel) — rozlišujte tyhle dva stavy.
-- **Řádek každé Situace je rozbalovací.** Sbaleně ukazuje jen název, volitelný popis, počet Závažností a **celkový počet Pravidel** napojených na kteroukoliv její Závažnost (skloňování: 1 → „pravidlo", 2–4 → „pravidla", 5+ → „pravidel").
-  - Po rozbalení: seznam Závažností, u každé její priorita (badge) a počet napojených Pravidel. Pod každou Závažností jsou **rozepsaná** samotná napojená Pravidla jako klikací karty — kód, název, badge Spouštěče, badge priority, tečka aktivní/neaktivní (zelená/šedá). Klik vede rovnou do editace daného Pravidla.
+- **Klik na kartičku Situace otevře její detail** (`/situace/:id`) — stejný cíl jako dřívější samostatný odkaz „upravit", který teď mizí (celá kartička dělá totéž). Rozbalení/sbalení má vlastní malou šipku (ikona chevron) se svým klikem (`stopPropagation`), aby šlo procházet Závažnosti/Pravidla bez odchodu ze seznamu.
+- **Kartička Situace sbaleně** ukazuje jen název, volitelný popis, počet Závažností a **celkový počet Pravidel** napojených na kteroukoliv její Závažnost (skloňování: 1 → „pravidlo", 2–4 → „pravidla", 5+ → „pravidel").
+  - Po rozbalení: seznam Závažností, u každé její priorita (badge) a počet napojených Pravidel. Pod každou Závažností jsou **rozepsaná** samotná napojená Pravidla jako klikací karty — stejné složení jako řádek v seznamu Pravidel (viz 5.7): název, badge Oblasti, badge Spouštěče, badge priority (needitovatelně shodná s prioritou vypsané Závažnosti, viz 4.5), žádný kód. **Klik otevře postranní detail Pravidla** (stejná komponenta jako v seznamu Pravidel), ne přímou editaci — konzistentní s tím, jak se k detailu Pravidla přistupuje odjinud.
   - Situace bez Závažností: „Zatím žádné závažnosti." (kurzívou).
+- **Žádné tlačítko „Zpět na pravidla" pod seznamem** — hlavní navigace nahoře stačí, tlačítko bylo duplicitní.
 - **Tlačítko „+ Nová situace"** — vytvoří prázdnou Situaci (výchozí název „Nová situace", náhodný kód, žádné Závažnosti) a rovnou otevře její detail k doplnění.
 - **Mazání Situace** je na řádku přímo v seznamu (ikona koše). **Blokované, pokud má Situace jakoukoliv Závažnost použitou v alespoň jednom Pravidle** — tlačítko je neaktivní, s popiskem „Používá se v N pravidlech". Tohle je tvrdý guard, ne jen varování — smazání musí být z UI úrovně nemožné, dokud se nezmenší počet na 0.
 
 ### 4.3 Detail Situace a editace Závažností
 
-- Název a popis Situace se editují přímo na stránce a **ukládají se okamžitě při každé změně** — žádné tlačítko „Uložit". Tohle je záměrný rozdíl oproti Pravidlu (viz 5.6), kde se ukládá až explicitním kliknutím — obě chování jsou správná, každé pro jinou obrazovku, nezaměňovat je.
-- Tlačítko „Smazat" u Situace v detailu má stejný guard jako v seznamu (blokované při jakémkoliv použití kterékoli Závažnosti v Pravidle).
+- Název, popis Situace i všechny Závažnosti (název, priorita, přiřazené akce) se editují lokálně a **ukládají se až explicitním kliknutím na tlačítko „Uložit"** — stejný vzor jako u Pravidla (viz 5.6), pro konzistenci mezi oběma obrazovkami. Pod tlačítkem „Uložit" je odkaz **„← Zpět na situace"**, který se vrátí na seznam bez uložení rozpracovaných změn.
+- Tlačítko „Smazat" u Situace v detailu má stejný guard jako v seznamu (blokované při jakémkoliv použití kterékoli Závažnosti v Pravidle), jen jiný popisek při najetí myší: „Situace se používá na pravidlech" (bez počtu, na rozdíl od popisku v seznamu).
 - **Každá Závažnost je vlastní karta** s:
-  - editovatelným názvem (auto-save),
-  - selectem priority `LOW / MEDIUM / HIGH / URGENT`,
+  - editovatelným názvem,
+  - selectem priority `Nízká / Vyšší / Vysoká / Urgentní`,
   - **mazáním blokovaným per-Závažnost** — guard počítá jen Pravidla napojená na tuhle konkrétní Závažnost (ne na celou Situaci), tzn. i uvnitř jedné Situace může jít smazat jedna Závažnost a druhá ne,
   - seznamem přiřazených akcí — každá jako štítek (label z katalogu) + textarea s výchozím textem pro operátora + odkaz „Odebrat" (bez guardu — odebrání akce ze Závažnosti nic neblokuje, i kdyby Závažnost měla napojená Pravidla, viz 4.5),
   - komponentou pro přidání další akce (viz 4.4),
-  - patičkou s počtem napojených Pravidel a tlačítkem **„+ Pravidlo pro tuto závažnost"**, které založí nové Pravidlo rovnou s předvyplněnou touhle Situací/Závažností (druhý vstupní bod do wizardu Pravidel, vedle „+ Nové pravidlo" v seznamu Pravidel).
-- **Tlačítko „+ Přidat závažnost"** na konci seznamu — nová Závažnost se výchozím názvem „Nová závažnost", prioritou `MEDIUM` a bez akcí.
+  - patičkou s počtem napojených Pravidel a tlačítkem **„+ Pravidlo pro tuto závažnost"**, které založí nové Pravidlo rovnou s předvyplněnou touhle Situací/Závažností (druhý vstupní bod do wizardu Pravidel, vedle „+ Nové pravidlo" v seznamu Pravidel). Po uložení takhle založeného (nebo přes tenhle vstupní bod editovaného) Pravidla se uživatel vrátí zpátky na detail téhle Situace (`/situace/:id`), ne na obecný seznam Pravidel — viz 5.6.
+- **Tlačítko „+ Přidat závažnost"** na konci seznamu — nová Závažnost se výchozím názvem „Nová závažnost", prioritou `Vyšší` a bez akcí.
 
 ### 4.4 Přidávání akcí — otevřený, rozšiřitelný katalog
 
@@ -123,17 +124,18 @@ Komponenta pro přidání akce k Závažnosti je zároveň **vyhledávač i tvů
 - Textový vstup filtruje existující katalog akcí (case-insensitive, podle labelu). Akce, které Závažnost už má přiřazené, se v nabídce nezobrazují (nejde přidat dvakrát stejnou).
 - Nic nenalezeno → text „Nic nenalezeno".
 - Pokud zadaný text přesně (case-insensitive) neodpovídá žádné existující položce katalogu, nabídne se možnost **„Vytvořit „{text}""** — jejím vybráním vznikne nová položka v katalogu (jen s labelem, bez ikony) a rovnou se přiřadí k dané Závažnosti. Katalog akcí tedy **není uzavřený číselník editovatelný jen na jednom místě** — rozšiřuje se přímo z místa použití.
+- Každá položka v nabídce má vlastní **ikonu koše** pro smazání z katalogu (viz 4.1) — mazání jde tedy udělat přímo odtud, ne jen z nějaké samostatné správy katalogu, která v tomto rozsahu ani neexistuje.
 
 ### 4.5 Napojení na Pravidlo a needitovatelnost akcí
 
 Tohle je nejdůležitější mechanismus celé kapitoly — jak se šablona ze Závažnosti promítá do konkrétního Pravidla.
 
-**Proč jsou Akce needitovatelné, zatímco název/popis/priorita Pravidla ne:** akce, které operátor u konkrétní věci k řešení uvidí, mají být vždy přesně ty, co jsou v tu chvíli definované na Závažnosti — bez rizika, že se jednotlivé Pravidlo v čase nepozorovaně „rozejde" se svou šablonou (např. že si někdo u jednoho konkrétního pravidla akci omylem odškrtne a nikdo si toho nevšimne, zatímco všechna ostatní pravidla stejné závažnosti ji dál mají). Název, popis a priorita se naopak liší pravidlo od pravidla přirozeně (různá pravidla stejné závažnosti typicky popisují jinou konkrétní okolnost), takže tam nezávislá editovatelnost dává smysl a needitovatelnost by naopak škodila.
+**Proč jsou Akce a Priorita needitovatelné, zatímco název a popis Pravidla ne:** akce a priorita, které operátor u konkrétní věci k řešení uvidí, mají být vždy přesně ty, co jsou v tu chvíli definované na Závažnosti — bez rizika, že se jednotlivé Pravidlo v čase nepozorovaně „rozejde" se svou šablonou (např. že si někdo u jednoho konkrétního pravidla akci omylem odškrtne, nebo že priorita jednoho pravidla zůstane „zamrzlá" na staré hodnotě, zatímco všechna ostatní pravidla stejné závažnosti se změnou posunula). Název a popis se naopak liší pravidlo od pravidla přirozeně (různá pravidla stejné závažnosti typicky popisují jinou konkrétní okolnost), takže tam nezávislá editovatelnost dává smysl a needitovatelnost by naopak škodila.
 
 Mechanismus konkrétně:
 
 1. Ve wizardu Pravidla (viz kapitola 5) uživatel vybere Situaci, pak Závažnost.
-2. Výběrem se **předvyplní priorita Pravidla** hodnotou z Závažnosti. Uživatel ji dál smí libovolně přepsat — je to jen výchozí návrh, ne vynucená hodnota.
+2. **Priorita Pravidla se needitovatelně zobrazuje ze zvolené Závažnosti** — Pravidlo nemá vlastní editovatelné pole pro prioritu, jen zobrazuje aktuální hodnotu Závažnosti (živý odkaz, stejný mechanismus jako Akce, bod 5 níže).
 3. **Název a popis Pravidla se nepředvyplňují vůbec** — Závažnost tahle pole nemá, uživatel je vyplňuje sám od nuly. Název je povinný (bez něj nejde Pravidlo uložit), popis je volitelný.
 4. **Sloupec Akce v pravé části wizardu je čistě needitovatelný výpis** — vždy přesně odpovídá aktuálnímu obsahu vybrané Závažnosti:
    - žádný checkbox na zapnutí/vypnutí jednotlivé akce,
@@ -141,10 +143,8 @@ Mechanismus konkrétně:
    - žádné „+ Přidat akci" ve wizardu Pravidla — přidávání/odebírání akcí jde jen na úrovni Závažnosti v „Situace a závažnosti",
    - výchozí text akce se zobrazuje jako obyčejný statický text, ne jako needitovatelné textové pole (nemá to působit jako dočasně vypnuté, ale jako čisté zobrazení hodnoty).
    - Pokud vybraná Závažnost nemá žádné přiřazené akce, zobrazí se prázdný stav s textem „Tato závažnost nemá žádné výchozí akce."
-5. Je to **živý odkaz, ne snapshot** — pokud se akce Závažnosti později v „Situace a závažnosti" upraví (přidá se nová, smaže existující, změní se text), promítne se to **okamžitě do všech Pravidel**, která na tuhle Závažnost odkazují, aniž by bylo nutné Pravidla znovu otevírat nebo ukládat. Příklad: pokud u Závažnosti „kritické" v Situaci „Nedoručeno" přidáte novou akci „Nabídnout náhradní termín", objeví se okamžitě u všech Pravidel navázaných na „kritické" — v jejich detailu i při dalším otevření editace.
+5. Je to **živý odkaz, ne snapshot** — platí pro Akce i Prioritu stejně: pokud se akce nebo priorita Závažnosti později v „Situace a závažnosti" upraví, promítne se to **okamžitě do všech Pravidel**, která na tuhle Závažnost odkazují, aniž by bylo nutné Pravidla znovu otevírat nebo ukládat. Příklad: pokud u Závažnosti „kritické" v Situaci „Nedoručeno" přidáte novou akci „Nabídnout náhradní termín" nebo změníte prioritu na „Urgentní", projeví se to okamžitě u všech Pravidel navázaných na „kritické" — v jejich detailu i při dalším otevření editace.
 6. Odebrání jednotlivé akce ze Závažnosti **nemá guard** (na rozdíl od mazání celé Závažnosti, viz 4.3) — je to přímý důsledek principu živého odkazu, projeví se ihned všude.
-
-> ⚠ **Poznámka k prototypu:** v aktuálním buildu je sloupec Akce ve wizardu ještě plně editovatelný (checkboxy, mazání, přidávání, needitovatelný text jako textarea) — needitovatelnost popsaná výše je cílové chování k naprogramování, prototyp ji zatím nezobrazuje.
 
 ---
 
@@ -161,7 +161,7 @@ Tři sloupce vedle sebe:
 | Sloupec | Obsah |
 |---|---|
 | **Levý** (užší) | Výběr Situace → Závažnosti. Pod tím tlačítko Uložit a odkaz zpět na seznam Pravidel. |
-| **Střední** (nejširší) | Nastavení pravidla (název/popis/priorita/aktivní), Spouštěč, tři bloky Podmínek. |
+| **Střední** (nejširší) | Nastavení pravidla (název/popis), Spouštěč, tři bloky Podmínek. |
 | **Pravý** (užší) | Needitovatelný výpis Akcí ze zvolené Závažnosti (viz 4.5). |
 
 Dokud uživatel nevybere Situaci **a** Závažnost, střední i pravý sloupec zobrazují placeholder („Vyber situaci a závažnost v levém sloupci.") — Spouštěč, Podmínky ani Akce nejsou dostupné dřív.
@@ -181,8 +181,11 @@ Vždy viditelné v horní části středního sloupce, nezávisle na tom, jestli
 |---|---|
 | **Název pravidla** | Povinné — tlačítko „Uložit" je needitovatelné (disabled), dokud je prázdné. Placeholder „Pojmenuj pravidlo…". |
 | **Popis (volitelný)** | Víceřádkové textové pole, žádná validace. |
-| **Priorita** | `LOW / MEDIUM / HIGH / URGENT`, výchozí předvyplněná ze Závažnosti (viz 4.5), dál volně měnitelná. |
-| **Aktivní** | Přepínač zap/vyp. |
+
+Pravidlo **nemá vlastní pole Priorita ani Aktivní**:
+
+- **Priorita** se needitovatelně odvozuje ze zvolené Závažnosti (viz 4.5) — ve wizardu se samostatně nezobrazuje (Závažnost už je vidět vybraná v levém sloupci), zobrazí se až v seznamu Pravidel a v detailu (viz 5.7).
+- **Aktivní/neaktivní jako koncept neexistuje** — jakmile je Pravidlo uložené, běží. Žádný přepínač na zapnutí/vypnutí.
 
 ### 5.4 Spouštěč
 
@@ -200,7 +203,7 @@ Volba Spouštěče přímo ovlivňuje, které bloky Podmínek jsou vůbec dostup
 Když je zvolený **Časovač**, navíc se zobrazí vlastní blok:
 
 - **„Zásilka nemá nový záznam déle než"** — číslo (výchozí `72`) + jednotka `hodin / dní / pracovních dní` + statický text „od posledního záznamu".
-- Pevná, needitovatelná poznámka pod tímto polem: **administrativní statusy (např. clení) se do „posledního záznamu" nepočítají** — je to natvrdo zabudované chování appky, uživatel appky ho nemůže z UI nijak vypnout ani nastavit jinak. **Proč natvrdo:** zásilky v celním odbavení běžně zůstávají „beze změny" delší dobu, aniž by šlo o skutečný problém — bez tohohle vyloučení by appka takové zásilky falešně vyhodnocovala jako „dlouho bez pohybu", i když jde o očekávaný proces. Appka nepotřebuje, aby si tohle uživatel appky nastavoval sám pro každé pravidlo zvlášť, je to vždy stejná sada statusů. (Konkrétní seznam statusů, které se počítají jako „administrativní", **zatím není finálně daný** — viz otevřená otázka v kapitole 8.)
+- Pevná poznámka pod tímto polem: **„Nastavená doba se nepočítá, pokud je zásilka na clení, nebo má jiný administrativní status."** Cílové chování pro budoucí engine (varianta „pauza", ne „přeskočit a počítat dál"): dokud má zásilka aktuálně administrativní status, odpočet neběží — bez ohledu na to, jak dlouho uplynulo od posledního neadministrativního záznamu. Jakmile přijde další záznam s jiným (neadministrativním) statusem, měření začíná znovu od něj — žádná speciální výjimka pro tenhle okamžik není potřeba, je to prostě nový „poslední záznam". **Proč natvrdo:** zásilky v celním odbavení běžně zůstávají „beze změny" delší dobu, aniž by šlo o skutečný problém — bez tohohle vyloučení by appka takové zásilky falešně vyhodnocovala jako „dlouho bez pohybu", i když jde o očekávaný proces. Appka nepotřebuje, aby si tohle uživatel appky nastavoval sám pro každé pravidlo zvlášť, je to vždy stejná sada statusů. (Konkrétní seznam statusů, které se počítají jako „administrativní", **zatím není finálně daný** — viz otevřená otázka v kapitole 8. Runtime evaluátor pro tenhle práh v prototypu zatím neexistuje — viz otevřená otázka níže.)
 
 > ⚠ **Datový model — dvě oddělené otevřené otázky, obě důležité pro engine, nezaměňovat:**
 >
@@ -214,6 +217,8 @@ Když je zvolený **Časovač**, navíc se zobrazí vlastní blok:
 Zobrazují se pod Spouštěčem, jakmile je vybraná Situace/Závažnost. Podmínky napříč všemi třemi bloky (a všechny řádky uvnitř jednoho bloku) se kombinují **AND** — Pravidlo se spustí, jen když platí úplně všechno najednou.
 
 **Proč jsou podmínky rozdělené zrovna do těchto tří bloků, ne do jednoho seznamu:** každý blok odpovídá jinému typu otázky, a míchání dohromady dělá pravidla nečitelná. Blok 5.5.1 se ptá „co je pravda o záznamu, který **právě teď** dorazil" — typicky rozpozná jednorázovou událost (výjimka, konkrétní status). Blok 5.5.2 se ptá „co bylo pravda **v minulosti**" — typicky odhalí vzorec v čase (opakovaný stejný status, něco, co v historii chybí nebo naopak je). Tohle rozlišení není jen kosmetické — modelový příklad je pravidlo na zásilku zaseknutou na jednom místě: samotný jeden příchozí záznam vypadá naprosto normálně, teprve srovnání s historií (že stejná lokace se opakuje) prozradí problém. Blok 5.5.3 se ptá na vlastnosti **zásilky/zákazníka jako celku**, nezávisle na konkrétních tracking záznamech (typ služby, stálost zákazníka…) — proto má vlastní, oddělený katalog polí od těch dvou tracking-specifických bloků.
+
+**Vizuální konzistence:** všechny tři bloky mají stejný vizuální rámec (jemně orámovaný box). Dřív ho měl jen blok „Co dále platí", zatímco zbylé dva byly bez rámce, což působilo nekonzistentně — čistě vizuální oprava, neměnící žádnou logiku.
 
 #### 5.5.1 Podmínky pro příchozí záznam
 
@@ -239,8 +244,13 @@ Týká se výhradně toho tracking záznamu, který **právě teď** dorazil.
 
 *Zobrazuje se vždy* (u obou Spouštěčů) — na rozdíl od bloku 5.5.1 se nezajímá o to, jestli právě teď něco dorazilo, ale co **v minulosti** o zásilce platilo.
 
-- Každý řádek: **pole** (stejný katalog jako výše) → **je / není** → **hodnota** → volba **„Kde hledat"**: **jen poslední záznam** (výchozí) / **kdekoliv v historii**.
-- „je"/„není" se vztahuje k tomu, jestli zkoumaný rozsah historie (poslední záznam, nebo celá historie) obsahuje záznam s danou hodnotou pole — ne k tomu, jestli konkrétní text „obsahuje" podřetězec.
+- Každý řádek: **pole** (stejný katalog jako výše) → **je / není** → **hodnota** → volba **„Kde hledat"**: první tlačítko (výchozí) / **kdekoliv v historii**.
+- „je"/„není" se vztahuje k tomu, jestli zkoumaný rozsah historie (poslední/předchozí záznam, nebo celá historie) obsahuje záznam s danou hodnotou pole — ne k tomu, jestli konkrétní text „obsahuje" podřetězec.
+- **Label prvního tlačítka se liší podle Spouštěče** (jen popisek, `scope` hodnota v datech je pro oba stejná — `"recent"`):
+  - **Časovač:** „Jen aktuální záznam" = nejnovější uložený tracking záznam zásilky. Žádný záznam se nevylučuje, protože u periodické kontroly neexistuje „právě příchozí" záznam (viz 5.5.1) — aktuální uložený záznam je zkrátka poslední.
+  - **Automaticky:** „Jen předchozí záznam" = záznam bezprostředně předcházející tomu, co právě dorazilo a testuje se zvlášť v bloku 5.5.1. Bez tohoto rozlišení by se týž nově příchozí záznam posuzoval dvakrát (jednou v 5.5.1, podruhé tady) — proto se tu vždy dívá jen na to, co existovalo *před* ním.
+  - „Kdekoliv v historii" má stejný rozdíl bez ohledu na to, jak se to nazve v UI (label zůstává stejný pro oba Spouštěče): u Časovače = kterýkoli uložený záznam; u Automaticky = kterýkoli uložený záznam kromě právě příchozího.
+  - Runtime evaluátor, který by tohle skutečně vyhodnocoval nad reálnými tracking daty, v prototypu neexistuje (mimo rozsah, viz kapitola 8) — tahle sekce jen fixuje cílovou logiku pro budoucí implementaci.
 - Víc řádků = AND. Tohle mimo jiné pokrývá **vyloučení administrativních statusů** bez potřeby zvláštního mechanismu navíc — stačí druhý řádek typu „Stav" „není" „In customs" (nebo jaký přesný status/kód se nakonec použije, viz kapitola 8), kombinovaný AND s hlavní podmínkou.
 
 **Příklad z ukázkových dat:** Pravidlo „Zásilka se zasekla na jednom místě" (Situace „Problém v přepravě", Závažnost „zaseknutá na místě") dnes v tomhle bloku hlídá, že určité pole (typicky lokace) se v historii opakovaně objevuje — přesný mechanismus „stejná hodnota trvá už N hodin/dní" **není součástí tohoto bloku a v datovém modelu zatím chybí**, viz otevřená otázka v kapitole 8. V aktuálním rozsahu se tenhle typ pravidla dá poskládat jen přes „je/není" + „kde hledat", ne přes přímé zadání časového prahu.
@@ -258,7 +268,6 @@ Týká se výhradně toho tracking záznamu, který **právě teď** dorazil.
 
 - Vyhledávací „+ Přidat podmínku" — položky seskupené podle kategorie (`Zásilka`, `Zákazník`), s vyhledáváním; už použitá pole mají v nabídce poznámku „již přidáno" (ale dají se v UI vybrat znovu — bez blokace).
 - Prázdný stav: „Žádné podmínky — akce se spustí vždy, když nastane spouštěč." (kurzívou).
-- Patička s ikonou info: „Když nejsou splněny, VkŘ se nevytvoří a akce se nespustí."
 - Katalog podporuje i speciální editor pro časové podmínky vázané na konkrétní checkpoint/systémovou událost (tři režimy: konkrétní čas, odstup od minulého záznamu, odstup od záznamu splňujícího zadané podmínky) — v aktuálním katalogu ho zatím žádné pole nevyužívá, mechanismus je připravený pro budoucí rozšíření.
 
 #### 5.5.4 Souhrn dostupnosti bloků podle Spouštěče
@@ -280,17 +289,20 @@ Týká se výhradně toho tracking záznamu, který **právě teď** dorazil.
   | Časovač | plánovaný běh | „Časový plán — kontroluje periodicky" |
 
 - Pokud je zvolený **Časovač**, do uložených Podmínek se propíšou **jen** řádky z bloku „Podmínky pro historické záznamy" — i kdyby v datech zbyl nějaký řádek z bloku „Podmínky pro příchozí záznam" (typicky se to nemůže stát běžným používáním UI, protože ten blok se u Časovače vůbec nevykresluje, ale je to důležité pro správné chování při přepínání Automaticky → Časovač a zpátky, aby se needitovatelný/neviditelný blok tiše nezapočítal).
-- Uložené Akce Pravidla vycházejí ze **všech** akcí aktuálně vybrané Závažnosti (needitovatelný živý odkaz, viz 4.5) — ne z nějaké dřívější kopie.
-- Po úspěšném uložení: potvrzující hláška („Pravidlo uloženo" / „Pravidlo upraveno") a návrat na seznam Pravidel.
+- Uložené Akce i Priorita Pravidla vycházejí z aktuálně vybrané Závažnosti (needitovatelný živý odkaz, viz 4.5) — ne z nějaké dřívější kopie.
+- Po úspěšném uložení: potvrzující hláška („Pravidlo uloženo" / „Pravidlo upraveno"). Návrat vede **na seznam Pravidel** (`/`) — **s výjimkou** vstupu přes „+ Pravidlo pro tuto závažnost" (viz 4.3), kde se uživatel vrátí zpátky na detail té konkrétní Situace (`/situace/:id`), ze které přišel.
 
 ### 5.7 Seznam Pravidel (přehled)
 
-- Postranní filtr: **„Všechna pravidla"**, **„Pouze aktivní"** (počty vedle každé položky).
+- **Žádný postranní filtrovací sloupec.** Dřívější „Pouze aktivní"/„Archiv" mizí spolu s konceptem aktivní/neaktivní (viz 5.3) — archivace jako funkce neexistuje, smazané Pravidlo je smazané, ne archivované.
+- **Filtr podle priority** — řada klikacích chipů nad tabulkou: „Všechny" / „Nízká" / „Vyšší" / „Vysoká" / „Urgentní" (počty vedle každého). Ruční přeřazení pořadí je dostupné jen při zvoleném „Všechny" — ve filtrovaném pohledu podle priority by přeřazení měnilo pořadí jen ve vybraném výřezu, což by bylo matoucí.
 - **Vyhledávání** — má být skutečně funkční filtr podle názvu/kódu Pravidla, obdoba vyhledávání na obrazovce „Situace a závažnosti" (viz 4.2).
-- Řádek Pravidla: kód, název, badge Oblasti, badge Spouštěče, badge priority (zvýrazněná barevně jen pro `HIGH`/`URGENT`), tečka aktivní/neaktivní, možnost ručně přeřadit pořadí (jen v pohledu „Všechna pravidla").
-- Klik na řádek otevře postranní detail s přehledem: Oblast, Spouštěč, seznam Akcí (needitovatelně načtených ze Závažnosti, viz 4.5), priorita. Z detailu vede odkaz do plné editace (otevře stejný wizard jako tvorba, s předvyplněnými hodnotami) a možnost Pravidlo smazat.
+- Řádek Pravidla: název, badge Oblasti, badge Spouštěče, badge priority (needitovatelně odvozená ze Závažnosti, viz 4.5; zvýrazněná barevně jen pro `Vysoká`/`Urgentní`). **Kód Pravidla a tečka aktivní/neaktivní mizí úplně** — jak z řádku, tak z hlavičky postranního detailu; kód zůstává jen interní identifikátor v datovém modelu, nikde v UI se nezobrazuje, tečka nemá bez konceptu aktivní/neaktivní smysl.
+- Klik na řádek otevře postranní detail s přehledem: Oblast, Spouštěč, seznam Akcí (needitovatelně načtených ze Závažnosti, viz 4.5), priorita (needitovatelně, stejný zdroj). Z detailu vede odkaz do plné editace (otevře stejný wizard jako tvorba, s předvyplněnými hodnotami) a možnost Pravidlo smazat.
+- **Postranní panel detailu má dvě záložky:** „Detail pravidla" (přejmenováno z „Shrnutí") a „Historie". Záložka „Test" byla čistě demonstrační pro vývoj prototypu (výsledek byl náhodně generovaný, nešlo o skutečné vyhodnocení podmínek) a je odstraněná. „Historie" zůstává needitovatelný placeholder („Žádné záznamy spuštění.") — bez runtime enginu (mimo rozsah, viz kapitola 1) nejsou žádná data k zobrazení. **Otevřená otázka pro budoucí MVP** (viz kapitola 8): až runtime engine vznikne, bude potřeba rozhodnout, jestli/jak hluboko appka bude ukazovat historii běhů Pravidla.
+- **Zkratkové tlačítko „Situace a závažnosti →" v horní liště mizí** — je to duplicita s trvalou položkou v hlavní navigaci (viz kapitola 6), která zůstává jako jediná cesta na `/situace`.
 
-> ⚠ **Poznámka k prototypu:** vyhledávací pole v seznamu Pravidel je v aktuálním buildu jen vizuální — nefiltruje. Filtr „Archiv" a možnost pravidlo archivovat jsou taky jen připravené UI bez reálné funkce (žádné Pravidlo se dnes nedá do archivu přesunout). Detail Pravidla má navíc v prototypu ještě záložky „Test" (simuluje vyhodnocení nad třemi ukázkovými zásilkami) a „Historie" — obě jsou čistě demonstrační našeho postupu vývoje prototypu (výsledek „Testu" je náhodně generovaný, nejde o skutečné vyhodnocení podmínek) a **nejsou předmětem této specifikace**.
+> ⚠ **Poznámka k prototypu:** vyhledávací pole v seznamu Pravidel je v aktuálním buildu jen vizuální — nefiltruje. To je jediný rozdíl od popisu výše.
 
 ---
 
@@ -318,13 +330,13 @@ Katalog akcí a tři reprezentativní Situace, jak jsou v prototypu nachystané 
 
 | Závažnost | Priorita | Přiřazené akce |
 |---|---|---|
-| běžné | LOW | Informovat e-mailem |
-| problémové | MEDIUM | Informovat e-mailem, Prověřit u dopravce |
-| kritické | HIGH | Zavolat zákazníkovi, Prověřit u dopravce |
+| běžné | Nízká | Informovat e-mailem |
+| problémové | Vyšší | Informovat e-mailem, Prověřit u dopravce |
+| kritické | Vysoká | Zavolat zákazníkovi, Prověřit u dopravce |
 
-**Situace „Problém v přepravě"** — tři Závažnosti (možný problém / zaseknutá na místě / podezření na ztrátu), rostoucí priorita LOW → MEDIUM → HIGH, akce „Prověřit u dopravce" napříč všemi, u nejzávažnější navíc „Zavolat zákazníkovi".
+**Situace „Problém v přepravě"** — tři Závažnosti (možný problém / zaseknutá na místě / podezření na ztrátu), rostoucí priorita Nízká → Vyšší → Vysoká, akce „Prověřit u dopravce" napříč všemi, u nejzávažnější navíc „Zavolat zákazníkovi".
 
-**Situace „Poškození zásilky"** — jedna Závažnost, priorita HIGH, akce „Zavolat zákazníkovi".
+**Situace „Poškození zásilky"** — jedna Závažnost, priorita Vysoká, akce „Zavolat zákazníkovi".
 
 ---
 
@@ -338,6 +350,7 @@ Body, které nejsou touto specifikací rozhodnuté a je potřeba je doladit s by
 4. **Perioda, s jakou appka Časovač mechanismus vůbec spouští** (jak často appka periodickou kontrolu reálně provádí — např. každých 30 minut vs. jednou za hodinu) nemá dnes žádné UI ani pole v datovém modelu — systémová věc, nezávislá na prahu jednotlivého pravidla (viz bod 1 a 5.4). Bude potřeba doplnit, až se bude řešit skutečný běh enginu, včetně rozhodnutí, jestli jde o jednu globální hodnotu, nebo nastavitelnou per pravidlo.
 5. **Pole „Typ služby" (Express/Economy)** chybí v katalogu polí pro Podmínky (5.5.1/5.5.2) — bude potřeba, pokud budou pravidla muset rozlišovat prahy podle typu přepravy.
 6. **Validace vstupů** (povinnost vyplnění, formát hodnot) není v žádné z popsaných obrazovek řešená nad rámec „Název pravidla je povinný" — doporučujeme doplnit rozumnou validaci podle standardů produkčního vývoje, tahle specifikace ji nevynucuje.
+7. **Hloubka historie běhů Pravidla v detailu** (záložka „Historie", viz 5.7) — až vznikne runtime engine, bude potřeba rozhodnout, jestli a jak dalece appka zobrazí historické běhy Pravidla operátorovi nebo administrátorovi. Zatím nerozhodnuto, mimo rozsah této iterace.
 
 Mimo rozsah zcela (viz i kapitola 1): Soulad s trasou / Kontrola na bodu, oblasti „Vyhodnocení objednávky" / „Nevyzvednutá objednávka" / „Parametry a cena", runtime generování a zobrazení VkŘ operátorovi, notifikace, automatizace akcí (technické chování jako auto-e-mail nebo automatický posun data — Akce jsou v tomto rozsahu čistě popisné štítky bez vlastního chování).
 
@@ -348,7 +361,7 @@ Mimo rozsah zcela (viz i kapitola 1): Soulad s trasou / Kontrola na bodu, oblast
 Pro přesnou implementaci — tvar dat tak, jak je popsaný výše, převedený do typových definic:
 
 ```ts
-type Priority = "low" | "medium" | "high" | "urgent";
+type Priority = "low" | "medium" | "high" | "urgent"; // v UI: Nízká / Vyšší / Vysoká / Urgentní
 
 interface ActionTag {
   id: string;
@@ -392,7 +405,7 @@ type HistoricalCondition = {
   valueMode: "specific";
   expectedValue?: string;
   mode?: "contains" | "not_contains";   // "je" / "není"
-  scope: "recent" | "anywhere";         // "jen poslední záznam" / "kdekoliv v historii"
+  scope: "recent" | "anywhere";         // "Jen aktuální záznam" (Časovač) / "Jen předchozí záznam" (Automaticky) / "kdekoliv v historii"
 };
 
 type Condition = FieldCondition | HistoricalCondition;
@@ -413,12 +426,11 @@ interface Rule {
   code: string;
   name: string;
   description?: string;
-  active: boolean;
-  priority: Priority;
+  priority: Priority;         // pro tracking_records: needitovatelný snapshot ze Severity.priority (viz 4.5), zobrazuje se ale vždy živě přes Závažnost, ne z tohoto pole
   trigger: { kind: "condition_met" | "schedule"; label: string };
   conditions: Condition[];
   actions: Action[];          // odvozené live ze Závažnosti, viz 4.5 — needitovatelné
-  situationId?: string;       // needitovatelné po založení
-  severityId?: string;        // needitovatelné po založení
+  situationId?: string;       // editovatelné i po založení
+  severityId?: string;        // editovatelné i po založení
 }
 ```

@@ -153,7 +153,7 @@ export interface Action {
 }
 
 export interface Rule {
-  id: string; code: string; name: string; area: Area; active: boolean; priority: Priority;
+  id: string; code: string; name: string; area: Area; priority: Priority;
   description?: string;
   trigger: { kind: TriggerKind; label: string };
   conditions: Condition[];

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, X, Info, Search } from "lucide-react";
+import { Plus, X, Search } from "lucide-react";
 import {
   VKR_CONDITION_CATALOG,
   findVkrField,
@@ -82,11 +82,6 @@ export function VkrConditionsBuilder({
         usedFieldIds={conditions.map((c) => c.fieldId)}
         onPick={addCondition}
       />
-
-      <div className="flex items-start gap-1.5 text-[10px] text-muted-foreground leading-snug pt-0.5">
-        <Info size={11} className="mt-0.5 shrink-0" />
-        <span>Když nejsou splněny, VkŘ se nevytvoří a akce se nespustí.</span>
-      </div>
     </div>
   );
 }

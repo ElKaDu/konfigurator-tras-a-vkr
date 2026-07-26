@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Plus, Trash2, ChevronRight, ChevronDown, Search } from "lucide-react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { AppHeader } from "@/components/AppHeader";
+import { AreaBadge } from "@/components/common/AreaBadge";
 import { useSituations, situationsStore, useRules } from "@/lib/model/store";
-import { triggerLabel, priorityLabel, isPriorityHigh } from "@/lib/model/ruleDisplay";
+import { triggerLabel, priorityLabel, isPriorityHigh, resolveRulePriority } from "@/lib/model/ruleDisplay";
+import { RuleDetailSidebar } from "@/components/rules/RuleDetailSidebar";
 import { cn } from "@/lib/utils";
 import type { Rule, Situation } from "@/lib/model/types";
 
@@ -13,6 +15,7 @@ export function SituationsListPage() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [selectedRule, setSelectedRule] = useState<Rule | null>(null);
 
   function createSituation() {
     const id = "sit_" + Date.now();
@@ -56,7 +59,7 @@ export function SituationsListPage() {
     <div className="flex h-screen w-screen flex-col bg-background text-foreground">
       <AppHeader current="situace" />
 
-      <div className="flex-1 overflow-y-auto">
+      <div className={cn("flex-1 overflow-y-auto", selectedRule && "mr-[460px]")}>
         <div className="mx-auto max-w-3xl p-6">
           <div className="flex items-center justify-between mb-1">
             <h1 className="text-lg font-semibold">Situace a závažnosti</h1>
@@ -93,10 +96,16 @@ export function SituationsListPage() {
                 return (
                   <div key={s.id} className="rounded-lg border border-border overflow-hidden">
                     <div
-                      onClick={() => toggleExpanded(s.id)}
+                      onClick={() => navigate({ to: "/situace/$id", params: { id: s.id } })}
                       className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40 transition-colors cursor-pointer"
                     >
-                      {isOpen ? <ChevronDown className="size-3.5 shrink-0 text-muted-foreground" /> : <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleExpanded(s.id); }}
+                        className="shrink-0 text-muted-foreground hover:text-foreground"
+                        title={isOpen ? "Skrýt závažnosti a pravidla" : "Zobrazit závažnosti a pravidla"}
+                      >
+                        {isOpen ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
+                      </button>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium">{s.name}</div>
                         {s.description && <div className="text-xs text-muted-foreground mt-0.5">{s.description}</div>}
@@ -107,14 +116,6 @@ export function SituationsListPage() {
                       <span className="shrink-0 text-xs text-muted-foreground">
                         {usage} {usage === 1 ? "pravidlo" : usage < 5 ? "pravidla" : "pravidel"}
                       </span>
-                      <Link
-                        to="/situace/$id"
-                        params={{ id: s.id }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="shrink-0 text-xs text-primary hover:underline"
-                      >
-                        upravit
-                      </Link>
                       <button
                         disabled={usage > 0}
                         onClick={(e) => {
@@ -150,31 +151,29 @@ export function SituationsListPage() {
                                   </span>
                                 </div>
                                 {sevRules.map((rule) => (
-                                  <Link
+                                  <div
                                     key={rule.id}
-                                    to="/rules/$ruleId/edit"
-                                    params={{ ruleId: rule.id }}
-                                    className="mt-1 flex items-center gap-3 rounded-lg border border-border bg-background px-3 py-2 hover:bg-muted/40 transition-colors"
+                                    onClick={() => setSelectedRule(rule)}
+                                    className="mt-1 flex items-center gap-3 rounded-lg border border-border bg-background px-3 py-2 hover:bg-muted/40 transition-colors cursor-pointer"
                                   >
-                                    <span className="font-mono text-[11px] text-muted-foreground w-9 shrink-0">{rule.code}</span>
                                     <div className="flex-1 min-w-0">
                                       <div className="text-xs font-medium truncate">{rule.name}</div>
                                       <div className="flex gap-1.5 mt-1">
+                                        <AreaBadge area={rule.area} />
                                         <span className="rounded-full border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground">
                                           {triggerLabel(rule.trigger.kind)}
                                         </span>
                                         <span
                                           className={cn(
                                             "rounded-full border border-border px-1.5 py-0.5 text-[10px] font-semibold",
-                                            isPriorityHigh(rule.priority) ? "text-destructive border-destructive/30" : "text-muted-foreground"
+                                            isPriorityHigh(resolveRulePriority(rule)) ? "text-destructive border-destructive/30" : "text-muted-foreground"
                                           )}
                                         >
-                                          {priorityLabel(rule.priority)}
+                                          {priorityLabel(resolveRulePriority(rule))}
                                         </span>
                                       </div>
                                     </div>
-                                    <span className={cn("size-2 rounded-full shrink-0", rule.active ? "bg-emerald-500" : "bg-border")} />
-                                  </Link>
+                                  </div>
                                 ))}
                               </div>
                             );
@@ -187,12 +186,15 @@ export function SituationsListPage() {
               })
             )}
           </div>
-
-          <Link to="/" className="mt-6 inline-block text-sm text-muted-foreground hover:text-foreground">
-            ← Zpět na pravidla
-          </Link>
         </div>
       </div>
+
+      {selectedRule && (
+        <RuleDetailSidebar
+          rule={selectedRule}
+          onClose={() => setSelectedRule(null)}
+        />
+      )}
     </div>
   );
 }

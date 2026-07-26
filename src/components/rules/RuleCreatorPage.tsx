@@ -30,8 +30,6 @@ type RuleCreatorInitialState = RuleCreatorUiState & {
   selectedArea: Area;
   ruleName: string;
   ruleDescription: string;
-  priority: Priority;
-  active: boolean;
 };
 
 function inferTriggerType(rule?: Rule): TrackingTriggerType {
@@ -51,8 +49,6 @@ function getInitialFormState(rule?: Rule): RuleCreatorInitialState {
     selectedArea: rule?.area ?? "tracking_records",
     ruleName: rule?.name ?? "",
     ruleDescription: rule?.description ?? "",
-    priority: rule?.priority ?? "medium",
-    active: rule?.active ?? true,
     selectedSituationId: ui.selectedSituationId ?? rule?.situationId ?? null,
     selectedSeverityId: ui.selectedSeverityId ?? rule?.severityId ?? null,
     triggerType: ui.triggerType ?? inferTriggerType(rule),
@@ -90,8 +86,6 @@ export function RuleCreatorPage({
   const [noMovementUnit, setNoMovementUnit] = useState<"h" | "d" | "bd">(initialState.noMovementUnit);
   const [ruleName, setRuleName] = useState(initialState.ruleName);
   const [ruleDescription, setRuleDescription] = useState(initialState.ruleDescription);
-  const [priority, setPriority] = useState<Priority>(initialState.priority);
-  const [active, setActive] = useState(initialState.active);
   const [vkrConditions, setVkrConditions] = useState<VkrCondition[]>(initialState.vkrConditions);
 
   useEffect(() => {
@@ -103,8 +97,6 @@ export function RuleCreatorPage({
     setNoMovementUnit(initialState.noMovementUnit);
     setRuleName(initialState.ruleName);
     setRuleDescription(initialState.ruleDescription);
-    setPriority(initialState.priority);
-    setActive(initialState.active);
     setVkrConditions(initialState.vkrConditions);
   }, [initialState]);
 
@@ -115,21 +107,15 @@ export function RuleCreatorPage({
   const selectedSituationObj: Situation | undefined = situations.find((s) => s.id === selectedSituationId);
   const selectedSeverityObj: Severity | undefined = selectedSituationObj?.severities.find((s) => s.id === selectedSeverityId);
 
-  function applySeverityTemplate(severity: Severity) {
-    setPriority(severity.priority);
-  }
-
   function handleSelectSituation(situationId: string) {
     setSelectedSituationId(situationId);
     const nextSituation = situations.find((s) => s.id === situationId);
     const firstSeverity = nextSituation?.severities[0];
     setSelectedSeverityId(firstSeverity?.id ?? null);
-    if (firstSeverity) applySeverityTemplate(firstSeverity);
   }
 
   function handleSelectSeverity(severity: Severity) {
     setSelectedSeverityId(severity.id);
-    applySeverityTemplate(severity);
   }
 
   useEffect(() => {
@@ -139,7 +125,6 @@ export function RuleCreatorPage({
     const severity = situation?.severities.find((s) => s.id === initialSeverityId) ?? situation?.severities[0];
     if (severity) {
       setSelectedSeverityId(severity.id);
-      applySeverityTemplate(severity);
     }
     // Only run once on mount for the "+ Pravidlo pro tuto závažnost" entry point — deliberately
     // excludes `situations` from deps so it doesn't re-fire and clobber user edits on every store update.
@@ -223,14 +208,17 @@ export function RuleCreatorPage({
                   actionTagId: a.actionTagId,
                 }));
 
+                const rulePriority: Priority = isTrackingRecords
+                  ? (selectedSeverityObj?.priority ?? existingRule?.priority ?? "medium")
+                  : (existingRule?.priority ?? "medium");
+
                 rulesStore.upsert({
                   id,
                   code,
                   name: ruleName,
                   description: ruleDescription || undefined,
                   area: selectedArea,
-                  active,
-                  priority: priority as Priority,
+                  priority: rulePriority,
                   trigger: isTrackingRecords ? trackingTrigger : (existingRule?.trigger ?? { kind: "condition_met", label: "—" }),
                   conditions: isTrackingRecords ? trackingConditionsOut : (existingRule?.conditions ?? []),
                   situationId: isTrackingRecords ? selectedSituationId ?? undefined : existingRule?.situationId,
@@ -247,7 +235,13 @@ export function RuleCreatorPage({
                   },
                 });
                 toast.success(isEdit ? "Pravidlo upraveno" : "Pravidlo uloženo");
-                navigate({ to: "/" });
+
+                // Vstup přes "+ Pravidlo pro tuto závažnost" — po uložení zpět na detail Situace, ze které uživatel přišel.
+                if (!isEdit && isTrackingRecords && initialSituationId) {
+                  navigate({ to: "/situace/$id", params: { id: initialSituationId } });
+                } else {
+                  navigate({ to: "/" });
+                }
               }}
               className={cn(
                 "w-full rounded-lg px-4 py-2.5 text-sm font-medium transition-colors",
@@ -268,7 +262,7 @@ export function RuleCreatorPage({
         {/* MIDDLE COLUMN — Spouštěč + Podmínky */}
         <div className="flex flex-1 min-w-0 flex-col border-r border-border">
           <div className="flex-1 overflow-y-auto p-5 space-y-4">
-            {/* Meta — název, priorita, aktivní — nahoře */}
+            {/* Meta — název, popis — nahoře */}
             <div className="space-y-3">
               <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Nastavení pravidla</div>
               <div>
@@ -289,34 +283,6 @@ export function RuleCreatorPage({
                   rows={2}
                   className="resize-none text-sm"
                 />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Priorita</label>
-                <select
-                  value={priority}
-                  onChange={(e) => setPriority(e.target.value as typeof priority)}
-                  className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none"
-                >
-                  <option value="low">LOW</option>
-                  <option value="medium">MEDIUM</option>
-                  <option value="high">HIGH</option>
-                  <option value="urgent">URGENT</option>
-                </select>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Aktivní</span>
-                <button
-                  onClick={() => setActive((v) => !v)}
-                  className={cn(
-                    "relative inline-block h-5 w-9 rounded-full transition-colors",
-                    active ? "bg-primary" : "bg-muted"
-                  )}
-                >
-                  <span className={cn(
-                    "absolute top-0.5 size-4 rounded-full bg-white transition-all shadow",
-                    active ? "right-0.5" : "left-0.5"
-                  )} />
-                </button>
               </div>
             </div>
 
@@ -394,8 +360,8 @@ export function RuleCreatorPage({
                     <div className="mt-2.5 flex items-start gap-2 rounded-lg border border-dashed border-emerald-600/40 bg-emerald-600/5 px-2.5 py-2">
                       <Lock className="size-3.5 shrink-0 mt-0.5 text-emerald-700" />
                       <p className="text-[11px] leading-relaxed text-foreground">
-                        <span className="font-medium">Administrativní statusy (např. clení) se do „posledního záznamu" nepočítají</span>
-                        {" "}— natvrdo, bez možnosti nastavení.
+                        <span className="font-medium">Nastavená doba se nepočítá</span>
+                        , pokud je zásilka na clení, nebo má jiný administrativní status.
                       </p>
                     </div>
                   </div>
@@ -407,8 +373,8 @@ export function RuleCreatorPage({
                   </div>
 
                   {triggerType === "automatic" && (
-                    <div className="mb-4">
-                      <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                    <div className="mb-4 rounded-xl border border-border bg-muted/10 p-3 space-y-2.5">
+                      <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                         Podmínky pro příchozí záznam
                       </div>
                       <TrackingIncomingConditionsBuilder
@@ -418,13 +384,14 @@ export function RuleCreatorPage({
                     </div>
                   )}
 
-                  <div className="mb-4">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                  <div className="mb-4 rounded-xl border border-border bg-muted/10 p-3 space-y-2.5">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                       Podmínky pro historické záznamy
                     </div>
                     <TrackingHistoricalConditionsBuilder
                       conditions={trackingConditions}
                       onChange={setTrackingConditions}
+                      triggerType={triggerType}
                     />
                   </div>
 

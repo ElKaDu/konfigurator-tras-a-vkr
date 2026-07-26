@@ -533,7 +533,6 @@ export const RULES: Rule[] = [
     code: "T03",
     name: "Zásilka na první pokus nedoručena",
     area: "tracking_records",
-    active: true,
     priority: "low",
     trigger: { kind: "condition_met", label: "Reaktivní — při každém novém tracking záznamu" },
     conditions: [
@@ -566,7 +565,6 @@ export const RULES: Rule[] = [
     code: "T04",
     name: "Nedoručeno na druhý pokus",
     area: "tracking_records",
-    active: true,
     priority: "medium",
     trigger: { kind: "condition_met", label: "Reaktivní — při každém novém tracking záznamu" },
     conditions: [
@@ -595,7 +593,6 @@ export const RULES: Rule[] = [
     code: "T05",
     name: "Nedoručeno na 3. pokus",
     area: "tracking_records",
-    active: true,
     priority: "high",
     trigger: { kind: "condition_met", label: "Reaktivní — při každém novém tracking záznamu" },
     conditions: [
@@ -630,7 +627,6 @@ export const RULES: Rule[] = [
     code: "T06",
     name: "Poškození zásilky",
     area: "tracking_records",
-    active: true,
     priority: "high",
     trigger: { kind: "condition_met", label: "Reaktivní — při každém novém tracking záznamu" },
     conditions: [
@@ -657,7 +653,6 @@ export const RULES: Rule[] = [
     code: "T07",
     name: "Zásilka se vrací odesílateli",
     area: "tracking_records",
-    active: true,
     priority: "medium",
     trigger: { kind: "condition_met", label: "Reaktivní — při každém novém tracking záznamu" },
     conditions: [
@@ -685,7 +680,6 @@ export const RULES: Rule[] = [
     name: "Zásilka zastavena — nebezpečné zboží",
     description: "Text statusu je příklad — přesná hodnota od dopravce potřeba ověřit.",
     area: "tracking_records",
-    active: true,
     priority: "high",
     trigger: { kind: "condition_met", label: "Reaktivní — při každém novém tracking záznamu" },
     conditions: [
@@ -712,7 +706,6 @@ export const RULES: Rule[] = [
     code: "T09",
     name: "Zásilka dlouho bez pohybu",
     area: "tracking_records",
-    active: true,
     priority: "medium",
     trigger: { kind: "schedule", label: "Časový plán — kontroluje periodicky" },
     conditions: [],

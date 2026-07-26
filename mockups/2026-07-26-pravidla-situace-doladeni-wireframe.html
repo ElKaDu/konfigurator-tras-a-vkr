@@ -1,0 +1,376 @@
+<meta charset="utf-8">
+<title>Doladění Pravidel/Situací — wireframe změn</title>
+<style>
+  :root {
+    --radius: 0.625rem;
+    --background: oklch(0.985 0.005 280);
+    --foreground: oklch(0.18 0.03 280);
+    --surface: oklch(1 0 0);
+    --card: oklch(1 0 0);
+    --primary: oklch(0.56 0.22 295);
+    --primary-foreground: oklch(0.99 0 0);
+    --primary-soft: oklch(0.96 0.04 295);
+    --secondary: oklch(0.97 0.01 280);
+    --secondary-foreground: oklch(0.25 0.03 280);
+    --muted: oklch(0.965 0.008 280);
+    --muted-foreground: oklch(0.5 0.02 280);
+    --accent: oklch(0.96 0.03 295);
+    --accent-foreground: oklch(0.35 0.18 295);
+    --destructive: oklch(0.6 0.22 25);
+    --destructive-foreground: oklch(0.99 0 0);
+    --success: oklch(0.7 0.16 155);
+    --success-foreground: oklch(0.2 0.05 155);
+    --warning: oklch(0.82 0.16 75);
+    --warning-foreground: oklch(0.3 0.08 75);
+    --border: oklch(0.92 0.01 280);
+    --success-soft: oklch(0.95 0.04 155);
+    --warning-soft: oklch(0.96 0.05 75);
+    --destructive-soft: oklch(0.95 0.05 25);
+    --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: oklch(0.16 0.02 280); --foreground: oklch(0.96 0.005 280);
+      --surface: oklch(0.2 0.02 280); --card: oklch(0.2 0.02 280);
+      --primary: oklch(0.7 0.2 295); --primary-foreground: oklch(0.15 0.02 280); --primary-soft: oklch(0.3 0.1 295);
+      --secondary: oklch(0.25 0.02 280); --secondary-foreground: oklch(0.96 0.005 280);
+      --muted: oklch(0.25 0.02 280); --muted-foreground: oklch(0.7 0.02 280);
+      --accent: oklch(0.3 0.08 295); --accent-foreground: oklch(0.96 0.005 280);
+      --border: oklch(1 0 0 / 12%);
+      --success-soft: oklch(0.3 0.07 155); --warning-soft: oklch(0.32 0.08 75); --destructive-soft: oklch(0.32 0.1 25);
+      --success-foreground: oklch(0.86 0.13 155); --warning-foreground: oklch(0.88 0.13 75);
+      --destructive: oklch(0.72 0.19 25);
+    }
+  }
+  :root[data-theme="dark"] {
+    --background: oklch(0.16 0.02 280); --foreground: oklch(0.96 0.005 280);
+    --surface: oklch(0.2 0.02 280); --card: oklch(0.2 0.02 280);
+    --primary: oklch(0.7 0.2 295); --primary-foreground: oklch(0.15 0.02 280); --primary-soft: oklch(0.3 0.1 295);
+    --secondary: oklch(0.25 0.02 280); --secondary-foreground: oklch(0.96 0.005 280);
+    --muted: oklch(0.25 0.02 280); --muted-foreground: oklch(0.7 0.02 280);
+    --accent: oklch(0.3 0.08 295); --accent-foreground: oklch(0.96 0.005 280);
+    --border: oklch(1 0 0 / 12%);
+    --success-soft: oklch(0.3 0.07 155); --warning-soft: oklch(0.32 0.08 75); --destructive-soft: oklch(0.32 0.1 25);
+    --success-foreground: oklch(0.86 0.13 155); --warning-foreground: oklch(0.88 0.13 75);
+    --destructive: oklch(0.72 0.19 25);
+  }
+  :root[data-theme="light"] {
+    --background: oklch(0.985 0.005 280); --foreground: oklch(0.18 0.03 280);
+    --surface: oklch(1 0 0); --card: oklch(1 0 0);
+    --primary: oklch(0.56 0.22 295); --primary-foreground: oklch(0.99 0 0); --primary-soft: oklch(0.96 0.04 295);
+    --secondary: oklch(0.97 0.01 280); --secondary-foreground: oklch(0.25 0.03 280);
+    --muted: oklch(0.965 0.008 280); --muted-foreground: oklch(0.5 0.02 280);
+    --accent: oklch(0.96 0.03 295); --accent-foreground: oklch(0.35 0.18 295);
+    --border: oklch(0.92 0.01 280);
+    --success-soft: oklch(0.95 0.04 155); --warning-soft: oklch(0.96 0.05 75); --destructive-soft: oklch(0.95 0.05 25);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--background); font-family: var(--font-sans); color: var(--foreground); -webkit-font-smoothing: antialiased; }
+  .page { max-width: 980px; margin: 0 auto; padding: 32px 24px 80px; }
+  h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+  .lede { color: var(--muted-foreground); font-size: 13px; margin: 0 0 28px; }
+
+  .legend { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-bottom: 32px; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); font-size: 12px; }
+  .legend .item { display: flex; align-items: center; gap: 6px; }
+  .swatch { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  .swatch.new { background: var(--success-soft); border: 1.5px solid var(--success); }
+  .swatch.removed { background: var(--destructive-soft); border: 1.5px solid var(--destructive); }
+  .swatch.changed { background: var(--warning-soft); border: 1.5px solid var(--warning); }
+
+  .section { margin-bottom: 44px; }
+  .section-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+  .section-num { font-family: var(--font-mono); font-size: 12px; color: var(--muted-foreground); }
+  .section-title { font-size: 15px; font-weight: 600; }
+  .section-note { font-size: 12.5px; color: var(--muted-foreground); margin: 4px 0 14px; line-height: 1.5; }
+
+  .frame { border: 1px solid var(--border); border-radius: calc(var(--radius) + 4px); background: var(--surface); overflow: hidden; }
+  .frame-bar { display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--border); background: var(--muted); }
+  .frame-bar .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); }
+  .frame-bar .path { font-family: var(--font-mono); font-size: 11px; color: var(--muted-foreground); margin-left: 6px; }
+  .frame-body { padding: 18px; }
+
+  .tag { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 600; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
+  .tag.new { background: var(--success-soft); color: var(--success-foreground); border: 1px solid var(--success); }
+  .tag.removed { background: var(--destructive-soft); color: var(--destructive); border: 1px solid var(--destructive); text-decoration: line-through; }
+  .tag.changed { background: var(--warning-soft); color: var(--warning-foreground); border: 1px solid var(--warning); }
+
+  .callout { position: relative; }
+  .callout::before { content: ""; position: absolute; inset: -3px; border: 2px dashed var(--success); border-radius: calc(var(--radius) + 2px); pointer-events: none; }
+  .callout.rm::before { border-color: var(--destructive); }
+  .callout.ch::before { border-color: var(--warning); }
+
+  label.field-label { display: block; font-size: 11px; color: var(--muted-foreground); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .03em; font-weight: 600; }
+  .input, select.input { width: 100%; border: 1px solid var(--border); background: var(--background); border-radius: 8px; padding: 7px 10px; font-size: 13px; color: var(--foreground); font-family: inherit; }
+  .row { display: flex; gap: 14px; }
+  .row > * { flex: 1; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; padding: 7px 14px; font-size: 13px; font-weight: 500; border: 1px solid var(--border); background: var(--surface); color: var(--foreground); cursor: default; }
+  .btn.primary { background: var(--primary); color: var(--primary-foreground); border-color: transparent; }
+  .btn.ghost { border-style: dashed; color: var(--muted-foreground); background: transparent; }
+  .btn.sm { padding: 5px 10px; font-size: 12px; }
+
+  .chip { display: inline-flex; align-items: center; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--border); font-size: 12px; color: var(--muted-foreground); }
+  .chip.active { background: var(--primary-soft); color: var(--primary); border-color: transparent; font-weight: 600; }
+
+  .icon { width: 14px; height: 14px; display: inline-block; vertical-align: middle; }
+
+  /* --- Section 1: dropdown --- */
+  .popover { width: 260px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); overflow: hidden; box-shadow: 0 8px 24px -8px oklch(0 0 0 / 20%); }
+  .popover-search { border-bottom: 1px solid var(--border); padding: 8px 10px; font-size: 12px; color: var(--muted-foreground); }
+  .popover-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; font-size: 12.5px; border-radius: 6px; }
+  .popover-row:hover { background: var(--muted); }
+  .popover-row .trash { color: var(--muted-foreground); opacity: .55; }
+
+  /* --- Section 4: 3-col wizard --- */
+  .wizard { display: grid; grid-template-columns: 200px 1fr 220px; gap: 0; }
+  .wizard-col { padding: 16px; border-right: 1px solid var(--border); }
+  .wizard-col:last-child { border-right: none; }
+  .sev-btn { display: block; width: 100%; text-align: left; padding: 7px 10px; border-radius: 8px; font-size: 12.5px; margin-bottom: 4px; border: 1px solid transparent; }
+  .sev-btn.active { background: var(--primary-soft); color: var(--primary); font-weight: 600; }
+  .group-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted-foreground); margin-bottom: 8px; }
+  .cond-group { border: 1px solid var(--border); border-radius: 10px; background: oklch(from var(--muted) l a b / 40%); padding: 12px; margin-bottom: 12px; }
+  .cond-row { border: 1px solid var(--border); border-radius: 8px; background: var(--background); padding: 8px 10px; font-size: 12px; margin-bottom: 6px; display:flex; justify-content:space-between; }
+  .action-item { border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; background: var(--background); }
+  .lock-note { display: flex; gap: 6px; align-items: flex-start; border: 1px dashed var(--success); background: var(--success-soft); border-radius: 8px; padding: 8px 10px; font-size: 11px; margin-top: 8px; }
+
+  /* --- Section 5: rules list --- */
+  .app-shell { display: flex; flex-direction: column; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .topbar .nav { display: flex; gap: 18px; font-size: 12.5px; color: var(--muted-foreground); }
+  .topbar .nav .cur { color: var(--foreground); font-weight: 600; }
+  .list-body { display: flex; }
+  .list-sidebar { width: 170px; border-right: 1px solid var(--border); padding: 10px; }
+  .list-main { flex: 1; padding: 14px 16px; }
+  .priority-chips { display: flex; gap: 6px; margin-bottom: 14px; }
+  table.rules { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.rules th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: .03em; color: var(--muted-foreground); padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  table.rules td { padding: 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+
+  .strike-row { opacity: .45; }
+  .strike-row td { text-decoration: line-through; }
+
+  .tabs { display: flex; gap: 4px; padding: 4px; background: var(--muted); border-radius: 10px; width: fit-content; }
+  .tab { padding: 6px 12px; font-size: 12px; border-radius: 8px; color: var(--muted-foreground); }
+  .tab.active { background: var(--surface); color: var(--foreground); font-weight: 600; box-shadow: 0 1px 2px oklch(0 0 0/8%); }
+  .tab.removed { text-decoration: line-through; opacity: .5; }
+</style>
+
+<div class="page">
+  <h1>Doladění Pravidel / Situací — wireframe změn</h1>
+  <p class="lede">Zjednodušené drátové modely (ne finální vizuál) pro shrnutí domluvených úprav ze specifikace ze dne 2026-07-26. Zelený rámeček = nové, červený = odstraněné, oranžový = přejmenované/upravené.</p>
+
+  <div class="legend">
+    <div class="item"><span class="swatch new"></span> nové</div>
+    <div class="item"><span class="swatch removed"></span> odstraněné</div>
+    <div class="item"><span class="swatch changed"></span> přejmenované / upravené</div>
+  </div>
+
+  <!-- 1: Katalog akcí dropdown -->
+  <div class="section">
+    <div class="section-head"><span class="section-num">1</span><span class="section-title">Katalog akcí — popelnice v dropdownu</span></div>
+    <p class="section-note">V dropdownu pro výběr/vytvoření akce (u Závažnosti) přibude u každé položky malá popelnice — smaže akci z celého katalogu, ne jen z aktuální závažnosti.</p>
+    <div class="frame">
+      <div class="frame-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="path">ActionTagPicker.tsx — popover</span></div>
+      <div class="frame-body" style="display:flex; gap:20px; align-items:flex-start;">
+        <div class="popover callout new">
+          <div class="popover-search">Hledat nebo vytvořit akci…</div>
+          <div class="popover-row">
+            <span>Zavolat zákazníkovi</span>
+            <svg class="icon trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+          </div>
+          <div class="popover-row">
+            <span>Informovat e-mailem</span>
+            <svg class="icon trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+          </div>
+          <div class="popover-row">
+            <span>Prověřit u dopravce</span>
+            <svg class="icon trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+          </div>
+        </div>
+        <div style="font-size:12px; color:var(--muted-foreground); max-width:280px; padding-top: 4px;">
+          <span class="tag new">NOVÉ</span><br><br>
+          Popelnice u položky, kterou právě nikde neužívá žádná Závažnost, je aktivní. Pokud je akce použitá jinde, je needitovatelná/disabled (stejný vzor jako mazání Závažnosti dnes).
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 + rename labels appear inline in section 4 -->
+
+  <!-- 3: Situace editor save button -->
+  <div class="section">
+    <div class="section-head"><span class="section-num">2</span><span class="section-title">Situace — přidání tlačítka „Uložit“</span></div>
+    <p class="section-note">Dnes se každá změna ukládá okamžitě (autosave při psaní). Nově se změny drží lokálně a commitnou se do store až kliknutím na Uložit — stejný vzor jako u Pravidla. Spolu s Uložit přibývá i „← Zpět na situace“ pod ním — stejná dvojice tlačítek jako má dnes Pravidlo (Uložit pravidlo / ← Zpět na pravidla).</p>
+    <div class="frame">
+      <div class="frame-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="path">SituationEditorPage.tsx</span></div>
+      <div class="frame-body">
+        <label class="field-label">Název situace</label>
+        <input class="input" value="Nedoručeno" readonly style="margin-bottom:12px;">
+        <label class="field-label">Popis (volitelný)</label>
+        <input class="input" value="Zásilka se nepodařilo doručit v rámci limitu." readonly style="margin-bottom:14px;">
+        <div class="group-label">Závažnosti</div>
+        <div class="cond-row"><span>běžné · Vyšší</span><span style="color:var(--muted-foreground)">2 pravidla</span></div>
+        <div class="cond-row"><span>problémové · Vysoká</span><span style="color:var(--muted-foreground)">1 pravidlo</span></div>
+
+        <div class="callout new" style="border-top:1px solid var(--border); margin-top:14px; padding-top:14px;">
+          <button class="btn primary" style="display:block; width:100%; justify-content:center; margin-bottom:8px;">Uložit</button>
+          <button class="btn" style="display:block; width:100%; justify-content:center; border-style:solid; color:var(--muted-foreground);">← Zpět na situace</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4: Rule wizard -->
+  <div class="section">
+    <div class="section-head"><span class="section-num">3</span><span class="section-title">Pravidlo — wizard (RuleCreatorPage)</span></div>
+    <p class="section-note">Situace/Závažnost zůstávají volně editovatelné i po uložení (beze změny). Priorita a Aktivní mizí ze středního sloupce. Tři skupiny podmínek dostávají jednotný box. Akce v pravém sloupci zůstávají needitovatelné (beze změny).</p>
+    <div class="frame">
+      <div class="frame-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="path">RuleCreatorPage.tsx</span></div>
+      <div class="wizard">
+        <div class="wizard-col">
+          <div class="group-label">Situace</div>
+          <select class="input" style="margin-bottom:12px;"><option>Nedoručeno</option></select>
+          <div class="group-label">Závažnost <span class="tag" style="background:var(--muted); color:var(--muted-foreground); border-color:var(--border);">beze změny — editovatelné i po uložení</span></div>
+          <div class="sev-btn active">problémové</div>
+          <div class="sev-btn">běžné</div>
+          <div class="sev-btn">kritické</div>
+        </div>
+
+        <div class="wizard-col">
+          <div class="group-label">Nastavení pravidla</div>
+          <label class="field-label">Název pravidla</label>
+          <input class="input" value="Nedoručeno — 2. pokus" readonly style="margin-bottom:10px;">
+
+          <div class="row" style="margin-bottom:10px;">
+            <div class="callout rm" style="padding:2px;">
+              <label class="field-label">Priorita <span class="tag removed">ODEBRÁNO</span></label>
+              <input class="input" value="Vyšší" disabled style="opacity:.4;">
+            </div>
+            <div class="callout rm" style="padding:2px;">
+              <label class="field-label">Aktivní <span class="tag removed">ODEBRÁNO</span></label>
+              <input class="input" value="zapnuto (přepínač)" disabled style="opacity:.4;">
+            </div>
+          </div>
+          <p style="font-size:11px; color:var(--muted-foreground); margin: 0 0 16px;">Priorita se od teď jen zobrazuje (odvozená ze Závažnosti, viz sekce 5) — pravidlo po uložení rovnou funguje, bez zapnout/vypnout přepínače.</p>
+
+          <div class="group-label" style="border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:12px;">Podmínky</div>
+
+          <div class="cond-group callout ch">
+            <div class="group-label">Podmínky pro příchozí záznam</div>
+            <div class="cond-row"><span>Stav je „Delivery Attempted…“</span><span>✕</span></div>
+            <button class="btn ghost sm">+ přidat podmínku</button>
+          </div>
+
+          <div class="cond-group callout ch">
+            <div class="group-label">Podmínky pro historické záznamy</div>
+            <button class="btn ghost sm">+ přidat podmínku</button>
+          </div>
+
+          <div class="cond-group">
+            <div class="group-label">Co dále platí</div>
+            <div class="cond-row" style="font-style:italic; color:var(--muted-foreground); border-style:dashed;"><span>Žádné podmínky — akce se spustí vždy.</span></div>
+            <button class="btn ghost sm">+ Přidat podmínku</button>
+          </div>
+          <p style="font-size:11px; color:var(--warning-foreground); margin-top:-4px;"><span class="tag changed">SJEDNOCENO</span> všechny tři skupiny mají teď stejný box (dřív ho měla jen „Co dále platí“).</p>
+        </div>
+
+        <div class="wizard-col">
+          <div class="group-label">Akce <span class="tag" style="background:var(--muted); color:var(--muted-foreground); border-color:var(--border);">beze změny</span></div>
+          <div class="action-item">
+            <div style="font-weight:600; margin-bottom:2px;">Zavolat zákazníkovi</div>
+            <div style="color:var(--muted-foreground);">Ověř, zda je zásilka stále aktuální.</div>
+          </div>
+          <div class="lock-note">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+            <span>Needitovatelné — vždy živě ze Závažnosti.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5: Priority labels + severity card -->
+  <div class="section">
+    <div class="section-head"><span class="section-num">4</span><span class="section-title">Závažnost — přejmenované priority</span></div>
+    <p class="section-note">LOW/MEDIUM/HIGH/URGENT → Nízká/Vyšší/Vysoká/Urgentní. Tohle je jediné místo, kde se priorita ještě nastavuje — na Pravidle se jen zobrazuje.</p>
+    <div class="frame" style="max-width:340px;">
+      <div class="frame-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="path">SeverityCard.tsx</span></div>
+      <div class="frame-body">
+        <label class="field-label">Priorita</label>
+        <select class="input callout ch">
+          <option>Nízká</option>
+          <option selected>Vyšší</option>
+          <option>Vysoká</option>
+          <option>Urgentní</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6: Rules list -->
+  <div class="section">
+    <div class="section-head"><span class="section-num">5</span><span class="section-title">Seznam pravidel (RulesList)</span></div>
+    <p class="section-note">Horní lišta ztrácí zkratkové tlačítko „Situace a závažnosti →“ (v hlavní navigaci zůstává). Levý sloupec s filtry mizí úplně — žádné „Všechna pravidla“, žádný Archiv (archivace jako koncept neexistuje; smazané pravidlo je smazané, ne archivované). Filtr podle priority se přesouvá do chipů nad tabulku, na celou šířku. V řádku mizí kód pravidla a stavová tečka aktivní/neaktivní; priorita se čte ze Závažnosti.</p>
+    <div class="frame">
+      <div class="frame-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="path">RulesList.tsx</span></div>
+      <div class="app-shell">
+        <div class="topbar">
+          <div class="nav"><span class="cur">Pravidla pro tracking</span><span>Soulad s trasou</span><span>Situace a závažnosti</span></div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <span class="btn sm callout rm" style="text-decoration:line-through; opacity:.5;">Situace a závažnosti →</span>
+            <span class="btn primary sm">+ Nové pravidlo</span>
+          </div>
+        </div>
+        <div class="list-body">
+          <div class="list-main" style="flex:1;">
+            <div class="callout rm" style="margin-bottom:12px; padding:8px 10px; font-size:11px; color:var(--destructive); border-radius:8px;">ODSTRANĚNO: celý levý sloupec s filtry (Všechna pravidla / Pouze aktivní / Archiv) — dál neexistuje.</div>
+            <div class="priority-chips callout new">
+              <span class="chip">Nízká</span>
+              <span class="chip active">Vyšší</span>
+              <span class="chip">Vysoká</span>
+              <span class="chip">Urgentní</span>
+            </div>
+            <table class="rules">
+              <tr><th>Název</th><th style="text-decoration:line-through; color:var(--destructive);">Kód</th><th>Priorita</th><th style="text-decoration:line-through; color:var(--destructive);">Stav</th><th></th></tr>
+              <tr>
+                <td>Nedoručeno — 2. pokus</td>
+                <td class="strike-row"><span style="text-decoration:line-through;">RULE-042</span></td>
+                <td><span class="chip active">Vyšší</span></td>
+                <td class="strike-row">●</td>
+                <td>🗑</td>
+              </tr>
+              <tr>
+                <td>Poškození zásilky</td>
+                <td class="strike-row"><span style="text-decoration:line-through;">RULE-051</span></td>
+                <td><span class="chip">Vysoká</span></td>
+                <td class="strike-row">●</td>
+                <td>🗑</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7: sidebar tabs -->
+  <div class="section">
+    <div class="section-head"><span class="section-num">6</span><span class="section-title">Detail pravidla — postranní panel</span></div>
+    <p class="section-note">Záložka „Test“ mizí. „Shrnutí“ → „Detail pravidla“. „Historie“ zůstává jako placeholder (bez runtime enginu není co zobrazit) — otevřená otázka pro MVP je jen jak hlubokou historii časem zobrazíme.</p>
+    <div class="frame" style="max-width:420px;">
+      <div class="frame-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="path">RulesList.tsx — RuleDetailSidebar</span></div>
+      <div class="frame-body">
+        <div class="tabs callout ch">
+          <div class="tab active">Detail pravidla</div>
+          <div class="tab removed">Test</div>
+          <div class="tab">Historie</div>
+        </div>
+        <div style="margin-top:14px; border:1px dashed var(--border); border-radius:8px; padding:16px; text-align:center; font-size:12px; color:var(--muted-foreground);">
+          Žádné záznamy spuštění.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

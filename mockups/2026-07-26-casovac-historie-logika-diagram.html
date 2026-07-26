@@ -1,0 +1,198 @@
+<meta charset="utf-8">
+<title>Časovač a historické záznamy — logika (diagram)</title>
+<style>
+  :root {
+    --radius: 0.625rem;
+    --background: oklch(0.985 0.005 280);
+    --foreground: oklch(0.18 0.03 280);
+    --surface: oklch(1 0 0);
+    --primary: oklch(0.56 0.22 295);
+    --primary-foreground: oklch(0.99 0 0);
+    --primary-soft: oklch(0.96 0.04 295);
+    --muted: oklch(0.965 0.008 280);
+    --muted-foreground: oklch(0.5 0.02 280);
+    --destructive: oklch(0.6 0.22 25);
+    --destructive-foreground: oklch(0.99 0 0);
+    --success: oklch(0.7 0.16 155);
+    --success-foreground: oklch(0.2 0.05 155);
+    --warning: oklch(0.82 0.16 75);
+    --warning-foreground: oklch(0.3 0.08 75);
+    --border: oklch(0.92 0.01 280);
+    --success-soft: oklch(0.95 0.04 155);
+    --warning-soft: oklch(0.96 0.05 75);
+    --destructive-soft: oklch(0.95 0.05 25);
+    --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: oklch(0.16 0.02 280); --foreground: oklch(0.96 0.005 280);
+      --surface: oklch(0.2 0.02 280);
+      --primary: oklch(0.7 0.2 295); --primary-foreground: oklch(0.15 0.02 280); --primary-soft: oklch(0.3 0.1 295);
+      --muted: oklch(0.25 0.02 280); --muted-foreground: oklch(0.7 0.02 280);
+      --border: oklch(1 0 0 / 12%);
+      --success-soft: oklch(0.3 0.07 155); --warning-soft: oklch(0.32 0.08 75); --destructive-soft: oklch(0.32 0.1 25);
+      --success-foreground: oklch(0.86 0.13 155); --warning-foreground: oklch(0.88 0.13 75);
+      --destructive: oklch(0.72 0.19 25);
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--background); font-family: var(--font-sans); color: var(--foreground); -webkit-font-smoothing: antialiased; }
+  .page { max-width: 980px; margin: 0 auto; padding: 32px 24px 80px; }
+  h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+  .lede { color: var(--muted-foreground); font-size: 13px; margin: 0 0 28px; }
+  .section { margin-bottom: 52px; }
+  .section-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .section-note { font-size: 12.5px; color: var(--muted-foreground); margin: 0 0 18px; line-height: 1.55; max-width: 780px; }
+  .card { border: 1px solid var(--border); border-radius: 14px; background: var(--surface); padding: 20px; }
+
+  /* timeline primitives */
+  .timeline { position: relative; margin: 18px 0; }
+  .axis { position: relative; height: 2px; background: var(--border); margin: 0 10px; }
+  .tick { position: absolute; top: -4px; width: 2px; height: 10px; background: var(--border); }
+  .tick-label { position: absolute; top: 10px; font-size: 10.5px; color: var(--muted-foreground); transform: translateX(-50%); white-space: nowrap; }
+  .band { position: absolute; top: -14px; height: 38px; border-radius: 8px; }
+  .band.admin { background: var(--warning-soft); border: 1px solid var(--warning); }
+  .band-label { position: absolute; top: -34px; font-size: 10.5px; font-weight: 700; color: var(--warning-foreground); text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
+  .event { position: absolute; top: -6px; width: 12px; height: 12px; border-radius: 50%; background: var(--surface); border: 2px solid var(--foreground); transform: translateX(-50%); }
+  .event.real { border-color: var(--primary); background: var(--primary-soft); }
+  .event-label { position: absolute; top: 16px; font-size: 10.5px; transform: translateX(-50%); text-align: center; width: 120px; margin-left: -60px; color: var(--foreground); }
+
+  .row-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted-foreground); margin-bottom: 26px; }
+  .variant { margin-bottom: 56px; }
+  .variant:last-child { margin-bottom: 0; }
+  .variant-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .tag { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .tag.bad { background: var(--destructive-soft); color: var(--destructive); border: 1px solid var(--destructive); }
+  .tag.good { background: var(--success-soft); color: var(--success-foreground); border: 1px solid var(--success); }
+
+  .bar-track { position: relative; height: 20px; margin: 32px 10px 0; }
+  .bar-track .axis { position: absolute; inset: 0; margin: 0; height: 20px; border-radius: 6px; background: var(--muted); }
+  .bar-fill { position: absolute; top: 0; left: 0; height: 20px; border-radius: 6px 0 0 6px; }
+  .bar-fill.ok { background: var(--primary-soft); }
+  .bar-fill.danger { background: var(--destructive-soft); }
+  .threshold-line { position: absolute; top: -6px; bottom: -6px; width: 2px; background: var(--foreground); opacity: .5; }
+  .threshold-label { position: absolute; top: -22px; font-size: 10px; font-weight: 600; transform: translateX(-50%); white-space: nowrap; }
+  .alarm { position: absolute; top: -34px; transform: translateX(-50%); font-size: 11px; font-weight: 700; color: var(--destructive); white-space: nowrap; display: flex; align-items: center; gap: 4px; }
+  .frozen-note { position: absolute; font-size: 10.5px; color: var(--warning-foreground); font-weight: 600; white-space: nowrap; }
+
+  /* record chain (topic 2) */
+  .chain { display: flex; align-items: flex-end; gap: 0; margin: 42px 0 40px; position: relative; }
+  .rec { width: 84px; flex-shrink: 0; text-align: center; position: relative; }
+  .rec-box { border: 1.5px solid var(--border); background: var(--surface); border-radius: 10px; padding: 10px 4px; font-size: 11px; font-weight: 600; position: relative; z-index: 2; }
+  .rec-box.newest { border-color: var(--primary); background: var(--primary-soft); color: var(--primary); }
+  .rec-idx { font-size: 9.5px; color: var(--muted-foreground); margin-top: 4px; }
+  .connector { flex: 1; height: 1.5px; background: var(--border); margin-bottom: 26px; }
+  .bracket { position: absolute; left: 0; right: 0; border: 1.5px solid; border-bottom: none; border-radius: 8px 8px 0 0; height: 14px; }
+  .bracket-label { position: absolute; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 999px; white-space: nowrap; }
+
+  .row-block { margin-bottom: 44px; }
+  .row-block:last-child { margin-bottom: 0; }
+  .row-head { display:flex; align-items:baseline; gap:8px; margin-bottom: 6px; }
+  .row-head .trig { font-size: 13px; font-weight: 700; }
+  .row-head .sub { font-size: 11.5px; color: var(--muted-foreground); }
+
+  .legend-inline { display: flex; gap: 16px; flex-wrap: wrap; font-size: 11.5px; color: var(--muted-foreground); margin-top: 10px; }
+  .legend-inline .dot { width: 9px; height: 9px; border-radius: 50%; display:inline-block; margin-right: 5px; vertical-align: -1px; }
+</style>
+
+<div class="page">
+  <h1>Časovač a historické záznamy — logika (diagram)</h1>
+  <p class="lede">Grafické vysvětlení dvou otevřených bodů z diskuze: (1) proč „pauza" dává větší smysl než „přeskočit a počítat dál" u administrativních statusů, a (2) proč se „poslední záznam" počítá jinak podle typu Spouštěče.</p>
+
+  <!-- TOPIC 1 -->
+  <div class="section">
+    <div class="section-title">1 · Administrativní status — pauza vs. počítání dál</div>
+    <p class="section-note">Stejná historie zásilky, dvě různé interpretace pravidla „Zásilka nemá nový záznam déle než 72 h". Zásilka dostane skutečný záznam v T=0h, v T=5h vstoupí do celního odbavení (administrativní status) a zůstane v něm dlouho — vystoupí až v T=90h.</p>
+
+    <div class="card">
+      <div class="timeline">
+        <div class="axis" style="margin-bottom: 78px;">
+          <div class="band admin" style="left:5%; width:85%;"></div>
+          <div class="band-label" style="left:47.5%; transform: translateX(-50%);">🛃 celní odbavení (administrativní status)</div>
+          <div class="event real" style="left:0%;"></div>
+          <div class="event-label" style="left:0%; width:130px; margin-left:0; text-align:left; transform:translateX(0);">T=0h<br><b>skutečný záznam</b></div>
+          <div class="event" style="left:5%; border-color:var(--warning);"></div>
+          <div class="event-label" style="left:5%; top:42px; width:170px; margin-left:0; text-align:left; transform:translateX(0); color:var(--warning-foreground);">↑ T=5h — vstup do admin. statusu</div>
+          <div class="event real" style="left:90%; border-color:var(--success);"></div>
+          <div class="event-label" style="left:90%; width:150px; margin-left:0; text-align:right; transform:translateX(-100%);">T=90h<br><b>výstup — nový skutečný záznam</b></div>
+        </div>
+      </div>
+
+      <div class="variant">
+        <div class="variant-head"><span class="tag bad">VARIANTA A — počítá se dál (nechtěné)</span></div>
+        <div class="section-note" style="margin-bottom:0;">„Poslední záznam" se hledá zpětně a přeskočí admin. status, ale hodiny běží od T=0h nepřetržitě — i po celou dobu, co je zásilka v odbavení.</div>
+        <div class="bar-track">
+          <div class="axis"></div>
+          <div class="bar-fill danger" style="width:80%;"></div>
+          <div class="threshold-line" style="left:80%;"></div>
+          <div class="threshold-label" style="left:80%;">72h práh</div>
+          <div class="alarm" style="left:80%;">🔥 FALSE ALARM v T=72h<br>&nbsp;</div>
+        </div>
+        <div class="section-note" style="margin-top:28px; margin-bottom:0;">V T=72h pravidlo spustí VkŘ, přestože zásilka je stále jen 67 hodin v běžném, očekávaném celním odbavení — false positive.</div>
+      </div>
+
+      <div class="variant">
+        <div class="variant-head"><span class="tag good">VARIANTA B — pauza (chtěné)</span></div>
+        <div class="section-note" style="margin-bottom:0;">Jakmile je aktuální status administrativní, počítání se úplně zastaví — bez ohledu na to, kolik hodin uběhlo od T=0h. Po výstupu v T=90h začíná počítání znovu od nuly, od nového záznamu.</div>
+        <div class="bar-track">
+          <div class="axis"></div>
+          <div class="bar-fill ok" style="width:5%;"></div>
+          <div class="frozen-note" style="left:6%; top:4px;">⏸ zamrzlé na 5h po celou dobu odbavení (T=5h → T=90h)</div>
+          <div class="threshold-line" style="left:100%; opacity:0;"></div>
+        </div>
+        <div class="section-note" style="margin-top:20px; margin-bottom:0;">Nikdy nedojde k falešnému spuštění během odbavení. Nový 72h odpočet běží až od T=90h — a to je už jen běžná logika „čas od posledního záznamu", žádná speciální výjimka není potřeba.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOPIC 2 -->
+  <div class="section">
+    <div class="section-title">2 · „Poslední záznam" v historii — podle typu Spouštěče</div>
+    <p class="section-note">Zásilka má v systému 5 tracking záznamů, chronologicky R1 (nejstarší) → R5 (nejnovější). Podle toho, jaký typ Spouštěče pravidlo má, se „poslední záznam" pro historický blok podmínek počítá jinak.</p>
+
+    <div class="card">
+      <div class="row-block">
+        <div class="row-head"><span class="trig">Spouštěč: Automaticky</span><span class="sub">— vyhodnocuje se přesně ve chvíli, kdy R5 právě dorazí</span></div>
+        <div class="chain">
+          <div class="bracket" style="left:0; width:68.8%; border-color: var(--warning); top: -8px;"></div>
+          <div class="bracket-label" style="left:0; top:-30px; background:var(--warning-soft); color:var(--warning-foreground); border:1px solid var(--warning);">kdekoliv v historii = R1–R4</div>
+          <div class="rec"><div class="rec-box">R1</div><div class="rec-idx">nejstarší</div></div>
+          <div class="connector"></div>
+          <div class="rec"><div class="rec-box">R2</div></div>
+          <div class="connector"></div>
+          <div class="rec"><div class="rec-box">R3</div></div>
+          <div class="connector"></div>
+          <div class="rec"><div class="rec-box" style="border-color:var(--success); background:var(--success-soft); color:var(--success-foreground);">R4</div><div class="rec-idx" style="color:var(--success-foreground); font-weight:700;">= „poslední záznam"</div></div>
+          <div class="connector"></div>
+          <div class="rec"><div class="rec-box newest">R5</div><div class="rec-idx" style="color:var(--primary); font-weight:700;">právě přišel — testuje se v „Příchozí záznam"</div></div>
+        </div>
+        <div class="section-note" style="margin-top:-14px;">Historický blok se dívá jen na to, co existovalo <b>před</b> R5 — jinak by se R5 testoval dvakrát (jednou v „Příchozí záznam", podruhé v „Historické záznamy").</div>
+      </div>
+
+      <div class="row-block">
+        <div class="row-head"><span class="trig">Spouštěč: Časovač</span><span class="sub">— periodická kontrola, žádný „právě příchozí" záznam neexistuje</span></div>
+        <div class="chain">
+          <div class="bracket" style="left:0; width:100%; border-color: var(--warning); top: -8px;"></div>
+          <div class="bracket-label" style="left:0; top:-30px; background:var(--warning-soft); color:var(--warning-foreground); border:1px solid var(--warning);">kdekoliv v historii = R1–R5</div>
+          <div class="rec"><div class="rec-box">R1</div><div class="rec-idx">nejstarší</div></div>
+          <div class="connector"></div>
+          <div class="rec"><div class="rec-box">R2</div></div>
+          <div class="connector"></div>
+          <div class="rec"><div class="rec-box">R3</div></div>
+          <div class="connector"></div>
+          <div class="rec"><div class="rec-box">R4</div></div>
+          <div class="connector"></div>
+          <div class="rec"><div class="rec-box newest" style="border-color:var(--success); background:var(--success-soft); color:var(--success-foreground);">R5</div><div class="rec-idx" style="color:var(--success-foreground); font-weight:700;">= „poslední záznam"</div></div>
+        </div>
+        <div class="section-note" style="margin-top:-14px;">Nic se nevylučuje — R5 je normálně nejnovější uložený záznam a zároveň „poslední záznam" pro historický blok.</div>
+      </div>
+
+      <div class="legend-inline">
+        <span><span class="dot" style="background:var(--success-soft); border:1.5px solid var(--success);"></span>„poslední záznam" (jen poslední)</span>
+        <span><span class="dot" style="background:var(--primary-soft); border:1.5px solid var(--primary);"></span>právě příchozí (jen u Automaticky)</span>
+        <span><span class="dot" style="background:var(--warning-soft); border:1.5px solid var(--warning);"></span>rozsah pro „kdekoliv v historii"</span>
+      </div>
+    </div>
+  </div>
+</div>

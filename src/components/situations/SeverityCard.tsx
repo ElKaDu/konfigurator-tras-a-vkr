@@ -60,10 +60,10 @@ export function SeverityCard({
           onChange={(e) => onChange({ ...severity, priority: e.target.value as Priority })}
           className="rounded-md border border-border bg-background px-2.5 py-1.5 text-sm"
         >
-          <option value="low">LOW</option>
-          <option value="medium">MEDIUM</option>
-          <option value="high">HIGH</option>
-          <option value="urgent">URGENT</option>
+          <option value="low">Nízká</option>
+          <option value="medium">Vyšší</option>
+          <option value="high">Vysoká</option>
+          <option value="urgent">Urgentní</option>
         </select>
       </div>
 

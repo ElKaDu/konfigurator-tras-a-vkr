@@ -6,9 +6,11 @@ import type { Condition } from "@/lib/model/types";
 export function TrackingHistoricalConditionsBuilder({
   conditions,
   onChange,
+  triggerType,
 }: {
   conditions: Condition[];
   onChange: (next: Condition[]) => void;
+  triggerType?: "automatic" | "timer";
 }) {
   const rows = conditions.filter(isHistoricalConditionRow);
 
@@ -82,7 +84,7 @@ export function TrackingHistoricalConditionsBuilder({
                   row.scope === "recent" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                jen poslední záznam
+                {triggerType === "automatic" ? "Jen předchozí záznam" : "Jen aktuální záznam"}
               </button>
               <button
                 onClick={() => updateAt(i, { ...row, scope: "anywhere" })}
