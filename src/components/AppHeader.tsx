@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 
-export type SectionKey = "rules" | "soulad" | "situace";
+export type SectionKey = "rules" | "soulad" | "situace" | "checklist";
 
 export function AppHeader({
   current,
@@ -25,6 +25,7 @@ export function AppHeader({
         <NavLink to="/" active={current === "rules"}>Pravidla pro tracking</NavLink>
         <NavLink to="/soulad-s-trasou" active={current === "soulad"}>Soulad s trasou</NavLink>
         <NavLink to="/situace" active={current === "situace"}>Situace a závažnosti</NavLink>
+        <NavLink to="/checklist" active={current === "checklist"}>Checklist objednávky</NavLink>
       </nav>
       <span className="rounded-md bg-primary-soft px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-primary">
         prototyp
