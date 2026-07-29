@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TestRouteImport } from './routes/test'
 import { Route as SouladSTrasouRouteImport } from './routes/soulad-s-trasou'
 import { Route as SituaceRouteImport } from './routes/situace'
+import { Route as ChecklistRouteImport } from './routes/checklist'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SituaceIdRouteImport } from './routes/situace_.$id'
 import { Route as RulesNewRouteImport } from './routes/rules.new'
@@ -34,6 +35,11 @@ const SouladSTrasouRoute = SouladSTrasouRouteImport.update({
 const SituaceRoute = SituaceRouteImport.update({
   id: '/situace',
   path: '/situace',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChecklistRoute = ChecklistRouteImport.update({
+  id: '/checklist',
+  path: '/checklist',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -79,6 +85,7 @@ const RulesRuleIdEditRoute = RulesRuleIdEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/checklist': typeof ChecklistRoute
   '/situace': typeof SituaceRoute
   '/soulad-s-trasou': typeof SouladSTrasouRoute
   '/test': typeof TestRoute
@@ -92,6 +99,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/checklist': typeof ChecklistRoute
   '/situace': typeof SituaceRoute
   '/soulad-s-trasou': typeof SouladSTrasouRoute
   '/test': typeof TestRoute
@@ -105,6 +113,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/checklist': typeof ChecklistRoute
   '/situace': typeof SituaceRoute
   '/soulad-s-trasou': typeof SouladSTrasouRoute
   '/test': typeof TestRoute
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/checklist'
     | '/situace'
     | '/soulad-s-trasou'
     | '/test'
@@ -133,6 +143,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/checklist'
     | '/situace'
     | '/soulad-s-trasou'
     | '/test'
@@ -145,6 +156,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/checklist'
     | '/situace'
     | '/soulad-s-trasou'
     | '/test'
@@ -159,6 +171,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChecklistRoute: typeof ChecklistRoute
   SituaceRoute: typeof SituaceRoute
   SouladSTrasouRoute: typeof SouladSTrasouRoute
   TestRoute: typeof TestRoute
@@ -190,6 +203,13 @@ declare module '@tanstack/react-router' {
       path: '/situace'
       fullPath: '/situace'
       preLoaderRoute: typeof SituaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checklist': {
+      id: '/checklist'
+      path: '/checklist'
+      fullPath: '/checklist'
+      preLoaderRoute: typeof ChecklistRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -267,6 +287,7 @@ const RulesNewRouteWithChildren = RulesNewRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChecklistRoute: ChecklistRoute,
   SituaceRoute: SituaceRoute,
   SouladSTrasouRoute: SouladSTrasouRoute,
   TestRoute: TestRoute,
