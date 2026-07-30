@@ -69,13 +69,21 @@ function ActiveCallCard({ kontakt, items }: { kontakt: Kontakt; items: Checklist
             Zatím nic k probrání — zatrhni „podezření“ nebo „potvrdit s klientem“ u položky.
           </p>
         )}
-        {linked.map((item) => (
-          <div key={item.id} className="py-0.5 text-[11px]">
-            <b>{templateById(item.templateId)?.title}</b>
-            {item.findingIsSuspicion && item.findingValue && <> — nález: {item.findingValue}</>}
-            {item.resolutionNeedsConfirm && item.resolutionValue && <> — řešení: {item.resolutionValue}</>}
-          </div>
-        ))}
+        {linked.map((item) => {
+          const hasFindingContext = item.findingIsSuspicion && item.findingValue;
+          const hasResolutionContext = item.resolutionNeedsConfirm && item.resolutionValue;
+          const findingPending = item.findingIsSuspicion && !item.findingValue;
+          const resolutionPending = item.resolutionNeedsConfirm && !item.resolutionValue;
+          return (
+            <div key={item.id} className="py-0.5 text-[11px]">
+              <b>{templateById(item.templateId)?.title}</b>
+              {hasFindingContext && <> — nález: {item.findingValue}</>}
+              {hasResolutionContext && <> — řešení: {item.resolutionValue}</>}
+              {findingPending && <> — podezření zatrženo, nález se doplňuje</>}
+              {resolutionPending && <> — čeká na potvrzení řešení</>}
+            </div>
+          );
+        })}
       </div>
 
       <div className="mb-1.5">
