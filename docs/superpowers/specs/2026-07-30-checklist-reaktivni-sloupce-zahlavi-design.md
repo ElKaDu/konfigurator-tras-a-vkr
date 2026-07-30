@@ -93,10 +93,13 @@ sekcemi:
 
 ## Levý sloupec
 
-- **Panel "Věci k řešení na checklistu" (`VkrPanel.tsx`) se ruší celý** — včetně dnešních dvou
-  statických řádků "Krok 1 mock". Pokud by šlo o ztrátu informace, kterou chce uživatelka zachovat
-  jinde, je to otevřená otázka k doladění při review specu — zatím se s Krok 1 mock řádky nepočítá
-  nikde jinde.
+- **Panel "Věci k řešení na checklistu" (`VkrPanel.tsx`) se ruší celý.** Jeho dva statické řádky
+  "Krok 1 mock" ("Přiřazení objednávky — volný zákazník" #4471-A a "Čeká na zaplacení" #4471-C)
+  nemizí, ale stěhují se do `Krok1Mock.tsx` (prostřední sloupec) — ten už dnes má needitovatelný
+  accordion s "Kontrola přiřazení zákazníka" (stejné VkŘ #4471-A). "Čeká na zaplacení" (#4471-C)
+  přibývá jako další needitovatelný řádek ve stejném stylu vedle "Kontrola potřebné expertizy".
+  Všechny tři řádky v `Krok1Mock` zůstávají čistě statické (needituje se, nereaguje na store), jak
+  komponenta funguje dnes.
 - **"Kapitoly kontrol" (`CategoryNav.tsx`)**: číslo `resolved/total` u kapitoly, která má aspoň
   jednu vyřešenou položku, je klikací odkaz. Klik scrollne **hlavní (druhý) sloupec** na sekci dané
   kapitoly a rozbalí její existující "▸ Hotovo (N)" disclosure (z `ItemsList.tsx`, Task 7 předchozího
