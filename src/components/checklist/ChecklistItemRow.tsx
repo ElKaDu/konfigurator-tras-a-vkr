@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
 export function ChecklistItemRow({ item, template }: { item: ChecklistItem; template: ChecklistItemTemplate }) {
+  const [expanded, setExpanded] = useState(false);
   const [showContext, setShowContext] = useState(false);
   const state = deriveItemState(item);
 
@@ -69,6 +70,16 @@ export function ChecklistItemRow({ item, template }: { item: ChecklistItem; temp
     </button>
   );
 
+  const expandToggle = (
+    <button
+      onClick={() => setExpanded((e) => !e)}
+      aria-expanded={expanded}
+      className="text-[13px] text-muted-foreground"
+    >
+      {expanded ? "▾" : "▸"}
+    </button>
+  );
+
   if (state === "resolved") {
     return (
       <div className="border-b border-border py-3 last:border-0">
@@ -112,8 +123,10 @@ export function ChecklistItemRow({ item, template }: { item: ChecklistItem; temp
         <StateDot state={state} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[13.5px] font-semibold">{template.title}</span>
-            {contextButton}
+            {expandToggle}
+            <button onClick={() => setExpanded((e) => !e)} className="text-[13.5px] font-semibold">
+              {template.title}
+            </button>
             {state === "waiting_contact" && (
               <span className="rounded-full bg-warning/15 px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-wide text-warning-foreground">
                 čeká na kontakt · {detail === "needs_confirm" ? "řešení k potvrzení" : "řešení chybí"}
@@ -121,58 +134,65 @@ export function ChecklistItemRow({ item, template }: { item: ChecklistItem; temp
             )}
             {trackingTag}
           </div>
-          <p className="mt-0.5 text-[12.5px] text-muted-foreground">{template.description}</p>
 
-          <div className="mt-2.5 flex flex-col gap-3 lg:flex-row lg:items-start">
-            <div className="flex flex-1 flex-col gap-2">
-              <TemplatedField
-                label="Nález"
-                options={template.findingOptions}
-                value={item.findingValue}
-                onChange={(v) => patch({ findingValue: v })}
-                checkboxLabel="podezření"
-                checked={item.findingIsSuspicion}
-                onCheckedChange={(c) => patch({ findingIsSuspicion: c })}
-              />
-              <TemplatedField
-                label="Řešení"
-                options={template.resolutionOptions}
-                value={item.resolutionValue}
-                onChange={(v) => patch({ resolutionValue: v })}
-                checkboxLabel="potvrdit s klientem"
-                checked={item.resolutionNeedsConfirm}
-                onCheckedChange={(c) => patch({ resolutionNeedsConfirm: c })}
-              />
-              <div className="flex items-start gap-1.5">
-                <span className="w-14 shrink-0 pt-1.5 text-[10.5px] font-bold uppercase tracking-wide text-muted-foreground">
-                  Pozn.
-                </span>
-                <Textarea
-                  value={item.noteValue ?? ""}
-                  onChange={(e) => patch({ noteValue: e.target.value || undefined })}
-                  rows={1}
-                  className="flex-1 text-[12.5px]"
-                  placeholder="Poznámka…"
-                  aria-label="Poznámka"
-                />
+          {expanded && (
+            <div className="mt-2 pl-[22px]">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-[12.5px] text-muted-foreground">{template.description}</p>
+                {contextButton}
               </div>
-              <div className="flex flex-wrap gap-2 pt-0.5">
-                <Button size="sm" onClick={resolve}>
-                  ✓ Označit jako vyřešeno
-                </Button>
-                {item.resolutionValue && template.canTrackForMonitoring && !item.trackingVkrId && (
-                  <Button size="sm" variant="outline" onClick={createTrackingVkr}>
-                    + Založit věc k řešení
+
+              {showContext && (
+                <div className="mt-2">
+                  <ItemContext title={template.title} fields={template.context} />
+                </div>
+              )}
+
+              <div className="mt-2.5 flex flex-col gap-2">
+                <TemplatedField
+                  label="Nález"
+                  options={template.findingOptions}
+                  value={item.findingValue}
+                  onChange={(v) => patch({ findingValue: v })}
+                  checkboxLabel="podezření"
+                  checked={item.findingIsSuspicion}
+                  onCheckedChange={(c) => patch({ findingIsSuspicion: c })}
+                />
+                <TemplatedField
+                  label="Řešení"
+                  options={template.resolutionOptions}
+                  value={item.resolutionValue}
+                  onChange={(v) => patch({ resolutionValue: v })}
+                  checkboxLabel="potvrdit s klientem"
+                  checked={item.resolutionNeedsConfirm}
+                  onCheckedChange={(c) => patch({ resolutionNeedsConfirm: c })}
+                />
+                <div className="flex items-start gap-1.5">
+                  <span className="w-14 shrink-0 pt-1.5 text-[10.5px] font-bold uppercase tracking-wide text-muted-foreground">
+                    Pozn.
+                  </span>
+                  <Textarea
+                    value={item.noteValue ?? ""}
+                    onChange={(e) => patch({ noteValue: e.target.value || undefined })}
+                    rows={1}
+                    className="flex-1 text-[12.5px]"
+                    placeholder="Poznámka…"
+                    aria-label="Poznámka"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2 pt-0.5">
+                  <Button size="sm" onClick={resolve}>
+                    ✓ Označit jako vyřešeno
                   </Button>
-                )}
+                  {item.resolutionValue && template.canTrackForMonitoring && !item.trackingVkrId && (
+                    <Button size="sm" variant="outline" onClick={createTrackingVkr}>
+                      + Založit věc k řešení
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
-            {showContext && (
-              <div className="lg:w-64 lg:shrink-0">
-                <ItemContext title={template.title} fields={template.context} />
-              </div>
-            )}
-          </div>
+          )}
         </div>
       </div>
     </div>
