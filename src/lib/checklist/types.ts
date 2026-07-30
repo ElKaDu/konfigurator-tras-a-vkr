@@ -8,13 +8,8 @@ export const CHECKLIST_CATEGORY_LABELS: Record<ChecklistCategory, string> = {
   dokumentace: "Dokumentace",
 };
 
-/** Pět stavů položky checklistu — viz docs/superpowers/specs (checklist krok2 analýza). */
-export type ChecklistItemState =
-  | "open"
-  | "resolved_ok"
-  | "resolved_found"
-  | "waiting_contact"
-  | "waiting_delivery";
+/** Tři stavy — nikdy se neukládá ručně, vždy se odvozuje přes deriveItemState() v derived.ts. */
+export type ChecklistItemState = "open" | "waiting_contact" | "resolved";
 
 export interface ContextField {
   label: string;
@@ -29,23 +24,34 @@ export interface ChecklistItemTemplate {
   title: string;
   description: string;
   context: ContextField[];
-  /** Nabízené možnosti řešení (rychlé volby v resolution formuláři, doplnitelné volným textem). */
+  /** Prázdné pole = rovnou textové pole místo dropdownu. Dropdown vždy interně přidává "Jiné…". */
+  findingOptions: string[];
   resolutionOptions: string[];
+  /** Řídí, jestli se u položky (jakmile má vyplněné Řešení) nabízí "Založit věc k řešení". */
+  canTrackForMonitoring: boolean;
 }
 
 /** Instance kontroly na konkrétní objednávce. */
 export interface ChecklistItem {
   id: string;
   templateId: string;
-  state: ChecklistItemState;
-  finding?: string;
-  resolution?: string;
+
+  findingValue?: string;
+  findingIsSuspicion: boolean;
+
+  resolutionValue?: string;
+  resolutionNeedsConfirm: boolean;
+
+  manuallyResolved: boolean;
   resolvedAt?: string;
   resolvedBy?: string;
-  /** Vyplněno, když state === "waiting_contact". */
+
+  /** Vyplněno, dokud je položka navázaná na (aktivní) kontakt. */
   kontaktId?: string;
-  /** Vyplněno, když state === "waiting_delivery" a operátor založil VkŘ pro sledování. */
-  vkrId?: string;
+  /** Nezávislé na stavu — položka může mít sledování i po vyřešení. */
+  trackingVkrId?: string;
+  /** Sdílená poznámka, viditelná i v přehledu callů. */
+  noteValue?: string;
 }
 
 export type KontaktType = "customer" | "carrier";
@@ -62,7 +68,7 @@ export interface Kontakt {
   linkedItemIds: string[];
 }
 
-/** VkŘ vytvořená ze sledování jedné konkrétní položky (stav waiting_delivery). */
+/** VkŘ vytvořená ze sledování jedné konkrétní položky. */
 export interface ChecklistVkr {
   id: string;
   title: string;
