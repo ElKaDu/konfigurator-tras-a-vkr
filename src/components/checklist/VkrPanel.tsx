@@ -10,13 +10,11 @@ export function VkrPanel() {
   const openCount = vkrs.filter((v) => !v.resolved).length;
 
   function resolveVkr(vkrId: string, itemId: string) {
-    const item = items.find((i) => i.id === itemId);
     checklistVkrStore.resolve(vkrId);
     checklistItemsStore.update(itemId, {
-      state: "resolved_found",
+      manuallyResolved: true,
       resolvedAt: new Date().toISOString(),
       resolvedBy: "E. Kadubcová",
-      finding: item?.finding ?? item?.resolution ?? "Dodáno / vyřízeno.",
     });
   }
 
