@@ -5,13 +5,14 @@ import { ItemsList } from "./ItemsList";
 import { ShrnutiNalezuPanel } from "./ShrnutiNalezuPanel";
 import { CallPanel } from "./CallPanel";
 import { VkrCards } from "./VkrCards";
-import { useChecklistItems, resetChecklistPrototype } from "@/lib/checklist/store";
+import { useChecklistItems, useKontakty, resetChecklistPrototype } from "@/lib/checklist/store";
 import { computeChecklistStatus } from "@/lib/checklist/derived";
 import { RotateCcw } from "lucide-react";
 
 export function ChecklistPage() {
   const items = useChecklistItems();
-  const status = computeChecklistStatus(items);
+  const kontakty = useKontakty();
+  const status = computeChecklistStatus(items, kontakty);
 
   return (
     <div className="flex h-screen w-screen flex-col bg-background text-foreground">

@@ -1,7 +1,6 @@
 import type { ChecklistCategory, ChecklistItem, ChecklistItemState, Kontakt } from "./types";
 import { CHECKLIST_CATEGORY_ORDER, CHECKLIST_CATEGORY_LABELS } from "./types";
 import { templateById } from "./store";
-import { kontaktyStore } from "./store";
 
 export function deriveItemState(item: ChecklistItem): ChecklistItemState {
   if (item.manuallyResolved) return "resolved";
@@ -47,7 +46,7 @@ export interface ChecklistStatus {
   progressPct: number;
 }
 
-export function computeChecklistStatus(items: ChecklistItem[]): ChecklistStatus {
+export function computeChecklistStatus(items: ChecklistItem[], kontakty: Kontakt[]): ChecklistStatus {
   const resolvedCount = items.filter(isResolved).length;
   const totalCount = items.length;
   const progressPct = totalCount === 0 ? 0 : Math.round((resolvedCount / totalCount) * 100);
@@ -57,7 +56,7 @@ export function computeChecklistStatus(items: ChecklistItem[]): ChecklistStatus 
   }
 
   // Záměrně jen "planned" — draft (rozjednaný call bez termínu) nemá měnit stavový štítek nahoře.
-  const plannedKontakty = kontaktyStore.all().filter((k: Kontakt) => k.status === "planned");
+  const plannedKontakty = kontakty.filter((k) => k.status === "planned");
   if (plannedKontakty.length > 0) {
     const now = Date.now();
     const overdue = plannedKontakty.some((k) => !!k.scheduledAt && new Date(k.scheduledAt).getTime() < now);
