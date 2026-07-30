@@ -41,6 +41,7 @@ export function TemplatedField({
           <select
             value={value ?? ""}
             onChange={(e) => handleSelectChange(e.target.value)}
+            aria-label={label}
             className="min-w-0 flex-1 rounded-md border border-input bg-transparent px-2.5 py-1.5 text-[12.5px]"
           >
             <option value="">— nevybráno —</option>
@@ -58,6 +59,7 @@ export function TemplatedField({
               value={value ?? ""}
               onChange={(e) => onChange(e.target.value || undefined)}
               placeholder="Popiš vlastními slovy…"
+              aria-label={label}
               className="min-w-0 flex-1 rounded-md border border-input bg-transparent px-2.5 py-1.5 text-[12.5px]"
             />
             {options.length > 0 && (
@@ -65,7 +67,6 @@ export function TemplatedField({
                 type="button"
                 onClick={() => {
                   setFreeText(false);
-                  onChange(undefined);
                 }}
                 className="shrink-0 text-[10.5px] text-muted-foreground hover:text-foreground"
               >
