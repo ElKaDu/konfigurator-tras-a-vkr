@@ -21,15 +21,22 @@ export function ShrnutiNalezuPanel() {
       <p className="mb-2.5 text-[10.5px] font-bold uppercase tracking-wide text-muted-foreground">Shrnutí</p>
 
       {sortedKontakty.length > 0 && (
-        <div className="mb-3 flex flex-col gap-2.5 border-b border-border pb-3">
-          {sortedKontakty.map((k) => (
-            <KontaktRow key={k.id} kontakt={k} />
-          ))}
+        <div className="mb-3 border-b border-border pb-3">
+          <p className="mb-1.5 text-[9.5px] font-bold uppercase tracking-wide text-muted-foreground/70">Cally</p>
+          <div className="flex flex-col gap-2.5">
+            {sortedKontakty.map((k) => (
+              <KontaktRow key={k.id} kontakt={k} />
+            ))}
+          </div>
         </div>
       )}
 
       {noteworthy.length > 0 && (
-        <div className="flex flex-col gap-2.5">
+        <div>
+          <p className="mb-1.5 text-[9.5px] font-bold uppercase tracking-wide text-muted-foreground/70">
+            Nálezy a poznámky
+          </p>
+          <div className="flex flex-col gap-2.5">
           {noteworthy.map((item) => {
             const tpl = templateById(item.templateId);
             return (
@@ -53,6 +60,7 @@ export function ShrnutiNalezuPanel() {
               </div>
             );
           })}
+          </div>
         </div>
       )}
     </div>
