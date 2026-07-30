@@ -13,7 +13,9 @@ export function syncKontaktAttachment(next: ChecklistItem): void {
     const planned = kontaktyStore.all().find((k) => k.status === "planned");
     if (planned) {
       checklistItemsStore.update(next.id, { kontaktId: planned.id });
-      kontaktyStore.update(planned.id, { linkedItemIds: [...planned.linkedItemIds, next.id] });
+      if (!planned.linkedItemIds.includes(next.id)) {
+        kontaktyStore.update(planned.id, { linkedItemIds: [...planned.linkedItemIds, next.id] });
+      }
     }
     return;
   }
