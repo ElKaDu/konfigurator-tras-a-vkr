@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useChecklistItems } from "@/lib/checklist/store";
 import { templateById } from "@/lib/checklist/store";
 import { CHECKLIST_CATEGORY_ORDER, CHECKLIST_CATEGORY_LABELS } from "@/lib/checklist/types";
-import { categoryCounts } from "@/lib/checklist/derived";
+import type { ChecklistItem } from "@/lib/checklist/types";
+import { categoryCounts, deriveItemState } from "@/lib/checklist/derived";
 import { ChecklistItemRow } from "./ChecklistItemRow";
 
 export function ItemsList() {
@@ -12,6 +14,8 @@ export function ItemsList() {
     <div className="flex flex-col gap-4">
       {CHECKLIST_CATEGORY_ORDER.map((category) => {
         const inCategory = items.filter((i) => templateById(i.templateId)?.category === category);
+        const open = inCategory.filter((i) => deriveItemState(i) !== "resolved");
+        const done = inCategory.filter((i) => deriveItemState(i) === "resolved");
         const count = counts.find((c) => c.category === category);
         return (
           <section key={category} id={`cat-${category}`} className="rounded-lg border border-border bg-card">
@@ -22,15 +26,39 @@ export function ItemsList() {
               </span>
             </div>
             <div className="px-4">
-              {inCategory.map((item) => {
+              {open.map((item) => {
                 const tpl = templateById(item.templateId);
                 if (!tpl) return null;
                 return <ChecklistItemRow key={item.id} item={item} template={tpl} />;
               })}
+              {done.length > 0 && <DoneDisclosure items={done} />}
             </div>
           </section>
         );
       })}
+    </div>
+  );
+}
+
+function DoneDisclosure({ items }: { items: ChecklistItem[] }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div className="py-1.5">
+      <button
+        onClick={() => setExpanded((e) => !e)}
+        className="w-full rounded-md bg-muted px-2.5 py-1.5 text-left text-[12px] font-bold text-muted-foreground"
+      >
+        {expanded ? "▾" : "▸"} Hotovo ({items.length})
+      </button>
+      {expanded && (
+        <div className="pl-3">
+          {items.map((item) => {
+            const tpl = templateById(item.templateId);
+            if (!tpl) return null;
+            return <ChecklistItemRow key={item.id} item={item} template={tpl} />;
+          })}
+        </div>
+      )}
     </div>
   );
 }
