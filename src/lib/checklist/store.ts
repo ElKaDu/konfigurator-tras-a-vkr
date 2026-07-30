@@ -144,7 +144,7 @@ export const checklistVkrStore = {
     _vkrs.setState([..._vkrs.getState(), vkr]);
   },
   /** Postupné odbavení — označí VkŘ za vyřešenou. Nemění navázanou ChecklistItem; to dělá volající
-   *  (viz VkrPanel), protože store nesmí znát detaily druhé domény sám od sebe. */
+   *  (viz VkrCards), protože store nesmí znát detaily druhé domény sám od sebe. */
   resolve(id: string): void {
     const cur = _vkrs.getState();
     _vkrs.setState(cur.map((v) => (v.id === id ? { ...v, resolved: true } : v)));
