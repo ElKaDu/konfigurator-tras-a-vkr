@@ -1,0 +1,337 @@
+<meta charset="utf-8">
+<title>Checklist položka — light verze</title>
+<style>
+  :root {
+    --background: oklch(0.985 0.005 280); --foreground: oklch(0.18 0.03 280);
+    --surface: oklch(1 0 0); --card: oklch(1 0 0);
+    --primary: oklch(0.56 0.22 295); --primary-soft: oklch(0.96 0.04 295);
+    --secondary: oklch(0.97 0.01 280); --secondary-foreground: oklch(0.25 0.03 280);
+    --muted: oklch(0.965 0.008 280); --muted-foreground: oklch(0.5 0.02 280);
+    --accent-foreground: oklch(0.35 0.18 295);
+    --success: oklch(0.55 0.15 155); --success-foreground: oklch(0.3 0.09 155); --success-soft: oklch(0.95 0.04 155);
+    --warning: oklch(0.62 0.15 75); --warning-foreground: oklch(0.38 0.1 75); --warning-soft: oklch(0.96 0.05 75);
+    --info: oklch(0.55 0.14 230); --info-foreground: oklch(0.35 0.12 230); --info-soft: oklch(0.95 0.04 230);
+    --border: oklch(0.92 0.01 280);
+    --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --background: oklch(0.16 0.02 280); --foreground: oklch(0.96 0.005 280);
+      --surface: oklch(0.2 0.02 280); --card: oklch(0.2 0.02 280);
+      --primary: oklch(0.7 0.2 295); --primary-soft: oklch(0.3 0.1 295);
+      --secondary: oklch(0.25 0.02 280); --secondary-foreground: oklch(0.96 0.005 280);
+      --muted: oklch(0.25 0.02 280); --muted-foreground: oklch(0.7 0.02 280);
+      --accent-foreground: oklch(0.96 0.005 280);
+      --border: oklch(1 0 0 / 12%);
+      --success: oklch(0.78 0.14 155); --success-foreground: oklch(0.86 0.13 155); --success-soft: oklch(0.3 0.07 155);
+      --warning: oklch(0.82 0.14 75); --warning-foreground: oklch(0.88 0.13 75); --warning-soft: oklch(0.32 0.08 75);
+      --info: oklch(0.72 0.14 230); --info-foreground: oklch(0.84 0.1 230); --info-soft: oklch(0.28 0.07 230);
+    }
+  }
+  :root[data-theme="dark"] {
+    --background: oklch(0.16 0.02 280); --foreground: oklch(0.96 0.005 280);
+    --surface: oklch(0.2 0.02 280); --card: oklch(0.2 0.02 280);
+    --primary: oklch(0.7 0.2 295); --primary-soft: oklch(0.3 0.1 295);
+    --secondary: oklch(0.25 0.02 280); --secondary-foreground: oklch(0.96 0.005 280);
+    --muted: oklch(0.25 0.02 280); --muted-foreground: oklch(0.7 0.02 280);
+    --accent-foreground: oklch(0.96 0.005 280);
+    --border: oklch(1 0 0 / 12%);
+    --success: oklch(0.78 0.14 155); --success-foreground: oklch(0.86 0.13 155); --success-soft: oklch(0.3 0.07 155);
+    --warning: oklch(0.82 0.14 75); --warning-foreground: oklch(0.88 0.13 75); --warning-soft: oklch(0.32 0.08 75);
+    --info: oklch(0.72 0.14 230); --info-foreground: oklch(0.84 0.1 230); --info-soft: oklch(0.28 0.07 230);
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--background); font-family:var(--font-sans); color:var(--foreground); -webkit-font-smoothing:antialiased; font-size:14px; }
+  .wrap { max-width:760px; margin:0 auto; padding:28px 20px 80px; }
+  h1 { font-size:20px; font-weight:700; margin:0 0 6px; }
+  .lede { color:var(--muted-foreground); font-size:13.5px; line-height:1.6; max-width:70ch; margin:0 0 26px; }
+  .stagelabel { font-size:11px; font-weight:700; color:var(--primary); margin:26px 0 8px; }
+  .stagelabel:first-of-type { margin-top:0; }
+
+  .list { border:1px solid var(--border); border-radius:12px; background:var(--card); }
+  .row { padding:12px 16px; border-bottom:1px solid var(--border); }
+  .row:last-child { border-bottom:none; }
+
+  .head { display:flex; align-items:flex-start; gap:8px; }
+  .dot { margin-top:4px; width:8px; height:8px; border-radius:999px; background:var(--border); flex-shrink:0; }
+  .dot.wait { background:var(--warning); }
+  .dot.done { background:var(--success); }
+  .titlewrap { flex:1; min-width:0; }
+  .titleline { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+  .title { font-size:13.5px; font-weight:600; }
+  .title.muted { color:var(--muted-foreground); font-weight:500; }
+  .desc { font-size:12px; color:var(--muted-foreground); margin-top:2px; }
+
+  .pill { font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:2px 8px; border-radius:999px; }
+  .pill.wait { background:var(--warning-soft); color:var(--warning-foreground); }
+  .pill.done { background:var(--success-soft); color:var(--success-foreground); }
+  .tag { font-size:9.5px; font-weight:700; padding:2px 7px; border-radius:999px; background:var(--info-soft); color:var(--info-foreground); border:1px dashed var(--info); }
+
+  .ctxbtn { display:inline-flex; align-items:center; gap:3px; font-size:11px; color:var(--primary); background:none; border:none; padding:0; cursor:pointer; font-weight:600; }
+  .ctxbtn:hover { text-decoration:underline; }
+
+  .fields { margin-top:10px; display:flex; flex-direction:column; gap:7px; max-width:520px; }
+  .frow { display:flex; align-items:center; gap:8px; }
+  .flabel { width:52px; flex-shrink:0; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:var(--muted-foreground); }
+  select, .fakeinput { flex:1; border:1px solid var(--border); border-radius:7px; padding:6px 9px; font-size:12.5px; background:var(--surface); color:var(--foreground); font-family:inherit; }
+  select:disabled, .fakeinput.disabled { opacity:.55; }
+  .chk { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--secondary-foreground); flex-shrink:0; white-space:nowrap; }
+
+  .actions { margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; }
+  .btn { padding:5px 12px; border-radius:7px; font-size:11.5px; font-weight:600; border:1px solid var(--border); background:var(--secondary); color:var(--secondary-foreground); cursor:pointer; }
+  .btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+  .btn.dashed { background:none; border-style:dashed; color:var(--primary); }
+
+  .ctx { margin-top:9px; border-left:3px solid var(--primary); background:var(--primary-soft); border-radius:0 8px 8px 0; padding:8px 11px; }
+  .ctx .k { font-size:10px; font-weight:700; text-transform:uppercase; color:var(--accent-foreground); opacity:.8; }
+  .ctx .g { display:grid; grid-template-columns:1fr 1fr; gap:6px 14px; margin-top:5px; }
+  .ctx .g div div:first-child { font-size:9.5px; font-weight:700; text-transform:uppercase; color:var(--muted-foreground); }
+  .ctx .g div div:last-child { font-size:12px; }
+
+  .qbox { border:1px solid var(--primary); background:var(--primary-soft); border-radius:9px; padding:10px 13px; font-size:12px; color:var(--accent-foreground); margin:14px 0 0; }
+</style>
+
+<div class="wrap">
+  <h1>Checklist položka — light verze</h1>
+  <p class="lede">
+    Dva řádky (Nález / Řešení) vždy viditelné, ukládá se rovnou při výběru — žádné tlačítko Uložit.
+    Jediná ruční akce je „Označit jako vyřešeno“, dostupná vždy. Ikonka kontextu je teď vlastní odkaz,
+    ne skrytá za klikem na název.
+  </p>
+
+  <div class="stagelabel">1 · Otevřeno — nic vyplněné, přesto jde rovnou vyřešit</div>
+  <div class="list">
+    <div class="row">
+      <div class="head">
+        <div class="dot"></div>
+        <div class="titlewrap">
+          <div class="titleline">
+            <span class="title">Kontrola nepřípustného zboží dle přepravce</span>
+            <button class="ctxbtn">🛈 kontext zásilky</button>
+          </div>
+          <div class="desc">Zbraně a makety, kazitelné potraviny, peníze apod. dle podmínek přepravce.</div>
+          <div class="fields">
+            <div class="frow">
+              <span class="flabel">Nález</span>
+              <select><option>— nevybráno —</option><option>V pořádku, bez závady</option><option>Obsahuje powerbanku / Li-ion baterii</option><option>Obsahuje zakázanou položku</option><option>Jiné…</option></select>
+              <label class="chk"><input type="checkbox"> podezření</label>
+            </div>
+            <div class="frow">
+              <span class="flabel">Řešení</span>
+              <select><option>— nevybráno —</option><option>Zákazník položku vyndal</option><option>Přebaleno dle pravidel přepravce</option><option>Jiné…</option></select>
+              <label class="chk"><input type="checkbox"> potvrdit s klientem</label>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn primary">✓ Označit jako vyřešeno</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stagelabel">2a · Nález vypsán, „Jiné…“ odkrylo textové pole</div>
+  <div class="list">
+    <div class="row">
+      <div class="head">
+        <div class="dot"></div>
+        <div class="titlewrap">
+          <div class="titleline">
+            <span class="title">Kontrola dokumentace k vývozu</span>
+            <button class="ctxbtn">🛈 kontext zásilky</button>
+          </div>
+          <div class="fields">
+            <div class="frow">
+              <span class="flabel">Nález</span>
+              <select><option>Jiné… ▾</option></select>
+              <label class="chk"><input type="checkbox"> podezření</label>
+            </div>
+            <div class="frow">
+              <span class="flabel"></span>
+              <input class="fakeinput" value="Faktura má jiné číslo objednávky, než je v systému." />
+            </div>
+            <div class="frow">
+              <span class="flabel">Řešení</span>
+              <select><option>— nevybráno —</option><option>Jiné…</option></select>
+              <label class="chk"><input type="checkbox"> potvrdit s klientem</label>
+            </div>
+          </div>
+          <div class="actions"><button class="btn primary">✓ Označit jako vyřešeno</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stagelabel">2b · Zaškrtnuto podezření u nálezu → čeká na kontakt, řešení zatím chybí</div>
+  <div class="list">
+    <div class="row">
+      <div class="head">
+        <div class="dot wait"></div>
+        <div class="titlewrap">
+          <div class="titleline">
+            <span class="title">Kontrola nepřípustného zboží dle přepravce</span>
+            <button class="ctxbtn">🛈 kontext zásilky</button>
+            <span class="pill wait">čeká na kontakt · řešení chybí</span>
+          </div>
+          <div class="fields">
+            <div class="frow">
+              <span class="flabel">Nález</span>
+              <select><option>Obsahuje powerbanku / Li-ion baterii</option></select>
+              <label class="chk"><input type="checkbox" checked> podezření</label>
+            </div>
+            <div class="frow">
+              <span class="flabel">Řešení</span>
+              <select><option>— nevybráno —</option></select>
+              <label class="chk"><input type="checkbox"> potvrdit s klientem</label>
+            </div>
+          </div>
+          <div class="actions"><button class="btn primary">✓ Označit jako vyřešeno</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stagelabel">2c · Řešení už vyplněné, ale potřeba potvrdit s klientem → čeká na kontakt, řešení k potvrzení</div>
+  <div class="list">
+    <div class="row">
+      <div class="head">
+        <div class="dot wait"></div>
+        <div class="titlewrap">
+          <div class="titleline">
+            <span class="title">Kontrola hodnoty zásilky vůči odpovědnosti přepravce</span>
+            <button class="ctxbtn">🛈 kontext zásilky</button>
+            <span class="pill wait">čeká na kontakt · řešení k potvrzení</span>
+          </div>
+          <div class="fields">
+            <div class="frow">
+              <span class="flabel">Nález</span>
+              <select><option>Hodnota převyšuje limit odpovědnosti</option></select>
+              <label class="chk"><input type="checkbox"></label>
+            </div>
+            <div class="frow">
+              <span class="flabel">Řešení</span>
+              <select><option>Nabídnout doplňkové pojištění</option></select>
+              <label class="chk"><input type="checkbox" checked> potvrdit s klientem</label>
+            </div>
+          </div>
+          <div class="actions"><button class="btn primary">✓ Označit jako vyřešeno</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stagelabel">3 · Řešení vyplněné → objeví se „Založit věc k řešení“ (jen u šablon, kde to analýza povoluje)</div>
+  <div class="list">
+    <div class="row">
+      <div class="head">
+        <div class="dot"></div>
+        <div class="titlewrap">
+          <div class="titleline">
+            <span class="title">Kontrola EORI vývozce</span>
+            <button class="ctxbtn">🛈 kontext zásilky</button>
+          </div>
+          <div class="fields">
+            <div class="frow">
+              <span class="flabel">Nález</span>
+              <select><option>EORI chybí / neplatné</option></select>
+              <label class="chk"><input type="checkbox"></label>
+            </div>
+            <div class="frow">
+              <span class="flabel">Řešení</span>
+              <select><option>Klient EORI doplní do zítřejšího odbavení</option></select>
+              <label class="chk"><input type="checkbox"></label>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn primary">✓ Označit jako vyřešeno</button>
+            <button class="btn dashed">+ Založit věc k řešení</button>
+          </div>
+          <p style="margin:6px 0 0; font-size:11px; color:var(--muted-foreground);">
+            Tlačítko se objeví, jen když je vyplněné Řešení <b>a</b> tahle šablona je označená (podle
+            analýzy), že u ní dané řešení typicky vyžaduje další sledování. U ostatních šablon se
+            neukáže vůbec — i když Řešení vyplníš.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stagelabel">4 · Vyřešeno ručně — a jedna z nich má navíc založené sledování</div>
+  <div class="list">
+    <div class="row">
+      <div class="head">
+        <div class="dot done"></div>
+        <div class="titlewrap">
+          <div class="titleline">
+            <span class="title muted">Kontrola nepřípustného zboží dle přepravce</span>
+            <button class="ctxbtn">🛈 kontext zásilky</button>
+            <span class="pill done">vyřešeno</span>
+          </div>
+          <div class="desc">Nález: Obsahuje powerbanku / Li-ion baterii · Řešení: Zákazník položku vyndal</div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="head">
+        <div class="dot done"></div>
+        <div class="titlewrap">
+          <div class="titleline">
+            <span class="title muted">Kontrola EORI vývozce</span>
+            <button class="ctxbtn">🛈 kontext zásilky</button>
+            <span class="pill done">vyřešeno</span>
+            <span class="tag">⏳ sleduje se</span>
+          </div>
+          <div class="desc">Nález: EORI chybí / neplatné · Řešení: Klient EORI doplní do zítřejšího odbavení</div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="head">
+        <div class="dot done"></div>
+        <div class="titlewrap">
+          <div class="titleline">
+            <span class="title muted">Kontrola shody adresy doručení</span>
+            <button class="ctxbtn">🛈 kontext zásilky</button>
+            <span class="pill done">vyřešeno</span>
+          </div>
+          <div class="desc">Nález: — (rovnou označeno v pořádku)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stagelabel">5 · Kontext zásilky rozbalený</div>
+  <div class="list">
+    <div class="row">
+      <div class="head">
+        <div class="dot"></div>
+        <div class="titlewrap">
+          <div class="titleline">
+            <span class="title">Kontrola nepřípustného zboží dle přepravce</span>
+            <button class="ctxbtn">🛈 kontext zásilky</button>
+          </div>
+          <div class="ctx">
+            <div class="k">Kontext ze zásilky</div>
+            <div class="g">
+              <div><div>Obsah balíku</div><div>Elektronika — powerbanka</div></div>
+              <div><div>Deklarovaná hodnota</div><div>2 400 Kč</div></div>
+              <div><div>Přepravce</div><div>DPD CZ</div></div>
+              <div><div>Limit přepravce</div><div>Li-ion do 100 Wh</div></div>
+            </div>
+          </div>
+          <div class="fields" style="margin-top:9px;">
+            <div class="frow"><span class="flabel">Nález</span><select><option>— nevybráno —</option></select><label class="chk"><input type="checkbox"></label></div>
+            <div class="frow"><span class="flabel">Řešení</span><select><option>— nevybráno —</option></select><label class="chk"><input type="checkbox"></label></div>
+          </div>
+          <div class="actions"><button class="btn primary">✓ Označit jako vyřešeno</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="qbox">
+    Ikonka „🛈 kontext zásilky“ je teď samostatný prvek vedle názvu — vidíš rovnou, že jde kliknout,
+    aniž bys musela zkoušet klikat na název. Stav a doplňkový štítek „sleduje se“ jsou na sobě nezávislé —
+    i vyřešená položka může mít založenou věc k řešení, kterou jen sleduješ dál.
+  </div>
+</div>

@@ -1,0 +1,261 @@
+<meta charset="utf-8">
+<title>Nález / Řešení jako dvě fáze — layout</title>
+<style>
+  :root {
+    --background: oklch(0.985 0.005 280); --foreground: oklch(0.18 0.03 280);
+    --surface: oklch(1 0 0); --card: oklch(1 0 0);
+    --primary: oklch(0.56 0.22 295); --primary-soft: oklch(0.96 0.04 295);
+    --secondary: oklch(0.97 0.01 280); --secondary-foreground: oklch(0.25 0.03 280);
+    --muted: oklch(0.965 0.008 280); --muted-foreground: oklch(0.5 0.02 280);
+    --accent-foreground: oklch(0.35 0.18 295);
+    --success: oklch(0.55 0.15 155); --success-foreground: oklch(0.3 0.09 155); --success-soft: oklch(0.95 0.04 155);
+    --warning: oklch(0.62 0.15 75); --warning-foreground: oklch(0.38 0.1 75); --warning-soft: oklch(0.96 0.05 75);
+    --info: oklch(0.55 0.14 230); --info-foreground: oklch(0.35 0.12 230); --info-soft: oklch(0.95 0.04 230);
+    --border: oklch(0.92 0.01 280);
+    --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --background: oklch(0.16 0.02 280); --foreground: oklch(0.96 0.005 280);
+      --surface: oklch(0.2 0.02 280); --card: oklch(0.2 0.02 280);
+      --primary: oklch(0.7 0.2 295); --primary-soft: oklch(0.3 0.1 295);
+      --secondary: oklch(0.25 0.02 280); --secondary-foreground: oklch(0.96 0.005 280);
+      --muted: oklch(0.25 0.02 280); --muted-foreground: oklch(0.7 0.02 280);
+      --accent-foreground: oklch(0.96 0.005 280);
+      --border: oklch(1 0 0 / 12%);
+      --success: oklch(0.78 0.14 155); --success-foreground: oklch(0.86 0.13 155); --success-soft: oklch(0.3 0.07 155);
+      --warning: oklch(0.82 0.14 75); --warning-foreground: oklch(0.88 0.13 75); --warning-soft: oklch(0.32 0.08 75);
+      --info: oklch(0.72 0.14 230); --info-foreground: oklch(0.84 0.1 230); --info-soft: oklch(0.28 0.07 230);
+    }
+  }
+  :root[data-theme="dark"] {
+    --background: oklch(0.16 0.02 280); --foreground: oklch(0.96 0.005 280);
+    --surface: oklch(0.2 0.02 280); --card: oklch(0.2 0.02 280);
+    --primary: oklch(0.7 0.2 295); --primary-soft: oklch(0.3 0.1 295);
+    --secondary: oklch(0.25 0.02 280); --secondary-foreground: oklch(0.96 0.005 280);
+    --muted: oklch(0.25 0.02 280); --muted-foreground: oklch(0.7 0.02 280);
+    --accent-foreground: oklch(0.96 0.005 280);
+    --border: oklch(1 0 0 / 12%);
+    --success: oklch(0.78 0.14 155); --success-foreground: oklch(0.86 0.13 155); --success-soft: oklch(0.3 0.07 155);
+    --warning: oklch(0.82 0.14 75); --warning-foreground: oklch(0.88 0.13 75); --warning-soft: oklch(0.32 0.08 75);
+    --info: oklch(0.72 0.14 230); --info-foreground: oklch(0.84 0.1 230); --info-soft: oklch(0.28 0.07 230);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--background); font-family:var(--font-sans); color:var(--foreground); -webkit-font-smoothing:antialiased; font-size:14px; }
+  .wrap { max-width:980px; margin:0 auto; padding:28px 20px 80px; }
+  h1 { font-size:20px; font-weight:700; margin:0 0 6px; }
+  .lede { color:var(--muted-foreground); font-size:13.5px; line-height:1.6; max-width:74ch; margin:0 0 24px; }
+
+  .sectionhead { font-size:13.5px; font-weight:700; margin:30px 0 4px; display:flex; align-items:center; gap:8px; }
+  .sectionsub { font-size:12px; color:var(--muted-foreground); margin-bottom:12px; }
+  .badge { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:2px 8px; border-radius:999px; background:var(--primary-soft); color:var(--accent-foreground); }
+
+  .itemcard { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+  .ittl { font-size:13.5px; font-weight:600; margin-bottom:3px; }
+  .idesc { font-size:12px; color:var(--muted-foreground); margin-bottom:10px; }
+  .statuspill { font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:2px 8px; border-radius:999px; margin-left:8px; vertical-align:1px; }
+  .statuspill.open { background:var(--muted); color:var(--muted-foreground); }
+  .statuspill.wait { background:var(--warning-soft); color:var(--warning-foreground); }
+  .statuspill.ok { background:var(--success-soft); color:var(--success-foreground); }
+
+  /* --- Varianta A: vedle sebe --- */
+  .cols2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:4px; }
+  /* --- Varianta B: pod sebou --- */
+  .stack { display:flex; flex-direction:column; gap:10px; margin-top:4px; }
+
+  .phase { border:1px solid var(--border); border-radius:9px; padding:10px 12px; background:var(--background); }
+  .phase.filled { border-color:var(--success); background:var(--success-soft); }
+  .phase.pending { border-style:dashed; }
+  .phase .ph { display:flex; align-items:center; gap:6px; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:var(--muted-foreground); margin-bottom:6px; }
+  .phase.filled .ph { color:var(--success-foreground); }
+  .phase .ph .ic { width:13px; height:13px; border-radius:999px; border:1.5px solid currentColor; display:flex; align-items:center; justify-content:center; font-size:8px; }
+  .phase.filled .ph .ic { background:var(--success); border-color:var(--success); color:#fff; }
+  .phase .val { font-size:12.5px; }
+  .phase .val.empty { color:var(--muted-foreground); font-style:italic; }
+  .phase textarea, .phase input[type=text] { width:100%; border:1px solid var(--border); border-radius:6px; padding:6px 8px; font-size:12px; font-family:inherit; background:var(--surface); color:var(--foreground); resize:vertical; }
+  .phase .chk { display:flex; align-items:center; gap:6px; font-size:11.5px; margin-top:7px; color:var(--secondary-foreground); }
+  .phase .btnrow { margin-top:8px; }
+  .btn { padding:5px 11px; border-radius:7px; font-size:11.5px; font-weight:600; border:1px solid var(--border); background:var(--secondary); color:var(--secondary-foreground); }
+  .btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+  .poznamka { margin-top:10px; padding:9px 11px; border-radius:8px; background:var(--info-soft); border:1px solid var(--info); }
+  .poznamka .lbl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:var(--info-foreground); display:flex; align-items:center; gap:6px; margin-bottom:5px; }
+  .poznamka textarea { width:100%; border:1px solid var(--border); border-radius:6px; padding:6px 8px; font-size:12px; font-family:inherit; background:var(--surface); color:var(--foreground); }
+  .poznamka .hint { font-size:10.5px; color:var(--info-foreground); margin-top:5px; opacity:.85; }
+
+  .flowcard { display:flex; flex-direction:column; gap:14px; }
+  .flowcard .stagelabel { font-size:11px; font-weight:700; color:var(--primary); }
+  .flowcard .arrow { text-align:center; color:var(--border); font-size:16px; }
+
+  .callref { margin-top:10px; border:1px solid var(--info); background:var(--info-soft); border-radius:9px; padding:10px 12px; }
+  .callref .t { font-size:11.5px; font-weight:700; color:var(--info-foreground); }
+  .callref .row { font-size:11px; color:var(--muted-foreground); margin-top:5px; display:flex; gap:6px; }
+  .callref .row b { color:var(--foreground); font-weight:600; }
+
+  .qbox { border:1px solid var(--primary); background:var(--primary-soft); border-radius:9px; padding:10px 13px; font-size:12px; color:var(--accent-foreground); margin-top:10px; }
+
+  .divider { border:none; border-top:1px dashed var(--border); margin:32px 0; }
+</style>
+
+<div class="wrap">
+  <h1>Nález a řešení jako dvě samostatné fáze</h1>
+  <p class="lede">
+    Dvě varianty rozvržení pro tutéž věc — box Nález a box Řešení jde vyplnit nezávisle, kdykoli. Stav
+    položky se odvozuje z toho, co je vyplněné. Poznámka je jedno sdílené pole, propojené živě s callem.
+  </p>
+
+  <div class="sectionhead">Varianta A — vedle sebe <span class="badge">dva sloupce</span></div>
+  <div class="sectionsub">Oba boxy vidíš pořád naráz — hned je zřejmé, který ještě čeká.</div>
+  <div class="itemcard">
+    <div class="ittl">Kontrola nepřípustného zboží dle přepravce<span class="statuspill wait">čeká na řešení</span></div>
+    <div class="idesc">Zbraně a makety, kazitelné potraviny, peníze apod. dle podmínek přepravce.</div>
+    <div class="cols2">
+      <div class="phase filled">
+        <div class="ph"><span class="ic">✓</span> Nález</div>
+        <div class="val">Obsahovalo powerbanku (Li-ion).</div>
+        <label class="chk"><input type="checkbox" checked> Jde o podezření — potřebuju probrat s klientem</label>
+      </div>
+      <div class="phase pending">
+        <div class="ph"><span class="ic">2</span> Řešení</div>
+        <div class="val empty">zatím nevyplněno — doplníš po callu</div>
+        <div class="btnrow"><button class="btn" disabled>Uložit řešení</button></div>
+      </div>
+    </div>
+    <div class="poznamka">
+      <div class="lbl">📞 Poznámka <span style="font-weight:400; text-transform:none; opacity:.8;">— sdílená, vidět i na callu</span></div>
+      <textarea rows="2">Ověřit, jestli je v balíku opravdu powerbanka a jaká kapacita.</textarea>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="sectionhead">Varianta B — pod sebou <span class="badge">jeden sloupec</span></div>
+  <div class="sectionsub">Užší, lépe se hodí do stávajícího prostředního sloupce checklistu bez rozšiřování layoutu.</div>
+  <div class="itemcard" style="max-width:480px;">
+    <div class="ittl">Kontrola nepřípustného zboží dle přepravce<span class="statuspill wait">čeká na řešení</span></div>
+    <div class="idesc">Zbraně a makety, kazitelné potraviny, peníze apod. dle podmínek přepravce.</div>
+    <div class="stack">
+      <div class="phase filled">
+        <div class="ph"><span class="ic">✓</span> Nález</div>
+        <div class="val">Obsahovalo powerbanku (Li-ion).</div>
+        <label class="chk"><input type="checkbox" checked> Jde o podezření — potřebuju probrat s klientem</label>
+      </div>
+      <div class="phase pending">
+        <div class="ph"><span class="ic">2</span> Řešení</div>
+        <div class="val empty">zatím nevyplněno — doplníš po callu</div>
+        <div class="btnrow"><button class="btn" disabled>Uložit řešení</button></div>
+      </div>
+    </div>
+    <div class="poznamka">
+      <div class="lbl">📞 Poznámka <span style="font-weight:400; text-transform:none; opacity:.8;">— sdílená, vidět i na callu</span></div>
+      <textarea rows="2">Ověřit, jestli je v balíku opravdu powerbanka a jaká kapacita.</textarea>
+    </div>
+  </div>
+  <div class="qbox">
+    Varianta A využije šířku prostředního sloupce líp (checklist stránka je dost široká), varianta B je
+    kompaktnější a blíž tomu, jak vypadají ostatní položky teď. Řekni, která — nebo klidně obě otestujeme
+    v hotovém prototypu a rozhodneme podle pocitu.
+  </div>
+
+  <hr class="divider">
+
+  <div class="sectionhead">Celý cyklus — od otevřené po vyřešenou (varianta A)</div>
+  <div class="sectionsub">Stav položky (ta oranžová/zelená pilulka nahoře) se vždy odvozuje jen z toho, co je v boxech vyplněné.</div>
+
+  <div class="flowcard">
+
+    <div>
+      <div class="stagelabel">1 · Otevřeno — oba boxy prázdné</div>
+      <div class="itemcard">
+        <div class="ittl">Kontrola nepřípustného zboží dle přepravce<span class="statuspill open">otevřeno</span></div>
+        <div class="cols2">
+          <div class="phase pending">
+            <div class="ph"><span class="ic">1</span> Nález</div>
+            <textarea rows="2" placeholder="Co jsi zjistila…"></textarea>
+            <label class="chk"><input type="checkbox"> Jde o podezření — potřebuju probrat s klientem</label>
+            <div class="btnrow"><button class="btn primary">Uložit nález</button></div>
+          </div>
+          <div class="phase pending">
+            <div class="ph"><span class="ic">2</span> Řešení</div>
+            <div class="val empty">nejdřív vyplň nález</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow">↓ vyplní nález, NEzaškrtne podezření, rovnou zná i řešení → rychlá cesta</div>
+
+    <div>
+      <div class="stagelabel">2a · Rychlá cesta — obojí najednou, hotovo</div>
+      <div class="itemcard">
+        <div class="ittl">Kontrola nepřípustného zboží dle přepravce<span class="statuspill ok">vyřešeno</span></div>
+        <div class="cols2">
+          <div class="phase filled"><div class="ph"><span class="ic">✓</span> Nález</div><div class="val">Obsahovalo powerbanku.</div></div>
+          <div class="phase filled"><div class="ph"><span class="ic">✓</span> Řešení</div><div class="val">Zákazník věc vyndal, přeprava pokračuje.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow">↓ nebo: zaškrtne podezření → čeká na call, řešení nechá prázdné</div>
+
+    <div>
+      <div class="stagelabel">2b · Čeká na řešení — napojeno na sdílený call</div>
+      <div class="itemcard">
+        <div class="ittl">Kontrola nepřípustného zboží dle přepravce<span class="statuspill wait">čeká na řešení</span></div>
+        <div class="cols2">
+          <div class="phase filled">
+            <div class="ph"><span class="ic">✓</span> Nález</div>
+            <div class="val">Obsahovalo powerbanku (Li-ion).</div>
+            <label class="chk"><input type="checkbox" checked disabled> podezření</label>
+          </div>
+          <div class="phase pending"><div class="ph"><span class="ic">2</span> Řešení</div><div class="val empty">čeká na call</div></div>
+        </div>
+        <div class="callref">
+          <div class="t">📞 Napojeno na call — zítra 10:00</div>
+          <div class="row"><b>Poznámky z položek na tomhle callu:</b></div>
+          <div class="row">• Ověřit, jestli je v balíku opravdu powerbanka a jaká kapacita.</div>
+          <div class="row">• (Kontrola hodnoty vůči odpovědnosti) Nabídnout pojištění, zjistit zájem.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow">↓ call proběhl, operátorka se vrací a doplňuje Řešení</div>
+
+    <div>
+      <div class="stagelabel">3 · Po callu — doplňuje se jen chybějící box</div>
+      <div class="itemcard">
+        <div class="ittl">Kontrola nepřípustného zboží dle přepravce<span class="statuspill wait">čeká na řešení</span></div>
+        <div class="cols2">
+          <div class="phase filled"><div class="ph"><span class="ic">✓</span> Nález</div><div class="val">Obsahovalo powerbanku (Li-ion).</div></div>
+          <div class="phase pending">
+            <div class="ph"><span class="ic">2</span> Řešení</div>
+            <textarea rows="2">Klient potvrdil, věc vyndá před vyzvednutím.</textarea>
+            <div class="btnrow"><button class="btn primary">Uložit řešení</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow">↓ po uložení řešení</div>
+
+    <div>
+      <div class="stagelabel">4 · Vyřešeno — oba boxy hotové, mizí do sbalené sekce</div>
+      <div class="itemcard">
+        <div class="ittl">Kontrola nepřípustného zboží dle přepravce<span class="statuspill ok">vyřešeno</span></div>
+        <div class="cols2">
+          <div class="phase filled"><div class="ph"><span class="ic">✓</span> Nález</div><div class="val">Obsahovalo powerbanku (Li-ion).</div></div>
+          <div class="phase filled"><div class="ph"><span class="ic">✓</span> Řešení</div><div class="val">Klient potvrdil, věc vyndá před vyzvednutím.</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="qbox">
+    Tlačítko "Zavřít nález" zmizelo úplně — každý box se ukládá zvlášť svým vlastním tlačítkem ("Uložit
+    nález" / "Uložit řešení"), a jestli je položka vyřešená, se dopočítá samo z toho, jestli jsou vyplněné
+    oba boxy. Nikde není akce, která by "uzavírala" něco, co ještě nemá obsah.
+  </div>
+</div>
