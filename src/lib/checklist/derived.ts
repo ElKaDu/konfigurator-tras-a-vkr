@@ -72,7 +72,7 @@ export function computeChecklistStatus(items: ChecklistItem[]): ChecklistStatus 
 
 /** Položky s nálezem nebo poznámkou, bez ohledu na stav — pro rozšířený panel Shrnutí. */
 export function noteworthyItems(items: ChecklistItem[]): ChecklistItem[] {
-  return items.filter((i) => !!i.findingValue || !!i.noteValue);
+  return items.filter((i) => !!i.findingValue || !!i.resolutionValue || !!i.noteValue);
 }
 
 export function nextPlannedKontakt(kontakty: Kontakt[]): Kontakt | undefined {
