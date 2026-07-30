@@ -70,7 +70,7 @@ export function computeChecklistStatus(items: ChecklistItem[]): ChecklistStatus 
   return { kind: "in_progress", label: "V průběhu", resolvedCount, totalCount, progressPct };
 }
 
-/** Položky s nálezem nebo poznámkou, bez ohledu na stav — pro rozšířený panel Shrnutí. */
+/** Položky s nálezem, řešením nebo poznámkou, bez ohledu na stav — pro rozšířený panel Shrnutí. */
 export function noteworthyItems(items: ChecklistItem[]): ChecklistItem[] {
   return items.filter((i) => !!i.findingValue || !!i.resolutionValue || !!i.noteValue);
 }
