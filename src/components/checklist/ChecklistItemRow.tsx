@@ -14,7 +14,8 @@ export function ChecklistItemRow({ item, template }: { item: ChecklistItem; temp
 
   function patch(fields: Partial<ChecklistItem>) {
     checklistItemsStore.update(item.id, fields);
-    syncKontaktAttachment({ ...item, ...fields });
+    const fresh = checklistItemsStore.byId(item.id);
+    if (fresh) syncKontaktAttachment(fresh);
   }
 
   function resolve() {
@@ -53,6 +54,7 @@ export function ChecklistItemRow({ item, template }: { item: ChecklistItem; temp
   const contextButton = (
     <button
       onClick={() => setShowContext((s) => !s)}
+      aria-expanded={showContext}
       className="text-[11px] font-semibold text-primary hover:underline"
     >
       🛈 kontext zásilky
@@ -143,13 +145,14 @@ export function ChecklistItemRow({ item, template }: { item: ChecklistItem; temp
                   rows={1}
                   className="flex-1 text-[12.5px]"
                   placeholder="Poznámka…"
+                  aria-label="Poznámka"
                 />
               </div>
               <div className="flex flex-wrap gap-2 pt-0.5">
                 <Button size="sm" onClick={resolve}>
                   ✓ Označit jako vyřešeno
                 </Button>
-                {item.resolutionValue && template.canTrackForMonitoring && (
+                {item.resolutionValue && template.canTrackForMonitoring && !item.trackingVkrId && (
                   <Button size="sm" variant="outline" onClick={createTrackingVkr}>
                     + Založit věc k řešení
                   </Button>
