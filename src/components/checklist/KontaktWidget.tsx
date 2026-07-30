@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { Phone } from "lucide-react";
-import { useKontakty } from "@/lib/checklist/store";
+import { useKontakty, useChecklistItems, templateById } from "@/lib/checklist/store";
 import { nextPlannedKontakt, formatKontaktDateTime } from "@/lib/checklist/derived";
-import { templateById } from "@/lib/checklist/store";
-import { useChecklistItems } from "@/lib/checklist/store";
 import { KontaktSchedulerDialog } from "./KontaktSchedulerDialog";
 
 export function KontaktWidget() {
@@ -25,7 +23,7 @@ export function KontaktWidget() {
             <div className="text-[11px] text-muted-foreground">žádný zatím naplánovaný</div>
           </div>
         </button>
-        {scheduling && <KontaktSchedulerDialog preselectedItemIds={[]} onClose={() => setScheduling(false)} />}
+        {scheduling && <KontaktSchedulerDialog onClose={() => setScheduling(false)} />}
       </>
     );
   }
