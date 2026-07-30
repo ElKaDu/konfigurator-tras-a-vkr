@@ -120,39 +120,19 @@ export const CHECKLIST_ITEM_TEMPLATES: ChecklistItemTemplate[] = [
   },
 ];
 
-export const CHECKLIST_KONTAKTY: Kontakt[] = [
-  {
-    id: "kontakt_1",
-    type: "customer",
-    scheduledAt: nextNoon(1, 10),
-    note: "Nabídka pojištění + omezený rozsah pojistitelnosti.",
-    status: "planned",
-    linkedItemIds: ["item_hodnota_odpovednost", "item_pojistitelnost"],
-  },
-];
+/** Prázdno — checklist startuje jako čerstvá, nedotčená objednávka, ne s ilustračními daty. */
+export const CHECKLIST_KONTAKTY: Kontakt[] = [];
 
-export const CHECKLIST_VKRS: ChecklistVkr[] = [
-  {
-    id: "vkr_celni_faktura",
-    title: "Sledovat dodání celní faktury",
-    itemId: "item_celni_faktura",
-    dueAt: nextNoon(2, 12),
-    createdAt: nextNoon(0, 9),
-    resolved: false,
-  },
-];
+/** Prázdno — viz CHECKLIST_KONTAKTY výše. */
+export const CHECKLIST_VKRS: ChecklistVkr[] = [];
 
 export const CHECKLIST_ITEMS: ChecklistItem[] = [
   {
     id: "item_neprip_zbozi",
     templateId: "tpl_neprip_zbozi",
-    findingValue: "Obsahovalo powerbanku (Li-ion).",
     findingIsSuspicion: false,
-    resolutionValue: "Zákazník věc vyndal, přeprava pokračuje — potvrzeno e-mailem.",
     resolutionNeedsConfirm: false,
-    manuallyResolved: true,
-    resolvedAt: nextNoon(0, 10, 12),
-    resolvedBy: "E. Kadubcová",
+    manuallyResolved: false,
   },
   {
     id: "item_dg",
@@ -171,20 +151,16 @@ export const CHECKLIST_ITEMS: ChecklistItem[] = [
   {
     id: "item_hodnota_odpovednost",
     templateId: "tpl_hodnota_odpovednost",
-    findingValue: "Hodnota převyšuje limit odpovědnosti.",
     findingIsSuspicion: false,
-    resolutionNeedsConfirm: true,
+    resolutionNeedsConfirm: false,
     manuallyResolved: false,
-    kontaktId: "kontakt_1",
   },
   {
     id: "item_pojistitelnost",
     templateId: "tpl_pojistitelnost",
-    findingValue: "Komodita pojistitelná jen v omezeném rozsahu.",
     findingIsSuspicion: false,
-    resolutionNeedsConfirm: true,
+    resolutionNeedsConfirm: false,
     manuallyResolved: false,
-    kontaktId: "kontakt_1",
   },
   {
     id: "item_hodnota_chyba",
@@ -196,28 +172,15 @@ export const CHECKLIST_ITEMS: ChecklistItem[] = [
   {
     id: "item_celni_faktura",
     templateId: "tpl_celni_faktura",
-    findingValue: "Faktura nedodána.",
     findingIsSuspicion: false,
-    resolutionValue: "Čekáme na dodání",
     resolutionNeedsConfirm: false,
     manuallyResolved: false,
-    trackingVkrId: "vkr_celni_faktura",
   },
   {
     id: "item_eori",
     templateId: "tpl_eori",
-    findingValue: "EORI chybí nebo neplatné.",
     findingIsSuspicion: false,
-    resolutionValue: "Čekáme na vyřízení",
     resolutionNeedsConfirm: false,
     manuallyResolved: false,
   },
 ];
-
-/** Pomocná funkce pro čitelná seed data — "zítra/pozítří v HH:MM", bez závislosti na knihovně. */
-function nextNoon(daysFromNow: number, hour: number, minute = 0): string {
-  const d = new Date();
-  d.setDate(d.getDate() + daysFromNow);
-  d.setHours(hour, minute, 0, 0);
-  return d.toISOString();
-}
