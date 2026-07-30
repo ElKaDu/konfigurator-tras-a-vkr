@@ -202,9 +202,13 @@ export function ChecklistItemRow({ item, template }: { item: ChecklistItem; temp
 }
 
 function StateDot({ state }: { state: "open" | "waiting_contact" }) {
-  const base = "mt-0.5 flex size-[18px] shrink-0 items-center justify-center rounded-[5px] border text-[10px]";
   if (state === "waiting_contact") {
-    return <span className={`${base} border-warning bg-warning/15 text-warning-foreground`}>📞</span>;
+    return (
+      <span className="mt-0.5 flex size-[18px] shrink-0 items-center justify-center rounded-[5px] border border-warning bg-warning/15 text-[10px] text-warning-foreground">
+        📞
+      </span>
+    );
   }
-  return <span className={`${base} border-input bg-transparent`} />;
+  // Vědomě NE tvar checkboxu — jen stavová tečka, není klikací a nic se sem nezaškrtává.
+  return <span className="mt-[9px] size-2 shrink-0 rounded-full bg-border" />;
 }

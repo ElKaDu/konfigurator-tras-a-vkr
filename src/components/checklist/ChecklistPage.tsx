@@ -31,10 +31,7 @@ export function ChecklistPage() {
 
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-[1600px] px-6 py-5">
-          <div className="mb-4 rounded-lg border border-primary bg-primary-soft px-4 py-2.5 text-xs text-accent-foreground">
-            <b>Prototyp checklistu.</b> Krok 1 níže je jen náhled (needituje se). Zbytek — položky, kontext,
-            nálezy, kontakty, věci k řešení — je plně funkční, ukládá se do localStorage.
-          </div>
+          <h2 className="mb-4 text-base font-semibold">Checklist</h2>
 
           <div className="mb-4 rounded-lg border border-border bg-card px-4 py-3">
             <div className="mb-1.5 flex justify-between text-xs text-muted-foreground">

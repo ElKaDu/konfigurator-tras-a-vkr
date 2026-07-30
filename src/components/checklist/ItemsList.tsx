@@ -26,12 +26,12 @@ export function ItemsList() {
               </span>
             </div>
             <div className="px-4">
+              {done.length > 0 && <DoneDisclosure category={category} items={done} />}
               {open.map((item) => {
                 const tpl = templateById(item.templateId);
                 if (!tpl) return null;
                 return <ChecklistItemRow key={item.id} item={item} template={tpl} />;
               })}
-              {done.length > 0 && <DoneDisclosure category={category} items={done} />}
             </div>
           </section>
         );
@@ -58,7 +58,7 @@ function DoneDisclosure({ category, items }: { category: ChecklistCategory; item
       <button
         onClick={() => setExpanded((e) => !e)}
         aria-expanded={expanded}
-        className="w-full rounded-md bg-muted px-2.5 py-1.5 text-left text-[12px] font-bold text-muted-foreground"
+        className="w-full rounded-md border border-success/30 bg-success/15 px-2.5 py-1.5 text-left text-[12px] font-bold text-success-foreground"
       >
         {expanded ? "▾" : "▸"} Hotovo ({items.length})
       </button>
