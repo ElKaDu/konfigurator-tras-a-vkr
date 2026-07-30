@@ -1,10 +1,21 @@
-import type { ChecklistCategory, ChecklistItem, Kontakt } from "./types";
+import type { ChecklistCategory, ChecklistItem, ChecklistItemState, Kontakt } from "./types";
 import { CHECKLIST_CATEGORY_ORDER, CHECKLIST_CATEGORY_LABELS } from "./types";
 import { templateById } from "./store";
 import { kontaktyStore } from "./store";
 
+export function deriveItemState(item: ChecklistItem): ChecklistItemState {
+  if (item.manuallyResolved) return "resolved";
+  if (item.findingIsSuspicion || item.resolutionNeedsConfirm) return "waiting_contact";
+  return "open";
+}
+
+/** Volat, jen když deriveItemState(item) === "waiting_contact". */
+export function waitingContactDetail(item: ChecklistItem): "missing_resolution" | "needs_confirm" {
+  return item.resolutionValue ? "needs_confirm" : "missing_resolution";
+}
+
 export function isResolved(item: ChecklistItem): boolean {
-  return item.state === "resolved_ok" || item.state === "resolved_found";
+  return deriveItemState(item) === "resolved";
 }
 
 export interface CategoryCount {
@@ -58,8 +69,9 @@ export function computeChecklistStatus(items: ChecklistItem[]): ChecklistStatus 
   return { kind: "in_progress", label: "V průběhu", resolvedCount, totalCount, progressPct };
 }
 
-export function findingsSummary(items: ChecklistItem[]): ChecklistItem[] {
-  return items.filter((i) => i.state === "resolved_found");
+/** Položky s nálezem nebo poznámkou, bez ohledu na stav — pro rozšířený panel Shrnutí. */
+export function noteworthyItems(items: ChecklistItem[]): ChecklistItem[] {
+  return items.filter((i) => !!i.findingValue || !!i.noteValue);
 }
 
 export function nextPlannedKontakt(kontakty: Kontakt[]): Kontakt | undefined {
