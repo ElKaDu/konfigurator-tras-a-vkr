@@ -46,9 +46,17 @@ export function ChecklistItemRow({ item, template }: { item: ChecklistItem; temp
   }
 
   const trackingTag = item.trackingVkrId && (
-    <span className="rounded-full border border-dashed border-info px-2 py-0.5 text-[9.5px] font-bold text-info-foreground">
-      ⏳ sleduje se
-    </span>
+    <button
+      onClick={() => {
+        const el = document.getElementById(`vkr-${item.trackingVkrId}`);
+        el?.scrollIntoView({ behavior: "smooth", block: "center" });
+        el?.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 900, iterations: 2 });
+      }}
+      className="rounded-full border border-dashed border-info px-2 py-0.5 text-[9.5px] font-bold text-info-foreground hover:bg-info/10"
+      title="Zobrazit věc k řešení"
+    >
+      ⏳ sleduje se →
+    </button>
   );
 
   const contextButton = (

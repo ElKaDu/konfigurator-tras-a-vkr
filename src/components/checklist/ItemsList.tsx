@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useChecklistItems } from "@/lib/checklist/store";
 import { templateById } from "@/lib/checklist/store";
 import { CHECKLIST_CATEGORY_ORDER, CHECKLIST_CATEGORY_LABELS } from "@/lib/checklist/types";
-import type { ChecklistItem } from "@/lib/checklist/types";
+import type { ChecklistCategory, ChecklistItem } from "@/lib/checklist/types";
 import { categoryCounts, deriveItemState } from "@/lib/checklist/derived";
 import { ChecklistItemRow } from "./ChecklistItemRow";
 
@@ -31,7 +31,7 @@ export function ItemsList() {
                 if (!tpl) return null;
                 return <ChecklistItemRow key={item.id} item={item} template={tpl} />;
               })}
-              {done.length > 0 && <DoneDisclosure items={done} />}
+              {done.length > 0 && <DoneDisclosure category={category} items={done} />}
             </div>
           </section>
         );
@@ -40,12 +40,24 @@ export function ItemsList() {
   );
 }
 
-function DoneDisclosure({ items }: { items: ChecklistItem[] }) {
+function DoneDisclosure({ category, items }: { category: ChecklistCategory; items: ChecklistItem[] }) {
   const [expanded, setExpanded] = useState(false);
+
+  // Proklik z levého panelu (CategoryNav) rozbalí správnou sekci — komunikace přes window event,
+  // ať CategoryNav nemusí vlastnit stav, který patří sem.
+  useEffect(() => {
+    function onExpand(e: Event) {
+      if ((e as CustomEvent<string>).detail === category) setExpanded(true);
+    }
+    window.addEventListener("checklist:expand-done", onExpand);
+    return () => window.removeEventListener("checklist:expand-done", onExpand);
+  }, [category]);
+
   return (
     <div className="py-1.5">
       <button
         onClick={() => setExpanded((e) => !e)}
+        aria-expanded={expanded}
         className="w-full rounded-md bg-muted px-2.5 py-1.5 text-left text-[12px] font-bold text-muted-foreground"
       >
         {expanded ? "▾" : "▸"} Hotovo ({items.length})
