@@ -69,6 +69,6 @@ function resolveVkr(vkr: ChecklistVkr, itemId: string) {
   checklistItemsStore.update(itemId, {
     manuallyResolved: true,
     resolvedAt: new Date().toISOString(),
-    resolvedBy: "E. Kadubcová",
+    resolvedBy: "J. Nováková",
   });
 }

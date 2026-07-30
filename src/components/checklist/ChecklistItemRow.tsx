@@ -23,7 +23,7 @@ export function ChecklistItemRow({ item, template }: { item: ChecklistItem; temp
     checklistItemsStore.update(item.id, {
       manuallyResolved: true,
       resolvedAt: new Date().toISOString(),
-      resolvedBy: "E. Kadubcová",
+      resolvedBy: "J. Nováková",
     });
   }
 

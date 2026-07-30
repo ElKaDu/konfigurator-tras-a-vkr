@@ -30,7 +30,7 @@ export function ShipmentHeader({
         <Attr label="Odkud → kam" value="🇨🇿 Praha → 🇩🇪 Berlín" />
         <Attr label="Přepravce" value="DHL Express" />
         <Attr label="Hodnota" value="4 200 Kč" />
-        <Attr label="Operátor" value="E. Kadubcová" />
+        <Attr label="Operátor" value="J. Nováková" />
 
         <div className="ml-auto flex items-center gap-2.5 rounded-[9px] border border-warning bg-warning/15 px-3.5 py-1.5">
           <span className="text-[22px] font-extrabold leading-none tabular-nums text-warning-foreground">2:40</span>
