@@ -55,14 +55,15 @@ export interface ChecklistItem {
 }
 
 export type KontaktType = "customer" | "carrier";
-export type KontaktStatus = "planned" | "done";
+/** "draft" = rozjednaný call bez termínu (vznikl zatržením checkboxu), "planned" = má termín. */
+export type KontaktStatus = "draft" | "planned" | "done";
 
 /** Naplánovaná domluva — jedna událost, víc navázaných položek checklistu. */
 export interface Kontakt {
   id: string;
   type: KontaktType;
-  /** ISO datetime string, např. "2026-07-30T10:00:00". */
-  scheduledAt: string;
+  /** ISO datetime string, např. "2026-07-30T10:00:00". Prázdné, dokud je kontakt "draft". */
+  scheduledAt?: string;
   note?: string;
   status: KontaktStatus;
   linkedItemIds: string[];
