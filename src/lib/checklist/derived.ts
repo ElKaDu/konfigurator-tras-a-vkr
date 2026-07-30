@@ -56,10 +56,11 @@ export function computeChecklistStatus(items: ChecklistItem[]): ChecklistStatus 
     return { kind: "done", label: "Hotovo", resolvedCount, totalCount, progressPct };
   }
 
+  // Záměrně jen "planned" — draft (rozjednaný call bez termínu) nemá měnit stavový štítek nahoře.
   const plannedKontakty = kontaktyStore.all().filter((k: Kontakt) => k.status === "planned");
   if (plannedKontakty.length > 0) {
     const now = Date.now();
-    const overdue = plannedKontakty.some((k) => new Date(k.scheduledAt).getTime() < now);
+    const overdue = plannedKontakty.some((k) => !!k.scheduledAt && new Date(k.scheduledAt).getTime() < now);
     if (overdue) {
       return { kind: "overdue", label: "⏱ Po termínu kontaktu", resolvedCount, totalCount, progressPct };
     }
@@ -76,11 +77,13 @@ export function noteworthyItems(items: ChecklistItem[]): ChecklistItem[] {
 
 export function nextPlannedKontakt(kontakty: Kontakt[]): Kontakt | undefined {
   return kontakty
-    .filter((k) => k.status === "planned")
-    .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())[0];
+    .filter((k) => k.status === "planned" && !!k.scheduledAt)
+    .sort((a, b) => new Date(a.scheduledAt!).getTime() - new Date(b.scheduledAt!).getTime())[0];
 }
 
-export function formatKontaktDateTime(iso: string): string {
+/** Vrací "—" pro kontakt bez termínu (draft), jinak "31. 7. 10:00". */
+export function formatKontaktDateTime(iso: string | undefined): string {
+  if (!iso) return "—";
   const d = new Date(iso);
   return new Intl.DateTimeFormat("cs-CZ", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" }).format(d);
 }
