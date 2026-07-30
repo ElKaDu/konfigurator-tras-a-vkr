@@ -11,10 +11,7 @@ export function syncKontaktAttachment(next: ChecklistItem): void {
   const needsContact = next.findingIsSuspicion || next.resolutionNeedsConfirm;
 
   if (needsContact && !next.kontaktId) {
-    let target = kontaktyStore.all().find((k) => k.status === "draft" || k.status === "planned");
-    if (!target) {
-      target = createDraftKontakt();
-    }
+    const target = createDraftKontakt();
     checklistItemsStore.update(next.id, { kontaktId: target.id });
     if (!target.linkedItemIds.includes(next.id)) {
       kontaktyStore.update(target.id, { linkedItemIds: [...target.linkedItemIds, next.id] });
@@ -33,8 +30,10 @@ export function syncKontaktAttachment(next: ChecklistItem): void {
   }
 }
 
-/** Založí prázdný rozjednaný call. Volá se i z pravého sloupce ("+ Naplánovat kontakt ručně"). */
+/** Založí prázdný rozjednaný call, nebo vrátí ten, co už existuje (nikdy dva zároveň). */
 export function createDraftKontakt(): Kontakt {
+  const existing = kontaktyStore.all().find((k) => k.status === "draft" || k.status === "planned");
+  if (existing) return existing;
   const kontakt: Kontakt = {
     id: "kontakt_" + Date.now(),
     type: "customer",

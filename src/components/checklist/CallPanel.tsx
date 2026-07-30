@@ -26,17 +26,6 @@ export function CallPanel() {
         </div>
       )}
 
-      {active && (
-        <div className="text-center">
-          <button
-            onClick={() => createDraftKontakt()}
-            className="text-[11px] font-bold text-primary hover:underline"
-          >
-            + Naplánovat další kontakt
-          </button>
-        </div>
-      )}
-
       {done.map((k) => (
         <DoneCallCard key={k.id} kontakt={k} />
       ))}
