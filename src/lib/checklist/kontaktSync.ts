@@ -1,21 +1,23 @@
 import { checklistItemsStore, kontaktyStore } from "./store";
-import type { ChecklistItem } from "./types";
+import type { ChecklistItem, Kontakt } from "./types";
 
 /**
  * Po každé změně findingIsSuspicion/resolutionNeedsConfirm dorovná navázání položky na
- * aktuálně naplánovaný kontakt (jeden call pro vše, co čeká), nebo ji odpojí, pokud už žádný
- * checkbox není zatržený.
+ * rozjednaný nebo naplánovaný kontakt (jeden call pro vše, co čeká). Pokud žádný takový
+ * neexistuje, založí nový "draft" — call bez termínu, který se v pravém sloupci hned zobrazí
+ * k doplnění. Odpojí položku, pokud už žádný checkbox není zatržený.
  */
 export function syncKontaktAttachment(next: ChecklistItem): void {
   const needsContact = next.findingIsSuspicion || next.resolutionNeedsConfirm;
 
   if (needsContact && !next.kontaktId) {
-    const planned = kontaktyStore.all().find((k) => k.status === "planned");
-    if (planned) {
-      checklistItemsStore.update(next.id, { kontaktId: planned.id });
-      if (!planned.linkedItemIds.includes(next.id)) {
-        kontaktyStore.update(planned.id, { linkedItemIds: [...planned.linkedItemIds, next.id] });
-      }
+    let target = kontaktyStore.all().find((k) => k.status === "draft" || k.status === "planned");
+    if (!target) {
+      target = createDraftKontakt();
+    }
+    checklistItemsStore.update(next.id, { kontaktId: target.id });
+    if (!target.linkedItemIds.includes(next.id)) {
+      kontaktyStore.update(target.id, { linkedItemIds: [...target.linkedItemIds, next.id] });
     }
     return;
   }
@@ -29,4 +31,16 @@ export function syncKontaktAttachment(next: ChecklistItem): void {
     }
     checklistItemsStore.update(next.id, { kontaktId: undefined });
   }
+}
+
+/** Založí prázdný rozjednaný call. Volá se i z pravého sloupce ("+ Naplánovat kontakt ručně"). */
+export function createDraftKontakt(): Kontakt {
+  const kontakt: Kontakt = {
+    id: "kontakt_" + Date.now(),
+    type: "customer",
+    status: "draft",
+    linkedItemIds: [],
+  };
+  kontaktyStore.create(kontakt);
+  return kontakt;
 }
