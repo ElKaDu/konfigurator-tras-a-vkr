@@ -25,11 +25,15 @@ export function TemplatedField({
   function handleSelectChange(next: string) {
     if (next === OTHER) {
       setFreeText(true);
-      onChange(undefined);
+      if (!value || options.includes(value)) {
+        onChange(undefined);
+      }
       return;
     }
     onChange(next || undefined);
   }
+
+  const customOptionValue = value && !options.includes(value) ? value : undefined;
 
   return (
     <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center">
@@ -50,6 +54,9 @@ export function TemplatedField({
                 {opt}
               </option>
             ))}
+            {customOptionValue && (
+              <option value={customOptionValue}>{customOptionValue}</option>
+            )}
             <option value={OTHER}>Jiné…</option>
           </select>
         ) : (
