@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useChecklistItems, useKontakty, kontaktyStore, templateById } from "@/lib/checklist/store";
 import { noteworthyItems, formatKontaktDateTime } from "@/lib/checklist/derived";
 import type { Kontakt } from "@/lib/checklist/types";
@@ -53,12 +52,6 @@ export function ShrnutiNalezuPanel() {
 }
 
 function KontaktRow({ kontakt }: { kontakt: Kontakt }) {
-  const [note, setNote] = useState(kontakt.note ?? "");
-
-  function saveNote() {
-    kontaktyStore.update(kontakt.id, { note: note || undefined });
-  }
-
   return (
     <div>
       <div className="flex items-center justify-between gap-2 text-[12px]">
@@ -74,11 +67,11 @@ function KontaktRow({ kontakt }: { kontakt: Kontakt }) {
         </span>
       </div>
       <textarea
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-        onBlur={saveNote}
+        value={kontakt.note ?? ""}
+        onChange={(e) => kontaktyStore.update(kontakt.id, { note: e.target.value || undefined })}
         rows={1}
         placeholder="Poznámka k callu…"
+        aria-label="Poznámka k callu"
         className="mt-1 w-full rounded-md border border-input bg-transparent px-2 py-1 text-[11.5px]"
       />
     </div>
