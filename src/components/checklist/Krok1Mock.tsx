@@ -11,7 +11,7 @@ export function Krok1Mock() {
         <span className="text-muted-foreground">▶</span>
         <b>Krok 1 · Oprávněnost zpracovat objednávku</b>
         <span className="rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-semibold text-success-foreground">
-          vyřešeno 2/2
+          vyřešeno 3/3
         </span>
         <span className="ml-auto text-xs text-muted-foreground">proběhlo před přiřazením — jen náhled</span>
       </summary>
@@ -35,6 +35,17 @@ export function Krok1Mock() {
             <div className="font-medium">Kontrola potřebné expertizy</div>
             <div className="text-xs text-muted-foreground">
               Pravidlo nenašlo shodu — VkŘ nevzniklo, splněno automaticky.
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <span className="mt-0.5 flex size-4 items-center justify-center rounded bg-success text-[10px] text-success-foreground">
+            ✓
+          </span>
+          <div>
+            <div className="font-medium">Čeká na zaplacení</div>
+            <div className="text-xs text-muted-foreground">
+              Uhrazeno 9:42. <span className="opacity-70">VkŘ #4471-C</span>
             </div>
           </div>
         </div>
