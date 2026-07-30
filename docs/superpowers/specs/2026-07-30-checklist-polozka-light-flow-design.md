@@ -160,6 +160,11 @@ Nahrazuje se dnešní `ItemResolutionForm` (dvoumódový modální formulář s 
   vedle pilulky "vyřešeno" se zobrazí i doplňkový štítek "⏳ sleduje se", pokud má `trackingVkrId`.
 - Vedle názvu položky přibývá samostatný prvek `🛈 kontext zásilky` (button), který přepíná
   zobrazení `ItemContext` — dosavadní klik na celý název se ruší, aby byla afordance viditelná.
+  Konkrétní umístění `ItemContext` je otevřené kreativní rozhodnutí implementace: zkusit variantu,
+  kde je kontext vidět vedle řádků Nález/Řešení (ne jen jako blok nad/pod nimi po kliknutí) — např.
+  jako postranní panel po pravé straně obou řádků, viditelný, jakmile jsou pole rozkliknutá/aktivní.
+  Pokud se to prostorově neosvědčí (úzký sloupec, moc obsahu), padá to zpátky na dnešní
+  nad/pod-blokové zobrazení po kliknutí na `🛈`.
 
 `ItemResolutionForm.tsx` se celý odstraňuje; jeho logiku (dropdown + "Jiné…" pole) nahrazuje menší
 sdílená komponenta pro jeden řádek (např. `TemplatedSelect`), použitá dvakrát v `ChecklistItemRow`
