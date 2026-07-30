@@ -186,7 +186,7 @@ export function ChecklistItemRow({ item, template }: { item: ChecklistItem; temp
                   <Button size="sm" onClick={resolve}>
                     ✓ Označit jako vyřešeno
                   </Button>
-                  {item.resolutionValue && template.canTrackForMonitoring && !item.trackingVkrId && (
+                  {item.resolutionValue && !item.trackingVkrId && (
                     <Button size="sm" variant="outline" onClick={createTrackingVkr}>
                       + Založit věc k řešení
                     </Button>
