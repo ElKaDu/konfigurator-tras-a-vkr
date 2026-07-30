@@ -91,11 +91,12 @@ function ActiveCallCard({ kontakt, items }: { kontakt: Kontakt; items: Checklist
           Typ
         </label>
         <select
-          value={kontakt.type}
-          onChange={(e) => patch({ type: e.target.value as KontaktType })}
+          value={kontakt.type ?? ""}
+          onChange={(e) => patch({ type: (e.target.value || undefined) as KontaktType | undefined })}
           aria-label="Typ kontaktu"
           className="w-full rounded-md border border-input bg-surface px-2 py-1.5 text-[11.5px]"
         >
+          <option value="">— nevybráno —</option>
           <option value="customer">Zákazník</option>
           <option value="carrier">Přepravce</option>
         </select>
@@ -150,11 +151,17 @@ function DoneCallCard({ kontakt }: { kontakt: Kontakt }) {
         </span>
       </div>
       <div className="text-[11.5px] font-semibold">
-        {kontakt.type === "customer" ? "Zákazník" : "Přepravce"} · {formatKontaktDateTime(kontakt.scheduledAt)}
+        {kontaktTypeLabel(kontakt.type)} · {formatKontaktDateTime(kontakt.scheduledAt)}
       </div>
       {kontakt.note && <div className="mt-1 text-[11px] text-muted-foreground">{kontakt.note}</div>}
     </div>
   );
+}
+
+function kontaktTypeLabel(type: KontaktType | undefined): string {
+  if (type === "customer") return "Zákazník";
+  if (type === "carrier") return "Přepravce";
+  return "Typ nezvolen";
 }
 
 /** ISO → hodnota pro <input type="datetime-local"> ("2026-07-31T10:00"). Prázdný string pro draft. */

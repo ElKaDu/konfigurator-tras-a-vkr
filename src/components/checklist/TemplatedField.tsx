@@ -40,7 +40,7 @@ export function TemplatedField({
       <span className="w-14 shrink-0 pt-1.5 text-[10.5px] font-bold uppercase tracking-wide text-muted-foreground sm:pt-0">
         {label}
       </span>
-      <div className="flex flex-1 flex-wrap items-center gap-2">
+      <div className="flex max-w-md flex-1 flex-wrap items-center gap-2">
         {options.length > 0 && !freeText ? (
           <select
             value={value ?? ""}

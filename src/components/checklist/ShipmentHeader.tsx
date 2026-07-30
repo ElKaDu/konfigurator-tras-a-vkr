@@ -18,7 +18,7 @@ export function ShipmentHeader({
     <header className="shrink-0 border-b border-border bg-surface px-6 py-4">
       <div className="flex flex-wrap items-center gap-3">
         <div className="grid size-[34px] shrink-0 place-items-center rounded-[9px] bg-primary-soft text-base">📦</div>
-        <h1 className="text-[17px] font-bold">Objednávka #OP-2026-04471</h1>
+        <h1 className="text-[18px] font-semibold">Objednávka #OP-2026-04471</h1>
         <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wide text-accent-foreground">
           Krok 2 — Vyhodnocení a kontrola
         </span>

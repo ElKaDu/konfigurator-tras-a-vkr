@@ -61,7 +61,8 @@ export type KontaktStatus = "draft" | "planned" | "done";
 /** Naplánovaná domluva — jedna událost, víc navázaných položek checklistu. */
 export interface Kontakt {
   id: string;
-  type: KontaktType;
+  /** Nevyplněno, dokud operátorka nezvolí — žádný výchozí typ se nepředpokládá. */
+  type?: KontaktType;
   /** ISO datetime string, např. "2026-07-30T10:00:00". Prázdné, dokud je kontakt "draft". */
   scheduledAt?: string;
   note?: string;

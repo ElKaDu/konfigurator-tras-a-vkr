@@ -64,7 +64,8 @@ function KontaktRow({ kontakt }: { kontakt: Kontakt }) {
     <div>
       <div className="flex items-center justify-between gap-2 text-[12px]">
         <span className="font-semibold">
-          {kontakt.type === "customer" ? "Zákazník" : "Přepravce"} · {formatKontaktDateTime(kontakt.scheduledAt)}
+          {kontakt.type === "customer" ? "Zákazník" : kontakt.type === "carrier" ? "Přepravce" : "Typ nezvolen"} ·{" "}
+          {formatKontaktDateTime(kontakt.scheduledAt)}
         </span>
         <span
           className={`rounded-full px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-wide ${

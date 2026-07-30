@@ -36,7 +36,6 @@ export function createDraftKontakt(): Kontakt {
   if (existing) return existing;
   const kontakt: Kontakt = {
     id: "kontakt_" + Date.now(),
-    type: "customer",
     status: "draft",
     linkedItemIds: [],
   };
