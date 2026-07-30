@@ -8,48 +8,31 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useChecklistItems, checklistItemsStore, kontaktyStore } from "@/lib/checklist/store";
-import { templateById } from "@/lib/checklist/store";
+import { useChecklistItems, checklistItemsStore, kontaktyStore, templateById } from "@/lib/checklist/store";
+import { deriveItemState } from "@/lib/checklist/derived";
 import type { KontaktType } from "@/lib/checklist/types";
 
-export function KontaktSchedulerDialog({
-  preselectedItemIds,
-  onClose,
-}: {
-  preselectedItemIds: string[];
-  onClose: () => void;
-}) {
+export function KontaktSchedulerDialog({ onClose }: { onClose: () => void }) {
   const items = useChecklistItems();
-  const selectable = items.filter(
-    (i) => i.state === "open" || (i.state === "waiting_contact" && preselectedItemIds.includes(i.id))
-  );
+  const eligible = items.filter((i) => deriveItemState(i) === "waiting_contact" && !i.kontaktId);
 
   const [type, setType] = useState<KontaktType>("customer");
   const [scheduledAt, setScheduledAt] = useState(defaultDateTimeLocal());
   const [note, setNote] = useState("");
-  const [selected, setSelected] = useState<Set<string>>(new Set(preselectedItemIds));
-
-  function toggle(id: string) {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
 
   function submit() {
     const id = "kontakt_" + Date.now();
+    const itemIds = eligible.map((i) => i.id);
     kontaktyStore.create({
       id,
       type,
       scheduledAt: new Date(scheduledAt).toISOString(),
       note: note || undefined,
       status: "planned",
-      linkedItemIds: [...selected],
+      linkedItemIds: itemIds,
     });
-    selected.forEach((itemId) => {
-      checklistItemsStore.update(itemId, { state: "waiting_contact", kontaktId: id });
+    itemIds.forEach((itemId) => {
+      checklistItemsStore.update(itemId, { kontaktId: id });
     });
     onClose();
   }
@@ -90,21 +73,25 @@ export function KontaktSchedulerDialog({
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-muted-foreground">Navázané položky</label>
-            <div className="max-h-40 space-y-1.5 overflow-y-auto rounded-md border border-border p-2">
-              {selectable.length === 0 && (
-                <p className="px-1 py-2 text-xs text-muted-foreground">Žádné otevřené položky k výběru.</p>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">
+              Tento call se týká {eligible.length} {eligible.length === 1 ? "položky" : "položek"} — připojily se samy
+            </label>
+            <div className="max-h-40 space-y-1 overflow-y-auto rounded-md border border-border p-2">
+              {eligible.length === 0 && (
+                <p className="px-1 py-2 text-xs text-muted-foreground">Žádná položka zatím nečeká na kontakt.</p>
               )}
-              {selectable.map((i) => {
+              {eligible.map((i) => {
                 const tpl = templateById(i.templateId);
                 return (
-                  <label key={i.id} className="flex items-center gap-2 rounded px-1.5 py-1 text-[13px] hover:bg-muted">
-                    <input type="checkbox" checked={selected.has(i.id)} onChange={() => toggle(i.id)} />
+                  <div key={i.id} className="rounded px-1.5 py-1 text-[13px]">
                     {tpl?.title}
-                  </label>
+                  </div>
                 );
               })}
             </div>
+            <p className="mt-1.5 text-[11px] text-muted-foreground">
+              Seznam je jen náhled — co se má na call probrat, se řeší checkboxem přímo u položky.
+            </p>
           </div>
         </div>
 
@@ -112,7 +99,7 @@ export function KontaktSchedulerDialog({
           <Button variant="ghost" onClick={onClose}>
             Zrušit
           </Button>
-          <Button onClick={submit} disabled={selected.size === 0}>
+          <Button onClick={submit} disabled={eligible.length === 0}>
             Naplánovat
           </Button>
         </DialogFooter>
