@@ -177,24 +177,23 @@
         <div class="it">
           <span class="statusicon dot"></span>
           <div class="ib">
-            <div class="ittl">Zjištěn nález. Jde pouze o podezření?</div>
+            <div class="ittl">Kontrola nepřípustného zboží dle přepravce</div>
             <div class="btnrow">
-              <button class="btn primary">Ano, jen podezření</button>
-              <button class="btn outline">Ne, je to jistý nález</button>
+              <button class="btn outline">⚠ Nahlásit nález</button>
             </div>
           </div>
         </div>
       </div>
-      <div class="fromdiagram" style="margin-top:6px; display:block;">→ <b>"Zjištěn nález. Jde pouze o podezření?"</b></div>
+      <div class="fromdiagram" style="margin-top:6px; display:block;">rozbaluje jeden formulář níže</div>
     </div>
   </div>
 
   <hr class="divider">
 
   <div class="stagehead">
-    <span class="stagenum">2a</span>
-    <span class="stagetitle">Podezření — rovnou čeká na call</span>
-    <span class="fromdiagram">→ <b>"Označuji si, co je nález. Označuji, že jde o podezření. Případně poznámka…"</b></span>
+    <span class="stagenum">2</span>
+    <span class="stagetitle">Nahlásit nález — jeden formulář, jeden checkbox</span>
+    <span class="fromdiagram">sjednocuje: <b>"podezření?"</b> · <b>"už vím řešení?"</b> · <b>"potřeba informovat?"</b></span>
   </div>
   <div class="card">
     <div class="it">
@@ -202,81 +201,36 @@
       <div class="ib">
         <div class="ittl">Kontrola nepřípustného zboží dle přepravce</div>
         <div class="field">
-          <label>Co je nález (podezření)</label>
-          <div class="box filled">Vypadá to na powerbanku, ale nejsem si jistá — na fotce špatně vidět.</div>
-        </div>
-        <div class="field">
-          <label>Poznámka, co chci probrat s klientem</label>
-          <div class="box filled">Zeptat se, jestli je v balíku powerbanka.</div>
-        </div>
-        <div class="btnrow">
-          <button class="btn primary">📞 Přidat na call</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="stagehead">
-    <span class="stagenum">2b</span>
-    <span class="stagetitle">Jistý nález → znám řešení?</span>
-    <span class="fromdiagram">→ <b>"Označuji nález. Už vím řešení?"</b></span>
-  </div>
-  <div class="card">
-    <div class="it">
-      <span class="statusicon dot"></span>
-      <div class="ib">
-        <div class="ittl">Kontrola nepřípustného zboží dle přepravce</div>
-        <div class="field">
-          <label>Co je nález</label>
+          <label>Nález</label>
           <div class="box filled">Obsahovalo powerbanku (Li-ion).</div>
         </div>
+        <div class="field">
+          <label>Řešení (pokud ho znáš)</label>
+          <div class="box filled">Zákazník věc vyndá, přeprava pokračuje.</div>
+        </div>
+        <div class="field">
+          <label>Poznámka</label>
+          <div class="box filled">Ověřit u klienta, jestli šlo opravdu jen o tohle.</div>
+        </div>
+        <label style="display:flex; align-items:flex-start; gap:8px; margin-top:11px; font-size:12.5px; cursor:pointer;">
+          <input type="checkbox" style="margin-top:2px;">
+          <span>Jde jen o podezření / potřebuju to nejdřív probrat s klientem <span style="color:var(--muted-foreground);">— přidá na call</span></span>
+        </label>
         <div class="btnrow">
-          <button class="btn primary">Ano, znám řešení</button>
-          <button class="btn outline">Ne, budu kontaktovat klienta</button>
+          <button class="btn primary">Uzavřít nález</button>
         </div>
       </div>
     </div>
   </div>
-
-  <div class="branch">
-    <div>
-      <div class="branchlabel">→ Ne, neznám řešení</div>
-      <div class="card">
-        <div class="it">
-          <span class="statusicon wait">📞</span>
-          <div class="ib">
-            <div class="ihead"><span class="ittl">Kontrola nepřípustného zboží dle přepravce</span><span class="tag wait">čeká na call</span></div>
-            <div class="found"><b>Nález:</b> Obsahovalo powerbanku (Li-ion).</div>
-          </div>
-        </div>
-      </div>
-      <div class="fromdiagram" style="margin-top:6px; display:block;">→ <b>"Budu kontaktovat klienta"</b></div>
-    </div>
-    <div>
-      <div class="branchlabel">→ Ano, znám řešení</div>
-      <div class="card">
-        <div class="it">
-          <span class="statusicon dot"></span>
-          <div class="ib">
-            <div class="ittl">Kontrola nepřípustného zboží dle přepravce</div>
-            <div class="field">
-              <label>Řešení</label>
-              <div class="box filled">Zákazník věc vyndá, přeprava pokračuje.</div>
-            </div>
-            <div class="btnrow">
-              <button class="btn outline">Potřeba klienta informovat / dát úkol</button>
-              <button class="btn primary">Ne, rovnou uzavřít</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="fromdiagram" style="margin-top:6px; display:block;">→ <b>"Označuji řešení. Je potřeba informovat klienta nebo něco probrat?"</b></div>
-    </div>
+  <div class="qbox">
+    Žádné binární "ano/podezření vs. ne/jisté" rozcestí. Řešení a poznámku vyplníš vždy (i když si nejsi
+    jistá), a jediný checkbox rozhoduje, jestli se to rovnou uzavře, nebo to přidá na call — popisek
+    tlačítka se podle checkboxu mění.
   </div>
 
   <div class="branch">
     <div>
-      <div class="branchlabel">→ Ne → rovnou hotovo, bez callu</div>
+      <div class="branchlabel">→ checkbox nezaškrtnutý</div>
       <div class="card">
         <div class="it">
           <span class="statusicon ok">✓</span>
@@ -288,14 +242,14 @@
       </div>
     </div>
     <div>
-      <div class="branchlabel">→ Ano → čeká na call</div>
+      <div class="branchlabel">→ checkbox zaškrtnutý</div>
       <div class="card">
         <div class="it">
           <span class="statusicon wait">📞</span>
           <div class="ib">
             <div class="ihead"><span class="ittl">Kontrola nepřípustného zboží dle přepravce</span><span class="tag wait">čeká na call</span></div>
             <div class="found"><b>Nález:</b> Obsahovalo powerbanku. <b>Řešení:</b> zákazník věc vyndá.</div>
-            <div class="idesc" style="margin-top:5px;">Řešení už mám — jen potřebuju klienta informovat.</div>
+            <div class="idesc" style="margin-top:5px;">Poznámka: ověřit u klienta, jestli šlo opravdu jen o tohle.</div>
           </div>
         </div>
       </div>
@@ -331,8 +285,8 @@
 
   <div class="stagehead">
     <span class="stagenum">4</span>
-    <span class="stagetitle">Po callu — nález i řešení se doplňují zvlášť</span>
-    <span class="fromdiagram">→ <b>"Doplňuji všude nálezy…"</b> <i>a zároveň</i> <b>"Doplňuji všude řešení…"</b></span>
+    <span class="stagetitle">Po callu — doplníš, co ses dozvěděla</span>
+    <span class="fromdiagram">stejná pole jako ve Stage 2, teď editovatelná s tím, co víš navíc</span>
   </div>
   <div class="card">
     <div class="it">
@@ -340,19 +294,24 @@
       <div class="ib">
         <div class="ihead"><span class="ittl">Kontrola nepřípustného zboží dle přepravce</span><span class="tag info">call proběhl</span></div>
         <div class="field">
-          <label>Nález — dozvěděla ses od klienta?</label>
-          <div class="box filled">Potvrdil, že jde o powerbanku 10 000 mAh.</div>
+          <label>Nález</label>
+          <div class="box filled">Potvrzeno — powerbanka 10 000 mAh.</div>
         </div>
         <div class="field">
-          <label>Řešení — dozvěděla ses od klienta?</label>
-          <div class="box filled">Souhlasil, že věc vyndá před vyzvednutím.</div>
+          <label>Řešení</label>
+          <div class="box filled">Zákazník věc vyndá před vyzvednutím.</div>
         </div>
         <div class="btnrow">
-          <button class="btn primary">✓ Teď je to vyřešené</button>
-          <button class="btn outline">Ještě je potřeba počkat / sledovat</button>
+          <button class="btn primary">✓ Uzavřít</button>
+          <button class="btn outline">Necháme čekat / sledovat</button>
         </div>
       </div>
     </div>
+  </div>
+  <div class="qbox">
+    Žádná nová otázka "dozvěděla ses to?" — jsou to tytéž dvě pole ze Stage 2 (u podezření prázdná, jinak
+    předvyplněná odhadem), teď je jen doplníš/upravíš podle toho, co řekl klient. Tlačítka mluví o tom, co
+    operátor dělá ("Uzavřít"), ne o tom, co se ptá diagram.
   </div>
 
   <div class="branch">
