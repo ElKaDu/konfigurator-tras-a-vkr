@@ -1,39 +1,86 @@
-import { useChecklistItems } from "@/lib/checklist/store";
-import { findingsSummary } from "@/lib/checklist/derived";
-import { templateById } from "@/lib/checklist/store";
+import { useState } from "react";
+import { useChecklistItems, useKontakty, kontaktyStore, templateById } from "@/lib/checklist/store";
+import { noteworthyItems, formatKontaktDateTime } from "@/lib/checklist/derived";
+import type { Kontakt } from "@/lib/checklist/types";
 
 export function ShrnutiNalezuPanel() {
   const items = useChecklistItems();
-  const findings = findingsSummary(items);
+  const kontakty = useKontakty();
+  const noteworthy = noteworthyItems(items);
 
-  if (findings.length === 0) return null;
+  if (kontakty.length === 0 && noteworthy.length === 0) return null;
+
+  const sortedKontakty = [...kontakty].sort(
+    (a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime(),
+  );
 
   return (
     <div className="rounded-lg border border-border bg-card p-3.5">
-      <p className="mb-0.5 text-[10.5px] font-bold uppercase tracking-wide text-muted-foreground">
-        Shrnutí nálezů
-      </p>
-      <p className="mb-2.5 text-[11px] text-muted-foreground">co nebylo v pořádku a jak se to vyřešilo</p>
-      <div className="flex flex-col gap-2.5">
-        {findings.map((item) => {
-          const tpl = templateById(item.templateId);
-          return (
-            <div key={item.id} className="border-b border-border pb-2.5 last:border-0 last:pb-0">
-              <div className="text-[12.5px] font-semibold">{tpl?.title}</div>
-              <div className="mt-0.5 text-[11.5px] text-success-foreground">
-                <b>Nález:</b> {item.finding}
+      <p className="mb-2.5 text-[10.5px] font-bold uppercase tracking-wide text-muted-foreground">Shrnutí</p>
+
+      {sortedKontakty.length > 0 && (
+        <div className="mb-3 flex flex-col gap-2.5 border-b border-border pb-3">
+          {sortedKontakty.map((k) => (
+            <KontaktRow key={k.id} kontakt={k} />
+          ))}
+        </div>
+      )}
+
+      {noteworthy.length > 0 && (
+        <div className="flex flex-col gap-2.5">
+          {noteworthy.map((item) => {
+            const tpl = templateById(item.templateId);
+            return (
+              <div key={item.id} className="border-b border-border pb-2.5 last:border-0 last:pb-0">
+                <div className="text-[12.5px] font-semibold">{tpl?.title}</div>
+                {item.findingValue && (
+                  <div className="mt-0.5 text-[11.5px] text-foreground">
+                    <b>Nález:</b> {item.findingValue}
+                  </div>
+                )}
+                {item.noteValue && (
+                  <div className="text-[11.5px] text-muted-foreground">
+                    <b>Poznámka:</b> {item.noteValue}
+                  </div>
+                )}
               </div>
-              <div className="text-[11.5px] text-success-foreground">
-                <b>Řešení:</b> {item.resolution}
-              </div>
-              <div className="mt-0.5 text-[10.5px] text-muted-foreground">
-                vyřešil{item.resolvedBy ? "a " + item.resolvedBy : "a"}
-                {item.resolvedAt ? ", " + new Date(item.resolvedAt).toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" }) : ""}
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function KontaktRow({ kontakt }: { kontakt: Kontakt }) {
+  const [note, setNote] = useState(kontakt.note ?? "");
+
+  function saveNote() {
+    kontaktyStore.update(kontakt.id, { note: note || undefined });
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-2 text-[12px]">
+        <span className="font-semibold">
+          {kontakt.type === "customer" ? "Zákazník" : "Přepravce"} · {formatKontaktDateTime(kontakt.scheduledAt)}
+        </span>
+        <span
+          className={`rounded-full px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-wide ${
+            kontakt.status === "done" ? "bg-success/15 text-success-foreground" : "bg-warning/15 text-warning-foreground"
+          }`}
+        >
+          {kontakt.status === "done" ? "proběhl" : "naplánován"}
+        </span>
       </div>
+      <textarea
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        onBlur={saveNote}
+        rows={1}
+        placeholder="Poznámka k callu…"
+        className="mt-1 w-full rounded-md border border-input bg-transparent px-2 py-1 text-[11.5px]"
+      />
     </div>
   );
 }
