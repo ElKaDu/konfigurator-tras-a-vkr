@@ -7,10 +7,13 @@ export function ShrnutiNalezuPanel() {
   const kontakty = useKontakty();
   const noteworthy = noteworthyItems(items);
 
-  if (kontakty.length === 0 && noteworthy.length === 0) return null;
+  // Rozjednané cally (draft) sem nepatří — v shrnutí má být jen to, co má termín nebo proběhlo.
+  const relevantKontakty = kontakty.filter((k) => k.status !== "draft");
 
-  const sortedKontakty = [...kontakty].sort(
-    (a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime(),
+  if (relevantKontakty.length === 0 && noteworthy.length === 0) return null;
+
+  const sortedKontakty = [...relevantKontakty].sort(
+    (a, b) => new Date(b.scheduledAt ?? 0).getTime() - new Date(a.scheduledAt ?? 0).getTime(),
   );
 
   return (
@@ -35,6 +38,11 @@ export function ShrnutiNalezuPanel() {
                 {item.findingValue && (
                   <div className="mt-0.5 text-[11.5px] text-foreground">
                     <b>Nález:</b> {item.findingValue}
+                  </div>
+                )}
+                {item.resolutionValue && (
+                  <div className="text-[11.5px] text-foreground">
+                    <b>Řešení:</b> {item.resolutionValue}
                   </div>
                 )}
                 {item.noteValue && (
