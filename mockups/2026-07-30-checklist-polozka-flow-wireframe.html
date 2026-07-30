@@ -1,0 +1,428 @@
+<meta charset="utf-8">
+<title>Flow položky — ověření proti diagramu</title>
+<style>
+  :root {
+    --background: oklch(0.985 0.005 280);
+    --foreground: oklch(0.18 0.03 280);
+    --surface: oklch(1 0 0);
+    --card: oklch(1 0 0);
+    --primary: oklch(0.56 0.22 295);
+    --primary-soft: oklch(0.96 0.04 295);
+    --secondary: oklch(0.97 0.01 280);
+    --secondary-foreground: oklch(0.25 0.03 280);
+    --muted: oklch(0.965 0.008 280);
+    --muted-foreground: oklch(0.5 0.02 280);
+    --accent-foreground: oklch(0.35 0.18 295);
+    --destructive: oklch(0.6 0.22 25);
+    --success: oklch(0.55 0.15 155);
+    --success-foreground: oklch(0.3 0.09 155);
+    --success-soft: oklch(0.95 0.04 155);
+    --warning: oklch(0.62 0.15 75);
+    --warning-foreground: oklch(0.38 0.1 75);
+    --warning-soft: oklch(0.96 0.05 75);
+    --info: oklch(0.55 0.14 230);
+    --info-foreground: oklch(0.35 0.12 230);
+    --info-soft: oklch(0.95 0.04 230);
+    --border: oklch(0.92 0.01 280);
+    --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --background: oklch(0.16 0.02 280); --foreground: oklch(0.96 0.005 280);
+      --surface: oklch(0.2 0.02 280); --card: oklch(0.2 0.02 280);
+      --primary: oklch(0.7 0.2 295); --primary-soft: oklch(0.3 0.1 295);
+      --secondary: oklch(0.25 0.02 280); --secondary-foreground: oklch(0.96 0.005 280);
+      --muted: oklch(0.25 0.02 280); --muted-foreground: oklch(0.7 0.02 280);
+      --accent-foreground: oklch(0.96 0.005 280);
+      --border: oklch(1 0 0 / 12%);
+      --success: oklch(0.78 0.14 155); --success-foreground: oklch(0.86 0.13 155); --success-soft: oklch(0.3 0.07 155);
+      --warning: oklch(0.82 0.14 75); --warning-foreground: oklch(0.88 0.13 75); --warning-soft: oklch(0.32 0.08 75);
+      --destructive: oklch(0.72 0.19 25);
+      --info: oklch(0.72 0.14 230); --info-foreground: oklch(0.84 0.1 230); --info-soft: oklch(0.28 0.07 230);
+    }
+  }
+  :root[data-theme="dark"] {
+    --background: oklch(0.16 0.02 280); --foreground: oklch(0.96 0.005 280);
+    --surface: oklch(0.2 0.02 280); --card: oklch(0.2 0.02 280);
+    --primary: oklch(0.7 0.2 295); --primary-soft: oklch(0.3 0.1 295);
+    --secondary: oklch(0.25 0.02 280); --secondary-foreground: oklch(0.96 0.005 280);
+    --muted: oklch(0.25 0.02 280); --muted-foreground: oklch(0.7 0.02 280);
+    --accent-foreground: oklch(0.96 0.005 280);
+    --border: oklch(1 0 0 / 12%);
+    --success: oklch(0.78 0.14 155); --success-foreground: oklch(0.86 0.13 155); --success-soft: oklch(0.3 0.07 155);
+    --warning: oklch(0.82 0.14 75); --warning-foreground: oklch(0.88 0.13 75); --warning-soft: oklch(0.32 0.08 75);
+    --destructive: oklch(0.72 0.19 25);
+    --info: oklch(0.72 0.14 230); --info-foreground: oklch(0.84 0.1 230); --info-soft: oklch(0.28 0.07 230);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--background); font-family:var(--font-sans); color:var(--foreground); -webkit-font-smoothing:antialiased; font-size:14px; }
+  .wrap { max-width:900px; margin:0 auto; padding:30px 20px 80px; }
+
+  h1 { font-size:21px; font-weight:700; letter-spacing:-.01em; margin:0 0 8px; }
+  .lede { color:var(--muted-foreground); font-size:13.5px; line-height:1.6; max-width:70ch; margin:0 0 26px; }
+
+  .stage { margin-bottom:6px; }
+  .stagehead { display:flex; align-items:baseline; gap:10px; margin:26px 0 8px; }
+  .stagenum { flex:none; width:22px; height:22px; border-radius:999px; background:var(--primary); color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+  .stagetitle { font-size:14px; font-weight:700; }
+  .fromdiagram { font-size:11px; color:var(--muted-foreground); font-family:var(--font-mono); }
+  .fromdiagram b { color:var(--accent-foreground); font-weight:600; }
+
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+  .it { display:flex; gap:11px; }
+  .ib { flex:1; min-width:0; }
+  .ihead { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .ittl { font-size:13.5px; font-weight:600; }
+  .ittl.muted { color:var(--muted-foreground); font-weight:500; }
+  .idesc { font-size:12.5px; color:var(--muted-foreground); margin-top:3px; line-height:1.5; }
+
+  .statusicon { flex:none; width:16px; height:16px; margin-top:2px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:9px; }
+  .statusicon.ok { background:var(--success); color:#fff; }
+  .statusicon.wait { background:var(--warning); color:#fff; }
+  .statusicon.dot { width:8px; height:8px; margin-top:5px; background:var(--border); }
+
+  .tag { font-size:9px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:2px 7px; border-radius:999px; }
+  .tag.ok { background:var(--success-soft); color:var(--success-foreground); }
+  .tag.wait { background:var(--warning-soft); color:var(--warning-foreground); }
+  .tag.info { background:var(--info-soft); color:var(--info-foreground); }
+
+  .btnrow { margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; }
+  .btn { padding:6px 13px; border-radius:8px; font-size:12.5px; font-weight:600; border:1px solid var(--border); background:var(--secondary); color:var(--secondary-foreground); }
+  .btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+  .btn.outline { background:transparent; border:1px solid var(--primary); color:var(--primary); }
+  .btn.ghost { background:transparent; border:1px dashed var(--border); color:var(--muted-foreground); }
+
+  .field { margin-top:9px; }
+  .field label { display:block; font-size:11px; font-weight:600; color:var(--muted-foreground); margin-bottom:3px; }
+  .field .box { border:1px solid var(--border); border-radius:7px; padding:7px 10px; font-size:12px; background:var(--background); color:var(--muted-foreground); }
+  .field .box.filled { color:var(--foreground); background:var(--surface); }
+
+  .note { margin-top:9px; padding:8px 10px; border-radius:8px; background:var(--info-soft); color:var(--info-foreground); font-size:11.5px; }
+  .found { margin-top:8px; font-size:11.5px; color:var(--success-foreground); }
+  .found b { font-weight:600; }
+
+  .branch { display:flex; gap:14px; margin-top:14px; }
+  .branch > div { flex:1; min-width:0; }
+  .branchlabel { font-size:11px; font-weight:700; color:var(--primary); margin-bottom:6px; display:flex; align-items:center; gap:6px; }
+  .arrow-down { text-align:center; color:var(--border); font-size:18px; margin:2px 0; }
+
+  .collapsed-row { display:flex; align-items:center; gap:9px; padding:8px 0; border-bottom:1px solid var(--border); }
+  .collapsed-row:last-child { border-bottom:none; }
+  .collapsed-row .ttl { flex:1; font-size:12.5px; color:var(--muted-foreground); }
+  .collapsed-row .ttl s { text-decoration:none; }
+  .collapsed-row .undo { font-size:11px; color:var(--primary); cursor:pointer; }
+  .disclosure { font-size:11.5px; color:var(--muted-foreground); padding:6px 0; cursor:pointer; }
+
+  .callcard { border:1px solid var(--info); background:var(--info-soft); border-radius:12px; padding:14px 16px; }
+  .callcard .t { font-size:13px; font-weight:700; color:var(--info-foreground); }
+  .callcard .m { font-size:11.5px; color:var(--muted-foreground); margin-top:2px; }
+  .calllist { margin-top:10px; display:flex; flex-direction:column; gap:5px; }
+  .calllist .row { font-size:11.5px; display:flex; gap:6px; align-items:baseline; }
+  .calllist .row .dot { width:5px; height:5px; border-radius:999px; background:var(--info); flex:none; margin-top:5px; }
+
+  .divider { border:none; border-top:1px dashed var(--border); margin:34px 0; }
+
+  .qbox { border:1px solid var(--primary); background:var(--primary-soft); border-radius:10px; padding:12px 15px; font-size:12.5px; color:var(--accent-foreground); margin-top:10px; }
+  .qbox b { font-weight:700; }
+</style>
+
+<div class="wrap">
+  <h1>Flow položky — ověření proti tvému diagramu</h1>
+  <p class="lede">
+    Jedna položka ("Kontrola nepřípustného zboží dle přepravce"), projetá všemi větvemi z tvého flow.
+    U každého kroku je citace z diagramu, ať je vidět, že se to opravdu drží tvého rozcestí — ne mojí domněnky.
+  </p>
+
+  <div class="stagehead">
+    <span class="stagenum">1</span>
+    <span class="stagetitle">Otevřeno — bez checkboxu, dvě tlačítka</span>
+    <span class="fromdiagram">→ <b>"Otevřeno – je to v pořádku"</b></span>
+  </div>
+  <div class="card">
+    <div class="it">
+      <span class="statusicon dot"></span>
+      <div class="ib">
+        <div class="ihead"><span class="ittl">Kontrola nepřípustného zboží dle přepravce</span></div>
+        <div class="idesc">Zbraně a makety, kazitelné potraviny, peníze apod. dle podmínek přepravce.</div>
+        <div class="btnrow">
+          <button class="btn primary">✓ V pořádku</button>
+          <button class="btn outline">⚠ Nahlásit nález</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="qbox">
+    Zrušil jsem tu dřívější "checkbox" ikonu vlevo — byla to jen tečka, na kterou se nedalo kliknout, a to
+    tě zmátlo. Zůstávají jen ta dvě tlačítka. Malá tečka vlevo je čistě informační značka stavu, ne ovládací prvek.
+  </div>
+
+  <div class="branch">
+    <div>
+      <div class="branchlabel">→ Ano</div>
+      <div class="card">
+        <div class="it">
+          <span class="statusicon ok">✓</span>
+          <div class="ib">
+            <div class="ihead"><span class="ittl muted">Kontrola nepřípustného zboží dle přepravce</span><span class="tag ok">vyřešeno</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="fromdiagram" style="margin-top:6px; display:block;">→ <b>"Vyřešeno"</b></div>
+    </div>
+    <div>
+      <div class="branchlabel">→ Ne</div>
+      <div class="card">
+        <div class="it">
+          <span class="statusicon dot"></span>
+          <div class="ib">
+            <div class="ittl">Zjištěn nález. Jde pouze o podezření?</div>
+            <div class="btnrow">
+              <button class="btn primary">Ano, jen podezření</button>
+              <button class="btn outline">Ne, je to jistý nález</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="fromdiagram" style="margin-top:6px; display:block;">→ <b>"Zjištěn nález. Jde pouze o podezření?"</b></div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="stagehead">
+    <span class="stagenum">2a</span>
+    <span class="stagetitle">Podezření — rovnou čeká na call</span>
+    <span class="fromdiagram">→ <b>"Označuji si, co je nález. Označuji, že jde o podezření. Případně poznámka…"</b></span>
+  </div>
+  <div class="card">
+    <div class="it">
+      <span class="statusicon dot"></span>
+      <div class="ib">
+        <div class="ittl">Kontrola nepřípustného zboží dle přepravce</div>
+        <div class="field">
+          <label>Co je nález (podezření)</label>
+          <div class="box filled">Vypadá to na powerbanku, ale nejsem si jistá — na fotce špatně vidět.</div>
+        </div>
+        <div class="field">
+          <label>Poznámka, co chci probrat s klientem</label>
+          <div class="box filled">Zeptat se, jestli je v balíku powerbanka.</div>
+        </div>
+        <div class="btnrow">
+          <button class="btn primary">📞 Přidat na call</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stagehead">
+    <span class="stagenum">2b</span>
+    <span class="stagetitle">Jistý nález → znám řešení?</span>
+    <span class="fromdiagram">→ <b>"Označuji nález. Už vím řešení?"</b></span>
+  </div>
+  <div class="card">
+    <div class="it">
+      <span class="statusicon dot"></span>
+      <div class="ib">
+        <div class="ittl">Kontrola nepřípustného zboží dle přepravce</div>
+        <div class="field">
+          <label>Co je nález</label>
+          <div class="box filled">Obsahovalo powerbanku (Li-ion).</div>
+        </div>
+        <div class="btnrow">
+          <button class="btn primary">Ano, znám řešení</button>
+          <button class="btn outline">Ne, budu kontaktovat klienta</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="branch">
+    <div>
+      <div class="branchlabel">→ Ne, neznám řešení</div>
+      <div class="card">
+        <div class="it">
+          <span class="statusicon wait">📞</span>
+          <div class="ib">
+            <div class="ihead"><span class="ittl">Kontrola nepřípustného zboží dle přepravce</span><span class="tag wait">čeká na call</span></div>
+            <div class="found"><b>Nález:</b> Obsahovalo powerbanku (Li-ion).</div>
+          </div>
+        </div>
+      </div>
+      <div class="fromdiagram" style="margin-top:6px; display:block;">→ <b>"Budu kontaktovat klienta"</b></div>
+    </div>
+    <div>
+      <div class="branchlabel">→ Ano, znám řešení</div>
+      <div class="card">
+        <div class="it">
+          <span class="statusicon dot"></span>
+          <div class="ib">
+            <div class="ittl">Kontrola nepřípustného zboží dle přepravce</div>
+            <div class="field">
+              <label>Řešení</label>
+              <div class="box filled">Zákazník věc vyndá, přeprava pokračuje.</div>
+            </div>
+            <div class="btnrow">
+              <button class="btn outline">Potřeba klienta informovat / dát úkol</button>
+              <button class="btn primary">Ne, rovnou uzavřít</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="fromdiagram" style="margin-top:6px; display:block;">→ <b>"Označuji řešení. Je potřeba informovat klienta nebo něco probrat?"</b></div>
+    </div>
+  </div>
+
+  <div class="branch">
+    <div>
+      <div class="branchlabel">→ Ne → rovnou hotovo, bez callu</div>
+      <div class="card">
+        <div class="it">
+          <span class="statusicon ok">✓</span>
+          <div class="ib">
+            <div class="ihead"><span class="ittl muted">Kontrola nepřípustného zboží dle přepravce</span><span class="tag ok">vyřešeno · s nálezem</span></div>
+            <div class="found"><b>Nález:</b> Obsahovalo powerbanku (Li-ion). <b>Řešení:</b> Zákazník věc vyndá, přeprava pokračuje.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="branchlabel">→ Ano → čeká na call</div>
+      <div class="card">
+        <div class="it">
+          <span class="statusicon wait">📞</span>
+          <div class="ib">
+            <div class="ihead"><span class="ittl">Kontrola nepřípustného zboží dle přepravce</span><span class="tag wait">čeká na call</span></div>
+            <div class="found"><b>Nález:</b> Obsahovalo powerbanku. <b>Řešení:</b> zákazník věc vyndá.</div>
+            <div class="idesc" style="margin-top:5px;">Řešení už mám — jen potřebuju klienta informovat.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="stagehead">
+    <span class="stagenum">3</span>
+    <span class="stagetitle">Jeden call pro celý checklist — ne výběr položek</span>
+    <span class="fromdiagram">→ <b>"Call s klientem"</b> · "neplánuje se pro jednotlivé položky"</span>
+  </div>
+  <div class="callcard">
+    <div class="t">📞 Call naplánován — zítra 10:00</div>
+    <div class="m">Všechno, co čeká na kontakt, se na tenhle jeden call napojí samo:</div>
+    <div class="calllist">
+      <div class="row"><span class="dot"></span> Kontrola nepřípustného zboží dle přepravce — podezření</div>
+      <div class="row"><span class="dot"></span> Kontrola hodnoty vůči naší odpovědnosti — neznámé řešení</div>
+      <div class="row"><span class="dot"></span> Kontrola splnění podmínek pro pojištění — potřeba informovat</div>
+    </div>
+    <div class="btnrow" style="margin-top:12px;">
+      <button class="btn primary">Call proběhl</button>
+      <button class="btn ghost">Přeplánovat</button>
+    </div>
+  </div>
+  <div class="qbox">
+    Položka se na call napojí automaticky v momentě, kdy do něj vstoupí (podezření / neznám řešení / potřeba
+    informovat) — nikde nevybíráš ručně, které položky do callu patří.
+  </div>
+
+  <div class="arrow-down">↓ po kliknutí "Call proběhl"</div>
+
+  <div class="stagehead">
+    <span class="stagenum">4</span>
+    <span class="stagetitle">Po callu — nález i řešení se doplňují zvlášť</span>
+    <span class="fromdiagram">→ <b>"Doplňuji všude nálezy…"</b> <i>a zároveň</i> <b>"Doplňuji všude řešení…"</b></span>
+  </div>
+  <div class="card">
+    <div class="it">
+      <span class="statusicon wait">📞</span>
+      <div class="ib">
+        <div class="ihead"><span class="ittl">Kontrola nepřípustného zboží dle přepravce</span><span class="tag info">call proběhl</span></div>
+        <div class="field">
+          <label>Nález — dozvěděla ses od klienta?</label>
+          <div class="box filled">Potvrdil, že jde o powerbanku 10 000 mAh.</div>
+        </div>
+        <div class="field">
+          <label>Řešení — dozvěděla ses od klienta?</label>
+          <div class="box filled">Souhlasil, že věc vyndá před vyzvednutím.</div>
+        </div>
+        <div class="btnrow">
+          <button class="btn primary">✓ Teď je to vyřešené</button>
+          <button class="btn outline">Ještě je potřeba počkat / sledovat</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="branch">
+    <div>
+      <div class="branchlabel">→ Vyřešeno</div>
+      <div class="card">
+        <div class="it">
+          <span class="statusicon ok">✓</span>
+          <div class="ib">
+            <div class="ihead"><span class="ittl muted">Kontrola nepřípustného zboží dle přepravce</span><span class="tag ok">vyřešeno · s nálezem</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="fromdiagram" style="margin-top:6px; display:block;">→ <b>"Je vše opravdu vyřešeno?"</b> → Vyřešeno</div>
+    </div>
+    <div>
+      <div class="branchlabel">→ Potřeba sledovat</div>
+      <div class="card">
+        <div class="it">
+          <span class="statusicon wait">⏳</span>
+          <div class="ib">
+            <div class="ihead"><span class="ittl">Kontrola nepřípustného zboží dle přepravce</span><span class="tag wait">čeká na dodání</span></div>
+            <div class="btnrow">
+              <button class="btn ghost">+ Založit věc k řešení</button>
+              <button class="btn ghost">📞 Naplánovat další call</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="fromdiagram" style="margin-top:6px; display:block;">→ <b>"Založení věcí k řešení u položek"</b> a/nebo <b>"naplánování dalšího callu na celým checklistem"</b></div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="stagehead">
+    <span class="stagenum">5</span>
+    <span class="stagetitle">Hotové položky se upozadí</span>
+    <span class="fromdiagram">tvoje poznámka z testování — ne z diagramu</span>
+  </div>
+  <div class="card">
+    <div class="disclosure">▸ Hotovo (2) — sbaleno, klikni pro rozbalení</div>
+    <div class="collapsed-row">
+      <span class="statusicon ok" style="width:14px;height:14px;">✓</span>
+      <span class="ttl">Kontrola nepřípustného zboží dle přepravce</span>
+      <span class="undo">↺ vrátit do otevřeného stavu</span>
+    </div>
+    <div class="collapsed-row">
+      <span class="statusicon ok" style="width:14px;height:14px;">✓</span>
+      <span class="ttl">Vyhodnocení obsahu z pohledu DG</span>
+      <span class="undo">↺ vrátit do otevřeného stavu</span>
+    </div>
+    <div style="border-top:1px solid var(--border); margin-top:10px; padding-top:10px;">
+      <div class="it">
+        <span class="statusicon dot"></span>
+        <div class="ib">
+          <div class="ittl">Ověření, že se jedná o dokumenty</div>
+          <div class="idesc">Potvrzení, že obsah jsou opravdu jen dokumenty.</div>
+          <div class="btnrow">
+            <button class="btn primary">✓ V pořádku</button>
+            <button class="btn outline">⚠ Nahlásit nález</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="qbox">
+    Hotové položky se sbalí na jeden řádek nahoře skupiny (nebo dole — dej vědět, co dává větší smysl) a jde
+    je jednotlivě vrátit zpátky do stavu Otevřeno. Otevřené/čekající zůstávají plně rozbalené, protože ty
+    potřebuješ vidět pořád.
+  </div>
+
+</div>
