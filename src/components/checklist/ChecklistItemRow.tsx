@@ -48,7 +48,8 @@ export function ChecklistItemRow({ item, template }: { item: ChecklistItem; temp
 
   const trackingTag = item.trackingVkrId && (
     <button
-      onClick={() => {
+      onClick={(e) => {
+        e.stopPropagation();
         const el = document.getElementById(`vkr-${item.trackingVkrId}`);
         el?.scrollIntoView({ behavior: "smooth", block: "center" });
         el?.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 900, iterations: 2 });
@@ -70,15 +71,6 @@ export function ChecklistItemRow({ item, template }: { item: ChecklistItem; temp
     </button>
   );
 
-  const expandToggle = (
-    <button
-      onClick={() => setExpanded((e) => !e)}
-      aria-expanded={expanded}
-      className="text-[13px] text-muted-foreground"
-    >
-      {expanded ? "▾" : "▸"}
-    </button>
-  );
 
   if (state === "resolved") {
     return (
@@ -122,11 +114,21 @@ export function ChecklistItemRow({ item, template }: { item: ChecklistItem; temp
       <div className="flex gap-2.5">
         <StateDot state={state} />
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            {expandToggle}
-            <button onClick={() => setExpanded((e) => !e)} className="text-[13.5px] font-semibold">
-              {template.title}
-            </button>
+          <div
+            onClick={() => setExpanded((e) => !e)}
+            role="button"
+            tabIndex={0}
+            aria-expanded={expanded}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setExpanded((exp) => !exp);
+              }
+            }}
+            className="-mx-2 flex flex-wrap items-center gap-2 rounded-md px-2 py-1 cursor-pointer hover:bg-muted"
+          >
+            <span className="text-[13px] text-muted-foreground">{expanded ? "▾" : "▸"}</span>
+            <span className="text-[13.5px] font-semibold">{template.title}</span>
             {state === "waiting_contact" && (
               <span className="rounded-full bg-warning/15 px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-wide text-warning-foreground">
                 čeká na kontakt · {detail === "needs_confirm" ? "řešení k potvrzení" : "řešení chybí"}

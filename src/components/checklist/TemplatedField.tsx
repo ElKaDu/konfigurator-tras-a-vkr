@@ -40,13 +40,13 @@ export function TemplatedField({
       <span className="w-14 shrink-0 pt-1.5 text-[10.5px] font-bold uppercase tracking-wide text-muted-foreground sm:pt-0">
         {label}
       </span>
-      <div className="flex max-w-md flex-1 flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         {options.length > 0 && !freeText ? (
           <select
             value={value ?? ""}
             onChange={(e) => handleSelectChange(e.target.value)}
             aria-label={label}
-            className="min-w-0 flex-1 rounded-md border border-input bg-transparent px-2.5 py-1.5 text-[12.5px]"
+            className="w-64 shrink-0 rounded-md border border-input bg-transparent px-2.5 py-1.5 text-[12.5px]"
           >
             <option value="">— nevybráno —</option>
             {options.map((opt) => (
@@ -60,14 +60,14 @@ export function TemplatedField({
             <option value={OTHER}>Jiné…</option>
           </select>
         ) : (
-          <div className="flex min-w-0 flex-1 items-center gap-1.5">
+          <div className="flex items-center gap-1.5">
             <input
               type="text"
               value={value ?? ""}
               onChange={(e) => onChange(e.target.value || undefined)}
               placeholder="Popiš vlastními slovy…"
               aria-label={label}
-              className="min-w-0 flex-1 rounded-md border border-input bg-transparent px-2.5 py-1.5 text-[12.5px]"
+              className="w-64 shrink-0 rounded-md border border-input bg-transparent px-2.5 py-1.5 text-[12.5px]"
             />
             {options.length > 0 && (
               <button
