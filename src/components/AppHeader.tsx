@@ -25,6 +25,7 @@ export function AppHeader({
         <NavLink to="/" active={current === "rules"}>Pravidla pro tracking</NavLink>
         <NavLink to="/soulad-s-trasou" active={current === "soulad"}>Soulad s trasou</NavLink>
         <NavLink to="/situace" active={current === "situace"}>Situace a závažnosti</NavLink>
+        <div className="mx-1.5 h-5 w-px bg-border" />
         <NavLink to="/checklist" active={current === "checklist"}>Checklist objednávky</NavLink>
       </nav>
       <span className="rounded-md bg-primary-soft px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-primary">

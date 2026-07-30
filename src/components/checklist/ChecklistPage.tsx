@@ -35,7 +35,7 @@ export function ChecklistPage() {
           <div className="mb-4 flex flex-wrap items-center gap-2">
             <h1 className="text-lg font-semibold">Objednávka #OP-2026-04471</h1>
             <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-[11px] font-semibold text-accent-foreground">
-              Objednávka · Vyhodnocení a kontrola
+              Krok 2 — Vyhodnocení a kontrola
             </span>
             <span className={statusPillClass(status.kind)}>{status.label}</span>
           </div>
