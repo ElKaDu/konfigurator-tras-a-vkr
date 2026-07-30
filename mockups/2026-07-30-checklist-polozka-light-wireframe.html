@@ -256,9 +256,23 @@
     </div>
   </div>
 
-  <div class="stagelabel">4 · Vyřešeno ručně — a jedna z nich má navíc založené sledování</div>
+  <div class="stagelabel">4 · Vyřešené se sbalí pryč od otevřených, jde je vrátit zpět</div>
   <div class="list">
     <div class="row">
+      <div class="titlewrap" style="width:100%;">
+        <div class="titleline">
+          <span class="title">Kontrola dokumentace k vývozu</span>
+          <span class="pill wait">otevřeno</span>
+        </div>
+        <div class="desc">— zbývající otevřená položka kategorie, zůstává nahoře</div>
+      </div>
+    </div>
+    <div class="row" style="background:var(--muted); border-radius:8px; margin:2px 0;">
+      <div class="titleline" style="cursor:pointer;">
+        <span style="font-size:12px; font-weight:700; color:var(--muted-foreground);">▸ Hotovo (3)</span>
+      </div>
+    </div>
+    <div class="row" style="padding-left:24px;">
       <div class="head">
         <div class="dot done"></div>
         <div class="titlewrap">
@@ -268,10 +282,11 @@
             <span class="pill done">vyřešeno</span>
           </div>
           <div class="desc">Nález: Obsahuje powerbanku / Li-ion baterii · Řešení: Zákazník položku vyndal</div>
+          <button class="ctxbtn" style="margin-top:3px;">↺ vrátit do otevřeného stavu</button>
         </div>
       </div>
     </div>
-    <div class="row">
+    <div class="row" style="padding-left:24px;">
       <div class="head">
         <div class="dot done"></div>
         <div class="titlewrap">
@@ -282,10 +297,11 @@
             <span class="tag">⏳ sleduje se</span>
           </div>
           <div class="desc">Nález: EORI chybí / neplatné · Řešení: Klient EORI doplní do zítřejšího odbavení</div>
+          <button class="ctxbtn" style="margin-top:3px;">↺ vrátit do otevřeného stavu</button>
         </div>
       </div>
     </div>
-    <div class="row">
+    <div class="row" style="padding-left:24px;">
       <div class="head">
         <div class="dot done"></div>
         <div class="titlewrap">
@@ -295,6 +311,7 @@
             <span class="pill done">vyřešeno</span>
           </div>
           <div class="desc">Nález: — (rovnou označeno v pořádku)</div>
+          <button class="ctxbtn" style="margin-top:3px;">↺ vrátit do otevřeného stavu</button>
         </div>
       </div>
     </div>
@@ -333,5 +350,81 @@
     Ikonka „🛈 kontext zásilky“ je teď samostatný prvek vedle názvu — vidíš rovnou, že jde kliknout,
     aniž bys musela zkoušet klikat na název. Stav a doplňkový štítek „sleduje se“ jsou na sobě nezávislé —
     i vyřešená položka může mít založenou věc k řešení, kterou jen sleduješ dál.
+  </div>
+
+  <div class="stagelabel">6 · Naplánovaný call — odkud se vzaly navázané položky</div>
+  <p style="font-size:12.5px; color:var(--muted-foreground); max-width:70ch; margin:0 0 12px;">
+    Žádný ruční výběr položek. Jakmile má aspoň jedna položka zatržený checkbox (podezření u nálezu
+    nebo potvrdit s klientem u řešení) a ještě není navázaná na žádný kontakt, objeví se v náhledu
+    při zakládání callu — a jakmile call existuje, další takové položky se k němu přidají samy.
+  </p>
+
+  <div class="list">
+    <div class="row">
+      <div class="titlewrap" style="width:100%;">
+        <div class="titleline"><span class="title">Zakládání callu — dialog</span></div>
+        <div class="ctx" style="margin-top:8px;">
+          <div class="k">Typ</div>
+          <div style="font-size:12.5px; margin:3px 0 8px;">Zákazník</div>
+          <div class="k">Termín</div>
+          <div style="font-size:12.5px; margin:3px 0 8px;">31. 7. 2026, 10:00</div>
+          <div class="k">Tento call se týká 3 položek — připojily se samy</div>
+          <div style="margin-top:6px; display:flex; flex-direction:column; gap:5px;">
+            <div style="font-size:12px; display:flex; justify-content:space-between; gap:8px;">
+              <span>Kontrola nepřípustného zboží dle přepravce</span>
+              <span class="tag" style="border-style:solid; background:var(--warning-soft); color:var(--warning-foreground); border-color:var(--warning);">nález · podezření</span>
+            </div>
+            <div style="font-size:12px; display:flex; justify-content:space-between; gap:8px;">
+              <span>Kontrola hodnoty vůči odpovědnosti</span>
+              <span class="tag" style="border-style:solid; background:var(--warning-soft); color:var(--warning-foreground); border-color:var(--warning);">řešení · potvrdit s klientem</span>
+            </div>
+            <div style="font-size:12px; display:flex; justify-content:space-between; gap:8px;">
+              <span>Kontrola splnění podmínek pro pojištění</span>
+              <span class="tag" style="border-style:solid; background:var(--warning-soft); color:var(--warning-foreground); border-color:var(--warning);">nález · podezření</span>
+            </div>
+          </div>
+          <p style="font-size:11px; color:var(--muted-foreground); margin:8px 0 0;">
+            Seznam je jen náhled, nejde v něm nic odškrtnout — co se má na call probrat, se řeší
+            checkboxem přímo u položky, ne tady.
+          </p>
+        </div>
+        <div class="actions" style="margin-top:10px;">
+          <button class="btn">Zrušit</button>
+          <button class="btn primary">Naplánovat</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stagelabel" style="margin-top:22px;">Po naplánování — widget nahoře na stránce</div>
+  <div class="list">
+    <div class="row">
+      <div class="titlewrap" style="width:100%;">
+        <div style="display:flex; align-items:center; gap:10px; border:1px solid var(--info); background:var(--info-soft); border-radius:9px; padding:10px 13px;">
+          <span style="font-size:17px;">📞</span>
+          <div>
+            <div style="font-size:12.5px; font-weight:700; color:var(--info-foreground);">Kontakt naplánován — 31. 7. 10:00</div>
+            <div style="font-size:11px; color:var(--muted-foreground);">Zákazník · 3 položky: Nepřípustné zboží, Hodnota vůči odpovědnosti, Pojistitelnost</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="titlewrap" style="width:100%;">
+        <div class="titleline">
+          <span class="title">Kontrola nepřípustného zboží dle přepravce</span>
+          <span class="pill wait">čeká na kontakt · řešení chybí</span>
+        </div>
+        <p style="font-size:11px; color:var(--muted-foreground); margin:3px 0 0;">
+          Navázáno na kontakt 31. 7. 10:00 — protože měla zatržené „podezření“ u nálezu.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="qbox">
+    Čtvrtá položka („Kontrola EORI vývozce“) na tomhle callu není, protože nemá zatržený žádný ze
+    dvou checkboxů — i kdyby měla vyplněné pole Nález nebo Řešení. Připojení ke callu vždy řídí
+    jen ty dva checkboxy, nikdy vyplněnost polí samotná.
   </div>
 </div>

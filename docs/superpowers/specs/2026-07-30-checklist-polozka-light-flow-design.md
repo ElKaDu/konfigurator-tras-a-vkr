@@ -68,6 +68,7 @@ export interface ChecklistItem {
 
   kontaktId?: string;           // vyplněno, dokud je položka navázaná na (aktivní) kontakt
   trackingVkrId?: string;       // nezávislé na stavu — položka může mít sledování i po vyřešení
+  noteValue?: string;           // volná poznámka, viz sekce „Poznámka na položce" níže
 }
 ```
 
@@ -91,11 +92,10 @@ export function waitingContactDetail(item: ChecklistItem): "missing_resolution" 
 `waitingContactDetail` řídí doplňkový popisek pilulky: "čeká na kontakt · řešení chybí" vs.
 "čeká na kontakt · řešení k potvrzení". Volá se, jen když `deriveItemState(item) === "waiting_contact"`.
 
-`isResolved`, `categoryCounts`, `computeChecklistStatus` a `findingsSummary` v `derived.ts` se
-přepočítají na `deriveItemState(item) === "resolved"` / `"waiting_contact"` místo dřívějšího
-porovnání s `resolved_ok`/`resolved_found`. `findingsSummary` nově filtruje podle
-`item.findingValue` existuje (bez ohledu na stav), protože nález může existovat i u nevyřešené
-položky.
+`isResolved`, `categoryCounts` a `computeChecklistStatus` v `derived.ts` se přepočítají na
+`deriveItemState(item) === "resolved"` / `"waiting_contact"` místo dřívějšího porovnání s
+`resolved_ok`/`resolved_found`. Dosavadní `findingsSummary` se ruší — nahrazuje ji obecnější
+`noteworthyItems`, viz sekce „Přehled callů a poznámek/nálezů" níže.
 
 ### `ChecklistItemTemplate` — nová pole
 
@@ -165,13 +165,64 @@ Nahrazuje se dnešní `ItemResolutionForm` (dvoumódový modální formulář s 
 sdílená komponenta pro jeden řádek (např. `TemplatedSelect`), použitá dvakrát v `ChecklistItemRow`
 (pro nález i řešení) — vyhne se to duplicitě mezi oběma řádky.
 
+## Vrácení vyřešené položky zpět
+
+Vyřešená položka (souhrnný řádek) dostává malý odkaz **"↺ vrátit do otevřeného stavu"**. Akce jen
+nastaví `manuallyResolved: false` a smaže `resolvedAt`/`resolvedBy` — `findingValue`, `resolutionValue`
+i oba checkboxy zůstávají beze změny, takže se nic nemaže, jen se odemkne k další editaci. Stav se
+pak znovu odvodí přes `deriveItemState` (vrátí se buď do `open`, nebo rovnou do `waiting_contact`,
+pokud byl některý checkbox zatržený už předtím).
+
+## Hotové položky se sbalují pryč
+
+V `ItemsList` se v rámci každé kategorie položky řadí do dvou skupin: nevyřešené (`open` +
+`waiting_contact`, v pořadí podle `template.order` jako dnes) nahoře, a pod nimi jedna sbalitelná
+sekce **"▸ Hotovo (N)"** se všemi `resolved` položkami té kategorie — sbalená ve výchozím stavu.
+Rozbalením se ukážou souhrnné řádky včetně odkazu na vrácení zpět. Díky tomu hlavní pohled na
+kategorii vždy ukazuje jen to, co ještě zbývá udělat; `categoryCounts` (Hotovo N/Celkem) se nemění,
+jen se podle něj řídí štítek u sbalovací sekce.
+
+## Navigace a nadpis "Krok 2"
+
+- `AppHeader.tsx`: mezi `NavLink` pro "Situace a závažnosti" a "Checklist objednávky" přibývá stejný
+  vizuální oddělovač, jaký je dnes mezi logem a navigací (`<div className="h-5 w-px bg-border" />`).
+  Vizuálně tak oddělí checklist (jiný nástroj, práce na konkrétní objednávce) od trojice
+  Pravidla/Soulad/Situace (engine pravidel a tracking).
+- `ChecklistPage.tsx`: badge vedle `<h1>` se mění z "Objednávka · Vyhodnocení a kontrola" na
+  explicitní **"Krok 2 — Vyhodnocení a kontrola"**, aby bylo hned v nadpisu jasné, o který krok jde
+  (dnes je "Krok 2" schované jen jako malý label u progress baru níž na stránce).
+
+## Poznámka na položce
+
+`ChecklistItem` dostává zpět pole `noteValue?: string` — volný text, autosave, bez tlačítka Uložit,
+viditelný přímo v `ChecklistItemRow` pod řádky Nález/Řešení. Je to jediné úložiště té poznámky: když
+se stejná hodnota zobrazí i v kontextu callu (viz níže), jde o čtení téhož pole, ne o kopii — úprava
+na jednom místě se projeví všude.
+
+`Kontakt.note` zůstává samostatné pole (zápis o samotném callu — agenda i výsledek), beze změny
+oproti dnešku: editovatelné kdykoliv, i po tom, co `status` přejde na `"done"`.
+
+## Přehled callů a poznámek/nálezů (rozšíření `ShrnutiNalezuPanel`)
+
+`ShrnutiNalezuPanel` se rozšiřuje o dvě části nad sebou:
+
+- **Cally** — seznam všech `Kontakt` záznamů (naplánované i proběhlé, ne jen nejbližší jako dnešní
+  `KontaktWidget`), each s typem, časem, stavem (naplánován/proběhl) a přímo editovatelným `note`.
+- **Položky s nálezem nebo poznámkou** — nahrazuje dnešní `findingsSummary` (která bere jen
+  `state === "resolved_found"`) obecnějším `noteworthyItems(items)`, jenž vrací všechny položky, kde
+  `item.findingValue` nebo `item.noteValue` není prázdné, bez ohledu na `deriveItemState`. U každé se
+  zobrazí nález (pokud je) a poznámka (pokud je).
+
+Nadpis panelu se zkracuje z "Shrnutí nálezů" na **"Shrnutí"**, ať odpovídá širšímu obsahu. Zůstává to
+jeden panel v levém sloupci — žádný nový panel nepřibývá.
+
 ## Co se nemění
 
 - `ChecklistVkr`, `checklistVkrStore` (`create`/`resolve`) — beze změny, jen `item.vkrId` →
   `item.trackingVkrId` v poli, na které se váže.
-- `VkrPanel`, `ShrnutiNalezuPanel`, `CategoryNav` — čtou přes `derived.ts` helpery, takže jim stačí,
-  že `deriveItemState`/`findingsSummary` vrací stejný tvar dat jako dřív; drobné úpravy jen tam, kde
-  dnes přímo porovnávají `item.state === "resolved_found"` apod.
+- `VkrPanel`, `CategoryNav` — čtou přes `derived.ts` helpery, takže jim stačí, že `deriveItemState`
+  vrací stejný tvar dat jako dřív; drobné úpravy jen tam, kde dnes přímo porovnávají
+  `item.state === "resolved_found"` apod. (`ShrnutiNalezuPanel` se mění, viz sekce výše.)
 - `Krok1Mock`, `KontaktWidget` (kromě zjednodušení dialogu popsaného výše) — beze změny.
 
 ## Ověření
