@@ -1,11 +1,33 @@
-export type ChecklistCategory = "obsah" | "hodnota" | "dokumentace";
+export type ChecklistCategory =
+  | "obsah"
+  | "zabaleni"
+  | "hodnota"
+  | "dokumentace"
+  | "adresy"
+  | "doba_doruceni"
+  | "financni"
+  | "celkove";
 
-export const CHECKLIST_CATEGORY_ORDER: ChecklistCategory[] = ["obsah", "hodnota", "dokumentace"];
+export const CHECKLIST_CATEGORY_ORDER: ChecklistCategory[] = [
+  "obsah",
+  "zabaleni",
+  "hodnota",
+  "dokumentace",
+  "adresy",
+  "doba_doruceni",
+  "financni",
+  "celkove",
+];
 
 export const CHECKLIST_CATEGORY_LABELS: Record<ChecklistCategory, string> = {
   obsah: "Obsah zásilky — přípustnost",
+  zabaleni: "Obsah zásilky — vhodné zabalení",
   hodnota: "Hodnota, odpovědnost, pojištění",
   dokumentace: "Dokumentace",
+  adresy: "Adresy a kontaktní údaje",
+  doba_doruceni: "Doba doručení a vyzvednutí",
+  financni: "Finanční hodnoty",
+  celkove: "Celkové zhodnocení",
 };
 
 /** Tři stavy — nikdy se neukládá ručně, vždy se odvozuje přes deriveItemState() v derived.ts. */
@@ -27,8 +49,6 @@ export interface ChecklistItemTemplate {
   /** Prázdné pole = rovnou textové pole místo dropdownu. Dropdown vždy interně přidává "Jiné…". */
   findingOptions: string[];
   resolutionOptions: string[];
-  /** Řídí, jestli se u položky (jakmile má vyplněné Řešení) nabízí "Založit věc k řešení". */
-  canTrackForMonitoring: boolean;
 }
 
 /** Instance kontroly na konkrétní objednávce. */
