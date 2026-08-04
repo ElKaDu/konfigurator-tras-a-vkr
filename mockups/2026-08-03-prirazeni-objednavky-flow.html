@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>prirazeni_objednavky_flow</title>
+<style>
+  :root{
+    --bg:#f2f0ea; --paper:#faf9f5; --grid-line:#dcd8cc;
+    --ink:#23241f; --ink-muted:#63645b; --rule:#c9c5b6;
+    --accent:#b2551b; --blue:#1f5c8c; --green:#2e6b4f; --gold:#8a6d1f; --red:#9b2f2f;
+    --n-dec:#e9f0f6; --n-dec-b:#1f5c8c;
+    --n-adr:#f6eee4; --n-adr-b:#b2551b;
+    --n-ok:#e4efe8;  --n-ok-b:#2e6b4f;
+    --n-urg:#f7f1dd; --n-urg-b:#8a6d1f;
+    --n-esc:#f7e6e2; --n-esc-b:#9b2f2f;
+    --n-neutral:#eeece4; --n-neutral-b:#63645b;
+    --wire:#7d7a6e;
+    --zoneA-bg:rgba(31,92,140,.07); --zoneA-br:rgba(31,92,140,.45); --zoneA-tx:#1f5c8c;
+    --zoneB-bg:rgba(178,85,27,.07); --zoneB-br:rgba(178,85,27,.45); --zoneB-tx:#b2551b;
+  }
+  :root[data-theme="dark"]{
+    --bg:#14161a; --paper:#1b1e23; --grid-line:#2a2e35;
+    --ink:#e9e7dd; --ink-muted:#9a9c95; --rule:#3a3d44;
+    --accent:#e08a4e; --blue:#6fb2e6; --green:#5cb98d; --gold:#d4ac3f; --red:#e08585;
+    --n-dec:#1a2733; --n-dec-b:#6fb2e6;
+    --n-adr:#2c2118; --n-adr-b:#e08a4e;
+    --n-ok:#17281f;  --n-ok-b:#5cb98d;
+    --n-urg:#2a2415; --n-urg-b:#d4ac3f;
+    --n-esc:#33201f; --n-esc-b:#e08585;
+    --n-neutral:#22252b; --n-neutral-b:#9a9c95;
+    --wire:#7c8089;
+    --zoneA-bg:rgba(111,178,230,.09); --zoneA-br:rgba(111,178,230,.4); --zoneA-tx:#6fb2e6;
+    --zoneB-bg:rgba(224,138,78,.09); --zoneB-br:rgba(224,138,78,.4); --zoneB-tx:#e08a4e;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#14161a; --paper:#1b1e23; --grid-line:#2a2e35;
+      --ink:#e9e7dd; --ink-muted:#9a9c95; --rule:#3a3d44;
+      --accent:#e08a4e; --blue:#6fb2e6; --green:#5cb98d; --gold:#d4ac3f; --red:#e08585;
+      --n-dec:#1a2733; --n-dec-b:#6fb2e6;
+      --n-adr:#2c2118; --n-adr-b:#e08a4e;
+      --n-ok:#17281f;  --n-ok-b:#5cb98d;
+      --n-urg:#2a2415; --n-urg-b:#d4ac3f;
+      --n-esc:#33201f; --n-esc-b:#e08585;
+      --n-neutral:#22252b; --n-neutral-b:#9a9c95;
+      --wire:#7c8089;
+      --zoneA-bg:rgba(111,178,230,.09); --zoneA-br:rgba(111,178,230,.4); --zoneA-tx:#6fb2e6;
+      --zoneB-bg:rgba(224,138,78,.09); --zoneB-br:rgba(224,138,78,.4); --zoneB-tx:#e08a4e;
+    }
+  }
+  *{ box-sizing:border-box; }
+  body{
+    background:
+      linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0/100% 28px,
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0/28px 100%,
+      var(--bg);
+    background-attachment:local; color:var(--ink); margin:0;
+    font-family: ui-monospace,"SF Mono","JetBrains Mono",Consolas,monospace;
+  }
+  .wrap{ max-width:1200px; margin:0 auto; padding:40px 22px 56px; }
+  h1{
+    font-family:-apple-system,"Helvetica Neue",Arial,sans-serif; font-weight:700;
+    font-size:clamp(24px,3.6vw,32px); letter-spacing:-.01em; line-height:1.15;
+    margin:0 0 22px; text-wrap:balance;
+  }
+  .panel{ background:var(--paper); border:1px solid var(--rule); padding:18px 20px; margin-bottom:22px; }
+  .panel-label{
+    font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-muted);
+    margin:0 0 14px; border-bottom:1px dashed var(--rule); padding-bottom:9px;
+  }
+  .legend{ display:flex; flex-wrap:wrap; gap:10px 22px; font-family:-apple-system,sans-serif; font-size:12px; }
+  .legend span{ display:flex; align-items:center; gap:7px; color:var(--ink-muted); }
+  .swatch{ width:16px; height:12px; border:1.5px solid; display:inline-block; flex:none; }
+  .sw-dec{ background:var(--n-dec); border-color:var(--n-dec-b); }
+  .sw-adr{ background:var(--n-adr); border-color:var(--n-adr-b); }
+  .sw-urg{ background:var(--n-urg); border-color:var(--n-urg-b); }
+  .sw-esc{ background:var(--n-esc); border-color:var(--n-esc-b); }
+  .sw-ok{ background:var(--n-ok); border-color:var(--n-ok-b); }
+  .sw-ka{ background:var(--zoneA-bg); border-color:var(--zoneA-br); border-style:dashed; }
+  .sw-kb{ background:var(--zoneB-bg); border-color:var(--zoneB-br); border-style:dashed; }
+
+  .scroller{ overflow-x:auto; background:var(--paper); border:1px solid var(--rule); padding:18px; }
+  .canvas{ position:relative; width:1050px; height:1730px; }
+  .canvas svg{ position:absolute; inset:0; width:1050px; height:1730px; z-index:1; }
+
+  .zone{
+    position:absolute; z-index:0; border:1.5px dashed; border-radius:4px;
+    font-family:-apple-system,"Helvetica Neue",Arial,sans-serif;
+  }
+  .zone b{
+    position:absolute; top:9px; left:14px; font-size:10px; letter-spacing:.1em;
+    text-transform:uppercase; font-weight:700;
+  }
+  .zone-a{ background:var(--zoneA-bg); border-color:var(--zoneA-br); }
+  .zone-a b{ color:var(--zoneA-tx); }
+
+  .node{
+    position:absolute; z-index:2; border:1.5px solid; padding:10px 12px;
+    font-family:-apple-system,"Helvetica Neue",Arial,sans-serif;
+    display:flex; flex-direction:column; justify-content:center; gap:4px;
+  }
+  .node b{ font-size:13px; font-weight:700; line-height:1.3; }
+  .node small{ font-size:10.5px; line-height:1.45; color:var(--ink-muted); display:block; }
+  .n-start{ background:var(--n-neutral); border-color:var(--n-neutral-b); }
+  .n-dec{ background:var(--n-dec); border-color:var(--n-dec-b); }
+  .n-adr{ background:var(--n-adr); border-color:var(--n-adr-b); }
+  .n-urg{ background:var(--n-urg); border-color:var(--n-urg-b); }
+  .n-esc{ background:var(--n-esc); border-color:var(--n-esc-b); }
+  .n-ok{ background:var(--n-ok); border-color:var(--n-ok-b); }
+  .n-ok b{ color:var(--green); letter-spacing:.04em; }
+  .n-esc b{ color:var(--red); letter-spacing:.03em; }
+  .n-urg b{ color:var(--gold); letter-spacing:.03em; }
+
+  .badge{
+    display:inline-block; font-size:8.5px; letter-spacing:.07em; text-transform:uppercase;
+    border:1px solid currentColor; padding:1px 4px; border-radius:2px; margin-top:2px;
+    align-self:flex-start; font-weight:700;
+  }
+  .b-iter{ color:var(--blue); }
+  .b-open{ color:var(--red); }
+
+  .note{
+    position:absolute; z-index:2; background:var(--paper); border:1px dashed var(--rule);
+    padding:12px 14px; font-family:-apple-system,"Helvetica Neue",Arial,sans-serif;
+  }
+  .note h4{
+    margin:0 0 8px; font-size:10.5px; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--accent); font-weight:700;
+  }
+  .note ul{ margin:0; padding-left:15px; }
+  .note li{ font-size:11px; line-height:1.55; margin-bottom:5px; color:var(--ink-muted); }
+  .note li b{ color:var(--ink); font-weight:600; }
+  .note p{ margin:6px 0 0; font-size:10.5px; line-height:1.5; color:var(--ink-muted); font-style:italic; }
+
+  .note-b{ background:var(--zoneB-bg); border:1.5px dashed var(--zoneB-br); }
+  .note-b h4{ color:var(--zoneB-tx); }
+  .note-b li, .note-b p{ color:var(--ink); }
+
+  .elbl{ font-family:-apple-system,sans-serif; font-size:10.5px; font-weight:600; fill:var(--ink-muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Přiřazení objednávky — komu vznikne věc k řešení a co se stane, když si ji nikdo nevezme</h1>
+
+  <div class="panel">
+    <p class="panel-label">legenda</p>
+    <div class="legend">
+      <span><i class="swatch sw-dec"></i> rozhodnutí</span>
+      <span><i class="swatch sw-adr"></i> určení adresáta</span>
+      <span><i class="swatch sw-urg"></i> urgence — pořád jen adresátovi</span>
+      <span><i class="swatch sw-esc"></i> zobrazení všem</span>
+      <span><i class="swatch sw-ok"></i> koncový stav</span>
+      <span><i class="swatch sw-ka"></i> kategorie A — nepřítomnost celý den</span>
+      <span><i class="swatch sw-kb"></i> kategorie B — dnes teprve dorazí</span>
+    </div>
+  </div>
+
+  <div class="scroller">
+  <div class="canvas">
+
+    <div class="zone zone-a" style="left:745px; top:440px; width:300px; height:290px;">
+      <b>Kategorie A · dnes nepřijde</b>
+    </div>
+
+    <svg viewBox="0 0 1050 1730" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--wire)"/>
+        </marker>
+      </defs>
+      <g fill="none" stroke="var(--wire)" stroke-width="1.6" marker-end="url(#ah)">
+        <path d="M 140,100 V 140"/>
+        <path d="M 260,190 H 330 V 263 H 390"/>
+        <path d="M 140,240 V 290"/>
+        <path d="M 260,336 H 330 V 263 H 390"/>
+        <path d="M 140,382 V 410 H 495 A 15,15 0 0 1 525,410 H 700 V 335 H 770"/>
+        <path d="M 510,301 V 450"/>
+        <path d="M 630,500 H 770"/>
+        <path d="M 990,470 V 390"/>
+        <path d="M 900,580 V 630"/>
+        <path d="M 770,665 H 700 V 730 H 510 V 790"/>
+        <path d="M 510,550 V 790"/>
+        <path d="M 510,854 V 900"/>
+        <path d="M 630,944 H 770"/>
+        <path d="M 510,988 V 1030"/>
+        <path d="M 510,1126 V 1172"/>
+        <path d="M 630,1216 H 770"/>
+        <path d="M 510,1260 V 1302"/>
+        <path d="M 510,1406 V 1452"/>
+        <path d="M 630,1496 H 770"/>
+        <path d="M 510,1540 V 1582"/>
+      </g>
+      <path d="M 260,678 H 505" fill="none" stroke="var(--zoneB-br)" stroke-width="1.5" stroke-dasharray="5 4"/>
+      <circle cx="510" cy="678" r="4" fill="var(--zoneB-br)"/>
+
+      <text class="elbl" x="285" y="182">Ano</text>
+      <text class="elbl" x="150" y="272">Ne</text>
+      <text class="elbl" x="285" y="330">Ano</text>
+      <text class="elbl" x="150" y="404">Ne</text>
+      <text class="elbl" x="665" y="494">Ne</text>
+      <text class="elbl" x="999" y="440">Ne</text>
+      <text class="elbl" x="909" y="612">Ano</text>
+      <text class="elbl" x="520" y="582">Ano</text>
+      <text class="elbl" x="686" y="938">Ano</text>
+      <text class="elbl" x="520" y="1015">Ne</text>
+      <text class="elbl" x="686" y="1210">Ano</text>
+      <text class="elbl" x="520" y="1288">Ne</text>
+      <text class="elbl" x="686" y="1490">Ano</text>
+      <text class="elbl" x="520" y="1568">Ne</text>
+    </svg>
+
+    <div class="node n-start" style="left:20px; top:40px; width:240px; height:60px;">
+      <b>Přišla nová objednávka</b>
+    </div>
+
+    <div class="node n-dec" style="left:20px; top:140px; width:240px; height:100px;">
+      <b>Vyžaduje objednávka expertizu, kterou má nějaký operátor?</b>
+      <span class="badge b-iter">až 2. iterace</span>
+    </div>
+
+    <div class="node n-dec" style="left:20px; top:290px; width:240px; height:92px;">
+      <b>Má zákazník vlastníka?</b>
+      <small>jednoho nebo víc</small>
+    </div>
+
+    <div class="node n-adr" style="left:390px; top:225px; width:240px; height:76px;">
+      <b>Množina adresátů určena</b>
+      <small>vlastníci zákazníka — později specialista, který má přednost</small>
+    </div>
+
+    <div class="node n-esc" style="left:770px; top:280px; width:260px; height:110px;">
+      <b>VYSKOČÍ VŠEM</b>
+      <small>žádný cílený adresát — volný zákazník, nebo nepřítomní bez náhradníka. Bez čekání na limit.</small>
+    </div>
+
+    <div class="node n-dec" style="left:390px; top:450px; width:240px; height:100px;">
+      <b>Přijde některý z nich ještě dnes?</b>
+      <small>podle rozvrhu — pracovní doba i zapsaná nepřítomnost</small>
+    </div>
+
+    <div class="node n-dec" style="left:770px; top:470px; width:260px; height:110px;">
+      <b>Má některý z nepřítomných náhradníka?</b>
+      <small>u specialisty náhradníka s touto expertizou — zastupování se neřetězí</small>
+    </div>
+
+    <div class="node n-adr" style="left:770px; top:630px; width:260px; height:70px;">
+      <b>Adresát = náhradník</b>
+    </div>
+
+    <div class="node n-adr" style="left:390px; top:790px; width:240px; height:64px;">
+      <b>VkŘ adresátovi</b>
+    </div>
+
+    <div class="node n-dec" style="left:390px; top:900px; width:240px; height:88px;">
+      <b>Přiřadil si ji do limitu?</b>
+    </div>
+
+    <div class="node n-ok" style="left:770px; top:912px; width:260px; height:64px;">
+      <b>PŘIŘAZENO</b>
+    </div>
+
+    <div class="node n-urg" style="left:390px; top:1030px; width:240px; height:96px;">
+      <b>URGENCE adresátovi</b>
+      <small>táž VkŘ, vyšší důraz — pořád ji vidí jen on</small>
+    </div>
+
+    <div class="node n-dec" style="left:390px; top:1172px; width:240px; height:88px;">
+      <b>Přiřadil si ji po urgenci?</b>
+    </div>
+
+    <div class="node n-ok" style="left:770px; top:1184px; width:260px; height:64px;">
+      <b>PŘIŘAZENO</b>
+    </div>
+
+    <div class="node n-esc" style="left:390px; top:1302px; width:240px; height:104px;">
+      <b>VYSKOČÍ VŠEM</b>
+      <small>nový typ VkŘ s označením eskalace — vidí ji i operátoři, kteří nejsou vlastník ani specialista</small>
+    </div>
+
+    <div class="node n-dec" style="left:390px; top:1452px; width:240px; height:88px;">
+      <b>Vezme si ji někdo?</b>
+    </div>
+
+    <div class="node n-ok" style="left:770px; top:1464px; width:260px; height:64px;">
+      <b>PŘIŘAZENO</b>
+    </div>
+
+    <div class="node n-esc" style="left:390px; top:1582px; width:240px; height:104px;">
+      <b>URGENCE SE OPAKUJE VŠEM</b>
+      <small>po dalším intervalu znovu, dokud si ji někdo nevezme</small>
+      <span class="badge b-open">k rozhodnutí</span>
+    </div>
+
+    <div class="note" style="left:20px; top:440px; width:240px;">
+      <h4>Limit pro přiřazení</h4>
+      <ul>
+        <li><b>2 hodiny</b> od vytvoření objednávky</li>
+        <li>objednávka vytvořená <b>do 16:00</b> se musí přiřadit tentýž den</li>
+        <li><b>45 minut</b> před časem vyzvednutí</li>
+      </ul>
+      <p>Stačí, aby platil jeden — použije se ten, který nastane dřív. Počítá se v pracovní době 8:00–17:30.</p>
+    </div>
+
+    <div class="note note-b" style="left:20px; top:650px; width:240px;">
+      <h4>Kategorie B · dnes teprve dorazí</h4>
+      <ul>
+        <li>vlastník má dnes směnu, jen ještě nezačala</li>
+        <li><b>náhradník se nezapojuje</b> — VkŘ zůstává vlastníkovi a čeká na něj</li>
+        <li>časovače mu běží od vzniku objednávky, takže když nedorazí včas, objednávka vyskočí
+          <b>všem</b> — ne náhradníkovi</li>
+        <li>platební metodu mezitím vyřeší kdokoli, aniž by si objednávku přiřadil</li>
+      </ul>
+    </div>
+
+    <div class="note" style="left:20px; top:935px; width:240px;">
+      <h4>Náhradník</h4>
+      <ul>
+        <li>dosazuje se, až když by množina adresátů zůstala <b>prázdná</b> — přítomný druhý vlastník
+          má přednost</li>
+        <li>dědí zákazníky, <b>nedědí expertizy</b></li>
+        <li>hledá se jen <b>jedna úroveň</b>, zastupování se neřetězí</li>
+      </ul>
+    </div>
+
+    <div class="note" style="left:20px; top:1130px; width:240px;">
+      <h4>Urgence</h4>
+      <ul>
+        <li>není nová VkŘ — je to <b>vyšší stav té stávající</b></li>
+        <li>přichází s pevným předstihem před každým spouštěčem</li>
+      </ul>
+      <p>Zadání: „…&nbsp;a i přes urgence si objednávku nikdo nepřiřadí, tak pak by taková objednávka vyskočila všem."</p>
+    </div>
+
+    <div class="note" style="left:20px; top:1400px; width:240px;">
+      <h4>Co zbývá rozhodnout</h4>
+      <ul>
+        <li>kdy přesně přijde urgence</li>
+        <li>jestli se eskalace všem opravdu <b>opakuje</b>, a v jakém intervalu</li>
+        <li>objednávka, jejíž operátor onemocní až <b>po</b> přiřazení</li>
+      </ul>
+    </div>
+
+  </div>
+  </div>
+
+</div>
+</body>
+</html>
