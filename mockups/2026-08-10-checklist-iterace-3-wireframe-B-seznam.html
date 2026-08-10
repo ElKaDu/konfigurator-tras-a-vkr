@@ -515,7 +515,7 @@ const S={
   edit:{},       /* id -> rozbalený picker */
   filter:'vse',  /* vse | open | agenda */
   group:'stav',  /* stav | tema | kat */
-  notes:'Zákazník volá z auta, mluvit stručně.\nDrone je dárek — na termín 24. 12. si potrpí.',
+  notes:'',
   area:null,
   sim:{mimoEU:true, pojisteno:false, clo:true, pref:true}
 };
@@ -807,7 +807,7 @@ function colCall(L,agenda){
       <div><b>Hovor se zákazníkem — zítra 10:00</b>
         <div style="font-size:11px;color:var(--mut)">Jan Novák · +420 777 123 456 · ${open.length} bodů k probrání</div></div>
       <button class="lnk">přeplánovat</button></div>
-    <div class="col-b" id="cbCall">${body||'<div class="colempty">Zatím nic k hovoru — navěsíš položku tlačítkem „+ na agendu“ ve 2. sloupci.</div>'}</div>
+    <div class="col-b" id="cbCall">${body||'<div class="colempty">Zatím nic k hovoru. Jakmile u položky vybereš volbu, která potřebuje zákazníka, objeví se tu jako bod agendy — a půjde si k němu psát poznámky.</div>'}</div>
     <div class="notespanel">
       <div class="nh">Poznámky k zásilce</div>
       <textarea id="notesArea" placeholder="Volné poznámky operátora — co zaznělo, na co nezapomenout…">${esc(S.notes)}</textarea>
@@ -920,20 +920,6 @@ function measure(){
 }
 addEventListener('resize',measure);
 
-/* ═══════════════ VÝCHOZÍ STAV UKÁZKY ═══════════════ */
-[['znam',0],['podm',2],['dg',3],['dok',2],['clenicil',4],['vnejsi',0],['osklivy',1],
- ['pojodp',0],['faktura',3],['stat',1],['tel',3],['priplatek',3],['hodobs',3],['objem',3],['psc',2]
-].forEach(([id,i])=>{
-  if(!BY[id]) return;
-  S.sel[id]=i;
-  const st=BY[id].o[i][1];
-  if(CALLST.includes(st)) S.agenda[id]=1;
-});
-S.ticked['hodobs']=1;            /* už probráno v hovoru */
-S.wait['objem']=1;               /* čeká se na potvrzení doplatku */
-S.evid['hodobs']='telefonicky';
-S.note['clenicil']='Muster AG má vlastního brokera? Pokud ne, doklady navíc + zdržení ~2 dny.';
-S.note['pojodp']='Rozdíl 32 500 Kč. Nabídnout pojištění — cca 450 Kč, nebo si to vezme na sebe.';
-S.note['vnejsi']='Zeptat se, v čem je to zabalené a jestli je dron v originál krabici.';
+/* Checklist startuje prázdný — přesně tak, jak ho operátor otevře poprvé. */
 render();
 </script>
