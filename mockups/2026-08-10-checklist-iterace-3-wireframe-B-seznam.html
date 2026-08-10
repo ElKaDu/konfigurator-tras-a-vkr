@@ -56,7 +56,9 @@ textarea{font:inherit}
 .sum{display:flex;flex-direction:column;gap:6px;flex:1;min-width:330px;max-width:620px}
 .sumbar{display:flex;height:11px;border-radius:6px;overflow:hidden;background:var(--line2);gap:2px}
 .sumbar i{display:block;transition:width .35s cubic-bezier(.4,0,.2,1)}
-.sg-done{background:var(--ok)} .sg-call{background:var(--accent2)}
+/* „na hovoru“ = tlumená břidlicová, aby seděla na klidné řádky ve 2. sloupci;
+   „čeká na zákazníka“ = sytá modrá, stejně jako tam */
+.sg-done{background:var(--ok)} .sg-call{background:color-mix(in srgb,var(--cek) 42%,var(--faint))}
 .sg-wait{background:var(--cek)} .sg-loose{background:var(--res)}
 .sumleg{display:flex;flex-wrap:wrap;gap:3px 13px;font-size:11.5px;color:var(--mut)}
 .sumleg .tot{color:var(--faint);margin-left:2px}
@@ -64,7 +66,7 @@ textarea{font:inherit}
 .lg::before{content:"";width:9px;height:9px;border-radius:3px;background:var(--lc,var(--line2));flex:none}
 .lg b{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums}
 .lg.zero{opacity:.4}
-.lg-done{--lc:var(--ok)} .lg-call{--lc:var(--accent2)} .lg-wait{--lc:var(--cek)}
+.lg-done{--lc:var(--ok)} .lg-call{--lc:color-mix(in srgb,var(--cek) 42%,var(--faint))} .lg-wait{--lc:var(--cek)}
 .lg-loose{--lc:var(--res)} .lg-todo{--lc:var(--faint)}
 .lg.tot::before{display:none}
 .gstat{margin-left:auto;display:flex;align-items:center;gap:8px;font-weight:650;font-size:13px;
@@ -147,8 +149,12 @@ textarea{font:inherit}
 /* hotová položka — jeden řádek, barvu nese celá karta podle výsledného stavu */
 .card.done{background:color-mix(in srgb,var(--sc) 10%,var(--card));
   border-color:color-mix(in srgb,var(--sc) 32%,transparent);padding:0;overflow:hidden}
-.donerow{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:none;
+.rowwrap{display:flex;align-items:center;gap:9px;padding-right:11px}
+.donerow{display:flex;align-items:center;gap:8px;flex:1;min-width:0;width:100%;text-align:left;background:none;border:none;
   padding:7px 11px;cursor:pointer;flex-wrap:wrap;line-height:1.35}
+.rowact{flex:none;font-weight:600;white-space:nowrap;border-color:color-mix(in srgb,var(--pot) 55%,transparent);
+  color:var(--pot);background:var(--card)}
+.rowact:hover{border-color:var(--pot);background:color-mix(in srgb,var(--pot) 10%,var(--card))}
 .donerow:hover{background:color-mix(in srgb,var(--sc) 8%,transparent)}
 .donerow .dn{font-size:12.5px;font-weight:650;color:var(--ink)}
 .donerow .dv{font-size:12.5px;color:var(--mut)}
@@ -161,12 +167,13 @@ textarea{font:inherit}
 .card.done:hover .doneact,.card.done:focus-within .doneact,
 .card.onag:hover .doneact,.card.onag:focus-within .doneact,
 .card.orphaned:hover .doneact,.card.orphaned:focus-within .doneact{display:flex}
-/* na agendě hovoru — fialová 3. sloupce · čeká se na zákazníka — modrá */
-.card.onag{background:color-mix(in srgb,var(--accent2) 12%,var(--card));
-  border-color:color-mix(in srgb,var(--accent2) 34%,transparent);padding:0;overflow:hidden}
-.card.onag .donerow:hover{background:color-mix(in srgb,var(--accent2) 9%,transparent)}
-.card.onag.waiting{background:color-mix(in srgb,var(--cek) 12%,var(--card));
-  border-color:color-mix(in srgb,var(--cek) 34%,transparent)}
+/* na agendě hovoru — nenápadná šedomodrá, stejně tichá jako položky k posouzení */
+.card.onag{background:color-mix(in srgb,var(--cek) 7%,var(--well));
+  border-color:color-mix(in srgb,var(--cek) 24%,var(--line));padding:0;overflow:hidden}
+.card.onag .donerow:hover{background:color-mix(in srgb,var(--cek) 7%,transparent)}
+/* čeká se na zákazníka — o stupeň sytější modrá, ať jde odlišit od „ještě to probereme“ */
+.card.onag.waiting{background:color-mix(in srgb,var(--cek) 15%,var(--card));
+  border-color:color-mix(in srgb,var(--cek) 38%,transparent)}
 .card.onag.waiting .donerow:hover{background:color-mix(in srgb,var(--cek) 9%,transparent)}
 /* rozhodnuto, ale nikde se to neřeší — jediný stav, který má být vidět jako nedodělek */
 .card.orphaned{background:var(--card);border:1px dashed var(--res);padding:0;overflow:hidden}
@@ -719,20 +726,28 @@ function itemCard(it){
 
   /* ── rozhodnuto = jeden řádek. Výplň říká, kde položka je; ikona, v jakém je stavu. ── */
   const i=S.sel[it.id], op=it.o[i];
+  /* meta stojí vedle řádku, ne uvnitř — aby z něj mohlo být i tlačítko */
   const row=(cls,meta,acts)=>`<div class="card ${cls} ${st==='rus'?'iskill':''}" data-twin="${it.id}" data-rel="${(it.rel||[]).join('|')}">
-      <button class="donerow" data-edit="${it.id}" title="klik = rozbalit a změnit volbu">
-        ${sic(st)}<span class="dn">${esc(it.n)}</span><span class="dv">${esc(op[0])}</span>
-        <span class="tg">${op[3].map(tagchip).join('')}</span>${meta}</button>
+      <div class="rowwrap">
+        <button class="donerow" data-edit="${it.id}" title="klik = rozbalit a změnit volbu">
+          ${sic(st)}<span class="dn">${esc(it.n)}</span><span class="dv">${esc(op[0])}</span>
+          <span class="tg">${op[3].map(tagchip).join('')}</span></button>${meta}</div>
       <div class="doneact"><button class="lnk" data-edit="${it.id}">změnit volbu</button>${acts}</div></div>`;
 
-  if(ph==='call')  /* na agendě hovoru — fialová jako 3. sloupec */
-    return row('onag',`<span class="dm ag">📞 ${esc(ZONE_OF[st])}</span>`,
-      `<button class="lnk" data-go="${it.id}">ukázat v agendě →</button>
-       <button class="lnk" data-drop="${it.id}">sundat z agendy</button>`);
+  const vAgende=`<button class="lnk" data-go="${it.id}">ukázat v agendě →</button>`;
+  const odebrat=`<button class="lnk" data-drop="${it.id}">odebrat z agendy</button>`;
+
+  if(ph==='call'){
+    /* „Potvrdit“ je akce jen tam, kde je v agendě checkbox Potvrzeno — u ostatních zón jen popisek */
+    const meta=(st==='pot'||st==='zme')
+      ? `<button class="mini rowact" data-tick="${it.id}"
+           title="uzavře položku v tomhle stavu — stejné jako checkbox Potvrzeno v agendě">✓ Potvrdit</button>`
+      : `<span class="dm ag">📞 ${esc(ZONE_OF[st])}</span>`;
+    return row('onag',meta,vAgende+odebrat);
+  }
 
   if(ph==='wait')
-    return row('onag waiting',`<span class="dm ag">⏳ Čeká na zákazníka</span>`,
-      `<button class="lnk" data-go="${it.id}">ukázat v agendě →</button>`);
+    return row('onag waiting',`<span class="dm ag">⏳ Čeká na zákazníka</span>`,vAgende);
 
   if(ph==='loose') /* rozhodnuto, ale nikde se to neřeší — jediný řádek, který volá po akci */
     return row('orphaned',`<span class="dm warn">neřeší se nikde</span>`,
@@ -740,7 +755,7 @@ function itemCard(it){
 
   /* hotovo — barvu nese výsledný stav; meta jen tam, kde nese informaci */
   return row(`done s-${st}`,
-    S.ticked[it.id]?`<span class="dm">odbaveno v hovoru${S.evid[it.id]?' · '+esc(S.evid[it.id]):''}</span>`:'',
+    S.ticked[it.id]?`<span class="dm">vyřešeno v hovoru${S.evid[it.id]?' · '+esc(S.evid[it.id]):''}</span>`:'',
     S.ticked[it.id]?`<button class="lnk" data-go="${it.id}">ukázat v agendě →</button>`
                    :`<button class="lnk" data-add="${it.id}">+ zmínit v hovoru</button>`);
 }
@@ -785,7 +800,7 @@ function agCard(it){
   if(ph==='done') return `<div class="card done s-${st}" data-twin="${it.id}">
     <button class="donerow" data-go2="${it.id}" title="klik = ukázat v checklistu">
       ${sic(st)}<span class="dn">${esc(it.n)}</span><span class="dv">${esc(op[0])}</span>
-      <span class="dm">✓ ${esc(S.evid[it.id]||'odbaveno')}</span></button>
+      <span class="dm">✓ ${esc(S.evid[it.id]||'vyřešeno')}</span></button>
     ${S.note[it.id]?`<div class="donenote">${esc(S.note[it.id])}</div>`:''}
     <div class="doneact"><button class="lnk" data-untick="${it.id}">vrátit na agendu</button></div></div>`;
 
@@ -802,7 +817,7 @@ function agCard(it){
   }else if(st==='ok'||st==='rus'){
     /* konečný stav, který si operátor navěsil sám — chce ho jen zmínit */
     act=`<div class="cardbar"><label class="tickbox"><input type="checkbox" data-tick="${it.id}"> Zmíněno</label>
-         <button class="lnk right" data-drop="${it.id}">sundat z agendy</button></div>`;
+         <button class="lnk right" data-drop="${it.id}">odebrat z agendy</button></div>`;
   }else if(st==='inf'){
     act=`<div class="cardbar"><label class="tickbox"><input type="checkbox" data-tick="${it.id}"> Informován</label>
          <span class="right">souhlas se nevyžaduje</span></div>`;
@@ -855,7 +870,7 @@ function colCall(L,agenda){
     waits.length?`<div class="zone tint zt-cek"><div class="zone-h">${sic('cek')} Čeká se na zákazníka
         <span class="c">${waits.length}</span></div>
         <div class="cards">${waits.map(agCard).join('')}</div></div>`:'',
-    done.length?`<div class="zone"><div class="zone-h">✓ Odbaveno v hovoru <span class="c">${done.length}</span></div>
+    done.length?`<div class="zone"><div class="zone-h">✓ Vyřešeno v hovoru <span class="c">${done.length}</span></div>
         <div class="cards">${done.map(agCard).join('')}</div></div>`:''
   ].join('');
 
