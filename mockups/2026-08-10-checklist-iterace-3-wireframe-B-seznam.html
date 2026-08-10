@@ -1,0 +1,939 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checklist zásilky — wireframe v3 · varianta B (seznam + agenda hovoru)</title>
+<style>
+:root{
+  --bg:#E2E3ED; --card:#fff; --ink:#403854; --mut:#837D96; --faint:#ADA8BC;
+  --line:#E4E1EB; --line2:#EFEDF5; --well:#F5F5FA; --sep:#E7E6EF;
+  --accent:#8C57FF; --shadow:0 1px 2px rgba(46,38,61,.06); --shadow2:0 8px 28px rgba(46,38,61,.18);
+  --ok:#4CAF50; --zji:#9891A8; --res:#EA580C; --inf:#00A9BE; --pot:#F59E0B; --zme:#D9A400;
+  --rus:#EF4444; --cek:#4C7EFF; --accent2:#A87FFF;
+  --ok-bg:#eef7ee; --pot-bg:#fdf3e2; --rus-bg:#fdecec; --zji-bg:#f1effa;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#242038; --card:#2f2b45; --ink:#E7E3FC; --mut:#A49FBD; --faint:#736D8C;
+  --line:#453F63; --line2:#3B3557; --well:#282443; --sep:#1E1B30;
+  --accent:#A98BFF; --shadow:0 1px 2px rgba(0,0,0,.3); --shadow2:0 8px 28px rgba(0,0,0,.5);
+  --ok-bg:#2b3a2c; --pot-bg:#41372a; --rus-bg:#432b2d; --zji-bg:#363152;
+}}
+:root[data-theme="dark"]{
+  --bg:#242038; --card:#2f2b45; --ink:#E7E3FC; --mut:#A49FBD; --faint:#736D8C;
+  --line:#453F63; --line2:#3B3557; --well:#282443; --sep:#1E1B30;
+  --accent:#A98BFF; --shadow:0 1px 2px rgba(0,0,0,.3); --shadow2:0 8px 28px rgba(0,0,0,.5);
+  --ok-bg:#2b3a2c; --pot-bg:#41372a; --rus-bg:#432b2d; --zji-bg:#363152;
+}
+:root[data-theme="light"]{
+  --bg:#f2f3f8; --card:#fff; --ink:#2E263D; --mut:#7A748C; --faint:#A7A2B8;
+  --line:#E4E1EB; --line2:#EFEDF5; --well:#F7F7FB; --sep:#E7E6EF;
+  --accent:#8C57FF; --ok-bg:#eef7ee; --pot-bg:#fdf3e2; --rus-bg:#fdecec; --zji-bg:#f1effa;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);overflow:hidden;
+     font:14px/1.5 -apple-system,"Segoe UI",Roboto,system-ui,sans-serif;min-width:1420px}
+button{font:inherit;color:inherit}
+textarea{font:inherit}
+
+/* ═══ stavy — barvu nese ikona, ne plocha ═══ */
+.sic{font-style:normal;font-weight:700;font-size:11px;width:15px;height:15px;flex:none;line-height:1;
+     display:inline-flex;align-items:center;justify-content:center;border-radius:50%;
+     background:color-mix(in srgb,var(--sc,var(--faint)) 18%,transparent);color:var(--sc,var(--faint))}
+.sic-zme{font-size:13px;font-weight:900;background:color-mix(in srgb,var(--sc) 30%,transparent)}
+.sic-ok{--sc:var(--ok)} .sic-zji{--sc:var(--mut)} .sic-res{--sc:var(--res)} .sic-inf{--sc:var(--inf)}
+.sic-pot{--sc:var(--pot)} .sic-zme{--sc:var(--zme)} .sic-rus{--sc:var(--rus)} .sic-cek{--sc:var(--cek)}
+.st{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--mut);font-weight:600;white-space:nowrap}
+.s-ok{--sc:var(--ok)} .s-zji{--sc:var(--zji)} .s-res{--sc:var(--res)} .s-inf{--sc:var(--inf)}
+.s-pot{--sc:var(--pot)} .s-zme{--sc:var(--zme)} .s-rus{--sc:var(--rus)} .s-cek{--sc:var(--cek)}
+
+/* ============ top ============ */
+.top{background:var(--card);border-bottom:1px solid var(--line)}
+.top-r1{display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center;padding:10px 22px 10px}
+.top h1{font-size:15px;margin:0;font-weight:650}
+.top h1 span{color:var(--mut);font-weight:400}
+.ship{color:var(--mut);font-size:12.5px}
+.ship b{color:var(--ink);font-weight:600}
+.prog{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--mut);font-variant-numeric:tabular-nums}
+.prog .bar{width:150px;height:6px;border-radius:3px;background:var(--line2);overflow:hidden;position:relative}
+.prog .bar i{position:absolute;left:0;top:0;height:100%;border-radius:3px}
+.prog .bar .b1{background:color-mix(in srgb,var(--accent) 30%,transparent)}
+.prog .bar .b2{background:var(--ok)}
+.gstat{margin-left:auto;display:flex;align-items:center;gap:8px;font-weight:650;font-size:13px;
+       padding:5px 14px;border-radius:20px;border:1px solid var(--line)}
+.gstat.g-ok{background:var(--ok-bg);border-color:transparent}
+.gstat.g-pot{background:var(--pot-bg);border-color:transparent}
+.gstat.g-rus{background:var(--rus-bg);border-color:transparent}
+.gstat.g-zji{background:var(--well);border-color:transparent}
+.gsub{font-weight:400;color:var(--mut);font-size:11.5px}
+.banner{display:none;background:var(--rus-bg);border-bottom:1px solid var(--rus);padding:8px 22px;
+        font-weight:600;font-size:13px}
+.banner.on{display:block}
+.banner em{font-weight:400;color:var(--mut);font-style:normal}
+.princip{background:color-mix(in srgb,var(--accent) 8%,var(--card));border-bottom:1px solid var(--line);
+         padding:6px 22px;font-size:11.5px;color:var(--mut)}
+.princip b{color:var(--ink);font-weight:650}
+
+/* ============ board ============ */
+.board{display:grid;grid-template-columns:250px minmax(560px,1fr) minmax(390px,430px);
+       gap:16px;align-items:stretch;max-width:2200px;margin:0 auto;
+       height:calc(100vh - var(--th,120px));overflow:hidden;padding:14px 18px 16px}
+.col{background:var(--card);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;
+     display:flex;flex-direction:column;min-height:0;max-height:100%;--cc:var(--accent)}
+.col-call{--cc:var(--accent2)}
+.col-h{flex:none;padding:12px 16px 11px;display:flex;flex-direction:column;gap:9px;
+       background:var(--card);border-bottom:1px solid var(--line)}
+.ch-top{display:flex;align-items:center;gap:10px}
+.ch-t{font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink);
+      display:inline-flex;align-items:center;gap:9px}
+.ch-t::before{content:"";width:3px;height:15px;border-radius:2px;background:var(--cc);flex:none}
+.ch-n{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;margin-left:auto;color:var(--cc)}
+.ch-n em{font-style:normal;font-size:12px;font-weight:500;color:var(--mut);opacity:.7}
+.ch-sub{font-size:11px;color:var(--mut);margin-top:-3px}
+.col-b{flex:1;overflow-y:auto;min-height:0;overscroll-behavior:contain}
+.segs{display:inline-flex;border:1px solid var(--line);border-radius:8px;background:var(--well);padding:2px;gap:2px}
+.segs button{background:none;border:none;border-radius:6px;padding:3px 9px;font-size:11px;cursor:pointer;color:var(--mut)}
+.segs button:hover{color:var(--ink)}
+.segs button.on{background:var(--card);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(64,56,84,.13)}
+
+/* ============ 1. sloupec — OBSAH ============ */
+.toc{padding:8px 0 14px}
+.toc-a{display:block;padding:6px 14px 6px 13px;cursor:pointer;text-decoration:none;border-left:3px solid transparent}
+.toc-a:hover{background:var(--well)}
+.toc-a.on{border-left-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--card))}
+.toc-a.off{opacity:.45}
+.toc-r1{display:flex;align-items:baseline;gap:8px}
+.toc-nm{font-size:12.5px;font-weight:600;color:var(--ink);flex:1;line-height:1.3}
+.toc-n{font-size:11px;color:var(--mut);font-variant-numeric:tabular-nums;flex:none}
+.toc-dots{display:flex;gap:3px;margin-top:5px;flex-wrap:wrap}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--sc,var(--line));flex:none}
+.dot.none{background:transparent;border:1.5px dashed var(--faint);width:8px;height:8px}
+.toc-cond{font-size:10px;color:var(--faint);border:1px dashed var(--line);border-radius:5px;padding:0 5px}
+.toc-h{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);
+       padding:12px 14px 5px}
+.legend{padding:4px 14px 0;border-top:1px solid var(--line);margin-top:10px}
+.leg-r{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--mut);padding:2.5px 0}
+.leg-r b{color:var(--ink);font-weight:600}
+.leg-note{font-size:10.5px;color:var(--faint);padding:8px 14px 0;line-height:1.5}
+
+/* ============ 2. sloupec — POLOŽKY ============ */
+.area+.area{border-top:10px solid var(--sep)}
+.area-h{position:sticky;top:0;z-index:8;background:var(--card)}
+.area-t{display:flex;align-items:baseline;gap:10px;padding:14px 16px 7px}
+.area-t h2{font-size:12.5px;margin:0;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink)}
+.area-t .pr{color:var(--faint);font-size:11px;margin-left:auto;font-variant-numeric:tabular-nums}
+.ctxbox{display:flex;flex-wrap:wrap;gap:2px 8px;padding:7px 16px;
+        background:color-mix(in srgb,var(--accent) 9%,var(--card));
+        border-bottom:1px solid color-mix(in srgb,var(--accent) 22%,transparent);
+        font-size:11px;color:var(--mut)}
+.kv{padding:1px 6px;border-radius:5px;border:1px solid transparent}
+.kv b{color:var(--ink);font-weight:600}
+.kv.hi{background:color-mix(in srgb,var(--accent) 14%,transparent);border-color:var(--accent);color:var(--ink)}
+.grp{padding:13px 16px 0;font-size:11.5px;color:var(--mut);font-weight:600}
+.cards{padding:11px 13px 13px;display:flex;flex-direction:column;gap:10px}
+
+.card{border:1px solid var(--line);border-radius:10px;padding:10px 12px 11px;background:var(--well);position:relative}
+.card.done{background:var(--card);border-style:dashed}
+.card.twin-hi{border-color:var(--accent2);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent2) 30%,transparent)}
+.card .crumb{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin-bottom:2px}
+.card .hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:2px}
+.card .nm{font-weight:650;font-size:13px}
+.card.done .nm{color:var(--mut);font-weight:600}
+.card .dsc{color:var(--mut);font-size:11.5px;margin:0 0 8px;max-width:82ch}
+.card .rel{font-size:10.5px;color:var(--mut);margin:9px 0 0;padding:6px 9px;line-height:1.55;
+           background:color-mix(in srgb,var(--accent) 9%,var(--card));border-radius:6px}
+.card .rel b{color:var(--ink);font-weight:600}
+.flag{font-size:10px;font-weight:700;padding:1px 7px;border-radius:5px;background:var(--pot-bg);
+      border:1px solid var(--pot);cursor:help}
+.cnd{font-size:10px;color:var(--faint);border:1px dashed var(--line);border-radius:5px;padding:1px 7px}
+.autopill{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;color:var(--accent);
+      border:1px dashed var(--accent);border-radius:12px;padding:1px 8px}
+
+.opts{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--card)}
+.orow{--sc:var(--faint);display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:var(--card);
+      border:none;border-top:1px solid var(--line2);padding:6px 10px;cursor:pointer;position:relative}
+.orow:first-child{border-top:none}
+.orow:hover{background:color-mix(in srgb,var(--accent) 7%,var(--card))}
+.orow:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.orow .rd{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--line);flex:none;background:var(--card)}
+.orow:hover .rd{border-color:var(--mut)}
+.orow .txt{flex:1;font-size:12.5px;line-height:1.35}
+.orow .tg{display:flex;gap:3px;flex:none;font-size:10.5px;opacity:.75}
+.orow .st{width:118px;justify-content:flex-start}
+.orow .info{flex:none;width:17px;height:17px;border-radius:50%;border:1px solid var(--line);color:var(--mut);
+      display:flex;align-items:center;justify-content:center;font-size:10px;font-style:italic;font-family:Georgia,serif;
+      opacity:0;transition:opacity .12s}
+.orow:hover .info{opacity:1}
+.osep{height:1px;background:var(--line)}
+.orow.sel{font-weight:600;box-shadow:inset 3px 0 0 var(--sc);background:color-mix(in srgb,var(--sc) 6%,var(--card))}
+.orow.sel .rd{border:4.5px solid var(--sc)}
+.orow.sel .st{color:var(--ink)}
+
+.chosen{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:none;border:none;
+        padding:0;margin-top:6px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);line-height:1.4}
+.chosen:hover{color:var(--accent)}
+.chosen .ct{flex:1}
+.chosen .tg{display:flex;gap:4px;font-size:11px;opacity:.7;font-weight:400}
+.card.done .chosen{font-weight:500;color:var(--mut)}
+
+.cardbar{display:flex;align-items:center;gap:10px;margin-top:9px;font-size:11px;color:var(--mut);flex-wrap:wrap}
+.mini{background:var(--card);border:1px solid var(--line);border-radius:6px;font-size:11px;padding:3px 9px;cursor:pointer}
+.mini:hover{border-color:var(--mut)}
+.mini.on{border-color:var(--accent2);color:var(--accent2);background:color-mix(in srgb,var(--accent2) 8%,var(--card));font-weight:600}
+.lnk{background:none;border:none;color:var(--mut);font-size:11px;cursor:pointer;text-decoration:underline;padding:0}
+.lnk:hover{color:var(--ink)}
+.cardbar .right{margin-left:auto}
+
+/* proužek „tahle položka je i v agendě“ — nositel duplikace */
+.dup{display:flex;align-items:center;gap:7px;margin-top:9px;padding:5px 9px;border-radius:7px;font-size:11px;
+     background:color-mix(in srgb,var(--accent2) 11%,var(--card));
+     border:1px solid color-mix(in srgb,var(--accent2) 32%,transparent);color:var(--mut);cursor:pointer}
+.dup b{color:var(--ink);font-weight:650}
+.dup:hover{background:color-mix(in srgb,var(--accent2) 18%,var(--card))}
+.dup.wait{background:color-mix(in srgb,var(--cek) 10%,var(--card));border-color:color-mix(in srgb,var(--cek) 32%,transparent)}
+.dup.done{background:var(--ok-bg);border-color:color-mix(in srgb,var(--ok) 30%,transparent)}
+.dup .go{margin-left:auto;text-decoration:underline;white-space:nowrap}
+.orphan{color:var(--res)}
+
+/* ============ 3. sloupec — HOVOR ============ */
+.callwrap{display:flex;flex-direction:column;gap:14px;min-height:0;max-height:100%}
+.callhead{padding:11px 16px;background:color-mix(in srgb,var(--accent2) 9%,var(--card));
+          border-bottom:1px solid color-mix(in srgb,var(--accent2) 25%,transparent);
+          display:flex;align-items:center;gap:10px;font-size:12.5px}
+.callhead .ci{font-size:17px}
+.callhead b{font-weight:650}
+.callhead .lnk{margin-left:auto}
+.zone{border-top:1px solid var(--line)}
+.zone:first-child{border-top:none}
+.zone-h{position:sticky;top:0;z-index:5;padding:9px 16px 8px;background:var(--card);font-size:11.5px;font-weight:700;
+        letter-spacing:.07em;display:flex;align-items:center;gap:8px;color:var(--ink);text-transform:uppercase;
+        border-bottom:1px solid var(--line)}
+.zone-h .c{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:600;color:var(--mut);letter-spacing:0}
+.zt-ok{--zt:var(--ok)} .zt-zji{--zt:var(--zji)} .zt-res{--zt:var(--res)} .zt-inf{--zt:var(--inf)}
+.zt-pot{--zt:var(--pot)} .zt-cek{--zt:var(--cek)}
+.zone.tint .zone-h{background:color-mix(in srgb,var(--zt) 17%,var(--card));
+        border-bottom-color:color-mix(in srgb,var(--zt) 30%,transparent)}
+.zone.tint{background:color-mix(in srgb,var(--zt) 6%,var(--card))}
+.zone .cards{padding:10px 12px 12px}
+.zone .card{background:var(--card)}
+
+.ag-h{display:flex;align-items:flex-start;gap:8px}
+.ag-nm{font-size:12.5px;font-weight:650;flex:1;line-height:1.35}
+.ag-crumb{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint)}
+.ag-find{font-size:12px;color:var(--mut);margin-top:4px;display:flex;gap:7px;align-items:flex-start}
+.ag-find b{color:var(--ink);font-weight:600}
+.ag-note{width:100%;margin-top:8px;min-height:46px;resize:vertical;border:1px solid var(--line);border-radius:7px;
+         background:var(--well);color:var(--ink);padding:7px 9px;font-size:12px;line-height:1.5}
+.ag-note:focus{outline:none;border-color:var(--accent2);background:var(--card)}
+.ag-note::placeholder{color:var(--faint)}
+.evid{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--mut);flex-wrap:wrap}
+.evid select{font:inherit;font-size:10.5px;background:var(--card);color:var(--ink);border:1px solid var(--line);
+             border-radius:5px;padding:1px 4px}
+.tickbox{display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:12.5px;font-weight:600;
+         color:var(--ink);background:none;border:none;padding:2px 0;margin:0}
+.tickbox:hover{color:var(--ok)}
+.tickbox input{width:16px;height:16px;margin:0;accent-color:var(--ok);cursor:pointer}
+.colempty{padding:14px 16px;color:var(--faint);font-size:12px;font-style:italic}
+.notespanel{flex:none;border-top:1px solid var(--line);background:var(--card);display:flex;flex-direction:column;
+            padding:11px 14px 13px;gap:7px;height:24%;min-height:132px}
+.notespanel .nh{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.08em;
+            text-transform:uppercase;color:var(--ink)}
+.notespanel .nh::before{content:"";width:3px;height:13px;border-radius:2px;background:var(--accent2)}
+.notespanel textarea{flex:1;width:100%;resize:none;border:1px solid var(--line);border-radius:9px;
+            background:var(--well);color:var(--ink);padding:9px 11px;font-size:12.5px;line-height:1.6}
+.notespanel textarea:focus{outline:none;border-color:var(--accent2);background:var(--card)}
+.notespanel .hint{font-size:10px;color:var(--faint)}
+
+.locked .col:not(.col-toc) .card:not(.iskill){opacity:.45;pointer-events:none}
+
+/* ============ hover panel ============ */
+#pop{position:fixed;z-index:80;width:330px;background:var(--card);border:1px solid var(--line);
+     border-radius:10px;box-shadow:var(--shadow2);display:none}
+#pop.show{display:block}
+#pop .pop-h{display:flex;align-items:center;gap:9px;padding:10px 13px;border-bottom:1px solid var(--line2)}
+#pop .pop-t{font-weight:650;font-size:12.5px;flex:1}
+#pop .pop-b{padding:9px 13px;font-size:12px;color:var(--ink);line-height:1.55}
+#pop .pop-b em{color:var(--mut);font-style:italic}
+#pop .pop-tags{display:flex;flex-direction:column;gap:4px;padding:8px 13px;border-top:1px solid var(--line2);
+     font-size:11px;color:var(--mut)}
+#pop::before{content:"";position:absolute;left:-6px;top:var(--ay,18px);width:10px;height:10px;
+     background:var(--card);border-left:1px solid var(--line);border-bottom:1px solid var(--line);
+     transform:rotate(45deg)}
+#pop.left::before{left:auto;right:-6px;transform:rotate(225deg)}
+</style>
+
+<header class="top" id="tophdr">
+  <div class="top-r1">
+    <h1>Checklist zásilky <span>· wireframe v3 — varianta B</span></h1>
+    <span class="ship"><b>#CZ-24 811</b> · Praha → Curych · balík 12 kg · 60×40×30 cm · hodnota 45 000 Kč · nepojištěno</span>
+    <span class="prog"><span id="pnum"></span>
+      <span class="bar"><i class="b1" id="pb1"></i><i class="b2" id="pb2"></i></span></span>
+    <span class="gstat" id="gstat"></span>
+  </div>
+  <div class="princip">
+    <b>Varianta B — položka se nikdy nestěhuje.</b> Celý checklist zůstává pohromadě ve 2. sloupci (i vyřešené,
+    i ty k hovoru). Co má přijít na telefonát, se <b>navěsí</b> do 3. sloupce — tam se k tomu píše agenda a poznámky.
+    Položka je tedy vidět na dvou místech zároveň; najeď myší a uvidíš svůj protějšek.
+  </div>
+</header>
+<div class="banner" id="ban">Zásilka se ruší — checklist je uzamčen. <em>Odblokuješ přepnutím červené volby u dané položky.</em></div>
+
+<div class="board" id="board"></div>
+<div id="pop" role="tooltip"></div>
+
+<script>
+/* ═══════════════ STAVY ═══════════════ */
+/* n = před hovorem (1. sloupec, záměr) · n2 = po hovoru (2./3. sloupec, hotová věc) */
+const ST = {
+  ok :{n:'V pořádku',        n2:'V pořádku',       ic:'✓'},
+  inf:{n:'Oznámíme',         n2:'Informován',      ic:'i'},
+  pot:{n:'Potvrdíme',        n2:'Potvrzeno',       ic:'✍'},
+  zme:{n:'Změna parametrů',  n2:'Změna potvrzena', ic:'⇄'},
+  zji:{n:'Ke zjištění',      n2:'Ke zjištění',     ic:'?'},
+  res:{n:'K vyřešení',       n2:'K vyřešení',      ic:'!'},
+  rus:{n:'Ruší se',          n2:'Zrušeno',         ic:'✕'},
+  cek:{n:'Čeká na zákazníka',n2:'Čeká na zákazníka',ic:'⏳'},
+};
+/* pořadí voleb: v pořádku první · zjistit/vyřešit předposlední · ruší se poslední */
+const RANK={ok:0, inf:1, pot:1, zme:2, zji:3, res:3, rus:4};
+const TAGS={cena:['💰','Dopad na cenu'],dok:['📄','Potřebujeme doklad'],cas:['⏱','Riziko zdržení'],
+            stop:['🚫','Riziko zastavení / zničení'],data:['✏️','Jen oprava dat']};
+
+/* ═══════════════ DATA (28 položek / 147 voleb) ═══════════════ */
+const AREAS=[
+{id:'obsah',name:'Obsah zásilky',ctx:[['Deklarováno','„drone + accessories“ · 2 položky'],['Nové/použité','neuvedeno'],['Hodnota','45 000 Kč'],['Směr','CZ → CH (mimo EU)']],groups:[{n:null,items:[
+ {id:'znam',n:'Známe kompletně obsah',d:'Ptáš se, jestli opravdu víš, co všechno je v zásilce.',rel:['Deklarováno','Nové/použité'],o:[
+  ['Známe kompletní obsah','ok','Jsi si jistý, že víš, co všechno je uvnitř.',[]],
+  ['Nevíme, co všechno je uvnitř','zji','Nemáš úplnou jistotu — musíš se zákazníka doptat.',[]]]},
+]}]},
+{id:'prip',name:'Přípustnost',ctx:[['Deklarováno','„drone + accessories“'],['Baterie','Li-ion 4 000 mAh (UN3481)'],['Směr','CZ → CH (mimo EU)'],['Incoterm','DAP'],['Příjemce','Muster AG (firma)']],groups:[{n:null,items:[
+ {id:'podm',n:'Přepravní podmínky',d:'Posuzuješ, jestli obsah neodporuje přepravním podmínkám dopravce.',rel:['Deklarováno','Nové/použité'],o:[
+  ['Nevíme, chybí informace o obsahu','zji','Z toho, co máš, nejde soulad posoudit — neznáš celý obsah nebo potřebuješ upřesnit charakter věcí.',[]],
+  ['Nesoulad s přepravními podmínkami','res','Víš, že obsah podmínkám odporuje, ale řešení zatím neznáš.',[]],
+  ['V souladu s přepravními podmínkami','ok','Máš jistotu, žádný problém.',[]],
+  ['Drobný nesoulad','inf','Nesoulad není nic závažného. Posíláte, ale zákazníka upozorni, že při odhalení hrozí zastavení, zničení nebo vrácení na jeho náklady.',['stop']],
+  ['Větší nesoulad','pot','Nesoulad je závažnější. Posíláte, ale zákazník musí potvrdit, že o riziku ví a souhlasí.',['stop']],
+  ['Zásadní nesoulad','rus','Obsah je ve velkém rozporu — nepošlete to, ani kdyby zákazník chtěl. Nebo od přepravy ustoupí sám.',[]],
+  ['Nesoulad řešitelný jinou přepravou','zme','Po dohodě volíte jiného dopravce nebo variantu; mění se tím i cena.',['cena']]]},
+ {id:'dg',n:'Potenciální DG',d:'Posuzuješ, jestli zásilka neobsahuje nebezpečné zboží.',rel:['Baterie','Deklarováno'],o:[
+  ['Nevíme, chybí informace o obsahu','zji','Stejná logika jako u přepravních podmínek.',[]],
+  ['Obsahuje DG','res','Víš o DG, řešení zatím neznáš.',[]],
+  ['DG neobsahuje','ok','Máš jistotu.',[]],
+  ['Obsahuje DG, drobné riziko','inf','Posíláte, zákazníka upozorni na rizika.',['stop']],
+  ['Obsahuje nepřepravitelné DG','rus','Přeprava se ruší.',[]],
+  ['Obsahuje DG, potřeba jiná přeprava','zme','Mění se dopravce nebo varianta.',['cena']]]},
+ {id:'dok',n:'Pouze dokumenty',d:'Posuzuješ, jestli jsou v zásilce opravdu jen papíry.',rel:['Deklarováno','Hodnota'],o:[
+  ['Nevíme, jestli jsou uvnitř jen dokumenty','zji','Nejsi schopen posoudit.',[]],
+  ['Obsahuje i zboží, ne jen dokumenty','res','Víš to. Čeká se, jestli zákazník zboží vyndá, nebo jak to vyřešíte.',[]],
+  ['Obsahuje pouze dokumenty','ok','Máš jistotu.',[]],
+  ['Obsahuje zboží — překlápí se na balík','zme','Zjištěno, že to nejsou jen dokumenty; mění se typ přepravy.',['cena']]]},
+ {id:'clenicil',n:'Clení v cílové zemi',d:'Neposuzuješ jen, jestli je zboží v cílové zemi zakázané, ale jestli může mít tahle konkrétní zásilka problém: součinnost příjemce, doklady navíc, nutnost externího brokera. Stejné zboží do stejné země může být jednou v pořádku a podruhé ne — typicky podle toho, jestli je příjemce firma, nebo fyzická osoba.',rel:['Směr','Incoterm','Příjemce'],o:[
+  ['Nevíme, chybí informace o obsahu','zji','Nejsi schopen posoudit.',[]],
+  ['Proclení bude problematické','res','Víš o problému, řešení zatím neznáš.',['cas']],
+  ['Proclí se standardně, bez problému','ok','Máš jistotu.',[]],
+  ['Proclení je problematické','inf','Posíláte, zákazníka upozorni na možné komplikace.',['cas']],
+  ['Proclení je hodně problematické','pot','Posíláte, ale zákazník musí komplikace potvrdit.',['cas']],
+  ['Proclení není průchozí','rus','Přeprava se ruší.',[]],
+  ['Proclení vyžaduje jinou přepravu','zme','Některé země mají pro silniční přepravu přísnější celní podmínky než pro leteckou. Např. do Turecka se silničně vždy clí přes externího brokera za ~300 USD na účet příjemce; letecky u drobnějších hodnot broker nutný není.',['cena','cas']]]},
+]}]},
+{id:'baleni',name:'Balení zásilky',ctx:[['Obal','karton, výplň neuvedena'],['Rozměry','60 × 40 × 30 cm'],['Hmotnost','12 kg'],['Směr','CZ → CH (mimo EU)']],groups:[
+{n:'Z pohledu vhodné ochrany pro přepravu',items:[
+ {id:'vnejsi',n:'Vnější obal',d:'Posuzuješ, jestli vnější obal ochrání obsah po celou cestu.',rel:['Obal','Rozměry'],o:[
+  ['Nevíme, jaký je vnější obal','zji','Nemáš jistotu.',[]],
+  ['Vnější obal nedostačuje','res','Víš, že je nedostačující, jdeš to řešit se zákazníkem.',[]],
+  ['Plně vyhovuje a chrání obsah','ok','',[]],
+  ['Vnější obal není ideální','inf','Posíláte, zákazníka upozorni na rizika.',['stop']],
+  ['Vnější obal je špatný','pot','Posíláte, zákazník musí riziko potvrdit.',['stop']],
+  ['Vnější obal je nepřijatelný','rus','Přeprava se ruší.',[]],
+  ['Obal zůstává, mění se přeprava','zme','Zásilka jede v původním obalu, ale jinou variantou nebo s jiným dopravcem. Skoro vždy k tomu ještě vybereš i některou z rizikových voleb — výjimečně může být obal pro nového dopravce v pořádku.',['cena']]]},
+ {id:'vnitrni',n:'Vnitřní obal',d:'Stejná logika jako u vnějšího obalu — posuzuješ výplň a fixaci obsahu.',rel:['Obal'],warn:'Klient u této položky píše jen „Lidské pojmenování viz vnější obal“ — texty jsou odvozené, potřebují jeho potvrzení (otázka 11).',o:[
+  ['Nevíme, jaká je vnitřní výplň','zji','',[]],
+  ['Vnitřní obal nedostačuje','res','',[]],
+  ['Plně vyhovuje a chrání obsah','ok','',[]],
+  ['Vnitřní obal není ideální','inf','',['stop']],
+  ['Vnitřní obal je špatný','pot','',['stop']],
+  ['Vnitřní obal je nepřijatelný','rus','',[]],
+  ['Obal zůstává, mění se přeprava','zme','',['cena']]]},
+]},
+{n:'Z pohledu případných poplatků (speciální manipulace)',items:[
+ {id:'osklivy',n:'„Ošklivý balík“',d:'Posuzuješ, jestli typ obalu nespadne pod poplatek za speciální manipulaci.',rel:['Obal','Rozměry','Hmotnost'],o:[
+  ['Nevíme, jak je zabaleno','zji','Neznáš přesné zabalení, nejde posoudit.',[]],
+  ['Zabaleno jako „ošklivý balík“','res','Víš to, jdeš to řešit se zákazníkem.',['cena']],
+  ['Zabaleno vhodně, poplatek nehrozí','ok','',[]],
+  ['Podléhá poplatku za „ošklivý balík“','inf','Zákazníka informuješ, zásilku posíláte.',['cena']],
+  ['Poplatek zákazník odmítl','rus','Kvůli poplatku ruší přepravu.',[]],
+  ['Poplatku se vyhneme jinou přepravou','zme','Přehodíte na variantu, kde poplatek nebude nebo je menší riziko, že ho na depu „zakliknou“.',['cena']]]},
+ {id:'stoh',n:'Stohovatelnost',d:'Posuzuješ, jestli je zásilka stohovatelná — jinak hrozí poplatek.',rel:['Rozměry','Obal'],o:[
+  ['Nevíme, jestli je stohovatelná','zji','',[]],
+  ['Zásilka není stohovatelná','res','Víš to, jdeš to řešit se zákazníkem.',['cena']],
+  ['Zásilka je stohovatelná','ok','',[]],
+  ['Není stohovatelná, podléhá poplatku','inf','Zákazníka informuješ, posíláte.',['cena']],
+  ['Poplatek zákazník odmítl','rus','',[]],
+  ['Poplatku se vyhneme jinou přepravou','zme','',['cena']]]},
+]},
+{n:'Z pohledu předpisů',items:[
+ {id:'drevo',n:'Dřevěné balení a ošetření proti škůdcům (mimo EU)',d:'Posuzuješ, jestli balení neobsahuje neošetřené surové dřevo.',rel:['Obal','Směr'],cond:'mimoEU',note:'Dvě zelené volby s různým zněním — proto picker nemůže být sada pevných tlačítek podle stavů.',o:[
+  ['Nevíme, jestli je v balení dřevo','zji','',[]],
+  ['Balení obsahuje neošetřené surové dřevo','res','Balení je dřevěné nebo má dřevěné části, které nejsou ošetřené. Čeká se na řešení se zákazníkem.',[]],
+  ['Balení neobsahuje ani kus surového dřeva','ok','',[]],
+  ['Balení obsahuje surové dřevo, vše je ošetřeno','ok','Druhá zelená varianta téže položky.',[]],
+  ['Neošetřené surové dřevo','pot','Posíláte s rizikem, zákazník to musí potvrdit.',['stop']],
+  ['Neošetřené dřevo, zákazník nechce řešit','rus','Přeprava se kvůli tomu ruší.',[]],
+  ['Přebalí se do jiného obalu','zme','Mění se tím parametry i cena.',['cena']]]},
+]}]},
+{id:'hodnota',name:'Hodnota, odpovědnost, pojištění',ctx:[['Hodnota','45 000 Kč'],['Pojištění','nesjednáno'],['Odpovědnost přepravce','~12 500 Kč (rozdíl 32 500 Kč)'],['Komodita','elektronika, Li-ion'],['Nové/použité','neuvedeno']],groups:[
+{n:null,items:[
+ {id:'hodobs',n:'Hodnota odpovídá obsahu',d:'Posuzuješ, jestli deklarovaná hodnota zhruba sedí k tomu, co je uvnitř.',rel:['Hodnota','Komodita'],o:[
+  ['Nevíme, chybí informace o obsahu','zji','Neznáš přesný obsah ani charakter položek.',[]],
+  ['Hodnota neodpovídá charakteru obsahu','res','',[]],
+  ['Hodnota zhruba odpovídá obsahu','ok','',[]],
+  ['Hodnota neodpovídá, necháváme ji být','inf','Hodnotu neměníte, zákazník je upozorněn, co to může znamenat.',[]],
+  ['Hodnota se opravuje','zme','Mění se cena pojištění, případně i typ přepravy (např. na leteckou, kde má přepravce vyšší odpovědnost).',['cena']]]},
+ {id:'pojodp',n:'Pojištění × odpovědnost přepravce (nepojištěno)',d:'U nepojištěné zásilky posuzuješ, jestli zákonná odpovědnost přepravce pokryje hodnotu obsahu.',rel:['Pojištění','Odpovědnost přepravce','Hodnota'],auto:1,
+  warn:'ROZPOR: schválené principy říkají „podmínky pojištění jen u pojištěných zásilek“, ale tahle položka je určená výslovně pro nepojištěné. K vyjasnění (otázka 9).',o:[
+  ['Odpovědnost přepravce hodnotu nekryje','res','Rozdíl je výrazný a zákazník nemá pojištěno. Domluvíte se, jak dál.',['cena']],
+  ['Odpovědnost přepravce hodnotu zhruba kryje','ok','Nepojištěno, ale odpovědnost stačí.',[]],
+  ['Nekryje, zákazník pojistit nechce','inf','Upozorni ho na rizika a posíláte.',[]],
+  ['Zákazník chce zásilku pojistit','zme','Zásilka se pojišťuje, mění se cena.',['cena']]]},
+]},
+{n:'Pojištění',items:[
+ {id:'gc',n:'Pojistitelné jako general cargo',d:'Posuzuješ, jestli obsah spadá do standardního pojištění general cargo.',rel:['Komodita'],o:[
+  ['Nevíme, chybí informace o obsahu','zji','Neznáš charakter konkrétních věcí.',[]],
+  ['Není pojistitelné jako general cargo','res','Víš to, čeká se na řešení se zákazníkem.',[]],
+  ['Pojistitelné jako general cargo','ok','',[]],
+  ['Nepojistitelné, zákazník ruší','rus','Kvůli tomu nechce poslat.',[]],
+  ['Přechod na speciální pojištění','zme','S přihláškou nebo potvrzením pojišťovny; často má individuální cenu.',['cena']]]},
+ {id:'plny',n:'Pojistitelné v plném rozsahu',d:'Posuzuješ, jestli lze zásilku pojistit i na poškození, ne jen na ztrátu. Typicky naráží na použité zboží.',rel:['Komodita','Nové/použité'],o:[
+  ['Nevíme, chybí informace o obsahu a stáří','zji','',[]],
+  ['Není pojistitelné v plném rozsahu','res','Zboží je použité a nespadá do žádné z výjimek. Čeká se na řešení.',[]],
+  ['Pojistitelné v plném rozsahu','ok','',[]],
+  ['Kryje jen ztrátu, ne poškození','inf','Pojištění zůstává, zákazník je informován o specifických podmínkách.',[]],
+  ['Zákazník kvůli tomu ruší přepravu','rus','',[]],
+  ['Zákazník ruší pojištění','zme','Ruší se pojištění, mění se cena.',['cena']]]},
+]}]},
+{id:'dokum',name:'Dokumentace a clení',cond:'mimoEU',ctx:[['Celní faktura','nahrána, položková'],['Původ','neuveden'],['EORI','CZ68000942 (online neověřeno)'],['Plná moc','nedoložena'],['Směr','CZ → CH (mimo EU)']],groups:[{n:null,items:[
+ {id:'faktura',n:'Celní faktura',d:'Posuzuješ, jestli je faktura použitelná pro celní účely.',rel:['Celní faktura'],o:[
+  ['Faktura zatím není nahraná','zji','Zákazník ji nenahrál, nejde posoudit.',['dok']],
+  ['Celní faktura není v pořádku','res','Není vhodná pro celní účely. Čeká se, jestli ji zákazník opraví, nebo nechá s rizikem.',['dok']],
+  ['Celní faktura má všechny náležitosti','ok','',[]],
+  ['Faktura není ideální, zákazník ji chce ponechat','inf','Upozorni ho na možné problémy při clení.',['cas']]]},
+ {id:'puvod',n:'Prokázání původu',d:'Nabízí se jen u přeprav do/z zemí, se kterými má EU preferenční dohodu.',rel:['Původ','Celní faktura'],cond:'pref',o:[
+  ['Nevíme, jaký je původ zboží','zji','Na faktuře není věta o původu, EUR1 se neřešil a podle charakteru zboží to nejde posoudit.',['dok']],
+  ['Chybí nebo je špatně uvedený důkaz původu','res','Věta na faktuře je, ale ve špatném znění. Nebo víš, že zboží je lokální a mohlo by mít preferenční sazbu, ale důkaz chybí.',['dok']],
+  ['Věta o původu je v přesném znění (nebo je EUR1)','ok','',[]],
+  ['Důkaz původu chybí, ale zboží není lokální','ok','Druhá zelená varianta téže položky.',[]],
+  ['Zboží je lokální, zákazník původ řešit nechce','inf','Upozorni ho a normálně přepravujete — zákazník přijde o preferenční sazbu.',['cena']]]},
+ {id:'eori',n:'Platné EORI',d:'Posuzuješ, jestli má osoba vývozce platné EORI.',rel:['EORI'],cond:'clo',o:[
+  ['Neznáme osobu vývozce','zji','Zákazník ji zatím neuvedl a nenahrál celní fakturu.',[]],
+  ['Vývozce nemá platné EORI','res','',['dok']],
+  ['Vývozce má platné EORI','ok','',[]],
+  ['Bez EORI, zásilka se ruší','rus','',[]],
+  ['Mění se osoba vývozce nebo hodnota','zme','Např. se bude clít na fyzickou osobu, nebo se sníží hodnota pod 1 000 EUR, aby nebylo nutné plnohodnotné exportní clení.',['cena']]]},
+ {id:'plnamoc',n:'Platná plná moc',d:'Posuzuješ, jestli máme řádně podepsanou plnou moc k zastupování při clení.',rel:['Plná moc'],cond:'clo',auto:1,o:[
+  ['Plnou moc nemáme nebo je neúplná','res','',['dok']],
+  ['Plnou moc máme, je řádně podepsaná','ok','',[]],
+  ['Bez plné moci, zásilka se ruší','rus','',[]],
+  ['Mění se osoba vývozce','zme','Podobně jako u EORI — např. se překlopí na fyzickou osobu.',['cena']]]},
+]}]},
+{id:'adresy',name:'Adresy a kontakty',ctx:[['Vyzvednutí','Endevel s.r.o., Lidická 700/19, Brno ✓'],['Doručení','Muster AG, Bahnhofstrasse 12, 8001 Zürich ⚠ neverifikovaná'],['Telefon','+420 777 123 456 (předvolba CZ)']],groups:[{n:null,items:[
+ {id:'stat',n:'Správný stát',d:'Posuzuješ, jestli cílový stát odpovídá zbytku adresy.',rel:['Doručení'],auto:1,o:[
+  ['Stát nesouhlasí','res','',[]],
+  ['Stát souhlasí','ok','',[]],
+  ['Oprava státu zásilku prodraží, zákazník ruší','rus','Např. se zákazník uklikl a zásilka do správného státu by byla o dost dražší.',['cena']],
+  ['Stát se opravuje','zme','Mění se cíl, může se změnit cena přepravy.',['cena']]]},
+ {id:'psc',n:'Správné PSČ',d:'Posuzuješ, jestli PSČ odpovídá městu a ulici.',rel:['Doručení'],o:[
+  ['Nejde posoudit, jestli je PSČ správné','zji','Někdy to nejde určit — probereš se zákazníkem.',[]],
+  ['PSČ nesouhlasí','res','',[]],
+  ['PSČ souhlasí','ok','',[]],
+  ['Správnost PSČ je nejistá','inf','Posíláte, zákazníka upozorni na riziko.',['cas']],
+  ['PSČ se opravuje','zme','',['data']]]},
+ {id:'ulice',n:'Ulice existuje',d:'Posuzuješ, jestli se ulice v cílovém městě dá dohledat.',rel:['Doručení'],o:[
+  ['Nejde posoudit, jestli ulice existuje','zji','Probereš se zákazníkem.',[]],
+  ['Ulice existuje','ok','',[]],
+  ['Ulici jsme nedohledali','inf','Posíláte, zákazníka upozorni na riziko.',['cas']],
+  ['Ulice se opravuje','zme','',['data']]]},
+ {id:'cp',n:'Obsahuje číslo popisné',d:'Posuzuješ, jestli adresa obsahuje číslo popisné.',rel:['Doručení'],o:[
+  ['Nejde posoudit, jestli je číslo popisné potřeba','zji','Někde se číslo popisné nepoužívá — probereš se zákazníkem.',[]],
+  ['Číslo popisné je uvedené','ok','',[]],
+  ['Číslo popisné chybí','inf','Posíláte, zákazníka upozorni.',['cas']],
+  ['Číslo popisné se doplňuje','zme','',['data']]]},
+ {id:'byt',n:'Obsahuje číslo bytu',d:'Posuzuješ, jestli u bytového domu nechybí číslo bytu.',rel:['Doručení'],o:[
+  ['Nejde posoudit, jestli je číslo bytu potřeba','zji','',[]],
+  ['Číslo bytu je uvedené','ok','',[]],
+  ['Číslo bytu chybí','inf','Posíláte, zákazníka upozorni.',['cas']],
+  ['Číslo bytu se doplňuje','zme','',['data']]]},
+ {id:'tel',n:'Telefonní číslo je lokální',d:'Posuzuješ, jestli je kontakt na příjemce místní číslo — kurýr v cílové zemi na cizí číslo často nedovolá.',rel:['Telefon','Doručení'],auto:1,o:[
+  ['Nejde posoudit, jestli je číslo místní','zji','',[]],
+  ['Telefonní číslo není lokální','res','',[]],
+  ['Číslo je jistě lokální','ok','',[]],
+  ['Číslo není lokální','inf','Posíláte, zákazníka upozorni na riziko nedoručení.',['cas']],
+  ['Bez lokálního čísla zásilku nepošleme','rus','',[]],
+  ['Číslo se mění','zme','',['data']]]},
+]}]},
+{id:'doba',name:'Doba doručení a vyzvednutí',ctx:[['Avizováno','3–4 pracovní dny'],['Dle tarifu','4–6 dnů'],['Cut-off','14:00 (nyní 12:40)'],['Svoz','po–pá']],groups:[{n:null,items:[
+ {id:'dobadoruc',n:'Avizovaná doba doručení je ekvivalentní',d:'Posuzuješ, jestli doba doručení avizovaná zákazníkovi odpovídá realitě u téhle konkrétní zásilky.',rel:['Avizováno','Dle tarifu'],auto:1,
+  note:'Klientova poznámka: „Změní operátor rovnou den doručení avizovaný zákazníkovi? Měl by asi.“ — k rozhodnutí (otázka 12).',o:[
+  ['Avizovaná doba neodpovídá nebo často nemusí','res','Víš, že se zásilka může zpozdit. Domluvíte se se zákazníkem.',['cas']],
+  ['Avizovaná doba odpovídá','ok','',[]],
+  ['Doba nemusí vyjít, zákazník souhlasí','inf','Zákazník je informován a souhlasí.',['cas']],
+  ['Zákazník kvůli termínu ruší','rus','',[]],
+  ['Přechod na expresní variantu','zme','',['cena','cas']]]},
+]}]},
+{id:'cenap',name:'Cena přepravy a náklady',ctx:[['Obj. hmotnost','12 kg (poměr 1,0)'],['Cenové pásmo','do 15 kg (+3,0 kg)'],['Rozměrový limit','60 cm / 120 cm'],['Rozměry','60 × 40 × 30 cm']],groups:[{n:null,items:[
+ {id:'objem',n:'Riziko většího objemu',d:'Posuzuješ, jestli u zásilky nehrozí velký skok objemu při drobné změně rozměrů — typicky dlouhé a široké, ale velmi tenké kusy.',rel:['Obj. hmotnost','Rozměry'],auto:1,o:[
+  ['Hrozí velká změna objemu při drobné změně rozměrů','res','Domluvíte se, co s tím.',['cena']],
+  ['Velká změna objemu nehrozí','ok','',[]],
+  ['Hrozí doplatek, zákazník informován','inf','Posíláte, zákazníka notifikuješ o možném doplatku.',['cena']],
+  ['Hrozí doplatek, chceme potvrzení','pot','Posíláte, zákazník musí doplatek předem odsouhlasit.',['cena']],
+  ['Zákazník kvůli riziku ruší','rus','',[]],
+  ['Jiná přeprava nebo přebalení','zme','Např. se zásilka přebalí, nebo se pošle mírně dražší variantou, u které nehrozí velký cenový skok.',['cena']]]},
+ {id:'skok',n:'Blízko cenovému skoku',d:'Posuzuješ, jestli zásilka není těsně pod hranicí, za kterou cena výrazně skočí.',rel:['Cenové pásmo','Obj. hmotnost'],auto:1,o:[
+  ['Hrozí velký cenový skok při vyšší účtovatelné hmotnosti','res','',['cena']],
+  ['Cenový skok nehrozí','ok','',[]],
+  ['Cenový skok docela hrozí','inf','',['cena']],
+  ['Cenový skok významně hrozí','pot','',['cena']],
+  ['Zákazník kvůli riziku ruší','rus','',[]],
+  ['Jiná přeprava nebo přebalení','zme','',['cena']]]},
+ {id:'priplatek',n:'Blízko velkému příplatku',d:'Posuzuješ, jestli zásilka není těsně pod rozměrovým limitem, jehož překročení znamená velký příplatek.',rel:['Rozměrový limit','Rozměry'],auto:1,
+  note:'Klient u této a u „Rizika většího objemu“ zvažuje sloučení do obecného „rizika vyšší ceny“. Návrh analýzy: místo sloučení použít značku 💰 (otázka 13).',o:[
+  ['Hrozí velký příplatek za překročení rozměrů','res','',['cena']],
+  ['Velký příplatek nehrozí','ok','',[]],
+  ['Příplatek docela hrozí','inf','',['cena']],
+  ['Příplatek významně hrozí','pot','',['cena']],
+  ['Zákazník kvůli riziku ruší','rus','',[]],
+  ['Jiná přeprava nebo přebalení','zme','',['cena']]]},
+]}]},
+];
+const PROPOSAL={pojodp:0, plnamoc:0, stat:1, tel:3, dobadoruc:0, objem:1, skok:1, priplatek:1};
+
+/* ═══════════════ STATE ═══════════════ */
+const S={
+  sel:{},        /* id -> index volby */
+  agenda:{},     /* id -> 1  (navěšeno na hovor) */
+  note:{},       /* id -> poznámka k bodu agendy */
+  wait:{},       /* id -> 1  (čeká se na zákazníka) */
+  ticked:{},     /* id -> 1  (odbaveno v hovoru) */
+  evid:{},       /* id -> jak byl souhlas získán */
+  edit:{},       /* id -> rozbalený picker */
+  filter:'vse',  /* vse | open | agenda */
+  group:'stav',  /* stav | tema | kat */
+  notes:'Zákazník volá z auta, mluvit stručně.\nDrone je dárek — na termín 24. 12. si potrpí.',
+  area:null,
+  sim:{mimoEU:true, pojisteno:false, clo:true, pref:true}
+};
+
+/* ═══════════════ ODVOZENÉ ═══════════════ */
+const ITEMS=[];
+AREAS.forEach(a=>a.groups.forEach(g=>g.items.forEach(it=>{
+  it.area=a.name; it.areaId=a.id; it.conds=[a.cond,it.cond].filter(Boolean);
+  ITEMS.push(it);
+})));
+const BY=Object.fromEntries(ITEMS.map(i=>[i.id,i]));
+const CONDN={mimoEU:'mimo EU',clo:'plnohodnotné clení',pref:'preferenční dohoda',pojisteno:'pojištěno'};
+/* stavy, které samy o sobě patří na hovor */
+const CALLST=['zji','res','inf','pot','zme'];
+
+const vis   = it => it.conds.every(c=>S.sim[c]);
+const live  = () => ITEMS.filter(vis);
+const stOf  = id => S.sel[id]===undefined ? null : BY[id].o[S.sel[id]][1];
+const optOf = id => S.sel[id]===undefined ? null : BY[id].o[S.sel[id]];
+
+/* stav položky ve 2. sloupci */
+function phase(id){
+  const s=stOf(id);
+  if(!s) return 'todo';                    /* nevyhodnoceno */
+  if(S.ticked[id]) return 'done';          /* odbaveno v hovoru */
+  if(S.wait[id]) return 'wait';
+  if(S.agenda[id]) return 'call';          /* na agendě — i „v pořádku“, když ji tam operátor dá sám */
+  if(s==='ok'||s==='rus') return 'done';   /* konečné, hovor nepotřebuje */
+  return 'loose';                          /* vyhodnoceno, ale nikde se neřeší */
+}
+const onAgenda = id => ['call','wait'].includes(phase(id));
+
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const stlab=(s,past)=>`<span class="st"><span class="sic sic-${s}">${ST[s].ic}</span>${past?ST[s].n2:ST[s].n}</span>`;
+const sic=s=>`<span class="sic sic-${s}">${ST[s].ic}</span>`;
+const ordered=it=>it.o.map((op,i)=>[i,op]).sort((a,b)=>RANK[a[1][1]]-RANK[b[1][1]] || a[0]-b[0]);
+const tagchip=t=>`<span title="${TAGS[t][1]}">${TAGS[t][0]}</span>`;
+
+/* ═══════════════ RENDER ═══════════════ */
+const board=document.getElementById('board');
+
+function render(){
+  const L=live();
+  const anyRed=L.some(i=>stOf(i.id)==='rus');
+  document.body.classList.toggle('locked',anyRed);
+  document.getElementById('ban').classList.toggle('on',anyRed);
+
+  const decided=L.filter(i=>stOf(i.id)).length;
+  const closed =L.filter(i=>phase(i.id)==='done').length;
+  const agenda =L.filter(i=>onAgenda(i.id));
+  document.getElementById('pnum').textContent=
+    `vyhodnoceno ${decided}/${L.length} · na agendě ${agenda.length} · uzavřeno ${closed}/${L.length}`;
+  document.getElementById('pb1').style.width=(decided/L.length*100)+'%';
+  document.getElementById('pb2').style.width=(closed/L.length*100)+'%';
+
+  const g=document.getElementById('gstat'); const sts=L.map(i=>stOf(i.id)); let k,txt,sub='';
+  if(sts.includes('rus')){k='rus';txt='Zásilka se ruší';}
+  else if(sts.includes(null)){k='zji';txt='Vyhodnocuje se';sub=`zbývá ${sts.filter(s=>!s).length}`;}
+  else if(closed<L.length){k='pot';txt='K odbavení v hovoru';sub=`${L.length-closed} položek`;}
+  else if(sts.includes('inf')||sts.includes('pot')||sts.includes('zme')){k='ok';txt='Posílá se s nálezy';}
+  else {k='ok';txt='Posílá se v pořádku';}
+  g.className='gstat g-'+k;
+  g.innerHTML=`${sic(k)}${esc(txt)}${sub?` <span class="gsub">· ${esc(sub)}</span>`:''}`;
+
+  /* zachovat scroll ve sloupcích */
+  const keep={};
+  document.querySelectorAll('.col-b[id]').forEach(n=>keep[n.id]=n.scrollTop);
+  board.innerHTML = colToc(L) + colItems(L) + colCall(L,agenda);
+  Object.entries(keep).forEach(([id,v])=>{const n=document.getElementById(id); if(n) n.scrollTop=v;});
+  measure();
+}
+
+/* ---------- 1. sloupec: OBSAH ---------- */
+function colToc(L){
+  const rows=AREAS.map(a=>{
+    const shown=!a.cond||S.sim[a.cond];
+    const items=a.groups.flatMap(g=>g.items).filter(vis);
+    if(!shown) return `<a class="toc-a off"><div class="toc-r1"><span class="toc-nm">${esc(a.name)}</span>
+        <span class="toc-cond">skryto</span></div>
+        <div class="toc-dots" style="font-size:10px;color:var(--faint)">podmínka: ${esc(CONDN[a.cond]||a.cond)}</div></a>`;
+    const dec=items.filter(i=>stOf(i.id)).length;
+    const dots=items.map(i=>{
+      const s=stOf(i.id);
+      return s?`<span class="dot s-${s}" style="background:var(--sc)" title="${esc(i.n)} — ${esc(ST[s].n)}"></span>`
+              :`<span class="dot none" title="${esc(i.n)} — nevyhodnoceno"></span>`;
+    }).join('');
+    return `<a class="toc-a ${S.area===a.id?'on':''}" data-nav="${a.id}">
+      <div class="toc-r1"><span class="toc-nm">${esc(a.name)}</span><span class="toc-n">${dec}/${items.length}</span></div>
+      <div class="toc-dots">${dots}</div></a>`;
+  }).join('');
+
+  const seg=(v,l)=>`<button data-filter="${v}" class="${S.filter===v?'on':''}">${l}</button>`;
+  const legend=Object.entries(ST).map(([k,v])=>
+    `<div class="leg-r">${sic(k)}<b>${esc(v.n)}</b></div>`).join('');
+
+  return `<div class="col col-toc">
+    <div class="col-h">
+      <div class="ch-top"><span class="ch-t">Obsah</span><span class="ch-n">${L.length}<em> pol.</em></span></div>
+      <span class="segs">${seg('vse','vše')}${seg('open','nevyřešené')}${seg('agenda','na agendě')}</span>
+    </div>
+    <div class="col-b" id="cbToc"><div class="toc">${rows}
+      <div class="toc-h">Typy stavů</div>
+      <div class="legend">${legend}</div>
+      <div class="leg-note">Kolečka u oblasti = jedna položka, jedna tečka. Prázdné kolečko = zatím nevyhodnoceno.
+      Tečky drží pořadí položek, takže je hned vidět, kde v oblasti je problém.</div>
+    </div></div></div>`;
+}
+
+/* ---------- volby ---------- */
+function optsHTML(it,selIdx,past){
+  let rows='',last=null;
+  ordered(it).forEach(([i,op])=>{
+    if(past && op[1]==='zji') return;   /* po hovoru „nevíme“ není platný výsledek */
+    const r=RANK[op[1]];
+    if(last!==null && r!==last) rows+='<div class="osep"></div>';
+    last=r;
+    rows+=`<button class="orow s-${op[1]} ${selIdx===i?'sel':''}" data-opt="${it.id}:${i}" data-pop="${it.id}:${i}">
+        <span class="rd"></span><span class="txt">${esc(op[0])}</span>
+        <span class="tg">${op[3].map(tagchip).join('')}</span>${stlab(op[1],past)}
+        <span class="info" title="popis volby">i</span></button>`;
+  });
+  return `<div class="opts">${rows}</div>`;
+}
+
+/* ---------- 2. sloupec: VŠECHNY POLOŽKY ---------- */
+function itemCard(it){
+  const ph=phase(it.id), st=stOf(it.id), editing=S.edit[it.id];
+  const a=AREAS.find(x=>x.id===it.areaId);
+  const rel=(it.rel||[]).map(k=>{const kv=a&&a.ctx.find(c=>c[0]===k);
+    return kv?`${esc(kv[0])}: <b>${esc(kv[1])}</b>`:'';}).filter(Boolean).join(' · ');
+
+  let body='',bar='',dup='';
+  if(ph==='todo'||editing){
+    body=(it.d?`<p class="dsc">${esc(it.d)}</p>`:'')+optsHTML(it,S.sel[it.id],false)
+       + (rel?`<div class="rel">${rel}</div>`:'');
+    if(editing) bar=`<button class="lnk" data-edit="${it.id}">zpět</button>`;
+  }else{
+    const i=S.sel[it.id], op=it.o[i];
+    body=`<button class="chosen" data-pop="${it.id}:${i}" data-edit="${it.id}" title="klik = změnit volbu">
+        ${sic(st)}<span class="ct">${esc(op[0])}</span><span class="tg">${op[3].map(tagchip).join('')}</span></button>`;
+    const zmen=`<button class="lnk" data-edit="${it.id}">změnit volbu</button>`;
+    if(ph==='done'){
+      const jak=S.evid[it.id]?` · ${esc(S.evid[it.id])}`:'';
+      bar=zmen+(S.ticked[it.id]?'':`<button class="mini" data-add="${it.id}">+ zmínit v hovoru</button>`)
+         +`<span class="right">${S.ticked[it.id]?'odbaveno v hovoru'+jak:'uzavřeno bez hovoru'}</span>`;
+    }else if(ph==='loose'){
+      bar=zmen+`<button class="mini" data-add="${it.id}">+ na agendu hovoru</button>`
+         +`<span class="right orphan">neřeší se nikde</span>`;
+    }else{
+      bar=zmen+`<button class="lnk" data-drop="${it.id}">sundat z agendy</button>`;
+    }
+    if(ph==='call') dup=`<div class="dup" data-go="${it.id}">📞 <b>Na agendě hovoru</b> · ${esc(ZONE_OF[st])}
+        <span class="go">ukázat v agendě →</span></div>`;
+    if(ph==='wait') dup=`<div class="dup wait" data-go="${it.id}">${sic('cek')} <b>Čeká se na zákazníka</b>
+        <span class="go">ukázat v agendě →</span></div>`;
+    if(ph==='done'&&S.ticked[it.id]) dup=`<div class="dup done" data-go="${it.id}">✓ <b>Probráno v hovoru</b>
+        ${S.note[it.id]?'· poznámka u bodu agendy':''}<span class="go">ukázat v agendě →</span></div>`;
+  }
+  /* iskill = karta, která zásilku ruší → jako jediná zůstává klikatelná, aby šel zámek sundat */
+  return `<div class="card ${ph==='done'?'done':''} ${st==='rus'?'iskill':''}" data-twin="${it.id}" data-rel="${(it.rel||[]).join('|')}">
+    <div class="hd">
+      <span class="nm">${esc(it.n)}</span>
+      ${it.conds.length?`<span class="cnd">jen když: ${it.conds.map(c=>esc(CONDN[c]||c)).join(' + ')}</span>`:''}
+      ${it.auto?`<span class="autopill">⚡ systém umí předvyplnit</span>`:''}
+      ${it.warn?`<span class="flag" title="${esc(it.warn)}">⚠ k vyjasnění</span>`:''}</div>
+    ${body}${dup}
+    ${bar?`<div class="cardbar">${bar}</div>`:''}</div>`;
+}
+
+function colItems(L){
+  const pass=it=>{
+    const ph=phase(it.id);
+    if(S.filter==='open')   return ph==='todo'||ph==='call'||ph==='wait'||ph==='loose';
+    if(S.filter==='agenda') return ph==='call'||ph==='wait';
+    return true;
+  };
+  const inner=AREAS.filter(a=>!a.cond||S.sim[a.cond]).map(a=>{
+    const all=a.groups.flatMap(g=>g.items).filter(vis);
+    const shown=all.filter(pass);
+    if(!shown.length) return '';
+    const dec=all.filter(i=>stOf(i.id)).length;
+    return `<div class="area" id="ar-${a.id}" data-area="${a.id}">
+      <div class="area-h">
+        <div class="area-t"><h2>${esc(a.name)}</h2><span class="pr">vyhodnoceno ${dec} z ${all.length}</span></div>
+        <div class="ctxbox">${a.ctx.map(([k,v])=>`<span class="kv" data-k="${esc(k)}">${esc(k)}: <b>${esc(v)}</b></span>`).join('')}</div>
+      </div>
+      ${a.groups.map(g=>{
+        const gi=g.items.filter(it=>vis(it)&&pass(it)); if(!gi.length) return '';
+        return (g.n?`<div class="grp">${esc(g.n)}</div>`:'')+`<div class="cards">${gi.map(itemCard).join('')}</div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+  const fl={vse:'všechny položky',open:'jen nevyřešené',agenda:'jen to, co je na agendě'}[S.filter];
+  return `<div class="col col-items">
+    <div class="col-h">
+      <div class="ch-top"><span class="ch-t">Položky checklistu</span>
+        <span class="ch-n">${L.filter(i=>stOf(i.id)).length}<em>/${L.length}</em></span></div>
+      <div class="ch-sub">Zobrazeno: ${fl} · vyhodnocené i navěšené na hovor tu zůstávají, nic se neodstěhuje</div>
+    </div>
+    <div class="col-b" id="cbItems">${inner||'<div class="colempty">Filtr nic nenašel.</div>'}</div></div>`;
+}
+
+/* ---------- 3. sloupec: AGENDA HOVORU ---------- */
+const ZONE_OF={zji:'Zjistit',res:'Vyřešit',inf:'Informovat',pot:'Potvrdit',zme:'Potvrdit',
+               ok:'Jen zmínit',rus:'Jen zmínit'};
+
+function agCard(it){
+  const st=stOf(it.id), i=S.sel[it.id], op=it.o[i], ph=phase(it.id), editing=S.edit['ag_'+it.id];
+  let act='';
+  if(ph==='wait'){
+    act=`<div class="cardbar"><label class="tickbox"><input type="checkbox" data-tick="${it.id}"> Potvrzení dorazilo</label>
+         <button class="lnk right" data-unwait="${it.id}">zpět do agendy</button></div>`;
+  }else if(ph==='done'){
+    act=`<div class="cardbar"><span>✓ odbaveno${S.evid[it.id]?' · '+esc(S.evid[it.id]):''}</span>
+         <button class="lnk right" data-untick="${it.id}">vrátit na agendu</button></div>`;
+  }else if(st==='zji'||st==='res'){
+    act=editing
+      ? optsHTML(it,i,true)+`<div class="cardbar"><button class="lnk" data-agedit="${it.id}">zpět</button>
+          <span class="right">volba se propíše i do 2. sloupce</span></div>`
+      : `<div class="cardbar"><button class="mini" data-agedit="${it.id}">Zaznamenat výsledek hovoru</button>
+          <span class="right">dokud nevybereš, položka zůstává otevřená</span></div>`;
+  }else if(st==='ok'||st==='rus'){
+    /* konečný stav, který si operátor navěsil sám — chce ho jen zmínit */
+    act=`<div class="cardbar"><label class="tickbox"><input type="checkbox" data-tick="${it.id}"> Zmíněno</label>
+         <button class="lnk right" data-drop="${it.id}">sundat z agendy</button></div>`;
+  }else if(st==='inf'){
+    act=`<div class="cardbar"><label class="tickbox"><input type="checkbox" data-tick="${it.id}"> Informován</label>
+         <span class="right">souhlas se nevyžaduje</span></div>`;
+  }else{ /* pot / zme */
+    act=`<div class="cardbar"><label class="tickbox"><input type="checkbox" data-tick="${it.id}"> Potvrzeno</label>
+         <span class="evid">jak: <select data-evid="${it.id}">
+           <option ${S.evid[it.id]==='telefonicky'?'selected':''}>telefonicky</option>
+           <option ${S.evid[it.id]==='e-mailem'?'selected':''}>e-mailem</option>
+           <option ${S.evid[it.id]==='v portálu'?'selected':''}>v portálu</option></select></span>
+         <button class="lnk right" data-wait="${it.id}">čeká se →</button></div>`;
+  }
+  return `<div class="card" data-twin="${it.id}">
+    <div class="ag-crumb">${esc(it.area)}</div>
+    <div class="ag-h"><span class="ag-nm">${esc(it.n)}</span>
+      <button class="lnk" data-go2="${it.id}">v checklistu ↑</button></div>
+    <div class="ag-find">${sic(st)}<span><b>${esc(op[0])}</b> ${op[3].map(tagchip).join('')}</span></div>
+    <textarea class="ag-note" data-note="${it.id}"
+      placeholder="Co říct / co zaznělo…">${esc(S.note[it.id]||'')}</textarea>
+    ${act}</div>`;
+}
+
+function colCall(L,agenda){
+  const waits=L.filter(i=>phase(i.id)==='wait');
+  const open =agenda.filter(i=>phase(i.id)==='call');
+  const done =L.filter(i=>phase(i.id)==='done'&&S.ticked[i.id]);
+
+  let zones;
+  if(S.group==='stav'){
+    zones=[['zji','Zjistit',i=>stOf(i.id)==='zji'],
+           ['res','Vyřešit',i=>stOf(i.id)==='res'],
+           ['inf','Informovat',i=>stOf(i.id)==='inf'],
+           ['pot','Potvrdit',i=>['pot','zme'].includes(stOf(i.id))],
+           ['ok','Jen zmínit',i=>['ok','rus'].includes(stOf(i.id))]]
+      .map(([k,label,f])=>({tint:k,k,label,items:open.filter(f)})).filter(z=>z.items.length);
+  }else if(S.group==='tema'){
+    const order=['cena','dok','cas','stop','data'];
+    zones=order.map(t=>({k:null,label:TAGS[t][0]+' '+TAGS[t][1],
+      items:open.filter(i=>(optOf(i.id)[3][0]||null)===t)}));
+    zones.push({k:null,label:'Bez tématu',items:open.filter(i=>!optOf(i.id)[3].length)});
+    zones=zones.filter(z=>z.items.length);
+  }else{
+    zones=AREAS.map(a=>({k:null,label:a.name,items:open.filter(i=>i.areaId===a.id)})).filter(z=>z.items.length);
+  }
+
+  const seg=(v,l)=>`<button data-grp="${v}" class="${S.group===v?'on':''}">${l}</button>`;
+  const body=[
+    zones.map(z=>`<div class="zone ${z.tint?'tint zt-'+z.tint:''}">
+        <div class="zone-h">${z.k?sic(z.k):''} ${esc(z.label)} <span class="c">${z.items.length}</span></div>
+        <div class="cards">${z.items.map(agCard).join('')}</div></div>`).join(''),
+    waits.length?`<div class="zone tint zt-cek"><div class="zone-h">${sic('cek')} Čeká se na zákazníka
+        <span class="c">${waits.length}</span></div>
+        <div class="cards">${waits.map(agCard).join('')}</div></div>`:'',
+    done.length?`<div class="zone"><div class="zone-h">✓ Odbaveno v hovoru <span class="c">${done.length}</span></div>
+        <div class="cards">${done.map(agCard).join('')}</div></div>`:''
+  ].join('');
+
+  return `<div class="col col-call">
+    <div class="col-h">
+      <div class="ch-top"><span class="ch-t">Hovor · agenda</span>
+        <span class="ch-n">${open.length+waits.length}<em>/${L.length}</em></span></div>
+      <span class="segs">${seg('stav','podle stavu')}${seg('tema','podle tématu')}${seg('kat','podle oblasti')}</span>
+    </div>
+    <div class="callhead"><span class="ci">📞</span>
+      <div><b>Hovor se zákazníkem — zítra 10:00</b>
+        <div style="font-size:11px;color:var(--mut)">Jan Novák · +420 777 123 456 · ${open.length} bodů k probrání</div></div>
+      <button class="lnk">přeplánovat</button></div>
+    <div class="col-b" id="cbCall">${body||'<div class="colempty">Zatím nic k hovoru — navěsíš položku tlačítkem „+ na agendu“ ve 2. sloupci.</div>'}</div>
+    <div class="notespanel">
+      <div class="nh">Poznámky k zásilce</div>
+      <textarea id="notesArea" placeholder="Volné poznámky operátora — co zaznělo, na co nezapomenout…">${esc(S.notes)}</textarea>
+      <span class="hint">Ukládá se k zásilce. Poznámka ke konkrétnímu bodu se píše přímo do jeho kartičky výše.</span>
+    </div></div>`;
+}
+
+/* ═══════════════ HOVER PANEL ═══════════════ */
+const pop=document.getElementById('pop');
+let popKey=null, hideT=null;
+function showPop(el){
+  const [id,ix]=el.dataset.pop.split(':');
+  const it=BY[id]; if(!it||!it.o[+ix]) return;
+  const op=it.o[+ix];
+  if(popKey===el.dataset.pop && pop.classList.contains('show')) return;
+  popKey=el.dataset.pop;
+  pop.innerHTML=`<div class="pop-h">${stlab(op[1])}<span class="pop-t">${esc(op[0])}</span></div>
+    <div class="pop-b">${op[2]?esc(op[2]):'<em>Bez doplňujícího popisu — volba je samovysvětlující.</em>'}</div>
+    ${op[3].length?`<div class="pop-tags">${op[3].map(t=>`<span>${TAGS[t][0]} ${esc(TAGS[t][1])}</span>`).join('')}</div>`:''}`;
+  pop.classList.add('show'); pop.classList.remove('left');
+  const r=el.getBoundingClientRect();
+  pop.style.top='0px'; pop.style.left='0px';
+  const pw=pop.offsetWidth, ph=pop.offsetHeight;
+  let x=r.right+12, y=r.top+r.height/2-18;
+  if(x+pw>innerWidth-8){ x=r.left-pw-12; pop.classList.add('left'); }
+  if(y+ph>innerHeight-8) y=innerHeight-ph-8;
+  if(y<58) y=58;
+  pop.style.left=x+'px'; pop.style.top=y+'px';
+  pop.style.setProperty('--ay',Math.max(10,Math.min(ph-20,r.top+r.height/2-y-5))+'px');
+}
+function hidePop(){ pop.classList.remove('show'); popKey=null; }
+
+/* dvojče: zvýraznit tutéž položku v obou sloupcích */
+let twinKey=null;
+function twin(id){
+  if(twinKey===id) return;
+  twinKey=id;
+  document.querySelectorAll('.twin-hi').forEach(n=>n.classList.remove('twin-hi'));
+  if(id) document.querySelectorAll(`[data-twin="${id}"]`).forEach(n=>n.classList.add('twin-hi'));
+}
+document.addEventListener('mouseover',e=>{
+  const el=e.target.closest('[data-pop]');
+  if(el){ clearTimeout(hideT); showPop(el); } else if(!e.target.closest('#pop')){ hideT=setTimeout(hidePop,120); }
+  const card=e.target.closest('[data-twin]');
+  twin(card?card.dataset.twin:null);
+  const row=e.target.closest('[data-rel]');
+  if(row){
+    const rel=row.dataset.rel?row.dataset.rel.split('|'):[];
+    row.closest('.col-b')?.querySelectorAll('.kv').forEach(k=>k.classList.toggle('hi',rel.includes(k.dataset.k)));
+  }
+});
+addEventListener('scroll',hidePop,{passive:true,capture:true});
+
+/* ═══════════════ EVENTS ═══════════════ */
+function scrollTo(col,el){ if(el) el.scrollIntoView({behavior:'smooth',block:'center'}); }
+
+document.addEventListener('click',e=>{
+  const C=s=>e.target.closest(s); let el;
+
+  if(el=C('[data-opt]')){
+    const [id,i]=el.dataset.opt.split(':');
+    /* „až po hovoru“ = výsledek zapsaný ze 3. sloupce; překlik ve 2. sloupci je pořád příprava */
+    const afterCall=!!S.edit['ag_'+id];
+    S.sel[id]=+i;
+    delete S.edit[id]; delete S.edit['ag_'+id];
+    const st=BY[id].o[+i][1];
+    if(st==='ok'||st==='rus'){ delete S.agenda[id]; delete S.wait[id]; delete S.ticked[id]; }
+    else if(afterCall){ S.agenda[id]=1; delete S.wait[id]; S.ticked[id]=1; }  /* výsledek hovoru → odbaveno */
+    else { S.agenda[id]=1; delete S.wait[id]; delete S.ticked[id]; }          /* nové → rovnou na agendu */
+    hidePop(); return render();
+  }
+  if(el=C('[data-edit]')){ const id=el.dataset.edit; S.edit[id]=!S.edit[id]; hidePop(); return render(); }
+  if(el=C('[data-agedit]')){ const id=el.dataset.agedit; S.edit['ag_'+id]=!S.edit['ag_'+id]; hidePop(); return render(); }
+  if(el=C('[data-add]')){ S.agenda[el.dataset.add]=1; return render(); }
+  if(el=C('[data-drop]')){ delete S.agenda[el.dataset.drop]; delete S.wait[el.dataset.drop]; return render(); }
+  if(el=C('[data-tick]')){ const id=el.dataset.tick; S.ticked[id]=1; delete S.wait[id]; return render(); }
+  if(el=C('[data-untick]')){ const id=el.dataset.untick; delete S.ticked[id]; S.agenda[id]=1; return render(); }
+  if(el=C('[data-wait]')){ const id=el.dataset.wait; S.wait[id]=1; return render(); }
+  if(el=C('[data-unwait]')){ delete S.wait[el.dataset.unwait]; return render(); }
+  if(el=C('[data-filter]')){ S.filter=el.dataset.filter; return render(); }
+  if(el=C('[data-grp]')){ S.group=el.dataset.grp; return render(); }
+  if(el=C('[data-nav]')){ S.area=el.dataset.nav;
+    document.getElementById('ar-'+el.dataset.nav)?.scrollIntoView({behavior:'smooth',block:'start'});
+    document.querySelectorAll('.toc-a').forEach(n=>n.classList.toggle('on',n.dataset.nav===S.area)); return; }
+  if(el=C('[data-go]')){ scrollTo('cbCall',document.querySelector(`#cbCall [data-twin="${el.dataset.go}"]`)); return; }
+  if(el=C('[data-go2]')){ scrollTo('cbItems',document.querySelector(`#cbItems [data-twin="${el.dataset.go2}"]`)); return; }
+});
+document.addEventListener('change',e=>{
+  if(e.target.dataset.evid){ S.evid[e.target.dataset.evid]=e.target.value; }
+});
+/* psaní bez překreslení, ať operátor nepřijde o kurzor */
+document.addEventListener('input',e=>{
+  if(e.target.id==='notesArea') S.notes=e.target.value;
+  else if(e.target.dataset.note) S.note[e.target.dataset.note]=e.target.value;
+});
+/* scroll-spy — obsah vlevo sleduje, kde jsi */
+document.addEventListener('scroll',e=>{
+  if(e.target.id!=='cbItems') return;
+  const top=e.target.getBoundingClientRect().top+40;
+  let cur=null;
+  e.target.querySelectorAll('.area').forEach(a=>{ if(a.getBoundingClientRect().top<=top) cur=a.dataset.area; });
+  if(cur&&cur!==S.area){ S.area=cur;
+    document.querySelectorAll('.toc-a').forEach(n=>n.classList.toggle('on',n.dataset.nav===cur)); }
+},true);
+
+function measure(){
+  const th=document.getElementById('tophdr').offsetHeight+
+           (document.getElementById('ban').classList.contains('on')?document.getElementById('ban').offsetHeight:0);
+  document.documentElement.style.setProperty('--th',th+'px');
+}
+addEventListener('resize',measure);
+
+/* ═══════════════ VÝCHOZÍ STAV UKÁZKY ═══════════════ */
+[['znam',0],['podm',2],['dg',3],['dok',2],['clenicil',4],['vnejsi',0],['osklivy',1],
+ ['pojodp',0],['faktura',3],['stat',1],['tel',3],['priplatek',3],['hodobs',3],['objem',3],['psc',2]
+].forEach(([id,i])=>{
+  if(!BY[id]) return;
+  S.sel[id]=i;
+  const st=BY[id].o[i][1];
+  if(CALLST.includes(st)) S.agenda[id]=1;
+});
+S.ticked['hodobs']=1;            /* už probráno v hovoru */
+S.wait['objem']=1;               /* čeká se na potvrzení doplatku */
+S.evid['hodobs']='telefonicky';
+S.note['clenicil']='Muster AG má vlastního brokera? Pokud ne, doklady navíc + zdržení ~2 dny.';
+S.note['pojodp']='Rozdíl 32 500 Kč. Nabídnout pojištění — cca 450 Kč, nebo si to vezme na sebe.';
+S.note['vnejsi']='Zeptat se, v čem je to zabalené a jestli je dron v originál krabici.';
+render();
+</script>
