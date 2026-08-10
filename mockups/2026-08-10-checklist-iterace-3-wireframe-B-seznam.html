@@ -131,7 +131,19 @@ textarea{font:inherit}
 .cards{padding:11px 13px 13px;display:flex;flex-direction:column;gap:10px}
 
 .card{border:1px solid var(--line);border-radius:10px;padding:10px 12px 11px;background:var(--well);position:relative}
-.card.done{background:var(--card);border-style:dashed}
+/* hotová položka — jeden řádek, barvu nese celá karta podle výsledného stavu */
+.card.done{background:color-mix(in srgb,var(--sc) 10%,var(--card));
+  border-color:color-mix(in srgb,var(--sc) 32%,transparent);padding:0;overflow:hidden}
+.donerow{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:none;
+  padding:7px 11px;cursor:pointer;flex-wrap:wrap;line-height:1.35}
+.donerow:hover{background:color-mix(in srgb,var(--sc) 8%,transparent)}
+.donerow .dn{font-size:12.5px;font-weight:650;color:var(--ink)}
+.donerow .dv{font-size:12.5px;color:var(--mut)}
+.donerow .tg{display:flex;gap:3px;font-size:10.5px;opacity:.75}
+.donerow .dm{margin-left:auto;font-size:10.5px;color:var(--faint);white-space:nowrap}
+.donenote{padding:0 11px 7px;font-size:11.5px;color:var(--mut);white-space:pre-wrap}
+.doneact{display:none;gap:12px;padding:0 11px 8px}
+.card.done:hover .doneact,.card.done:focus-within .doneact{display:flex}
 .card.twin-hi{border-color:var(--accent2);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent2) 30%,transparent)}
 .card .crumb{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin-bottom:2px}
 .card .hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:2px}
@@ -654,14 +666,23 @@ function itemCard(it){
     if(editing) bar=`<button class="lnk" data-edit="${it.id}">zpět</button>`;
   }else{
     const i=S.sel[it.id], op=it.o[i];
+    /* hotovo = jeden řádek. Detail i akce se rozbalí až na najetí / kliknutí. */
+    if(ph==='done'){
+      /* meta jen tam, kde nese informaci — „uzavřeno bez hovoru“ je u zelené samozřejmost */
+      const meta=S.ticked[it.id]
+        ? `<span class="dm">odbaveno v hovoru${S.evid[it.id]?' · '+esc(S.evid[it.id]):''}</span>` : '';
+      return `<div class="card done s-${st} ${st==='rus'?'iskill':''}" data-twin="${it.id}" data-rel="${(it.rel||[]).join('|')}">
+        <button class="donerow" data-edit="${it.id}" title="klik = rozbalit a změnit volbu">
+          ${sic(st)}<span class="dn">${esc(it.n)}</span><span class="dv">${esc(op[0])}</span>
+          <span class="tg">${op[3].map(tagchip).join('')}</span>${meta}</button>
+        <div class="doneact"><button class="lnk" data-edit="${it.id}">změnit volbu</button>
+          ${S.ticked[it.id]?`<button class="lnk" data-go="${it.id}">ukázat v agendě →</button>`
+                           :`<button class="lnk" data-add="${it.id}">+ zmínit v hovoru</button>`}</div></div>`;
+    }
     body=`<button class="chosen" data-pop="${it.id}:${i}" data-edit="${it.id}" title="klik = změnit volbu">
         ${sic(st)}<span class="ct">${esc(op[0])}</span><span class="tg">${op[3].map(tagchip).join('')}</span></button>`;
     const zmen=`<button class="lnk" data-edit="${it.id}">změnit volbu</button>`;
-    if(ph==='done'){
-      const jak=S.evid[it.id]?` · ${esc(S.evid[it.id])}`:'';
-      bar=zmen+(S.ticked[it.id]?'':`<button class="mini" data-add="${it.id}">+ zmínit v hovoru</button>`)
-         +`<span class="right">${S.ticked[it.id]?'odbaveno v hovoru'+jak:'uzavřeno bez hovoru'}</span>`;
-    }else if(ph==='loose'){
+    if(ph==='loose'){
       bar=zmen+`<button class="mini" data-add="${it.id}">+ na agendu hovoru</button>`
          +`<span class="right orphan">neřeší se nikde</span>`;
     }else{
@@ -671,8 +692,6 @@ function itemCard(it){
         <span class="go">ukázat v agendě →</span></div>`;
     if(ph==='wait') dup=`<div class="dup wait" data-go="${it.id}">${sic('cek')} <b>Čeká se na zákazníka</b>
         <span class="go">ukázat v agendě →</span></div>`;
-    if(ph==='done'&&S.ticked[it.id]) dup=`<div class="dup done" data-go="${it.id}">✓ <b>Probráno v hovoru</b>
-        ${S.note[it.id]?'· poznámka u bodu agendy':''}<span class="go">ukázat v agendě →</span></div>`;
   }
   /* iskill = karta, která zásilku ruší → jako jediná zůstává klikatelná, aby šel zámek sundat */
   return `<div class="card ${ph==='done'?'done':''} ${st==='rus'?'iskill':''}" data-twin="${it.id}" data-rel="${(it.rel||[]).join('|')}">
@@ -724,13 +743,18 @@ const ZONE_OF={zji:'Zjistit',res:'Vyřešit',inf:'Informovat',pot:'Potvrdit',zme
 
 function agCard(it){
   const st=stOf(it.id), i=S.sel[it.id], op=it.o[i], ph=phase(it.id), editing=S.edit['ag_'+it.id];
+  /* odbavený bod agendy — taky jen řádek, poznámka z hovoru zůstane jako záznam */
+  if(ph==='done') return `<div class="card done s-${st}" data-twin="${it.id}">
+    <button class="donerow" data-go2="${it.id}" title="klik = ukázat v checklistu">
+      ${sic(st)}<span class="dn">${esc(it.n)}</span><span class="dv">${esc(op[0])}</span>
+      <span class="dm">✓ ${esc(S.evid[it.id]||'odbaveno')}</span></button>
+    ${S.note[it.id]?`<div class="donenote">${esc(S.note[it.id])}</div>`:''}
+    <div class="doneact"><button class="lnk" data-untick="${it.id}">vrátit na agendu</button></div></div>`;
+
   let act='';
   if(ph==='wait'){
     act=`<div class="cardbar"><label class="tickbox"><input type="checkbox" data-tick="${it.id}"> Potvrzení dorazilo</label>
          <button class="lnk right" data-unwait="${it.id}">zpět do agendy</button></div>`;
-  }else if(ph==='done'){
-    act=`<div class="cardbar"><span>✓ odbaveno${S.evid[it.id]?' · '+esc(S.evid[it.id]):''}</span>
-         <button class="lnk right" data-untick="${it.id}">vrátit na agendu</button></div>`;
   }else if(st==='zji'||st==='res'){
     act=editing
       ? optsHTML(it,i,true)+`<div class="cardbar"><button class="lnk" data-agedit="${it.id}">zpět</button>
