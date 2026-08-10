@@ -101,13 +101,6 @@ textarea{font:inherit}
 .ch-n em{font-style:normal;font-size:12px;font-weight:500;color:var(--mut);opacity:.7}
 .ch-sub{font-size:11px;color:var(--mut);margin-top:-3px}
 .ch-row{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-top:-1px}
-.notetog{display:inline-flex;align-items:center;gap:6px;font-size:11px;cursor:pointer;color:var(--mut);
-  padding:3px 9px;border-radius:14px;border:1px solid var(--line);background:var(--card)}
-.notetog b{font-variant-numeric:tabular-nums;color:var(--ink)}
-.notetog:hover{border-color:var(--mut);color:var(--ink)}
-.notetog.on{border-color:var(--accent);color:var(--ink);background:color-mix(in srgb,var(--accent) 10%,transparent);font-weight:600}
-.notetog.zero{opacity:.45;cursor:default}
-.notetog.zero:hover{border-color:var(--line);color:var(--mut)}
 .stchip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;cursor:pointer;
   padding:3px 9px;border-radius:14px;border:1px solid var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
 .stchip .x{color:var(--mut);font-weight:400}
@@ -183,7 +176,9 @@ textarea{font:inherit}
 .dm{margin-left:auto;font-size:11px;color:var(--faint);white-space:nowrap}
 .dm.ag{color:var(--mut);font-weight:600}
 .dm.warn{color:var(--res);font-weight:600}
-.donenote{padding:0 11px 7px;font-size:11.5px;color:var(--mut);white-space:pre-wrap}
+.donenote{display:block;width:100%;text-align:left;background:none;border:none;cursor:pointer;
+  padding:0 11px 7px;font-size:11.5px;color:var(--mut);white-space:pre-wrap;line-height:1.45}
+.donenote:hover{color:var(--ink)}
 .doneact{display:none;gap:12px;padding:0 11px 8px}
 .card.done:hover .doneact,.card.done:focus-within .doneact,
 .card.onag:hover .doneact,.card.onag:focus-within .doneact,
@@ -284,6 +279,17 @@ textarea{font:inherit}
          background:var(--well);color:var(--ink);padding:7px 9px;font-size:12px;line-height:1.5}
 .ag-note:focus{outline:none;border-color:var(--accent2);background:var(--card)}
 .ag-note::placeholder{color:var(--faint)}
+/* rychlý zápis za hovoru — tenké, tiché pole rovnou na kartičce */
+.ag-note.quick{min-height:0;margin-top:7px;padding:5px 9px;background:none;border-color:var(--line2)}
+.ag-note.quick:placeholder-shown{color:var(--mut)}
+.ag-note.quick:not(:placeholder-shown){background:var(--well);border-color:var(--line)}
+/* záložka Poznámky — text je hlavní, kontext nad ním drobný */
+.notec{padding:10px 12px 11px}
+.nc-h{display:flex;align-items:center;gap:7px}
+.nc-n{font-size:12.5px;font-weight:650;flex:1;line-height:1.3}
+.nc-f{font-size:11px;color:var(--mut);margin:2px 0 7px;padding-left:23px}
+.nc-w{color:var(--faint)}
+.notec .ag-note{margin-top:0;min-height:58px;font-size:12.5px}
 .evid{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--mut);flex-wrap:wrap}
 .evid select{font:inherit;font-size:10.5px;background:var(--card);color:var(--ink);border:1px solid var(--line);
              border-radius:5px;padding:1px 4px}
@@ -292,15 +298,6 @@ textarea{font:inherit}
 .tickbox:hover{color:var(--ok)}
 .tickbox input{width:16px;height:16px;margin:0;accent-color:var(--ok);cursor:pointer}
 .colempty{padding:14px 16px;color:var(--faint);font-size:12px;font-style:italic}
-.notespanel{flex:none;border-top:1px solid var(--line);background:var(--card);display:flex;flex-direction:column;
-            padding:11px 14px 13px;gap:7px;height:24%;min-height:132px}
-.notespanel .nh{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.08em;
-            text-transform:uppercase;color:var(--ink)}
-.notespanel .nh::before{content:"";width:3px;height:13px;border-radius:2px;background:var(--accent2)}
-.notespanel textarea{flex:1;width:100%;resize:none;border:1px solid var(--line);border-radius:9px;
-            background:var(--well);color:var(--ink);padding:9px 11px;font-size:12.5px;line-height:1.6}
-.notespanel textarea:focus{outline:none;border-color:var(--accent2);background:var(--card)}
-.notespanel .hint{font-size:10px;color:var(--faint)}
 
 .locked .col:not(.col-toc) .card:not(.iskill){opacity:.45;pointer-events:none}
 
@@ -573,7 +570,7 @@ const S={
   note:{},       /* id -> poznámka k bodu agendy */
   noteOpen:{},   /* id -> poznámka je rozbalená */
   stFilter:null, /* filtr podle typu stavu (z Obsahu) */
-  noteFilter:0,  /* jen položky, u kterých je poznámka */
+  rtab:'agenda', /* pravý sloupec: agenda / poznámky */
   wait:{},       /* id -> 1  (čeká se na zákazníka) */
   ticked:{},     /* id -> 1  (odbaveno v hovoru) */
   evid:{},       /* id -> jak byl souhlas získán */
@@ -610,7 +607,6 @@ const inState = (it,k) => {
 const passFilter = it => {
   const ph=phase(it.id);
   if(S.stFilter && !inState(it,S.stFilter)) return false;
-  if(S.noteFilter && !S.note[it.id]) return false;
   if(S.filter==='open')   return ph!=='done';
   if(S.filter==='agenda') return ph==='call'||ph==='wait';
   return true;
@@ -682,7 +678,7 @@ function colToc(L){
   const rows=AREAS.map(a=>{
     const shown=!a.cond||S.sim[a.cond];
     const items=a.groups.flatMap(g=>g.items).filter(vis);
-    const filtered=S.stFilter||S.noteFilter||S.filter!=='vse';
+    const filtered=S.stFilter||S.filter!=='vse';
     /* oblast skrytá podmínkou zásilky — dává smysl jen když nic nefiltruje */
     if(!shown) return filtered ? '' : `<a class="toc-a off"><div class="toc-r1"><span class="toc-nm">${esc(a.name)}</span>
         <span class="toc-cond">skryto</span></div>
@@ -745,8 +741,9 @@ function optsHTML(it,selIdx,past){
 /* ---------- 2. sloupec: VŠECHNY POLOŽKY ---------- */
 function itemCard(it){
   const ph=phase(it.id), st=stOf(it.id), editing=S.edit[it.id];
-  /* kontext zásilky se ukáže až po najetí — na kartě nezabírá místo */
-  const attrs=`data-twin="${it.id}" data-rel="${(it.rel||[]).join('|')}" data-relpop="${it.id}"`;
+  /* žádný plovoucí kontext — ten je vidět v pruhu nad oblastí a najetím se v něm rozsvítí
+     přesně ty údaje, kterých se položka týká (data-rel) */
+  const attrs=`data-twin="${it.id}" data-rel="${(it.rel||[]).join('|')}"`;
 
   /* ── nevyhodnoceno (nebo rozbaleno ke změně) = plná karta s volbami ── */
   if(ph==='todo'||editing){
@@ -796,14 +793,18 @@ function itemCard(it){
   /* hotovo je vždycky zelené, ať se uzavřelo jakkoli — jediná výjimka je zrušená zásilka.
      Stav si nese ikona vlevo, plocha říká jen „tohle už je za mnou“.
      Poznámku lze psát jen sem — u uzavřené položky je to záznam, ne pracovní lístek. */
-  const noteOpen=S.noteOpen[it.id]||!!S.note[it.id];
+  /* napsaná poznámka je tu jen jako řádek záznamu; psát se do ní dá po kliknutí */
+  const note=S.noteOpen[it.id]
+    ? `<textarea class="ag-note" data-note="${it.id}" placeholder="Poznámka…">${esc(S.note[it.id]||'')}</textarea>`
+    : (S.note[it.id]
+        ? `<button class="donenote" data-noteopen="${it.id}" title="klik = upravit">📝 ${esc(S.note[it.id])}</button>`
+        : '');
   return row(`done ${st==='rus'?'s-rus':'s-ok'}`,
     S.ticked[it.id]?`<span class="dm">vyřešeno v hovoru${S.evid[it.id]?' · '+esc(S.evid[it.id]):''}</span>`:'',
     (S.ticked[it.id]?`<button class="lnk" data-go="${it.id}">ukázat v agendě →</button>`
                     :`<button class="lnk" data-add="${it.id}">+ zmínit v hovoru</button>`)
-    +(noteOpen?'':`<button class="lnk" data-noteopen="${it.id}">+ poznámka</button>`),
-    noteOpen?`<textarea class="ag-note" data-note="${it.id}"
-      placeholder="Poznámka…">${esc(S.note[it.id]||'')}</textarea>`:'');
+    +(S.note[it.id]||S.noteOpen[it.id]?'':`<button class="lnk" data-noteopen="${it.id}">+ poznámka</button>`),
+    note);
 }
 
 function colItems(L){
@@ -831,9 +832,6 @@ function colItems(L){
       <div class="ch-top"><span class="ch-t">Položky checklistu</span>
         <span class="ch-n">${todo}<em> k posouzení</em></span></div>
       <div class="ch-row"><span class="segs">${seg('vse','vše')}${seg('open','nevyřešené')}${seg('agenda','na agendě')}</span>
-        ${(()=>{const n=L.filter(i=>S.note[i.id]).length;
-          return `<button class="notetog ${S.noteFilter?'on':''} ${n?'':'zero'}" data-notefilter="1"
-            title="${n?'jen položky s poznámkou':'zatím nikde není poznámka'}">📝 s poznámkou <b>${n}</b></button>`;})()}
         ${S.stFilter
           ? `<button class="stchip" data-st="${S.stFilter}">${S.stFilter==='none'?'<span class="dot none"></span>':sic(S.stFilter)}
                ${esc(S.stFilter==='none'?'Nevyhodnoceno':ST[S.stFilter].n)} <span class="x">✕</span></button>
@@ -857,10 +855,9 @@ function agCard(it){
     ${S.note[it.id]?`<div class="donenote">${esc(S.note[it.id])}</div>`:''}
     <div class="doneact"><button class="lnk" data-untick="${it.id}">vrátit na agendu</button></div></div>`;
 
-  const noteOpen=S.noteOpen[it.id]||!!S.note[it.id];
-  const noteBox=noteOpen?`<textarea class="ag-note" data-note="${it.id}"
-      placeholder="Poznámka…">${esc(S.note[it.id]||'')}</textarea>`:'';
-  const noteLink=noteOpen?'':`<button class="lnk" data-noteopen="${it.id}">+ poznámka</button>`;
+  /* zápis za hovoru musí být na jeden klik — pole je rovnou tady, jen tenké a tiché */
+  const noteBox=`<textarea class="ag-note quick" data-note="${it.id}" rows="1"
+      placeholder="Poznámka…">${esc(S.note[it.id]||'')}</textarea>`;
 
   /* jen odškrtávátka a poznámka — výsledek se zapisuje u položky v checklistu */
   let tick='';
@@ -874,15 +871,14 @@ function agCard(it){
       <option ${S.evid[it.id]==='e-mailem'?'selected':''}>e-mailem</option>
       <option ${S.evid[it.id]==='v portálu'?'selected':''}>v portálu</option></select></span>`:'';
 
-  const bar=`<div class="cardbar">
-    ${tick?`<label class="tickbox"><input type="checkbox" data-tick="${it.id}"> ${tick}</label>${evid}`:''}
-    <span class="right">${noteLink}</span></div>`;
+  const bar=tick?`<div class="cardbar">
+    <label class="tickbox"><input type="checkbox" data-tick="${it.id}"> ${tick}</label>${evid}</div>`:'';
 
   return `<div class="card ag" data-twin="${it.id}" data-relpop="${it.id}">
     <div class="ag-h"><span class="ag-nm">${esc(it.n)}</span>
       <button class="lnk" data-go2="${it.id}">v checklistu ↑</button></div>
     <div class="ag-find">${sic(st)}<span><b>${esc(op[0])}</b> ${op[3].map(tagchip).join('')}</span></div>
-    ${bar}${noteBox}</div>`;
+    ${noteBox}${bar}</div>`;
 }
 
 function colCall(L,agenda){
@@ -920,22 +916,52 @@ function colCall(L,agenda){
         <div class="cards">${done.map(agCard).join('')}</div></div>`:''
   ].join('');
 
+  const withNote=L.filter(i=>S.note[i.id]).length;
+  const tab=(v,l)=>`<button data-rtab="${v}" class="${S.rtab===v?'on':''}">${l}</button>`;
+  const isNotes=S.rtab==='notes';
+
   return `<div class="col col-call">
     <div class="col-h">
-      <div class="ch-top"><span class="ch-t">Hovor · agenda</span>
-        <span class="ch-n">${open.length}<em> k probrání</em></span></div>
-      <span class="segs">${seg('stav','podle stavu')}${seg('tema','podle rizika')}${seg('kat','podle oblasti')}</span>
+      <div class="ch-top"><span class="ch-t">Hovor</span>
+        <span class="ch-n">${isNotes?withNote:open.length}<em>${isNotes?' poznámek':' k probrání'}</em></span></div>
+      <div class="ch-row">
+        <span class="segs">${tab('agenda','agenda')}${tab('notes',`poznámky${withNote?' · '+withNote:''}`)}</span>
+        ${isNotes?'':`<span class="segs">${seg('stav','stav')}${seg('tema','riziko')}${seg('kat','oblast')}</span>`}
+      </div>
     </div>
     <div class="callhead"><span class="ci">📞</span>
       <div><b>Hovor se zákazníkem — zítra 10:00</b>
         <div style="font-size:11px;color:var(--mut)">Jan Novák · +420 777 123 456 · ${open.length} bodů k probrání</div></div>
       <button class="lnk">přeplánovat</button></div>
-    <div class="col-b" id="cbCall">${body||'<div class="colempty">Zatím nic k hovoru. Jakmile u položky vybereš volbu, která potřebuje zákazníka, objeví se tu jako bod agendy — a půjde si k němu psát poznámky.</div>'}</div>
-    <div class="notespanel">
-      <div class="nh">Poznámky k zásilce</div>
-      <textarea id="notesArea" placeholder="Volné poznámky operátora — co zaznělo, na co nezapomenout…">${esc(S.notes)}</textarea>
-      <span class="hint">Ukládá se k zásilce. Poznámka ke konkrétnímu bodu se píše přímo do jeho kartičky výše.</span>
-    </div></div>`;
+    <div class="col-b" id="cbCall">${isNotes?notesView(L)
+      :(body||'<div class="colempty">Zatím nic k hovoru. Jakmile u položky vybereš volbu, která potřebuje zákazníka, objeví se tu jako bod agendy.</div>')}</div></div>`;
+}
+
+/* ---------- 3. sloupec, záložka POZNÁMKY ----------
+   Všechno, co jsem si za hovoru zapsal, na jedné obrazovce — a u každé poznámky
+   je vidět, ke které položce patří a co u ní bylo rozhodnuto. */
+function notesView(L){
+  const items=L.filter(i=>S.note[i.id]);
+  const blocks=AREAS.map(a=>{
+    const its=items.filter(i=>i.areaId===a.id);
+    if(!its.length) return '';
+    return `<div class="zone"><div class="zone-h">${esc(a.name)} <span class="c">${its.length}</span></div>
+      <div class="cards">${its.map(noteCard).join('')}</div></div>`;
+  }).join('');
+  return `<div class="zone"><div class="zone-h">Obecně k zásilce</div>
+      <div class="cards"><textarea class="ag-note" id="notesArea"
+        placeholder="Co zaznělo, na co nezapomenout…">${esc(S.notes)}</textarea></div></div>
+    ${blocks||`<div class="colempty">Zatím sis nic nezapsal. Poznámku napíšeš přímo do kartičky v agendě —
+      objeví se tu i s tím, ke které položce patří.</div>`}`;
+}
+function noteCard(it){
+  const st=stOf(it.id), op=optOf(it.id), ph=phase(it.id);
+  const kde={call:'na agendě',wait:'čeká na zákazníka',done:'vyřešeno',loose:'mimo agendu',todo:''}[ph];
+  return `<div class="card notec">
+    <div class="nc-h">${sic(st)}<span class="nc-n">${esc(it.n)}</span>
+      <button class="lnk" data-go2="${it.id}">v checklistu ↑</button></div>
+    <div class="nc-f">${esc(op[0])}${kde?` <span class="nc-w">· ${kde}</span>`:''}</div>
+    <textarea class="ag-note" data-note="${it.id}">${esc(S.note[it.id])}</textarea></div>`;
 }
 
 /* ═══════════════ HOVER PANEL ═══════════════ */
@@ -1018,12 +1044,11 @@ document.addEventListener('click',e=>{
   if(el=C('[data-unwait]')){ delete S.wait[el.dataset.unwait]; return render(); }
   if(el=C('[data-noteopen]')){ S.noteOpen[el.dataset.noteopen]=1; render();
     document.querySelector(`[data-note="${el.dataset.noteopen}"]`)?.focus(); return; }
-  if(el=C('[data-notefilter]')){ if(el.classList.contains('zero')) return;
-    S.noteFilter=!S.noteFilter; return render(); }
   if(el=C('[data-st]')){ const k=el.dataset.st;
     if(el.classList.contains('zero')) return;
     S.stFilter=S.stFilter===k?null:k; return render(); }
   if(el=C('[data-filter]')){ S.filter=el.dataset.filter; return render(); }
+  if(el=C('[data-rtab]')){ S.rtab=el.dataset.rtab; return render(); }
   if(el=C('[data-grp]')){ S.group=el.dataset.grp; return render(); }
   if(el=C('[data-nav]')){ S.area=el.dataset.nav;
     document.getElementById('ar-'+el.dataset.nav)?.scrollIntoView({behavior:'smooth',block:'start'});
