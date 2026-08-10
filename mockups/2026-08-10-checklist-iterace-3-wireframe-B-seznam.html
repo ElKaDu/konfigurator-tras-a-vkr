@@ -152,9 +152,9 @@ textarea{font:inherit}
 .rowwrap{display:flex;align-items:center;gap:9px;padding-right:11px}
 .donerow{display:flex;align-items:center;gap:8px;flex:1;min-width:0;width:100%;text-align:left;background:none;border:none;
   padding:7px 11px;cursor:pointer;flex-wrap:wrap;line-height:1.35}
-.rowact{flex:none;font-weight:600;white-space:nowrap;border-color:color-mix(in srgb,var(--pot) 55%,transparent);
-  color:var(--pot);background:var(--card)}
-.rowact:hover{border-color:var(--pot);background:color-mix(in srgb,var(--pot) 10%,var(--card))}
+/* tlačítko na řádku je tiché a šedé — zezelená až výsledek, ne cesta k němu */
+.rowact{flex:none;font-weight:600;white-space:nowrap;color:var(--mut);background:var(--card)}
+.rowact:hover{border-color:var(--ok);color:var(--ok);background:color-mix(in srgb,var(--ok) 8%,var(--card))}
 .donerow:hover{background:color-mix(in srgb,var(--sc) 8%,transparent)}
 .donerow .dn{font-size:12.5px;font-weight:650;color:var(--ink)}
 .donerow .dv{font-size:12.5px;color:var(--mut)}
@@ -170,11 +170,7 @@ textarea{font:inherit}
 /* na agendě hovoru — přesně stejná plocha i rámeček jako neposouzená kartička;
    odlišuje ji jen jeden řádek a značka vpravo (📞 zóna / ✓ Potvrdit) */
 .card.onag{background:var(--well);border-color:var(--line);padding:0;overflow:hidden}
-.card.onag .donerow:hover{background:color-mix(in srgb,var(--cek) 6%,transparent)}
-/* čeká se na zákazníka — o stupeň sytější modrá, ať jde odlišit od „ještě to probereme“ */
-.card.onag.waiting{background:color-mix(in srgb,var(--cek) 15%,var(--card));
-  border-color:color-mix(in srgb,var(--cek) 38%,transparent)}
-.card.onag.waiting .donerow:hover{background:color-mix(in srgb,var(--cek) 9%,transparent)}
+.card.onag .donerow:hover{background:color-mix(in srgb,var(--accent) 6%,transparent)}
 /* rozhodnuto, ale nikde se to neřeší — jediný stav, který má být vidět jako nedodělek */
 .card.orphaned{background:var(--card);border:1px dashed var(--res);padding:0;overflow:hidden}
 .card.orphaned .donerow:hover{background:color-mix(in srgb,var(--res) 7%,transparent)}
@@ -738,23 +734,26 @@ function itemCard(it){
   const odebrat=`<button class="lnk" data-drop="${it.id}">odebrat z agendy</button>`;
 
   if(ph==='call'){
-    /* „Potvrdit“ je akce jen tam, kde je v agendě checkbox Potvrzeno — u ostatních zón jen popisek */
-    const meta=(st==='pot'||st==='zme')
+    /* tam, kde je v agendě jen checkbox, je i tady tlačítko se stejným účinkem;
+       u „Zjistit“ a „Vyřešit“ se musí zaznamenat výsledek, takže jen popisek */
+    const tick={pot:'Potvrdit',zme:'Potvrdit',inf:'Informován'}[st];
+    const meta=tick
       ? `<button class="mini rowact" data-tick="${it.id}"
-           title="uzavře položku v tomhle stavu — stejné jako checkbox Potvrzeno v agendě">✓ Potvrdit</button>`
+           title="uzavře položku v tomhle stavu — stejné jako odkliknutí v agendě">✓ ${tick}</button>`
       : `<span class="dm ag">📞 ${esc(ZONE_OF[st])}</span>`;
     return row('onag',meta,vAgende+odebrat);
   }
 
   if(ph==='wait')
-    return row('onag waiting',`<span class="dm ag">⏳ Čeká na zákazníka</span>`,vAgende);
+    return row('onag',`<span class="dm ag">⏳ Čeká na zákazníka</span>`,vAgende);
 
   if(ph==='loose') /* rozhodnuto, ale nikde se to neřeší — jediný řádek, který volá po akci */
     return row('orphaned',`<span class="dm warn">neřeší se nikde</span>`,
       `<button class="lnk" data-add="${it.id}">+ na agendu hovoru</button>`);
 
-  /* hotovo — barvu nese výsledný stav; meta jen tam, kde nese informaci */
-  return row(`done s-${st}`,
+  /* hotovo je vždycky zelené, ať se uzavřelo jakkoli — jediná výjimka je zrušená zásilka.
+     Stav si nese ikona vlevo, plocha říká jen „tohle už je za mnou“. */
+  return row(`done ${st==='rus'?'s-rus':'s-ok'}`,
     S.ticked[it.id]?`<span class="dm">vyřešeno v hovoru${S.evid[it.id]?' · '+esc(S.evid[it.id]):''}</span>`:'',
     S.ticked[it.id]?`<button class="lnk" data-go="${it.id}">ukázat v agendě →</button>`
                    :`<button class="lnk" data-add="${it.id}">+ zmínit v hovoru</button>`);
@@ -856,7 +855,7 @@ function colCall(L,agenda){
     const order=['cena','dok','cas','stop','data'];
     zones=order.map(t=>({k:null,label:TAGS[t][0]+' '+TAGS[t][1],
       items:open.filter(i=>(optOf(i.id)[3][0]||null)===t)}));
-    zones.push({k:null,label:'Bez tématu',items:open.filter(i=>!optOf(i.id)[3].length)});
+    zones.push({k:null,label:'Bez rizika',items:open.filter(i=>!optOf(i.id)[3].length)});
     zones=zones.filter(z=>z.items.length);
   }else{
     zones=AREAS.map(a=>({k:null,label:a.name,items:open.filter(i=>i.areaId===a.id)})).filter(z=>z.items.length);
@@ -878,7 +877,7 @@ function colCall(L,agenda){
     <div class="col-h">
       <div class="ch-top"><span class="ch-t">Hovor · agenda</span>
         <span class="ch-n">${open.length}<em> k probrání</em></span></div>
-      <span class="segs">${seg('stav','podle stavu')}${seg('tema','podle tématu')}${seg('kat','podle oblasti')}</span>
+      <span class="segs">${seg('stav','podle stavu')}${seg('tema','podle rizika')}${seg('kat','podle oblasti')}</span>
     </div>
     <div class="callhead"><span class="ci">📞</span>
       <div><b>Hovor se zákazníkem — zítra 10:00</b>
