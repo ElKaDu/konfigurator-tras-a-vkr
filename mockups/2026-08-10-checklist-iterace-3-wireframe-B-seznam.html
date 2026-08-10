@@ -167,10 +167,10 @@ textarea{font:inherit}
 .card.done:hover .doneact,.card.done:focus-within .doneact,
 .card.onag:hover .doneact,.card.onag:focus-within .doneact,
 .card.orphaned:hover .doneact,.card.orphaned:focus-within .doneact{display:flex}
-/* na agendě hovoru — nenápadná šedomodrá, stejně tichá jako položky k posouzení */
-.card.onag{background:color-mix(in srgb,var(--cek) 7%,var(--well));
-  border-color:color-mix(in srgb,var(--cek) 24%,var(--line));padding:0;overflow:hidden}
-.card.onag .donerow:hover{background:color-mix(in srgb,var(--cek) 7%,transparent)}
+/* na agendě hovoru — přesně stejná plocha i rámeček jako neposouzená kartička;
+   odlišuje ji jen jeden řádek a značka vpravo (📞 zóna / ✓ Potvrdit) */
+.card.onag{background:var(--well);border-color:var(--line);padding:0;overflow:hidden}
+.card.onag .donerow:hover{background:color-mix(in srgb,var(--cek) 6%,transparent)}
 /* čeká se na zákazníka — o stupeň sytější modrá, ať jde odlišit od „ještě to probereme“ */
 .card.onag.waiting{background:color-mix(in srgb,var(--cek) 15%,var(--card));
   border-color:color-mix(in srgb,var(--cek) 38%,transparent)}
