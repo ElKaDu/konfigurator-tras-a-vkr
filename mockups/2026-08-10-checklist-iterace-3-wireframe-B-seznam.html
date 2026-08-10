@@ -101,6 +101,10 @@ textarea{font:inherit}
 .ch-n em{font-style:normal;font-size:12px;font-weight:500;color:var(--mut);opacity:.7}
 .ch-sub{font-size:11px;color:var(--mut);margin-top:-3px}
 .ch-row{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-top:-1px}
+.stchip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;cursor:pointer;
+  padding:3px 9px;border-radius:14px;border:1px solid var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.stchip .x{color:var(--mut);font-weight:400}
+.stchip:hover .x{color:var(--ink)}
 .ch-row .ch-sub{margin:0;flex:1;min-width:190px}
 .toc-hid{font-size:10.5px;color:var(--faint);padding:9px 14px 0;font-style:italic}
 .col-b{flex:1;overflow-y:auto;min-height:0;overscroll-behavior:contain}
@@ -124,9 +128,17 @@ textarea{font:inherit}
 .toc-cond{font-size:10px;color:var(--faint);border:1px dashed var(--line);border-radius:5px;padding:0 5px}
 .toc-h{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);
        padding:12px 14px 5px}
-.legend{padding:4px 14px 0;border-top:1px solid var(--line);margin-top:10px}
-.leg-r{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--mut);padding:2.5px 0}
-.leg-r b{color:var(--ink);font-weight:600}
+.legend{padding:4px 8px 0;border-top:1px solid var(--line);margin-top:10px}
+.leg-r{display:flex;align-items:center;gap:8px;width:100%;text-align:left;font-size:11px;color:var(--mut);
+  padding:4px 6px;background:none;border:none;border-radius:6px;cursor:pointer}
+.leg-r b{color:var(--ink);font-weight:600;flex:1}
+.leg-r .n{font-variant-numeric:tabular-nums;color:var(--mut);font-weight:600}
+.leg-r:hover{background:var(--well)}
+.leg-r.on{background:color-mix(in srgb,var(--accent) 12%,transparent);
+  box-shadow:inset 2px 0 0 var(--accent)}
+.leg-r.on b,.leg-r.on .n{color:var(--ink)}
+.leg-r.zero{opacity:.4;cursor:default}
+.leg-r.zero:hover{background:none}
 .leg-note{font-size:10.5px;color:var(--faint);padding:8px 14px 0;line-height:1.5}
 
 /* ============ 2. sloupec — POLOŽKY ============ */
@@ -176,7 +188,6 @@ textarea{font:inherit}
 /* rozhodnuto, ale nikde se to neřeší — jediný stav, který má být vidět jako nedodělek */
 .card.orphaned{background:var(--card);border:1px dashed var(--res);padding:0;overflow:hidden}
 .card.orphaned .donerow:hover{background:color-mix(in srgb,var(--res) 7%,transparent)}
-.card.twin-hi{border-color:var(--accent2);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent2) 30%,transparent)}
 .card .crumb{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin-bottom:2px}
 .card .hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:2px}
 .card .nm{font-weight:650;font-size:13px}
@@ -312,7 +323,7 @@ textarea{font:inherit}
   <div class="princip">
     <b>Varianta B — položka se nikdy nestěhuje.</b> Celý checklist zůstává pohromadě ve 2. sloupci (i vyřešené,
     i ty k hovoru). Co má přijít na telefonát, se <b>navěsí</b> do 3. sloupce — tam se k tomu píše agenda a poznámky.
-    Položka je tedy vidět na dvou místech zároveň; najeď myší a uvidíš svůj protějšek.
+    Položka je tedy vidět na dvou místech zároveň; odkazy „ukázat v agendě“ a „v checklistu“ skáčou mezi nimi.
   </div>
 </header>
 <div class="banner" id="ban">Zásilka se ruší — checklist je uzamčen. <em>Odblokuješ přepnutím červené volby u dané položky.</em></div>
@@ -549,6 +560,8 @@ const S={
   sel:{},        /* id -> index volby */
   agenda:{},     /* id -> 1  (navěšeno na hovor) */
   note:{},       /* id -> poznámka k bodu agendy */
+  noteOpen:{},   /* id -> poznámka je rozbalená */
+  stFilter:null, /* filtr podle typu stavu (z Obsahu) */
   wait:{},       /* id -> 1  (čeká se na zákazníka) */
   ticked:{},     /* id -> 1  (odbaveno v hovoru) */
   evid:{},       /* id -> jak byl souhlas získán */
@@ -572,9 +585,19 @@ const CONDN={mimoEU:'mimo EU',clo:'plnohodnotné clení',pref:'preferenční doh
 const CALLST=['zji','res','inf','pot','zme'];
 
 const vis   = it => it.conds.every(c=>S.sim[c]);
+/* „v jakém je položka stavu“ — pro počty i pro filtr v Obsahu.
+   cek není volitelný stav, ale odvozená pozice, tak se počítá podle ní. */
+const inState = (it,k) => {
+  if(k==='none') return !stOf(it.id);
+  /* čekání na zákazníka přebíjí původní stav, ať každá položka spadne právě do jednoho řádku */
+  if(phase(it.id)==='wait') return k==='cek';
+  return k!=='cek' && stOf(it.id)===k;
+};
+
 /* filtr 2. sloupce — používá ho i Obsah, aby se prázdné oblasti schovaly zároveň */
 const passFilter = it => {
   const ph=phase(it.id);
+  if(S.stFilter && !inState(it,S.stFilter)) return false;
   if(S.filter==='open')   return ph!=='done';
   if(S.filter==='agenda') return ph==='call'||ph==='wait';
   return true;
@@ -663,8 +686,15 @@ function colToc(L){
       <div class="toc-dots">${dots}</div></a>`;
   }).join('');
 
-  const legend=Object.entries(ST).map(([k,v])=>
-    `<div class="leg-r">${sic(k)}<b>${esc(v.n)}</b></div>`).join('');
+  /* stavy fungují jako filtr — s počtem, kolik položek v něm právě je */
+  const legRow=(k,label,icon)=>{
+    const n=L.filter(i=>inState(i,k)).length, on=S.stFilter===k;
+    return `<button class="leg-r ${on?'on':''} ${n?'':'zero'}" data-st="${k}"
+      title="${n?(on?'zrušit filtr':'ukázat jen tyhle položky'):'žádná položka v tomhle stavu'}">
+      ${icon||sic(k)}<b>${esc(label)}</b><span class="n">${n}</span></button>`;
+  };
+  const legend=legRow('none','Nevyhodnoceno','<span class="dot none"></span>')
+    +Object.entries(ST).map(([k,v])=>legRow(k,v.n)).join('');
   const flt={vse:'',open:'jen nevyřešené',agenda:'jen na agendě'}[S.filter];
 
   return `<div class="col col-toc">
@@ -782,7 +812,11 @@ function colItems(L){
       <div class="ch-top"><span class="ch-t">Položky checklistu</span>
         <span class="ch-n">${todo}<em> k posouzení</em></span></div>
       <div class="ch-row"><span class="segs">${seg('vse','vše')}${seg('open','nevyřešené')}${seg('agenda','na agendě')}</span>
-        <span class="ch-sub">vyhodnocené i navěšené na hovor tu zůstávají, nic se neodstěhuje</span></div>
+        ${S.stFilter
+          ? `<button class="stchip" data-st="${S.stFilter}">${S.stFilter==='none'?'<span class="dot none"></span>':sic(S.stFilter)}
+               ${esc(S.stFilter==='none'?'Nevyhodnoceno':ST[S.stFilter].n)} <span class="x">✕</span></button>
+             <span class="ch-sub">filtr ze sloupce Obsah</span>`
+          : `<span class="ch-sub">vyhodnocené i navěšené na hovor tu zůstávají, nic se neodstěhuje</span>`}</div>
     </div>
     <div class="col-b" id="cbItems">${inner||'<div class="colempty">Filtr nic nenašel.</div>'}</div></div>`;
 }
@@ -801,6 +835,12 @@ function agCard(it){
     ${S.note[it.id]?`<div class="donenote">${esc(S.note[it.id])}</div>`:''}
     <div class="doneact"><button class="lnk" data-untick="${it.id}">vrátit na agendu</button></div></div>`;
 
+  /* poznámka se otevírá až s výsledkem hovoru — a zůstane otevřená, když už v ní něco je */
+  const noteOpen=editing||S.noteOpen[it.id]||!!S.note[it.id];
+  const noteBox=noteOpen?`<textarea class="ag-note" data-note="${it.id}"
+      placeholder="Co zaznělo…">${esc(S.note[it.id]||'')}</textarea>`:'';
+  const noteLink=noteOpen?'':`<button class="lnk right" data-noteopen="${it.id}">+ poznámka</button>`;
+
   let act='';
   if(ph==='wait'){
     act=`<div class="cardbar"><label class="tickbox"><input type="checkbox" data-tick="${it.id}"> Potvrzení dorazilo</label>
@@ -817,7 +857,7 @@ function agCard(it){
          <button class="lnk right" data-drop="${it.id}">odebrat z agendy</button></div>`;
   }else if(st==='inf'){
     act=`<div class="cardbar"><label class="tickbox"><input type="checkbox" data-tick="${it.id}"> Informován</label>
-         <span class="right">souhlas se nevyžaduje</span></div>`;
+         ${noteLink||'<span class="right">souhlas se nevyžaduje</span>'}</div>`;
   }else{ /* pot / zme */
     act=`<div class="cardbar"><label class="tickbox"><input type="checkbox" data-tick="${it.id}"> Potvrzeno</label>
          <span class="evid">jak: <select data-evid="${it.id}">
@@ -826,14 +866,15 @@ function agCard(it){
            <option ${S.evid[it.id]==='v portálu'?'selected':''}>v portálu</option></select></span>
          <button class="lnk right" data-wait="${it.id}">čeká se →</button></div>`;
   }
+  /* u pot/zme a wait je řádek akcí plný — odkaz na poznámku dostane vlastní řádek */
+  const noteRow=(!noteOpen && (st==='pot'||st==='zme'||ph==='wait'||st==='ok'||st==='rus'))
+    ? `<div class="cardbar sub">${noteLink}</div>` : '';
   return `<div class="card" data-twin="${it.id}">
     <div class="ag-crumb">${esc(it.area)}</div>
     <div class="ag-h"><span class="ag-nm">${esc(it.n)}</span>
       <button class="lnk" data-go2="${it.id}">v checklistu ↑</button></div>
     <div class="ag-find">${sic(st)}<span><b>${esc(op[0])}</b> ${op[3].map(tagchip).join('')}</span></div>
-    <textarea class="ag-note" data-note="${it.id}"
-      placeholder="Co říct / co zaznělo…">${esc(S.note[it.id]||'')}</textarea>
-    ${act}</div>`;
+    ${act}${noteBox}${noteRow}</div>`;
 }
 
 function colCall(L,agenda){
@@ -915,18 +956,9 @@ function showPop(el){
 function hidePop(){ pop.classList.remove('show'); popKey=null; }
 
 /* dvojče: zvýraznit tutéž položku v obou sloupcích */
-let twinKey=null;
-function twin(id){
-  if(twinKey===id) return;
-  twinKey=id;
-  document.querySelectorAll('.twin-hi').forEach(n=>n.classList.remove('twin-hi'));
-  if(id) document.querySelectorAll(`[data-twin="${id}"]`).forEach(n=>n.classList.add('twin-hi'));
-}
 document.addEventListener('mouseover',e=>{
   const el=e.target.closest('[data-pop]');
   if(el){ clearTimeout(hideT); showPop(el); } else if(!e.target.closest('#pop')){ hideT=setTimeout(hidePop,120); }
-  const card=e.target.closest('[data-twin]');
-  twin(card?card.dataset.twin:null);
   const row=e.target.closest('[data-rel]');
   if(row){
     const rel=row.dataset.rel?row.dataset.rel.split('|'):[];
@@ -961,6 +993,11 @@ document.addEventListener('click',e=>{
   if(el=C('[data-untick]')){ const id=el.dataset.untick; delete S.ticked[id]; S.agenda[id]=1; return render(); }
   if(el=C('[data-wait]')){ const id=el.dataset.wait; S.wait[id]=1; return render(); }
   if(el=C('[data-unwait]')){ delete S.wait[el.dataset.unwait]; return render(); }
+  if(el=C('[data-noteopen]')){ S.noteOpen[el.dataset.noteopen]=1; render();
+    document.querySelector(`[data-note="${el.dataset.noteopen}"]`)?.focus(); return; }
+  if(el=C('[data-st]')){ const k=el.dataset.st;
+    if(el.classList.contains('zero')) return;
+    S.stFilter=S.stFilter===k?null:k; return render(); }
   if(el=C('[data-filter]')){ S.filter=el.dataset.filter; return render(); }
   if(el=C('[data-grp]')){ S.group=el.dataset.grp; return render(); }
   if(el=C('[data-nav]')){ S.area=el.dataset.nav;
