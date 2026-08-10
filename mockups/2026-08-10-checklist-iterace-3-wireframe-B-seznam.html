@@ -47,7 +47,9 @@ textarea{font:inherit}
 
 /* ============ top ============ */
 .top{background:var(--card);border-bottom:1px solid var(--line)}
-.top-r1{display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center;padding:10px 22px 10px}
+.top-r1{display:flex;flex-wrap:wrap;gap:6px 20px;align-items:baseline;padding:10px 22px 0}
+/* souhrn vlevo a stav checklistu vpravo stojí na jedné lince */
+.top-r2{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;padding:8px 22px 10px}
 .top h1{font-size:15px;margin:0;font-weight:650}
 .top h1 span{color:var(--mut);font-weight:400}
 .ship{color:var(--mut);font-size:12.5px}
@@ -80,9 +82,6 @@ textarea{font:inherit}
         font-weight:600;font-size:13px}
 .banner.on{display:block}
 .banner em{font-weight:400;color:var(--mut);font-style:normal}
-.princip{background:color-mix(in srgb,var(--accent) 8%,var(--card));border-bottom:1px solid var(--line);
-         padding:6px 22px;font-size:11.5px;color:var(--mut)}
-.princip b{color:var(--ink);font-weight:650}
 
 /* ============ board ============ */
 .board{display:grid;grid-template-columns:250px minmax(560px,1fr) minmax(390px,430px);
@@ -318,15 +317,12 @@ textarea{font:inherit}
 
 <header class="top" id="tophdr">
   <div class="top-r1">
-    <h1>Checklist zásilky <span>· wireframe v3 — varianta B</span></h1>
+    <h1>Checklist zásilky</h1>
     <span class="ship"><b>#CZ-24 811</b> · Praha → Curych · balík 12 kg · 60×40×30 cm · hodnota 45 000 Kč · nepojištěno</span>
+  </div>
+  <div class="top-r2">
     <div class="sum" id="sum"></div>
     <span class="gstat" id="gstat"></span>
-  </div>
-  <div class="princip">
-    <b>Varianta B — položka se nikdy nestěhuje.</b> Celý checklist zůstává pohromadě ve 2. sloupci (i vyřešené,
-    i ty k hovoru). Co má přijít na telefonát, se <b>navěsí</b> do 3. sloupce — tam se k tomu píše agenda a poznámky.
-    Položka je tedy vidět na dvou místech zároveň; odkazy „ukázat v agendě“ a „v checklistu“ skáčou mezi nimi.
   </div>
 </header>
 <div class="banner" id="ban">Zásilka se ruší — checklist je uzamčen. <em>Odblokuješ přepnutím červené volby u dané položky.</em></div>
