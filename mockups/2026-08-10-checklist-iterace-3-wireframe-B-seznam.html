@@ -52,11 +52,21 @@ textarea{font:inherit}
 .top h1 span{color:var(--mut);font-weight:400}
 .ship{color:var(--mut);font-size:12.5px}
 .ship b{color:var(--ink);font-weight:600}
-.prog{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--mut);font-variant-numeric:tabular-nums}
-.prog .bar{width:150px;height:6px;border-radius:3px;background:var(--line2);overflow:hidden;position:relative}
-.prog .bar i{position:absolute;left:0;top:0;height:100%;border-radius:3px}
-.prog .bar .b1{background:color-mix(in srgb,var(--accent) 30%,transparent)}
-.prog .bar .b2{background:var(--ok)}
+/* jeden souhrnný pruh: kde stojí všech 28 položek */
+.sum{display:flex;flex-direction:column;gap:6px;flex:1;min-width:330px;max-width:620px}
+.sumbar{display:flex;height:11px;border-radius:6px;overflow:hidden;background:var(--line2);gap:2px}
+.sumbar i{display:block;transition:width .35s cubic-bezier(.4,0,.2,1)}
+.sg-done{background:var(--ok)} .sg-call{background:var(--accent2)}
+.sg-wait{background:var(--cek)} .sg-loose{background:var(--res)}
+.sumleg{display:flex;flex-wrap:wrap;gap:3px 13px;font-size:11.5px;color:var(--mut)}
+.sumleg .tot{color:var(--faint);margin-left:2px}
+.lg{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.lg::before{content:"";width:9px;height:9px;border-radius:3px;background:var(--lc,var(--line2));flex:none}
+.lg b{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums}
+.lg.zero{opacity:.4}
+.lg-done{--lc:var(--ok)} .lg-call{--lc:var(--accent2)} .lg-wait{--lc:var(--cek)}
+.lg-loose{--lc:var(--res)} .lg-todo{--lc:var(--faint)}
+.lg.tot::before{display:none}
 .gstat{margin-left:auto;display:flex;align-items:center;gap:8px;font-weight:650;font-size:13px;
        padding:5px 14px;border-radius:20px;border:1px solid var(--line)}
 .gstat.g-ok{background:var(--ok-bg);border-color:transparent}
@@ -141,9 +151,23 @@ textarea{font:inherit}
 .donerow .dv{font-size:12.5px;color:var(--mut)}
 .donerow .tg{display:flex;gap:3px;font-size:10.5px;opacity:.75}
 .donerow .dm{margin-left:auto;font-size:10.5px;color:var(--faint);white-space:nowrap}
+.donerow .dm.ag{color:var(--mut);font-weight:600}
+.donerow .dm.warn{color:var(--res);font-weight:600}
 .donenote{padding:0 11px 7px;font-size:11.5px;color:var(--mut);white-space:pre-wrap}
 .doneact{display:none;gap:12px;padding:0 11px 8px}
-.card.done:hover .doneact,.card.done:focus-within .doneact{display:flex}
+.card.done:hover .doneact,.card.done:focus-within .doneact,
+.card.onag:hover .doneact,.card.onag:focus-within .doneact,
+.card.orphaned:hover .doneact,.card.orphaned:focus-within .doneact{display:flex}
+/* na agendě hovoru — fialová 3. sloupce · čeká se na zákazníka — modrá */
+.card.onag{background:color-mix(in srgb,var(--accent2) 12%,var(--card));
+  border-color:color-mix(in srgb,var(--accent2) 34%,transparent);padding:0;overflow:hidden}
+.card.onag .donerow:hover{background:color-mix(in srgb,var(--accent2) 9%,transparent)}
+.card.onag.waiting{background:color-mix(in srgb,var(--cek) 12%,var(--card));
+  border-color:color-mix(in srgb,var(--cek) 34%,transparent)}
+.card.onag.waiting .donerow:hover{background:color-mix(in srgb,var(--cek) 9%,transparent)}
+/* rozhodnuto, ale nikde se to neřeší — jediný stav, který má být vidět jako nedodělek */
+.card.orphaned{background:var(--card);border:1px dashed var(--res);padding:0;overflow:hidden}
+.card.orphaned .donerow:hover{background:color-mix(in srgb,var(--res) 7%,transparent)}
 .card.twin-hi{border-color:var(--accent2);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent2) 30%,transparent)}
 .card .crumb{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin-bottom:2px}
 .card .hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:2px}
@@ -276,8 +300,7 @@ textarea{font:inherit}
   <div class="top-r1">
     <h1>Checklist zásilky <span>· wireframe v3 — varianta B</span></h1>
     <span class="ship"><b>#CZ-24 811</b> · Praha → Curych · balík 12 kg · 60×40×30 cm · hodnota 45 000 Kč · nepojištěno</span>
-    <span class="prog"><span id="pnum"></span>
-      <span class="bar"><i class="b1" id="pb1"></i><i class="b2" id="pb2"></i></span></span>
+    <div class="sum" id="sum"></div>
     <span class="gstat" id="gstat"></span>
   </div>
   <div class="princip">
@@ -575,13 +598,18 @@ function render(){
   document.body.classList.toggle('locked',anyRed);
   document.getElementById('ban').classList.toggle('on',anyRed);
 
-  const decided=L.filter(i=>stOf(i.id)).length;
-  const closed =L.filter(i=>phase(i.id)==='done').length;
   const agenda =L.filter(i=>onAgenda(i.id));
-  document.getElementById('pnum').textContent=
-    `vyhodnoceno ${decided}/${L.length} · na agendě ${agenda.length} · uzavřeno ${closed}/${L.length}`;
-  document.getElementById('pb1').style.width=(decided/L.length*100)+'%';
-  document.getElementById('pb2').style.width=(closed/L.length*100)+'%';
+  /* jeden pruh přes všechny položky — každá je právě v jedné z pěti pozic */
+  const P={todo:0,call:0,wait:0,loose:0,done:0};
+  L.forEach(i=>P[phase(i.id)]++);
+  const N=L.length, closed=P.done, pct=n=>N?n/N*100:0;
+  const seg=(k,cls)=>P[k]?`<i class="${cls}" style="width:${pct(P[k])}%"></i>`:'';
+  const lg=(k,cls,label)=>`<span class="lg ${cls} ${P[k]?'':'zero'}"><b>${P[k]}</b> ${label}</span>`;
+  document.getElementById('sum').innerHTML=
+    `<div class="sumbar">${seg('done','sg-done')}${seg('call','sg-call')}${seg('wait','sg-wait')}${seg('loose','sg-loose')}</div>
+     <div class="sumleg">${lg('todo','lg-todo','k posouzení')}${lg('call','lg-call','na hovoru')}
+       ${P.wait?lg('wait','lg-wait','čeká na zákazníka'):''}${P.loose?lg('loose','lg-loose','bez agendy'):''}
+       ${lg('done','lg-done',`hotovo <span class="tot">z ${N}</span>`)}</div>`;
 
   const g=document.getElementById('gstat'); const sts=L.map(i=>stOf(i.id)); let k,txt,sub='';
   if(sts.includes('rus')){k='rus';txt='Zásilka se ruší';}
@@ -625,7 +653,7 @@ function colToc(L){
 
   return `<div class="col col-toc">
     <div class="col-h">
-      <div class="ch-top"><span class="ch-t">Obsah</span><span class="ch-n">${L.length}<em> pol.</em></span></div>
+      <div class="ch-top"><span class="ch-t">Obsah</span><span class="ch-n"><em>${L.length} položek</em></span></div>
       <span class="segs">${seg('vse','vše')}${seg('open','nevyřešené')}${seg('agenda','na agendě')}</span>
     </div>
     <div class="col-b" id="cbToc"><div class="toc">${rows}
@@ -659,52 +687,51 @@ function itemCard(it){
   const rel=(it.rel||[]).map(k=>{const kv=a&&a.ctx.find(c=>c[0]===k);
     return kv?`${esc(kv[0])}: <b>${esc(kv[1])}</b>`:'';}).filter(Boolean).join(' · ');
 
-  let body='',bar='',dup='';
+  /* ── nevyhodnoceno (nebo rozbaleno ke změně) = plná karta s volbami ── */
   if(ph==='todo'||editing){
-    body=(it.d?`<p class="dsc">${esc(it.d)}</p>`:'')+optsHTML(it,S.sel[it.id],false)
-       + (rel?`<div class="rel">${rel}</div>`:'');
-    if(editing) bar=`<button class="lnk" data-edit="${it.id}">zpět</button>`;
-  }else{
-    const i=S.sel[it.id], op=it.o[i];
-    /* hotovo = jeden řádek. Detail i akce se rozbalí až na najetí / kliknutí. */
-    if(ph==='done'){
-      /* meta jen tam, kde nese informaci — „uzavřeno bez hovoru“ je u zelené samozřejmost */
-      const meta=S.ticked[it.id]
-        ? `<span class="dm">odbaveno v hovoru${S.evid[it.id]?' · '+esc(S.evid[it.id]):''}</span>` : '';
-      return `<div class="card done s-${st} ${st==='rus'?'iskill':''}" data-twin="${it.id}" data-rel="${(it.rel||[]).join('|')}">
-        <button class="donerow" data-edit="${it.id}" title="klik = rozbalit a změnit volbu">
-          ${sic(st)}<span class="dn">${esc(it.n)}</span><span class="dv">${esc(op[0])}</span>
-          <span class="tg">${op[3].map(tagchip).join('')}</span>${meta}</button>
-        <div class="doneact"><button class="lnk" data-edit="${it.id}">změnit volbu</button>
-          ${S.ticked[it.id]?`<button class="lnk" data-go="${it.id}">ukázat v agendě →</button>`
-                           :`<button class="lnk" data-add="${it.id}">+ zmínit v hovoru</button>`}</div></div>`;
-    }
-    body=`<button class="chosen" data-pop="${it.id}:${i}" data-edit="${it.id}" title="klik = změnit volbu">
-        ${sic(st)}<span class="ct">${esc(op[0])}</span><span class="tg">${op[3].map(tagchip).join('')}</span></button>`;
-    const zmen=`<button class="lnk" data-edit="${it.id}">změnit volbu</button>`;
-    if(ph==='loose'){
-      bar=zmen+`<button class="mini" data-add="${it.id}">+ na agendu hovoru</button>`
-         +`<span class="right orphan">neřeší se nikde</span>`;
-    }else{
-      bar=zmen+`<button class="lnk" data-drop="${it.id}">sundat z agendy</button>`;
-    }
-    if(ph==='call') dup=`<div class="dup" data-go="${it.id}">📞 <b>Na agendě hovoru</b> · ${esc(ZONE_OF[st])}
-        <span class="go">ukázat v agendě →</span></div>`;
-    if(ph==='wait') dup=`<div class="dup wait" data-go="${it.id}">${sic('cek')} <b>Čeká se na zákazníka</b>
-        <span class="go">ukázat v agendě →</span></div>`;
+    const bar=editing?`<div class="cardbar"><button class="lnk" data-edit="${it.id}">zpět</button></div>`:'';
+    return `<div class="card ${st==='rus'?'iskill':''}" data-twin="${it.id}" data-rel="${(it.rel||[]).join('|')}">
+      <div class="hd">
+        <span class="nm">${esc(it.n)}</span>
+        ${it.conds.length?`<span class="cnd">jen když: ${it.conds.map(c=>esc(CONDN[c]||c)).join(' + ')}</span>`:''}
+        ${it.auto?`<span class="autopill">⚡ systém umí předvyplnit</span>`:''}
+        ${it.warn?`<span class="flag" title="${esc(it.warn)}">⚠ k vyjasnění</span>`:''}</div>
+      ${it.d?`<p class="dsc">${esc(it.d)}</p>`:''}
+      ${optsHTML(it,S.sel[it.id],false)}
+      ${rel?`<div class="rel">${rel}</div>`:''}
+      ${bar}</div>`;
   }
-  /* iskill = karta, která zásilku ruší → jako jediná zůstává klikatelná, aby šel zámek sundat */
-  return `<div class="card ${ph==='done'?'done':''} ${st==='rus'?'iskill':''}" data-twin="${it.id}" data-rel="${(it.rel||[]).join('|')}">
-    <div class="hd">
-      <span class="nm">${esc(it.n)}</span>
-      ${it.conds.length?`<span class="cnd">jen když: ${it.conds.map(c=>esc(CONDN[c]||c)).join(' + ')}</span>`:''}
-      ${it.auto?`<span class="autopill">⚡ systém umí předvyplnit</span>`:''}
-      ${it.warn?`<span class="flag" title="${esc(it.warn)}">⚠ k vyjasnění</span>`:''}</div>
-    ${body}${dup}
-    ${bar?`<div class="cardbar">${bar}</div>`:''}</div>`;
+
+  /* ── rozhodnuto = jeden řádek. Výplň říká, kde položka je; ikona, v jakém je stavu. ── */
+  const i=S.sel[it.id], op=it.o[i];
+  const row=(cls,meta,acts)=>`<div class="card ${cls} ${st==='rus'?'iskill':''}" data-twin="${it.id}" data-rel="${(it.rel||[]).join('|')}">
+      <button class="donerow" data-edit="${it.id}" title="klik = rozbalit a změnit volbu">
+        ${sic(st)}<span class="dn">${esc(it.n)}</span><span class="dv">${esc(op[0])}</span>
+        <span class="tg">${op[3].map(tagchip).join('')}</span>${meta}</button>
+      <div class="doneact"><button class="lnk" data-edit="${it.id}">změnit volbu</button>${acts}</div></div>`;
+
+  if(ph==='call')  /* na agendě hovoru — fialová jako 3. sloupec */
+    return row('onag',`<span class="dm ag">📞 ${esc(ZONE_OF[st])}</span>`,
+      `<button class="lnk" data-go="${it.id}">ukázat v agendě →</button>
+       <button class="lnk" data-drop="${it.id}">sundat z agendy</button>`);
+
+  if(ph==='wait')
+    return row('onag waiting',`<span class="dm ag">⏳ Čeká na zákazníka</span>`,
+      `<button class="lnk" data-go="${it.id}">ukázat v agendě →</button>`);
+
+  if(ph==='loose') /* rozhodnuto, ale nikde se to neřeší — jediný řádek, který volá po akci */
+    return row('orphaned',`<span class="dm warn">neřeší se nikde</span>`,
+      `<button class="lnk" data-add="${it.id}">+ na agendu hovoru</button>`);
+
+  /* hotovo — barvu nese výsledný stav; meta jen tam, kde nese informaci */
+  return row(`done s-${st}`,
+    S.ticked[it.id]?`<span class="dm">odbaveno v hovoru${S.evid[it.id]?' · '+esc(S.evid[it.id]):''}</span>`:'',
+    S.ticked[it.id]?`<button class="lnk" data-go="${it.id}">ukázat v agendě →</button>`
+                   :`<button class="lnk" data-add="${it.id}">+ zmínit v hovoru</button>`);
 }
 
 function colItems(L){
+  const todo=L.filter(i=>phase(i.id)==='todo').length;
   const pass=it=>{
     const ph=phase(it.id);
     if(S.filter==='open')   return ph==='todo'||ph==='call'||ph==='wait'||ph==='loose';
@@ -731,7 +758,7 @@ function colItems(L){
   return `<div class="col col-items">
     <div class="col-h">
       <div class="ch-top"><span class="ch-t">Položky checklistu</span>
-        <span class="ch-n">${L.filter(i=>stOf(i.id)).length}<em>/${L.length}</em></span></div>
+        <span class="ch-n">${todo}<em> k posouzení</em></span></div>
       <div class="ch-sub">Zobrazeno: ${fl} · vyhodnocené i navěšené na hovor tu zůstávají, nic se neodstěhuje</div>
     </div>
     <div class="col-b" id="cbItems">${inner||'<div class="colempty">Filtr nic nenašel.</div>'}</div></div>`;
@@ -824,7 +851,7 @@ function colCall(L,agenda){
   return `<div class="col col-call">
     <div class="col-h">
       <div class="ch-top"><span class="ch-t">Hovor · agenda</span>
-        <span class="ch-n">${open.length+waits.length}<em>/${L.length}</em></span></div>
+        <span class="ch-n">${open.length}<em> k probrání</em></span></div>
       <span class="segs">${seg('stav','podle stavu')}${seg('tema','podle tématu')}${seg('kat','podle oblasti')}</span>
     </div>
     <div class="callhead"><span class="ci">📞</span>
