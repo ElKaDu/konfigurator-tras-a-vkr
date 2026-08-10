@@ -153,15 +153,17 @@ textarea{font:inherit}
 .donerow{display:flex;align-items:center;gap:8px;flex:1;min-width:0;width:100%;text-align:left;background:none;border:none;
   padding:7px 11px;cursor:pointer;flex-wrap:wrap;line-height:1.35}
 /* tlačítko na řádku je tiché a šedé — zezelená až výsledek, ne cesta k němu */
-.rowact{flex:none;font-weight:600;white-space:nowrap;color:var(--mut);background:var(--card)}
-.rowact:hover{border-color:var(--ok);color:var(--ok);background:color-mix(in srgb,var(--ok) 8%,var(--card))}
+/* akce na řádku — bez rámečku, jen text; zezelená při najetí */
+.mini.rowact{flex:none;font-weight:600;white-space:nowrap;color:var(--mut);background:none;border:none;padding:3px 6px}
+.mini.rowact:hover{color:var(--ok);background:color-mix(in srgb,var(--ok) 9%,transparent)}
 .donerow:hover{background:color-mix(in srgb,var(--sc) 8%,transparent)}
 .donerow .dn{font-size:12.5px;font-weight:650;color:var(--ink)}
 .donerow .dv{font-size:12.5px;color:var(--mut)}
 .donerow .tg{display:flex;gap:3px;font-size:10.5px;opacity:.75}
-.donerow .dm{margin-left:auto;font-size:10.5px;color:var(--faint);white-space:nowrap}
-.donerow .dm.ag{color:var(--mut);font-weight:600}
-.donerow .dm.warn{color:var(--res);font-weight:600}
+/* meta stojí uvnitř řádku (agenda hovoru) i vedle něj (2. sloupec) — musí platit pro obojí */
+.dm{margin-left:auto;font-size:11px;color:var(--faint);white-space:nowrap}
+.dm.ag{color:var(--mut);font-weight:600}
+.dm.warn{color:var(--res);font-weight:600}
 .donenote{padding:0 11px 7px;font-size:11.5px;color:var(--mut);white-space:pre-wrap}
 .doneact{display:none;gap:12px;padding:0 11px 8px}
 .card.done:hover .doneact,.card.done:focus-within .doneact,
@@ -186,8 +188,6 @@ textarea{font:inherit}
 .flag{font-size:10px;font-weight:700;padding:1px 7px;border-radius:5px;background:var(--pot-bg);
       border:1px solid var(--pot);cursor:help}
 .cnd{font-size:10px;color:var(--faint);border:1px dashed var(--line);border-radius:5px;padding:1px 7px}
-.autopill{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;color:var(--accent);
-      border:1px dashed var(--accent);border-radius:12px;padding:1px 8px}
 
 .opts{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--card)}
 .orow{--sc:var(--faint);display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:var(--card);
@@ -428,7 +428,7 @@ const AREAS=[
   ['Hodnota zhruba odpovídá obsahu','ok','',[]],
   ['Hodnota neodpovídá, necháváme ji být','inf','Hodnotu neměníte, zákazník je upozorněn, co to může znamenat.',[]],
   ['Hodnota se opravuje','zme','Mění se cena pojištění, případně i typ přepravy (např. na leteckou, kde má přepravce vyšší odpovědnost).',['cena']]]},
- {id:'pojodp',n:'Pojištění × odpovědnost přepravce (nepojištěno)',d:'U nepojištěné zásilky posuzuješ, jestli zákonná odpovědnost přepravce pokryje hodnotu obsahu.',rel:['Pojištění','Odpovědnost přepravce','Hodnota'],auto:1,
+ {id:'pojodp',n:'Pojištění × odpovědnost přepravce (nepojištěno)',d:'U nepojištěné zásilky posuzuješ, jestli zákonná odpovědnost přepravce pokryje hodnotu obsahu.',rel:['Pojištění','Odpovědnost přepravce','Hodnota'],
   warn:'ROZPOR: schválené principy říkají „podmínky pojištění jen u pojištěných zásilek“, ale tahle položka je určená výslovně pro nepojištěné. K vyjasnění (otázka 9).',o:[
   ['Odpovědnost přepravce hodnotu nekryje','res','Rozdíl je výrazný a zákazník nemá pojištěno. Domluvíte se, jak dál.',['cena']],
   ['Odpovědnost přepravce hodnotu zhruba kryje','ok','Nepojištěno, ale odpovědnost stačí.',[]],
@@ -468,14 +468,14 @@ const AREAS=[
   ['Vývozce má platné EORI','ok','',[]],
   ['Bez EORI, zásilka se ruší','rus','',[]],
   ['Mění se osoba vývozce nebo hodnota','zme','Např. se bude clít na fyzickou osobu, nebo se sníží hodnota pod 1 000 EUR, aby nebylo nutné plnohodnotné exportní clení.',['cena']]]},
- {id:'plnamoc',n:'Platná plná moc',d:'Posuzuješ, jestli máme řádně podepsanou plnou moc k zastupování při clení.',rel:['Plná moc'],cond:'clo',auto:1,o:[
+ {id:'plnamoc',n:'Platná plná moc',d:'Posuzuješ, jestli máme řádně podepsanou plnou moc k zastupování při clení.',rel:['Plná moc'],cond:'clo',o:[
   ['Plnou moc nemáme nebo je neúplná','res','',['dok']],
   ['Plnou moc máme, je řádně podepsaná','ok','',[]],
   ['Bez plné moci, zásilka se ruší','rus','',[]],
   ['Mění se osoba vývozce','zme','Podobně jako u EORI — např. se překlopí na fyzickou osobu.',['cena']]]},
 ]}]},
 {id:'adresy',name:'Adresy a kontakty',ctx:[['Vyzvednutí','Endevel s.r.o., Lidická 700/19, Brno ✓'],['Doručení','Muster AG, Bahnhofstrasse 12, 8001 Zürich ⚠ neverifikovaná'],['Telefon','+420 777 123 456 (předvolba CZ)']],groups:[{n:null,items:[
- {id:'stat',n:'Správný stát',d:'Posuzuješ, jestli cílový stát odpovídá zbytku adresy.',rel:['Doručení'],auto:1,o:[
+ {id:'stat',n:'Správný stát',d:'Posuzuješ, jestli cílový stát odpovídá zbytku adresy.',rel:['Doručení'],o:[
   ['Stát nesouhlasí','res','',[]],
   ['Stát souhlasí','ok','',[]],
   ['Oprava státu zásilku prodraží, zákazník ruší','rus','Např. se zákazník uklikl a zásilka do správného státu by byla o dost dražší.',['cena']],
@@ -501,7 +501,7 @@ const AREAS=[
   ['Číslo bytu je uvedené','ok','',[]],
   ['Číslo bytu chybí','inf','Posíláte, zákazníka upozorni.',['cas']],
   ['Číslo bytu se doplňuje','zme','',['data']]]},
- {id:'tel',n:'Telefonní číslo je lokální',d:'Posuzuješ, jestli je kontakt na příjemce místní číslo — kurýr v cílové zemi na cizí číslo často nedovolá.',rel:['Telefon','Doručení'],auto:1,o:[
+ {id:'tel',n:'Telefonní číslo je lokální',d:'Posuzuješ, jestli je kontakt na příjemce místní číslo — kurýr v cílové zemi na cizí číslo často nedovolá.',rel:['Telefon','Doručení'],o:[
   ['Nejde posoudit, jestli je číslo místní','zji','',[]],
   ['Telefonní číslo není lokální','res','',[]],
   ['Číslo je jistě lokální','ok','',[]],
@@ -510,7 +510,7 @@ const AREAS=[
   ['Číslo se mění','zme','',['data']]]},
 ]}]},
 {id:'doba',name:'Doba doručení a vyzvednutí',ctx:[['Avizováno','3–4 pracovní dny'],['Dle tarifu','4–6 dnů'],['Cut-off','14:00 (nyní 12:40)'],['Svoz','po–pá']],groups:[{n:null,items:[
- {id:'dobadoruc',n:'Avizovaná doba doručení je ekvivalentní',d:'Posuzuješ, jestli doba doručení avizovaná zákazníkovi odpovídá realitě u téhle konkrétní zásilky.',rel:['Avizováno','Dle tarifu'],auto:1,
+ {id:'dobadoruc',n:'Avizovaná doba doručení je ekvivalentní',d:'Posuzuješ, jestli doba doručení avizovaná zákazníkovi odpovídá realitě u téhle konkrétní zásilky.',rel:['Avizováno','Dle tarifu'],
   note:'Klientova poznámka: „Změní operátor rovnou den doručení avizovaný zákazníkovi? Měl by asi.“ — k rozhodnutí (otázka 12).',o:[
   ['Avizovaná doba neodpovídá nebo často nemusí','res','Víš, že se zásilka může zpozdit. Domluvíte se se zákazníkem.',['cas']],
   ['Avizovaná doba odpovídá','ok','',[]],
@@ -519,21 +519,21 @@ const AREAS=[
   ['Přechod na expresní variantu','zme','',['cena','cas']]]},
 ]}]},
 {id:'cenap',name:'Cena přepravy a náklady',ctx:[['Obj. hmotnost','12 kg (poměr 1,0)'],['Cenové pásmo','do 15 kg (+3,0 kg)'],['Rozměrový limit','60 cm / 120 cm'],['Rozměry','60 × 40 × 30 cm']],groups:[{n:null,items:[
- {id:'objem',n:'Riziko většího objemu',d:'Posuzuješ, jestli u zásilky nehrozí velký skok objemu při drobné změně rozměrů — typicky dlouhé a široké, ale velmi tenké kusy.',rel:['Obj. hmotnost','Rozměry'],auto:1,o:[
+ {id:'objem',n:'Riziko většího objemu',d:'Posuzuješ, jestli u zásilky nehrozí velký skok objemu při drobné změně rozměrů — typicky dlouhé a široké, ale velmi tenké kusy.',rel:['Obj. hmotnost','Rozměry'],o:[
   ['Hrozí velká změna objemu při drobné změně rozměrů','res','Domluvíte se, co s tím.',['cena']],
   ['Velká změna objemu nehrozí','ok','',[]],
   ['Hrozí doplatek, zákazník informován','inf','Posíláte, zákazníka notifikuješ o možném doplatku.',['cena']],
   ['Hrozí doplatek, chceme potvrzení','pot','Posíláte, zákazník musí doplatek předem odsouhlasit.',['cena']],
   ['Zákazník kvůli riziku ruší','rus','',[]],
   ['Jiná přeprava nebo přebalení','zme','Např. se zásilka přebalí, nebo se pošle mírně dražší variantou, u které nehrozí velký cenový skok.',['cena']]]},
- {id:'skok',n:'Blízko cenovému skoku',d:'Posuzuješ, jestli zásilka není těsně pod hranicí, za kterou cena výrazně skočí.',rel:['Cenové pásmo','Obj. hmotnost'],auto:1,o:[
+ {id:'skok',n:'Blízko cenovému skoku',d:'Posuzuješ, jestli zásilka není těsně pod hranicí, za kterou cena výrazně skočí.',rel:['Cenové pásmo','Obj. hmotnost'],o:[
   ['Hrozí velký cenový skok při vyšší účtovatelné hmotnosti','res','',['cena']],
   ['Cenový skok nehrozí','ok','',[]],
   ['Cenový skok docela hrozí','inf','',['cena']],
   ['Cenový skok významně hrozí','pot','',['cena']],
   ['Zákazník kvůli riziku ruší','rus','',[]],
   ['Jiná přeprava nebo přebalení','zme','',['cena']]]},
- {id:'priplatek',n:'Blízko velkému příplatku',d:'Posuzuješ, jestli zásilka není těsně pod rozměrovým limitem, jehož překročení znamená velký příplatek.',rel:['Rozměrový limit','Rozměry'],auto:1,
+ {id:'priplatek',n:'Blízko velkému příplatku',d:'Posuzuješ, jestli zásilka není těsně pod rozměrovým limitem, jehož překročení znamená velký příplatek.',rel:['Rozměrový limit','Rozměry'],
   note:'Klient u této a u „Rizika většího objemu“ zvažuje sloučení do obecného „rizika vyšší ceny“. Návrh analýzy: místo sloučení použít značku 💰 (otázka 13).',o:[
   ['Hrozí velký příplatek za překročení rozměrů','res','',['cena']],
   ['Velký příplatek nehrozí','ok','',[]],
@@ -543,7 +543,6 @@ const AREAS=[
   ['Jiná přeprava nebo přebalení','zme','',['cena']]]},
 ]}]},
 ];
-const PROPOSAL={pojodp:0, plnamoc:0, stat:1, tel:3, dobadoruc:0, objem:1, skok:1, priplatek:1};
 
 /* ═══════════════ STATE ═══════════════ */
 const S={
@@ -712,7 +711,6 @@ function itemCard(it){
       <div class="hd">
         <span class="nm">${esc(it.n)}</span>
         ${it.conds.length?`<span class="cnd">jen když: ${it.conds.map(c=>esc(CONDN[c]||c)).join(' + ')}</span>`:''}
-        ${it.auto?`<span class="autopill">⚡ systém umí předvyplnit</span>`:''}
         ${it.warn?`<span class="flag" title="${esc(it.warn)}">⚠ k vyjasnění</span>`:''}</div>
       ${it.d?`<p class="dsc">${esc(it.d)}</p>`:''}
       ${optsHTML(it,S.sel[it.id],false)}
