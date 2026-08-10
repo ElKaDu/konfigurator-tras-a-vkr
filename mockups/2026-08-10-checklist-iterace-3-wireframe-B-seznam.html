@@ -176,9 +176,7 @@ textarea{font:inherit}
 .dm{margin-left:auto;font-size:11px;color:var(--faint);white-space:nowrap}
 .dm.ag{color:var(--mut);font-weight:600}
 .dm.warn{color:var(--res);font-weight:600}
-.donenote{display:block;width:100%;text-align:left;background:none;border:none;cursor:pointer;
-  padding:0 11px 7px;font-size:11.5px;color:var(--mut);white-space:pre-wrap;line-height:1.45}
-.donenote:hover{color:var(--ink)}
+.donenote{padding:0 11px 7px;font-size:11.5px;color:var(--mut);white-space:pre-wrap;line-height:1.45}
 .doneact{display:none;gap:12px;padding:0 11px 8px}
 .card.done:hover .doneact,.card.done:focus-within .doneact,
 .card.onag:hover .doneact,.card.onag:focus-within .doneact,
@@ -290,9 +288,6 @@ textarea{font:inherit}
 .nc-f{font-size:11px;color:var(--mut);margin:2px 0 7px;padding-left:23px}
 .nc-w{color:var(--faint)}
 .notec .ag-note{margin-top:0;min-height:58px;font-size:12.5px}
-.evid{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--mut);flex-wrap:wrap}
-.evid select{font:inherit;font-size:10.5px;background:var(--card);color:var(--ink);border:1px solid var(--line);
-             border-radius:5px;padding:1px 4px}
 .tickbox{display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:12.5px;font-weight:600;
          color:var(--ink);background:none;border:none;padding:2px 0;margin:0}
 .tickbox:hover{color:var(--ok)}
@@ -572,7 +567,6 @@ const S={
   rtab:'agenda', /* pravý sloupec: agenda / poznámky */
   wait:{},       /* id -> 1  (čeká se na zákazníka) */
   ticked:{},     /* id -> 1  (odbaveno v hovoru) */
-  evid:{},       /* id -> jak byl souhlas získán */
   edit:{},       /* id -> rozbalený picker */
   filter:'vse',  /* vse | open | agenda */
   group:'stav',  /* stav | tema | kat */
@@ -794,9 +788,11 @@ function itemCard(it){
      Stav si nese ikona vlevo, plocha říká jen „tohle už je za mnou“.
      Poznámku lze psát jen sem — u uzavřené položky je to záznam, ne pracovní lístek. */
   return row(`done ${st==='rus'?'s-rus':'s-ok'}`,
-    S.ticked[it.id]?`<span class="dm">vyřešeno v hovoru${S.evid[it.id]?' · '+esc(S.evid[it.id]):''}</span>`:'',
+    S.ticked[it.id]?`<span class="dm">vyřešeno v hovoru</span>`:'',
     S.ticked[it.id]?`<button class="lnk" data-go="${it.id}">ukázat v agendě →</button>`
-                   :`<button class="lnk" data-add="${it.id}">+ zmínit v hovoru</button>`);
+                   :`<button class="lnk" data-add="${it.id}">+ zmínit v hovoru</button>`,
+    /* poznámka z hovoru se sem propíše jako záznam — psát se dá jen v agendě */
+    S.note[it.id]?`<div class="donenote">${esc(S.note[it.id])}</div>`:'');
 }
 
 function colItems(L){
@@ -843,7 +839,7 @@ function agCard(it){
   if(ph==='done') return `<div class="card done s-${st}" data-twin="${it.id}" data-relpop="${it.id}">
     <button class="donerow" data-go2="${it.id}" title="klik = ukázat v checklistu">
       ${sic(st)}<span class="dn">${esc(it.n)}</span><span class="dv">${esc(op[0])}</span>
-      <span class="dm">✓ ${esc(S.evid[it.id]||'vyřešeno')}</span></button>
+      <span class="dm">✓ vyřešeno</span></button>
     ${S.note[it.id]?`<div class="donenote">${esc(S.note[it.id])}</div>`:''}
     <div class="doneact"><button class="lnk" data-untick="${it.id}">vrátit na agendu</button></div></div>`;
 
@@ -868,13 +864,8 @@ function agCard(it){
   else if(st==='pot'||st==='zme') tick='Potvrzeno';
   else if(st==='ok'||st==='rus')  tick='Zmíněno';
 
-  const evid=(st==='pot'||st==='zme')?`<span class="evid"><select data-evid="${it.id}">
-      <option ${S.evid[it.id]==='telefonicky'?'selected':''}>telefonicky</option>
-      <option ${S.evid[it.id]==='e-mailem'?'selected':''}>e-mailem</option>
-      <option ${S.evid[it.id]==='v portálu'?'selected':''}>v portálu</option></select></span>`:'';
-
   const bar=tick?`<div class="cardbar">
-    <label class="tickbox"><input type="checkbox" data-tick="${it.id}"> ${tick}</label>${evid}</div>`:'';
+    <label class="tickbox"><input type="checkbox" data-tick="${it.id}"> ${tick}</label></div>`:'';
 
   return `<div class="card ag" data-twin="${it.id}" data-relpop="${it.id}">
     <div class="ag-h"><span class="ag-nm">${esc(it.n)}</span>
@@ -1035,9 +1026,11 @@ document.addEventListener('click',e=>{
     S.sel[id]=+i;
     delete S.edit[id]; delete S.edit['ag_'+id];
     const st=BY[id].o[+i][1];
-    if(st==='ok'||st==='rus'){ delete S.agenda[id]; delete S.wait[id]; delete S.ticked[id]; }
-    else if(afterCall){ S.agenda[id]=1; delete S.wait[id]; S.ticked[id]=1; }  /* výsledek hovoru */
-    else { S.agenda[id]=1; delete S.wait[id]; delete S.ticked[id]; }          /* nové → rovnou na agendu */
+    delete S.wait[id];
+    /* zapsáno z agendy = hovor proběhl → ať je výsledek jakýkoli, patří mezi vyřešené v hovoru */
+    if(afterCall){ S.agenda[id]=1; S.ticked[id]=1; }
+    else if(st==='ok'||st==='rus'){ delete S.agenda[id]; delete S.ticked[id]; }
+    else { S.agenda[id]=1; delete S.ticked[id]; }
     hidePop(); return render();
   }
   if(el=C('[data-agedit]')){ const id=el.dataset.agedit; S.edit['ag_'+id]=!S.edit['ag_'+id]; hidePop(); return render(); }
@@ -1059,9 +1052,6 @@ document.addEventListener('click',e=>{
     document.querySelectorAll('.toc-a').forEach(n=>n.classList.toggle('on',n.dataset.nav===S.area)); return; }
   if(el=C('[data-go]')){ scrollTo('cbCall',document.querySelector(`#cbCall [data-twin="${el.dataset.go}"]`)); return; }
   if(el=C('[data-go2]')){ scrollTo('cbItems',document.querySelector(`#cbItems [data-twin="${el.dataset.go2}"]`)); return; }
-});
-document.addEventListener('change',e=>{
-  if(e.target.dataset.evid){ S.evid[e.target.dataset.evid]=e.target.value; }
 });
 /* psaní bez překreslení, ať operátor nepřijde o kurzor */
 document.addEventListener('input',e=>{
