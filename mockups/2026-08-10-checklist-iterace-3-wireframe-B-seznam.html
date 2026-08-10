@@ -275,7 +275,7 @@ textarea{font:inherit}
 .ag-crumb{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint)}
 .ag-find{font-size:12px;color:var(--mut);margin-top:4px;display:flex;gap:7px;align-items:flex-start}
 .ag-find b{color:var(--ink);font-weight:600}
-.ag-note{width:100%;margin-top:8px;min-height:46px;resize:vertical;border:1px solid var(--line);border-radius:7px;
+.ag-note{width:100%;margin-top:8px;min-height:46px;resize:none;overflow:hidden;border:1px solid var(--line);border-radius:7px;
          background:var(--well);color:var(--ink);padding:7px 9px;font-size:12px;line-height:1.5}
 .ag-note:focus{outline:none;border-color:var(--accent2);background:var(--card)}
 .ag-note::placeholder{color:var(--faint)}
@@ -568,7 +568,6 @@ const S={
   sel:{},        /* id -> index volby */
   agenda:{},     /* id -> 1  (navěšeno na hovor) */
   note:{},       /* id -> poznámka k bodu agendy */
-  noteOpen:{},   /* id -> poznámka je rozbalená */
   stFilter:null, /* filtr podle typu stavu (z Obsahu) */
   rtab:'agenda', /* pravý sloupec: agenda / poznámky */
   wait:{},       /* id -> 1  (čeká se na zákazníka) */
@@ -669,6 +668,7 @@ function render(){
   document.querySelectorAll('.col-b[id]').forEach(n=>keep[n.id]=n.scrollTop);
   board.innerHTML = colToc(L) + colItems(L) + colCall(L,agenda);
   Object.entries(keep).forEach(([id,v])=>{const n=document.getElementById(id); if(n) n.scrollTop=v;});
+  autogrowAll();
   measure();
 }
 
@@ -793,18 +793,10 @@ function itemCard(it){
   /* hotovo je vždycky zelené, ať se uzavřelo jakkoli — jediná výjimka je zrušená zásilka.
      Stav si nese ikona vlevo, plocha říká jen „tohle už je za mnou“.
      Poznámku lze psát jen sem — u uzavřené položky je to záznam, ne pracovní lístek. */
-  /* napsaná poznámka je tu jen jako řádek záznamu; psát se do ní dá po kliknutí */
-  const note=S.noteOpen[it.id]
-    ? `<textarea class="ag-note" data-note="${it.id}" placeholder="Poznámka…">${esc(S.note[it.id]||'')}</textarea>`
-    : (S.note[it.id]
-        ? `<button class="donenote" data-noteopen="${it.id}" title="klik = upravit">📝 ${esc(S.note[it.id])}</button>`
-        : '');
   return row(`done ${st==='rus'?'s-rus':'s-ok'}`,
     S.ticked[it.id]?`<span class="dm">vyřešeno v hovoru${S.evid[it.id]?' · '+esc(S.evid[it.id]):''}</span>`:'',
-    (S.ticked[it.id]?`<button class="lnk" data-go="${it.id}">ukázat v agendě →</button>`
-                    :`<button class="lnk" data-add="${it.id}">+ zmínit v hovoru</button>`)
-    +(S.note[it.id]||S.noteOpen[it.id]?'':`<button class="lnk" data-noteopen="${it.id}">+ poznámka</button>`),
-    note);
+    S.ticked[it.id]?`<button class="lnk" data-go="${it.id}">ukázat v agendě →</button>`
+                   :`<button class="lnk" data-add="${it.id}">+ zmínit v hovoru</button>`);
 }
 
 function colItems(L){
@@ -846,7 +838,7 @@ const ZONE_OF={zji:'Zjistit',res:'Vyřešit',inf:'Informovat',pot:'Potvrdit',zme
                ok:'Jen zmínit',rus:'Jen zmínit'};
 
 function agCard(it){
-  const st=stOf(it.id), i=S.sel[it.id], op=it.o[i], ph=phase(it.id);
+  const st=stOf(it.id), i=S.sel[it.id], op=it.o[i], ph=phase(it.id), editing=S.edit['ag_'+it.id];
   /* odbavený bod agendy — taky jen řádek, poznámka z hovoru zůstane jako záznam */
   if(ph==='done') return `<div class="card done s-${st}" data-twin="${it.id}" data-relpop="${it.id}">
     <button class="donerow" data-go2="${it.id}" title="klik = ukázat v checklistu">
@@ -859,7 +851,17 @@ function agCard(it){
   const noteBox=`<textarea class="ag-note quick" data-note="${it.id}" rows="1"
       placeholder="Poznámka…">${esc(S.note[it.id]||'')}</textarea>`;
 
-  /* jen odškrtávátka a poznámka — výsledek se zapisuje u položky v checklistu */
+  /* dočasný stav se odklikat nedá — zapíše se výsledek a položka jde rovnou mezi vyřešené */
+  if(st==='zji'||st==='res')
+    return `<div class="card ag" data-twin="${it.id}" data-relpop="${it.id}">
+      <div class="ag-h"><span class="ag-nm">${esc(it.n)}</span>
+        <button class="lnk" data-go2="${it.id}">v checklistu ↑</button></div>
+      <div class="ag-find">${sic(st)}<span><b>${esc(op[0])}</b> ${op[3].map(tagchip).join('')}</span></div>
+      ${noteBox}
+      ${editing?optsHTML(it,i,true)+`<div class="cardbar"><button class="lnk" data-agedit="${it.id}">zpět</button></div>`
+               :`<div class="cardbar"><button class="mini" data-agedit="${it.id}">Zapsat výsledek</button></div>`}
+    </div>`;
+
   let tick='';
   if(ph==='wait')            tick='Potvrzení dorazilo';
   else if(st==='inf')        tick='Informován';
@@ -1028,13 +1030,17 @@ document.addEventListener('click',e=>{
 
   if(el=C('[data-opt]')){
     const [id,i]=el.dataset.opt.split(':');
+    /* výsledek zapsaný z agendy = hovor už proběhl → položka jde rovnou mezi vyřešené */
+    const afterCall=!!S.edit['ag_'+id];
     S.sel[id]=+i;
-    delete S.edit[id];
+    delete S.edit[id]; delete S.edit['ag_'+id];
     const st=BY[id].o[+i][1];
     if(st==='ok'||st==='rus'){ delete S.agenda[id]; delete S.wait[id]; delete S.ticked[id]; }
+    else if(afterCall){ S.agenda[id]=1; delete S.wait[id]; S.ticked[id]=1; }  /* výsledek hovoru */
     else { S.agenda[id]=1; delete S.wait[id]; delete S.ticked[id]; }          /* nové → rovnou na agendu */
     hidePop(); return render();
   }
+  if(el=C('[data-agedit]')){ const id=el.dataset.agedit; S.edit['ag_'+id]=!S.edit['ag_'+id]; hidePop(); return render(); }
   if(el=C('[data-edit]')){ const id=el.dataset.edit; S.edit[id]=!S.edit[id]; hidePop(); return render(); }
   if(el=C('[data-add]')){ S.agenda[el.dataset.add]=1; return render(); }
   if(el=C('[data-drop]')){ delete S.agenda[el.dataset.drop]; delete S.wait[el.dataset.drop]; return render(); }
@@ -1042,8 +1048,6 @@ document.addEventListener('click',e=>{
   if(el=C('[data-untick]')){ const id=el.dataset.untick; delete S.ticked[id]; S.agenda[id]=1; return render(); }
   if(el=C('[data-wait]')){ const id=el.dataset.wait; S.wait[id]=1; return render(); }
   if(el=C('[data-unwait]')){ delete S.wait[el.dataset.unwait]; return render(); }
-  if(el=C('[data-noteopen]')){ S.noteOpen[el.dataset.noteopen]=1; render();
-    document.querySelector(`[data-note="${el.dataset.noteopen}"]`)?.focus(); return; }
   if(el=C('[data-st]')){ const k=el.dataset.st;
     if(el.classList.contains('zero')) return;
     S.stFilter=S.stFilter===k?null:k; return render(); }
@@ -1063,7 +1067,15 @@ document.addEventListener('change',e=>{
 document.addEventListener('input',e=>{
   if(e.target.id==='notesArea') S.notes=e.target.value;
   else if(e.target.dataset.note) S.note[e.target.dataset.note]=e.target.value;
+  if(e.target.classList.contains('ag-note')) autogrow(e.target);
 });
+/* pole na poznámku roste s obsahem — za hovoru se nechce scrollovat v okénku */
+function autogrow(el){
+  el.style.height='auto';
+  /* scrollHeight nepočítá rámeček, ale border-box výška ano — jinak by text o 2 px přetékal */
+  el.style.height=(el.scrollHeight+el.offsetHeight-el.clientHeight)+'px';
+}
+function autogrowAll(){ document.querySelectorAll('textarea.ag-note').forEach(autogrow); }
 /* scroll-spy — obsah vlevo sleduje, kde jsi */
 document.addEventListener('scroll',e=>{
   if(e.target.id!=='cbItems') return;
