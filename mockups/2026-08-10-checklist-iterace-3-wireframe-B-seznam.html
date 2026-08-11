@@ -338,7 +338,7 @@ const ST = {
   inf:{n:'Oznámíme',         n2:'Informován',      ic:'i'},
   pot:{n:'Potvrdíme',        n2:'Potvrzeno',       ic:'✍'},
   zme:{n:'Změna parametrů',  n2:'Změna potvrzena', ic:'⇄'},
-  zji:{n:'Ke zjištění',      n2:'Ke zjištění',     ic:'?'},
+  zji:{n:'K zjištění',      n2:'K zjištění',     ic:'?'},
   res:{n:'K vyřešení',       n2:'K vyřešení',      ic:'!'},
   rus:{n:'Ruší se',          n2:'Zrušeno',         ic:'✕'},
   cek:{n:'Čeká na zákazníka',n2:'Čeká na zákazníka',ic:'⏳'},
@@ -365,7 +365,7 @@ const AREAS=[
   ['Zásadní nesoulad','rus','Obsah je ve velkém rozporu — nepošlete to, ani kdyby zákazník chtěl. Nebo od přepravy ustoupí sám.',[]],
   ['Nesoulad řešitelný jinou přepravou','zme','Po dohodě volíte jiného dopravce nebo variantu; mění se tím i cena.',['cena']]]},
  {id:'dg',n:'Potenciální DG',d:'Posuzuješ, jestli zásilka neobsahuje nebezpečné zboží.',rel:['Baterie','Deklarováno'],o:[
-  ['Nevíme, chybí informace o obsahu','zji','Stejná logika jako u přepravních podmínek.',[]],
+  ['Nevíme, chybí informace o obsahu','zji','Z toho, co máš, nejde posoudit, jestli je uvnitř nebezpečné zboží — neznáš celý obsah nebo potřebuješ upřesnit charakter věcí.',[]],
   ['Obsahuje DG','res','Víš o DG, řešení zatím neznáš.',[]],
   ['DG neobsahuje','ok','Máš jistotu.',[]],
   ['Obsahuje DG, drobné riziko','inf','Posíláte, zákazníka upozorni na rizika.',['stop']],
@@ -395,14 +395,14 @@ const AREAS=[
   ['Vnější obal je špatný','pot','Posíláte, zákazník musí riziko potvrdit.',['stop']],
   ['Vnější obal je nepřijatelný','rus','Přeprava se ruší.',[]],
   ['Obal zůstává, mění se přeprava','zme','Zásilka jede v původním obalu, ale jinou variantou nebo s jiným dopravcem. Skoro vždy k tomu ještě vybereš i některou z rizikových voleb — výjimečně může být obal pro nového dopravce v pořádku.',['cena']]]},
- {id:'vnitrni',n:'Vnitřní obal',d:'Stejná logika jako u vnějšího obalu — posuzuješ výplň a fixaci obsahu.',rel:['Obal'],warn:'Klient u této položky píše jen „Lidské pojmenování viz vnější obal“ — texty jsou odvozené, potřebují jeho potvrzení (otázka 11).',o:[
-  ['Nevíme, jaká je vnitřní výplň','zji','',[]],
-  ['Vnitřní obal nedostačuje','res','',[]],
-  ['Plně vyhovuje a chrání obsah','ok','',[]],
-  ['Vnitřní obal není ideální','inf','',['stop']],
-  ['Vnitřní obal je špatný','pot','',['stop']],
-  ['Vnitřní obal je nepřijatelný','rus','',[]],
-  ['Obal zůstává, mění se přeprava','zme','',['cena']]]},
+ {id:'vnitrni',n:'Vnitřní obal',d:'Posuzuješ výplň a fixaci obsahu uvnitř — jestli se věci při přepravě nepohnou a neroztlučou o sebe.',rel:['Obal'],warn:'Klient u této položky píše jen „Lidské pojmenování viz vnější obal“ — texty jsou odvozené, potřebují jeho potvrzení (otázka 11).',o:[
+  ['Nevíme, jaká je vnitřní výplň','zji','Nemáš jistotu, čím je obsah uvnitř vyplněný a zafixovaný.',[]],
+  ['Vnitřní obal nedostačuje','res','Víš, že výplň obsah neochrání, ale řešení zatím neznáš — jdeš to probrat se zákazníkem.',[]],
+  ['Plně vyhovuje a chrání obsah','ok','Výplň a fixace udrží obsah na místě po celou cestu.',[]],
+  ['Vnitřní obal není ideální','inf','Výplň není dokonalá. Posíláte, ale zákazníka upozorni, že při poškození nemusí pojišťovna plnit.',['stop']],
+  ['Vnitřní obal je špatný','pot','Výplň je vážně nedostatečná. Posíláte, ale zákazník musí potvrdit, že o riziku poškození ví.',['stop']],
+  ['Vnitřní obal je nepřijatelný','rus','Obsah by cestu v tomhle zabalení nepřežil — přeprava se ruší.',[]],
+  ['Obal zůstává, mění se přeprava','zme','Zásilka jede v původním balení, ale variantou nebo dopravcem, kde je manipulace šetrnější; mění se tím cena.',['cena']]]},
 ]},
 {n:'Z pohledu případných poplatků (speciální manipulace)',items:[
  {id:'osklivy',n:'„Ošklivý balík“',d:'Posuzuješ, jestli typ obalu nespadne pod poplatek za speciální manipulaci.',rel:['Obal','Rozměry','Hmotnost'],o:[
@@ -425,7 +425,7 @@ const AREAS=[
   ['Nevíme, jestli je v balení dřevo','zji','',[]],
   ['Balení obsahuje neošetřené surové dřevo','res','Balení je dřevěné nebo má dřevěné části, které nejsou ošetřené. Čeká se na řešení se zákazníkem.',[]],
   ['Balení neobsahuje ani kus surového dřeva','ok','',[]],
-  ['Balení obsahuje surové dřevo, vše je ošetřeno','ok','Druhá zelená varianta téže položky.',[]],
+  ['Balení obsahuje surové dřevo, vše je ošetřeno','ok','Dřevěné části jsou ošetřené podle ISPM 15 a označené — z pohledu předpisů je zásilka v pořádku.',[]],
   ['Neošetřené surové dřevo','pot','Posíláte s rizikem, zákazník to musí potvrdit.',['stop']],
   ['Neošetřené dřevo, zákazník nechce řešit','rus','Přeprava se kvůli tomu ruší.',[]],
   ['Přebalí se do jiného obalu','zme','Mění se tím parametry i cena.',['cena']]]},
@@ -470,7 +470,7 @@ const AREAS=[
   ['Nevíme, jaký je původ zboží','zji','Na faktuře není věta o původu, EUR1 se neřešil a podle charakteru zboží to nejde posoudit.',['dok']],
   ['Chybí nebo je špatně uvedený důkaz původu','res','Věta na faktuře je, ale ve špatném znění. Nebo víš, že zboží je lokální a mohlo by mít preferenční sazbu, ale důkaz chybí.',['dok']],
   ['Věta o původu je v přesném znění (nebo je EUR1)','ok','',[]],
-  ['Důkaz původu chybí, ale zboží není lokální','ok','Druhá zelená varianta téže položky.',[]],
+  ['Důkaz původu chybí, ale zboží není lokální','ok','Zboží nepochází z EU, takže na preferenční sazbu nárok není a chybějící důkaz původu ničemu nevadí.',[]],
   ['Zboží je lokální, zákazník původ řešit nechce','inf','Upozorni ho a normálně přepravujete — zákazník přijde o preferenční sazbu.',['cena']]]},
  {id:'eori',n:'Platné EORI',d:'Posuzuješ, jestli má osoba vývozce platné EORI.',rel:['EORI'],cond:'clo',o:[
   ['Neznáme osobu vývozce','zji','Zákazník ji zatím neuvedl a nenahrál celní fakturu.',[]],
@@ -482,7 +482,7 @@ const AREAS=[
   ['Plnou moc nemáme nebo je neúplná','res','',['dok']],
   ['Plnou moc máme, je řádně podepsaná','ok','',[]],
   ['Bez plné moci, zásilka se ruší','rus','',[]],
-  ['Mění se osoba vývozce','zme','Podobně jako u EORI — např. se překlopí na fyzickou osobu.',['cena']]]},
+  ['Mění se osoba vývozce','zme','Clít se bude na někoho jiného, kdo plnou moc doložit umí — typicky se to překlopí na fyzickou osobu.',['cena']]]},
 ]}]},
 {id:'adresy',name:'Adresy a kontakty',ctx:[['Vyzvednutí','Endevel s.r.o., Lidická 700/19, Brno ✓'],['Doručení','Muster AG, Bahnhofstrasse 12, 8001 Zürich ⚠ neverifikovaná'],['Telefon','+420 777 123 456 (předvolba CZ)']],groups:[{n:null,items:[
  {id:'stat',n:'Správný stát',d:'Posuzuješ, jestli cílový stát odpovídá zbytku adresy.',rel:['Doručení'],o:[
@@ -561,7 +561,6 @@ const S={
   note:{},       /* id -> poznámka k bodu agendy */
   stFilter:null, /* filtr podle typu stavu (z Obsahu) */
   rtab:'agenda', /* pravý sloupec: agenda / poznámky */
-  wait:{},       /* id -> 1  (čeká se na zákazníka) */
   ticked:{},     /* id -> 1  (odbaveno v hovoru) */
   edit:{},       /* id -> rozbalený picker */
   filter:'vse',  /* vse | open | agenda */
@@ -577,6 +576,11 @@ AREAS.forEach(a=>a.groups.forEach(g=>g.items.forEach(it=>{
   it.area=a.name; it.areaId=a.id; it.conds=[a.cond,it.cond].filter(Boolean);
   ITEMS.push(it);
 })));
+/* „Čeká na zákazníka" je volba u každé položky — rozhodnutí padlo, ale čeká se na úkon
+   zákazníka. Nikdy to není konečný stav a vždycky to drží položku na agendě hovoru. */
+ITEMS.forEach(it=>it.o.push(['Čeká se na zákazníka','cek',
+  'Domluveno, ale čeká se, až zákazník něco udělá — potvrdí, doloží doklad, opraví údaj. Až to dorazí, vybereš výsledný stav.',[]]));
+RANK.cek=3;
 const BY=Object.fromEntries(ITEMS.map(i=>[i.id,i]));
 const CONDN={mimoEU:'mimo EU',clo:'plnohodnotné clení',pref:'preferenční dohoda',pojisteno:'pojištěno'};
 /* stavy, které samy o sobě patří na hovor */
@@ -585,12 +589,7 @@ const CALLST=['zji','res','inf','pot','zme'];
 const vis   = it => it.conds.every(c=>S.sim[c]);
 /* „v jakém je položka stavu“ — pro počty i pro filtr v Obsahu.
    cek není volitelný stav, ale odvozená pozice, tak se počítá podle ní. */
-const inState = (it,k) => {
-  if(k==='none') return !stOf(it.id);
-  /* čekání na zákazníka přebíjí původní stav, ať každá položka spadne právě do jednoho řádku */
-  if(phase(it.id)==='wait') return k==='cek';
-  return k!=='cek' && stOf(it.id)===k;
-};
+const inState = (it,k) => k==='none' ? !stOf(it.id) : stOf(it.id)===k;
 
 /* filtr 2. sloupce — používá ho i Obsah, aby se prázdné oblasti schovaly zároveň */
 const passFilter = it => {
@@ -608,8 +607,8 @@ const optOf = id => S.sel[id]===undefined ? null : BY[id].o[S.sel[id]];
 function phase(id){
   const s=stOf(id);
   if(!s) return 'todo';                    /* nevyhodnoceno */
-  if(S.ticked[id]) return 'done';          /* odbaveno v hovoru */
-  if(S.wait[id]) return 'wait';
+  if(s==='cek') return 'wait';             /* čekání není konečné — nejde ho ani odškrtnout */
+  if(S.ticked[id]) return 'done';          /* vyřešeno v hovoru */
   if(S.agenda[id]) return 'call';          /* na agendě — i „v pořádku“, když ji tam operátor dá sám */
   if(s==='ok'||s==='rus') return 'done';   /* konečné, hovor nepotřebuje */
   return 'loose';                          /* vyhodnoceno, ale nikde se neřeší */
@@ -620,7 +619,11 @@ const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const stlab=(s,past)=>`<span class="st"><span class="sic sic-${s}">${ST[s].ic}</span>${past?ST[s].n2:ST[s].n}</span>`;
 const sic=s=>`<span class="sic sic-${s}">${ST[s].ic}</span>`;
 const ordered=it=>it.o.map((op,i)=>[i,op]).sort((a,b)=>RANK[a[1][1]]-RANK[b[1][1]] || a[0]-b[0]);
-const tagchip=t=>`<span title="${TAGS[t][1]}">${TAGS[t][0]}</span>`;
+/* ⚠ ZNAČKY RIZIK (💰 cena · 📄 doklad · ⏱ zdržení · 🚫 zastavení · ✏️ oprava dat) JSOU DOČASNĚ SKRYTÉ.
+   Data u voleb zůstávají v poli TAGS a ve čtvrtém prvku každé volby — až se klient rozhodne
+   (otázka 13 v analýze), stačí přepnout TAGS_ON na true a vrátit volbu „podle rizika“ v agendě. */
+const TAGS_ON=false;
+const tagchip=t=>TAGS_ON?`<span title="${TAGS[t][1]}">${TAGS[t][0]}</span>`:'';
 
 /* ═══════════════ RENDER ═══════════════ */
 const board=document.getElementById('board');
@@ -831,43 +834,42 @@ const ZONE_OF={zji:'Zjistit',res:'Vyřešit',inf:'Informovat',pot:'Potvrdit',zme
 
 function agCard(it){
   const st=stOf(it.id), i=S.sel[it.id], op=it.o[i], ph=phase(it.id), editing=S.edit['ag_'+it.id];
-  /* odbavený bod agendy — taky jen řádek, poznámka z hovoru zůstane jako záznam */
-  if(ph==='done') return `<div class="card done s-${st}" data-twin="${it.id}" data-relpop="${it.id}">
-    <button class="donerow" data-go2="${it.id}" title="klik = ukázat v checklistu">
-      ${sic(st)}<span class="dn">${esc(it.n)}</span><span class="dv">${esc(op[0])}</span>
-      <span class="dm">✓ vyřešeno</span></button>
-    ${S.note[it.id]?`<div class="donenote">${esc(S.note[it.id])}</div>`:''}
-    <div class="doneact"><button class="lnk" data-untick="${it.id}">vrátit na agendu</button></div></div>`;
-
+  const head=`<div class="ag-h"><span class="ag-nm">${esc(it.n)}</span>
+      <button class="lnk" data-go2="${it.id}">v checklistu ↑</button></div>
+    <div class="ag-find">${sic(st)}<span><b>${esc(op[0])}</b></span></div>`;
   /* zápis za hovoru musí být na jeden klik — pole je rovnou tady, jen tenké a tiché */
   const noteBox=`<textarea class="ag-note quick" data-note="${it.id}" rows="1"
       placeholder="Poznámka…">${esc(S.note[it.id]||'')}</textarea>`;
 
-  /* dočasný stav se odklikat nedá — zapíše se výsledek a položka jde rovnou mezi vyřešené */
-  if(st==='zji'||st==='res')
-    return `<div class="card ag" data-twin="${it.id}" data-relpop="${it.id}">
-      <div class="ag-h"><span class="ag-nm">${esc(it.n)}</span>
-        <button class="lnk" data-go2="${it.id}">v checklistu ↑</button></div>
-      <div class="ag-find">${sic(st)}<span><b>${esc(op[0])}</b> ${op[3].map(tagchip).join('')}</span></div>
-      ${noteBox}
-      ${editing?optsHTML(it,i,true)+`<div class="cardbar"><button class="lnk" data-agedit="${it.id}">zpět</button></div>`
-               :`<div class="cardbar"><button class="mini" data-agedit="${it.id}">Zapsat výsledek</button></div>`}
-    </div>`;
+  /* volbu jde přepsat u každého bodu agendy — odsud jde výsledek rovnou mezi vyřešené,
+     což v checklistu udělat nejde */
+  if(editing)
+    return `<div class="card ag" data-twin="${it.id}" data-relpop="${it.id}">${head}${noteBox}
+      ${optsHTML(it,i,true)}
+      <div class="cardbar"><button class="lnk" data-agedit="${it.id}">zpět</button></div></div>`;
 
+  if(ph==='done')
+    return `<div class="card done s-${st}" data-twin="${it.id}" data-relpop="${it.id}">
+      <button class="donerow" data-go2="${it.id}" title="klik = ukázat v checklistu">
+        ${sic(st)}<span class="dn">${esc(it.n)}</span><span class="dv">${esc(op[0])}</span>
+        <span class="dm">✓ vyřešeno</span></button>
+      ${S.note[it.id]?`<div class="donenote">${esc(S.note[it.id])}</div>`:''}
+      <div class="doneact"><button class="lnk" data-agedit="${it.id}">změnit volbu</button>
+        <button class="lnk" data-untick="${it.id}">vrátit na agendu</button></div></div>`;
+
+  /* dočasné stavy se odklikat nedají — musí se zapsat výsledek */
+  const primary=(st==='zji'||st==='res'||st==='cek')
+    ? `<button class="mini" data-agedit="${it.id}">Zapsat výsledek</button>`
+    : '';
   let tick='';
-  if(ph==='wait')            tick='Potvrzení dorazilo';
-  else if(st==='inf')        tick='Informován';
+  if(st==='inf')                  tick='Informován';
   else if(st==='pot'||st==='zme') tick='Potvrzeno';
   else if(st==='ok'||st==='rus')  tick='Zmíněno';
 
-  const bar=tick?`<div class="cardbar">
-    <label class="tickbox"><input type="checkbox" data-tick="${it.id}"> ${tick}</label></div>`:'';
-
-  return `<div class="card ag" data-twin="${it.id}" data-relpop="${it.id}">
-    <div class="ag-h"><span class="ag-nm">${esc(it.n)}</span>
-      <button class="lnk" data-go2="${it.id}">v checklistu ↑</button></div>
-    <div class="ag-find">${sic(st)}<span><b>${esc(op[0])}</b> ${op[3].map(tagchip).join('')}</span></div>
-    ${noteBox}${bar}</div>`;
+  return `<div class="card ag" data-twin="${it.id}" data-relpop="${it.id}">${head}${noteBox}
+    <div class="cardbar">
+      ${tick?`<label class="tickbox"><input type="checkbox" data-tick="${it.id}"> ${tick}</label>`:primary}
+      <button class="lnk right" data-agedit="${it.id}">změnit volbu</button></div></div>`;
 }
 
 function colCall(L,agenda){
@@ -915,7 +917,7 @@ function colCall(L,agenda){
         <span class="ch-n">${isNotes?withNote:open.length}<em>${isNotes?' poznámek':' k probrání'}</em></span></div>
       <div class="ch-row">
         <span class="segs">${tab('agenda','agenda')}${tab('notes',`poznámky${withNote?' · '+withNote:''}`)}</span>
-        ${isNotes?'':`<span class="segs">${seg('stav','stav')}${seg('tema','riziko')}${seg('kat','oblast')}</span>`}
+        ${isNotes?'':`<span class="segs">${seg('stav','stav')}${TAGS_ON?seg('tema','riziko'):''}${seg('kat','oblast')}</span>`}
       </div>
     </div>
     <div class="callhead"><span class="ci">📞</span>
@@ -964,7 +966,7 @@ function showPop(el){
   popKey=el.dataset.pop;
   pop.innerHTML=`<div class="pop-h">${stlab(op[1])}<span class="pop-t">${esc(op[0])}</span></div>
     <div class="pop-b">${op[2]?esc(op[2]):'<em>Bez doplňujícího popisu — volba je samovysvětlující.</em>'}</div>
-    ${op[3].length?`<div class="pop-tags">${op[3].map(t=>`<span>${TAGS[t][0]} ${esc(TAGS[t][1])}</span>`).join('')}</div>`:''}`;
+    ${TAGS_ON&&op[3].length?`<div class="pop-tags">${op[3].map(t=>`<span>${TAGS[t][0]} ${esc(TAGS[t][1])}</span>`).join('')}</div>`:''}`;
   placePop(el);
 }
 /* kontext zásilky k položce — jen ta pole, podle kterých se rozhoduje */
@@ -1022,9 +1024,10 @@ document.addEventListener('click',e=>{
     S.sel[id]=+i;
     delete S.edit[id]; delete S.edit['ag_'+id];
     const st=BY[id].o[+i][1];
-    delete S.wait[id];
+    /* čekání na zákazníka drží položku na agendě a nikdy ji neuzavře */
+    if(st==='cek'){ S.agenda[id]=1; delete S.ticked[id]; }
     /* zapsáno z agendy = hovor proběhl → ať je výsledek jakýkoli, patří mezi vyřešené v hovoru */
-    if(afterCall){ S.agenda[id]=1; S.ticked[id]=1; }
+    else if(afterCall){ S.agenda[id]=1; S.ticked[id]=1; }
     else if(st==='ok'||st==='rus'){ delete S.agenda[id]; delete S.ticked[id]; }
     else { S.agenda[id]=1; delete S.ticked[id]; }
     hidePop(); return render();
@@ -1032,11 +1035,9 @@ document.addEventListener('click',e=>{
   if(el=C('[data-agedit]')){ const id=el.dataset.agedit; S.edit['ag_'+id]=!S.edit['ag_'+id]; hidePop(); return render(); }
   if(el=C('[data-edit]')){ const id=el.dataset.edit; S.edit[id]=!S.edit[id]; hidePop(); return render(); }
   if(el=C('[data-add]')){ S.agenda[el.dataset.add]=1; return render(); }
-  if(el=C('[data-drop]')){ delete S.agenda[el.dataset.drop]; delete S.wait[el.dataset.drop]; return render(); }
-  if(el=C('[data-tick]')){ const id=el.dataset.tick; S.ticked[id]=1; delete S.wait[id]; return render(); }
+  if(el=C('[data-drop]')){ delete S.agenda[el.dataset.drop]; return render(); }
+  if(el=C('[data-tick]')){ const id=el.dataset.tick; S.ticked[id]=1; return render(); }
   if(el=C('[data-untick]')){ const id=el.dataset.untick; delete S.ticked[id]; S.agenda[id]=1; return render(); }
-  if(el=C('[data-wait]')){ const id=el.dataset.wait; S.wait[id]=1; return render(); }
-  if(el=C('[data-unwait]')){ delete S.wait[el.dataset.unwait]; return render(); }
   if(el=C('[data-st]')){ const k=el.dataset.st;
     if(el.classList.contains('zero')) return;
     S.stFilter=S.stFilter===k?null:k; return render(); }

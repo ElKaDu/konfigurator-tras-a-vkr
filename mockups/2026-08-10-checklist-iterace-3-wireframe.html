@@ -30,8 +30,10 @@
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--ink);overflow:hidden;
-     font:14px/1.5 -apple-system,"Segoe UI",Roboto,system-ui,sans-serif;min-width:1500px}
+/* svisle scrollují jednotlivé sloupce, vodorovně celá stránka — na užším displeji
+   jde tak dojet na pravé sloupce místo toho, aby se uřízly */
+body{margin:0;background:var(--bg);color:var(--ink);overflow-x:auto;overflow-y:hidden;
+     font:14px/1.5 -apple-system,"Segoe UI",Roboto,system-ui,sans-serif;min-width:1600px}
 button{font:inherit;color:inherit}
 
 /* ═══ stavové tečky — jediný plošný nositel barvy ═══ */
@@ -50,17 +52,22 @@ button{font:inherit;color:inherit}
 .sic-pot{--sc:var(--pot)} .sic-zme{--sc:var(--zme)} .sic-rus{--sc:var(--rus)} .sic-cek{--sc:var(--cek)}
 
 /* ============ top ============ */
-.top{background:var(--card);border-bottom:1px solid var(--line)}
-.top-r1{display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center;padding:10px 24px 4px}
+.top{background:var(--card);border-bottom:1px solid var(--line);min-width:1600px}
+.top-in{display:flex;align-items:center;gap:26px;padding:11px 24px 13px}
+.tleft{flex:1;min-width:0}
+.trow1{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:10px}
 .top h1{font-size:15px;margin:0;font-weight:650}
 .top h1 span{color:var(--mut);font-weight:400}
 .ship{color:var(--mut);font-size:12.5px}
 .ship b{color:var(--ink);font-weight:600}
-.prog{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--mut);font-variant-numeric:tabular-nums}
-.prog .bar{width:150px;height:6px;border-radius:3px;background:var(--line2);overflow:hidden;position:relative}
-.prog .bar i{position:absolute;left:0;top:0;height:100%;border-radius:3px}
-.prog .bar .b1{background:color-mix(in srgb,var(--accent) 30%,transparent)}
-.prog .bar .b2{background:var(--ok)}
+/* skládaný pruh: kolik je hotovo, kolik se čeká, kolik je na hovoru, zbytek = k posouzení */
+.sbar{height:8px;border-radius:4px;background:var(--sep);overflow:hidden;display:flex;max-width:940px}
+.sbar i{display:block;height:100%;transition:width .35s cubic-bezier(.4,0,.2,1)}
+.slegend{display:flex;align-items:center;gap:18px;margin-top:8px;font-size:11.5px;color:var(--mut);flex-wrap:wrap}
+.slegend .lg{display:inline-flex;align-items:center;gap:6px}
+.slegend b{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums}
+.slegend .ld{width:9px;height:9px;border-radius:50%;flex:none}
+.slegend .tot{color:var(--faint)}
 .gstat{margin-left:auto;display:flex;align-items:center;gap:8px;font-weight:650;font-size:13px;
        padding:5px 14px;border-radius:20px;border:1px solid var(--line)}
 .gstat.g-ok{background:var(--ok-bg);border-color:transparent}
@@ -78,7 +85,7 @@ button{font:inherit;color:inherit}
 .banner em{font-weight:400;color:var(--mut);font-style:normal}
 
 /* ============ board — sloupce oddělené jen dividery ============ */
-.board{display:grid;grid-template-columns:minmax(620px,1.5fr) minmax(400px,1fr) minmax(330px,.85fr);
+.board{display:grid;grid-template-columns:238px minmax(520px,1.4fr) minmax(370px,1fr) minmax(300px,.8fr);
        gap:18px;align-items:stretch;max-width:2200px;margin:0 auto;
        height:calc(100vh - var(--th,110px));overflow:hidden;padding:16px 20px 18px}
 /* každý sloupec = samostatný bílý panel na šedém plátně → mezera je vidět */
@@ -92,7 +99,8 @@ button{font:inherit;color:inherit}
 .col-done{--cc:var(--ok)}
 .col-h{flex:none;padding:13px 18px 0;display:flex;flex-direction:column;gap:10px;
        background:var(--card);border-bottom:1px solid var(--line)}
-.ch-top{display:flex;align-items:center;gap:11px}
+/* min-height srovná hlavičky sloupců, i když jen některé mají přepínač */
+.ch-top{display:flex;align-items:center;gap:11px;min-height:29px}
 /* ── škála nadpisů ──
    Ú1 titulek sloupce · Ú2 kategorie/zóna · Ú3 podskupina · Ú4 drobenka na kartě
    Ú1–Ú2 verzálky + --ink (liší se jen velikostí), Ú3 větná velikost + šedá, ať se neplete */
@@ -123,13 +131,51 @@ button{font:inherit;color:inherit}
 .stack .col.waitp{flex:0 1 auto;max-height:42%}
 .stack .col.donep{flex:1 1 auto}
 
-/* navigace po oblastech */
-.catnav{flex:none;display:flex;flex-wrap:wrap;gap:4px;padding:8px 14px;border-bottom:1px solid var(--line);background:var(--card)}
-.catnav a{display:inline-flex;align-items:center;gap:5px;border-radius:13px;
-   padding:2px 10px;font-size:11px;font-weight:600;cursor:pointer;color:var(--mut);text-decoration:none;white-space:nowrap}
-.catnav a:hover{color:var(--ink);background:var(--card)}
-.catnav a .n{font-weight:400;font-variant-numeric:tabular-nums}
-.catnav a.empty{opacity:.4}
+/* ── přehledový sloupec: kategorie + tečka za každou položku ── */
+.navrow{display:block;width:100%;text-align:left;background:none;border:none;cursor:pointer;
+        padding:10px 16px;border-bottom:1px solid var(--line2)}
+.navrow:hover{background:var(--well)}
+/* kategorie, která už není v 1. sloupci — není kam skrolovat */
+.navrow:disabled{cursor:default;opacity:.55}
+.navrow:disabled:hover{background:none}
+.navrow:disabled .nm{font-weight:600;color:var(--mut)}
+.navrow .t{display:flex;align-items:baseline;gap:8px}
+.navrow .nm{font-weight:650;font-size:12.5px;flex:1;line-height:1.35}
+.navrow .c{font-size:11px;color:var(--mut);font-variant-numeric:tabular-nums;flex:none}
+.dots{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.dot{width:10px;height:10px;border-radius:50%;flex:none;border:1.5px dashed var(--faint);background:none}
+.dot.f{border:none}
+.dot.s-ok{background:var(--ok)}   .dot.s-zji{background:var(--zji)}  .dot.s-res{background:var(--res)}
+.dot.s-inf{background:var(--inf)} .dot.s-pot{background:var(--pot)}  .dot.s-zme{background:var(--zme)}
+.dot.s-rus{background:var(--rus)} .dot.s-cek{background:var(--cek)}
+.navfilt{flex:none;padding:9px 14px;border-bottom:1px solid var(--line)}
+.navchk{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:2px 0;
+        cursor:pointer;font-size:11.5px;color:var(--mut);text-align:left}
+.navchk:hover{color:var(--ink)}
+.navchk .box{width:15px;height:15px;border:1.5px solid var(--line);border-radius:4px;flex:none;
+             display:flex;align-items:center;justify-content:center;font-size:10px;color:transparent}
+.navchk.on .box{background:var(--accent);border-color:var(--accent);color:#fff}
+.navchk.on{color:var(--ink);font-weight:600}
+/* sbalený přehled */
+.board.navclosed{grid-template-columns:46px minmax(520px,1.4fr) minmax(370px,1fr) minmax(300px,.8fr)}
+.col-nav.closed{align-items:center;padding-top:13px;gap:14px}
+.navtoggle{background:none;border:1px solid var(--line);border-radius:7px;width:28px;height:28px;
+           cursor:pointer;color:var(--mut);font-size:13px;line-height:1;flex:none}
+.navtoggle:hover{border-color:var(--accent);color:var(--accent)}
+.vlabel{writing-mode:vertical-rl;text-orientation:mixed;font-size:11px;font-weight:800;
+        text-transform:uppercase;letter-spacing:.14em;color:var(--faint)}
+.col-h .navtoggle{margin-left:6px}
+
+/* ── plánování hovoru — pruh přes celý sloupec, lícuje s kontextem kategorie vlevo ── */
+.callplan{padding:14px 18px 12px;background:color-mix(in srgb,var(--accent) 9%,var(--card));
+          border-bottom:1px solid color-mix(in srgb,var(--accent) 22%,transparent)}
+.callplan .cp-h{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink)}
+.callplan .cp-s{font-size:11px;color:var(--mut);margin-top:8px}
+.callplan .cp-s .when{color:var(--accent);font-weight:700;font-size:12.5px;text-transform:none;letter-spacing:0}
+.callplan .cp-f{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.callplan input{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:6px;
+                padding:4px 7px;background:var(--card);color:var(--ink)}
+.callplan input:focus{outline:none;border-color:var(--accent)}
 
 /* ============ hierarchie 1. sloupce ============
    oblast (divider) → podskupina (label) → boxík položky → vnořený rámeček voleb   */
@@ -158,7 +204,7 @@ button{font:inherit;color:inherit}
 @keyframes slidein{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
 .card .crumb{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin-bottom:1px}
 .card .hd{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:2px}
-.card .nm{font-weight:650;font-size:13px}
+.card .nm{font-weight:650;font-size:12.5px;line-height:1.35}
 .card .dsc{color:var(--mut);font-size:11.5px;margin:0 0 8px;max-width:80ch}
 /* údaje zásilky — stejná fialová jako kontext kategorie v 1. sloupci */
 .card .rel{font-size:10.5px;color:var(--mut);margin:10px 0 0;padding:6px 9px;line-height:1.55;
@@ -197,6 +243,10 @@ button{font:inherit;color:inherit}
 
 .cardbar{display:flex;align-items:center;gap:12px;margin-top:12px;font-size:11px;color:var(--mut);flex-wrap:wrap}
 .cardbar.sub{margin-top:9px}
+/* v Uzavřených je návrat výjimečná akce → ukáže se až při najetí na kartu */
+.donep .card .cardbar{display:none}
+.donep .card:hover .cardbar,
+.donep .card:focus-within .cardbar{display:flex}
 .mini{background:var(--card);border:1px solid var(--line);border-radius:6px;font-size:11px;padding:3px 10px;cursor:pointer}
 .mini:hover{border-color:var(--mut)}
 .mini.pri{background:var(--ink);border-color:var(--ink);color:var(--card);font-weight:600}
@@ -216,7 +266,8 @@ button{font:inherit;color:inherit}
 .evid select{font:inherit;font-size:10.5px;background:var(--card);color:var(--ink);border:1px solid var(--line);
              border-radius:5px;padding:1px 4px}
 .colempty{padding:16px;color:var(--faint);font-size:12px;font-style:italic}
-.col-h.nobar{padding-bottom:13px}
+/* dorovná výšku za chybějící progress bar, ať hlavičky všech sloupců lícují */
+.col-h.nobar{padding-bottom:27px}
 /* poznámky operátora */
 .notes{padding:12px 14px;display:flex;flex-direction:column;gap:10px;height:100%}
 .notes textarea{width:100%;flex:1;min-height:220px;resize:vertical;border:1px solid var(--line);
@@ -230,7 +281,7 @@ button{font:inherit;color:inherit}
         letter-spacing:.07em;display:flex;align-items:center;gap:8px;color:var(--ink);text-transform:uppercase;
         border-bottom:1px solid var(--line)}
 .zone-h .c{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:600;color:var(--mut);letter-spacing:0}
-/* výchozí zóna (téma / kategorie) = bílá jako 1. sloupec, karty šedé — stejný princip */
+/* výchozí zóna (riziko / kategorie) = bílá jako 1. sloupec, karty šedé — stejný princip */
 .zgroup{background:var(--card)}
 .zgroup .zone-h{background:var(--card);border-bottom-color:var(--line)}
 .zgroup .card{background:var(--card)}
@@ -248,8 +299,9 @@ button{font:inherit;color:inherit}
 .m-pot{--sc:var(--pot)} .m-zme{--sc:var(--zme)} .m-rus{--sc:var(--rus)} .m-cek{--sc:var(--cek)}
 .card.mark{border-left:3px solid var(--sc);padding-left:11px}
 /* odlehčená karta — bez rámečku voleb, stav jen ikonou */
+/* název položky je nadpis, vybraná volba je sdělení pod ním — liší se velikostí i řezem */
 .chosen{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:none;border:none;
-        padding:0;margin-top:7px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);line-height:1.4}
+        padding:0;margin-top:6px;cursor:pointer;font-size:12px;font-weight:500;color:var(--ink);line-height:1.4}
 .chosen:hover{color:var(--accent)}
 .chosen .ct{flex:1}
 .chosen .tg{display:flex;gap:4px;font-size:11px;opacity:.7;font-weight:400}
@@ -275,11 +327,15 @@ button{font:inherit;color:inherit}
 </style>
 
 <header class="top" id="tophdr">
-  <div class="top-r1">
-    <h1>Checklist zásilky <span>· wireframe v3 — kanban</span></h1>
-    <span class="ship"><b>#CZ-24 811</b> · Praha → Curych · balík 12 kg · 60×40×30 cm · hodnota 45 000 Kč · nepojištěno</span>
-    <span class="prog"><span id="pnum"></span>
-      <span class="bar"><i class="b1" id="pb1"></i><i class="b2" id="pb2"></i></span></span>
+  <div class="top-in">
+    <div class="tleft">
+      <div class="trow1">
+        <h1>Checklist zásilky</h1>
+        <span class="ship"><b>#CZ-24 811</b> · Praha → Curych · balík 12 kg · 60×40×30 cm · hodnota 45 000 Kč · nepojištěno</span>
+      </div>
+      <div class="sbar" id="sbar"></div>
+      <div class="slegend" id="slegend"></div>
+    </div>
     <span class="gstat" id="gstat"></span>
   </div>
 </header>
@@ -296,7 +352,7 @@ const ST = {
   inf:{n:'Oznámíme',         n2:'Informován',      ic:'i'},
   pot:{n:'Potvrdíme',        n2:'Potvrzeno',       ic:'✍'},
   zme:{n:'Změna parametrů',  n2:'Změna potvrzena', ic:'⇄'},
-  zji:{n:'Ke zjištění',      n2:'Ke zjištění',     ic:'?'},
+  zji:{n:'K zjištění',      n2:'K zjištění',     ic:'?'},
   res:{n:'K vyřešení',       n2:'K vyřešení',      ic:'!'},
   rus:{n:'Ruší se',          n2:'Zrušeno',         ic:'✕'},
   cek:{n:'Čeká na klienta',  n2:'Čeká na klienta',  ic:'⏳'},
@@ -516,6 +572,7 @@ const PROPOSAL={pojodp:0, plnamoc:0, stat:1, tel:3, dobadoruc:0, objem:1, skok:1
 /* ═══════════════ STATE ═══════════════ */
 const S={sel:{}, agenda:{}, wait:{}, back:{}, evid:{}, accepted:{}, edit:{}, group:'stav',
          dtab:'done', notes:'', prev:null, delta:{},
+         navOpen:true, hideDone:false, call:null, callEdit:false,
          sim:{mimoEU:true, pojisteno:false, clo:true, pref:true}};
 
 /* hlavička sloupce s progress barem — ukazuje, kolik z celku je právě tady */
@@ -568,11 +625,21 @@ function render(){
   document.body.classList.toggle('locked',anyRed);
   document.getElementById('ban').classList.toggle('on',anyRed);
 
-  const decided=L.filter(i=>stOf(i.id)).length;
-  const closed =L.filter(i=>place(i.id)==='closed').length;
-  document.getElementById('pnum').textContent=`vyhodnoceno ${decided}/${L.length} · uzavřeno ${closed}/${L.length}`;
-  document.getElementById('pb1').style.width=(decided/L.length*100)+'%';
-  document.getElementById('pb2').style.width=(closed/L.length*100)+'%';
+  const nTodo=L.filter(i=>place(i.id)==='todo').length;
+  const nCall=L.filter(i=>place(i.id)==='call').length;
+  const nWait=L.filter(i=>place(i.id)==='wait').length;
+  const closed=L.filter(i=>place(i.id)==='closed').length;
+  const p=n=>L.length?(n/L.length*100)+'%':'0%';
+  /* pruh se plní zleva tím, co je hotové; zbytek pruhu = položky k posouzení */
+  document.getElementById('sbar').innerHTML=
+    `<i style="width:${p(closed)};background:var(--ok)"></i>`+
+    `<i style="width:${p(nWait)};background:var(--cek)"></i>`+
+    `<i style="width:${p(nCall)};background:var(--accent2)"></i>`;
+  const lg=(c,n,l)=>n?`<span class="lg"><span class="ld" style="background:${c}"></span><b>${n}</b> ${l}</span>`:'';
+  document.getElementById('slegend').innerHTML=
+    lg('var(--sep)',nTodo,'k posouzení')+lg('var(--accent2)',nCall,'na hovoru')+
+    lg('var(--cek)',nWait,'čeká na klienta')+lg('var(--ok)',closed,'hotovo')+
+    `<span class="tot">z ${L.length}</span>`;
 
   const g=document.getElementById('gstat'); const sts=L.map(i=>stOf(i.id)); let k,txt,sub='';
   if(sts.includes('rus')){k='rus';txt='Zásilka se ruší';}
@@ -596,7 +663,8 @@ function render(){
   S.prev=now;
   S.total=L.length;
 
-  board.innerHTML = colEval(todo) + colCall(call) +
+  board.className = 'board'+(S.navOpen?'':' navclosed');
+  board.innerHTML = colNav(L) + colEval(todo) + colCall(call) +
     `<div class="stack">${colWait(wait)}${colDone(done)}</div>`;
   measure();
 }
@@ -655,7 +723,7 @@ function cardHTML(it,mode,mark,noCrumb){
            <span class="tg"></span>${stlab('cek',true)}<span class="info"> </span></button>` : '';
     body=(editing?optsHTML(it,i,cekaRow,past):compact)+
          (rel&&mode!=='closed'?`<div class="rel">${rel}</div>`:'');
-    const jine=`<button class="lnk" data-edit="${it.id}">${editing?'zpět':'vybrat jiné'}</button>`;
+    const jine=`<button class="lnk" data-edit="${it.id}">${editing?'zpět':'jiný výsledek'}</button>`;
     if(mode==='call'&&(st==='zji'||st==='res'))
       /* dočasný stav — odškrtnout nelze, musí se zaznamenat výsledek */
       actions=`<button class="mini" data-edit="${it.id}">${editing?'Zpět':'Vybrat výsledek'}</button>`;
@@ -675,12 +743,41 @@ function cardHTML(it,mode,mark,noCrumb){
   </div>`;
 }
 
+/* ---------- přehledový sloupec ---------- */
+function colNav(L){
+  if(!S.navOpen) return `<div class="col col-nav closed">
+    <button class="navtoggle" data-navtoggle="1" title="Rozbalit obsah">›</button>
+    <span class="vlabel">Obsah</span></div>`;
+  const rows=AREAS.filter(a=>!a.cond||S.sim[a.cond]).map(a=>{
+    const items=a.groups.flatMap(g=>g.items).filter(vis);
+    if(!items.length) return '';
+    const hotovo=items.filter(i=>place(i.id)==='closed').length;
+    if(S.hideDone && hotovo===items.length) return '';
+    const dots=items.map(i=>{
+      const st=stOf(i.id), pl=place(i.id);
+      const k=pl==='wait'?'cek':st;
+      return `<span class="dot ${k?'f s-'+k:''}" title="${esc(i.n)} — ${k?ST[k].n:'nevyhodnoceno'}"></span>`;
+    }).join('');
+    /* skrolovat lze jen tam, kde v 1. sloupci ještě něco zbylo */
+    const kSkrolovani=items.some(i=>place(i.id)==='todo');
+    return `<button class="navrow" data-nav="${a.id}" ${kSkrolovani?'':'disabled title="Všechny položky už jsou v dalších sloupcích"'}>
+      <span class="t"><span class="nm">${esc(a.name)}</span><span class="c">${hotovo}/${items.length}</span></span>
+      <span class="dots">${dots}</span></button>`;
+  }).join('');
+  const skryto=AREAS.filter(a=>(!a.cond||S.sim[a.cond])).filter(a=>{
+    const it=a.groups.flatMap(g=>g.items).filter(vis);
+    return it.length && it.every(i=>place(i.id)==='closed');}).length;
+  return `<div class="col col-nav">
+    <div class="col-h nobar"><div class="ch-top"><span class="ch-t">Obsah</span>
+      <span class="ch-n">${L.length}<em> pol.</em></span>
+      <button class="navtoggle" data-navtoggle="1" title="Sbalit obsah">‹</button></div></div>
+    <div class="navfilt"><button class="navchk ${S.hideDone?'on':''}" data-hidedone="1">
+      <span class="box">✓</span> Skrýt hotové kategorie${S.hideDone&&skryto?` <span style="font-weight:400">(${skryto})</span>`:''}</button></div>
+    <div class="col-b">${rows||'<div class="colempty">Vše hotové.</div>'}</div></div>`;
+}
+
 /* ---------- sloupec 1 ---------- */
 function colEval(todo){
-  const nav=AREAS.filter(a=>!a.cond||S.sim[a.cond]).map(a=>{
-    const n=a.groups.flatMap(g=>g.items).filter(it=>vis(it)&&place(it.id)==='todo').length;
-    return `<a data-nav="${a.id}" class="${n?'':'empty'}">${esc(a.name)} <span class="n">${n}</span></a>`;
-  }).join('');
   const inner=AREAS.filter(a=>!a.cond||S.sim[a.cond]).map(a=>{
     const items=a.groups.flatMap(g=>g.items).filter(it=>vis(it)&&place(it.id)==='todo');
     if(!items.length) return '';
@@ -697,8 +794,35 @@ function colEval(todo){
     </div>`;
   }).join('');
   return `<div class="col col-todo">${colHead('todo','K vyhodnocení',todo.length,S.total)}
-    <div class="catnav">${nav}</div>
     <div class="col-b" id="cb1">${inner||'<div class="colempty">Vše vyhodnoceno.</div>'}</div></div>`;
+}
+
+/* hovor je samostatná věc, na kterou se položky navěšují — ne vlastnost položky */
+function callPlan(n){
+  const pol=n===1?'položka':n>=2&&n<=4?'položky':'položek';
+  if(S.callEdit){
+    const t=new Date(Date.now()+36e5);
+    return `<div class="callplan">
+      <div class="cp-h">Naplánovat hovor</div>
+      <div class="cp-f">
+        <input type="date" id="cpDate" value="${S.call?S.call.d:t.toISOString().slice(0,10)}">
+        <input type="time" id="cpTime" value="${S.call?S.call.t:String(t.getHours()).padStart(2,'0')+':00'}">
+        <button class="mini" data-cpsave="1">Uložit</button>
+        <button class="lnk" data-cpcancel="1" style="margin-left:0">zpět</button>
+      </div></div>`;
+  }
+  if(!S.call) return `<div class="callplan">
+      <div class="cp-h">Hovor</div>
+      <div class="cp-s">Zatím není naplánovaný · na agendě ${n} ${pol}</div>
+      <div class="cp-f"><button class="mini" data-cpedit="1">Naplánovat hovor</button></div></div>`;
+  const d=new Date(S.call.d+'T00:00');
+  const den=['neděle','pondělí','úterý','středa','čtvrtek','pátek','sobota'][d.getDay()];
+  return `<div class="callplan">
+    <div class="cp-h">Hovor</div>
+    <div class="cp-s"><span class="when">${den} ${d.getDate()}. ${d.getMonth()+1}. · ${esc(S.call.t)}</span>
+      &nbsp;· na agendě ${n} ${pol}</div>
+    <div class="cp-f"><button class="lnk" data-cpedit="1" style="margin-left:0">přeplánovat</button>
+      <button class="lnk" data-cpdel="1" style="margin-left:0">zrušit</button></div></div>`;
 }
 
 /* ---------- sloupec 2 ---------- */
@@ -715,7 +839,7 @@ function colCall(call){
     const order=['cena','dok','cas','stop','data'];
     zones=order.map(t=>({k:null,label:TAGS[t][0]+' '+TAGS[t][1],
       items:call.filter(i=>(optOf(i.id)[3][0]||null)===t)}));
-    zones.push({k:null,label:'Bez tématu',items:call.filter(i=>!optOf(i.id)[3].length)});
+    zones.push({k:null,label:'Bez rizika',items:call.filter(i=>!optOf(i.id)[3].length)});
     zones=zones.filter(z=>z.items.length);
   }else{
     /* podle hlavních kategorií — stejné členění jako levý sloupec, včetně prázdných */
@@ -723,9 +847,9 @@ function colCall(call){
       .map(a=>({k:null,label:a.name,items:call.filter(i=>i.areaId===a.id)}));
   }
   const seg=(v,l)=>`<button data-grp="${v}" class="${S.group===v?'on':''}">${l}</button>`;
-  const segs=`<span class="segs">${seg('stav','stav')}${seg('tema','téma')}${seg('kat','kategorie')}</span>`;
+  const segs=`<span class="segs">${seg('stav','stav')}${seg('tema','riziko')}${seg('kat','kategorie')}</span>`;
   return `<div class="col col-call">${colHead('call','K hovoru',call.length,S.total,segs)}
-    <div class="col-b">${call.length?zones.map(z=>`<div class="zgroup ${z.tint?'tint zt-'+z.tint:''}">
+    <div class="col-b">${callPlan(call.length)}${call.length?zones.map(z=>`<div class="zgroup ${z.tint?'tint zt-'+z.tint:''}">
         <div class="zone-h">${z.k?sic(z.k):''} ${esc(z.label)} <span class="c">${z.items.length}</span></div>
         <div class="cards">${z.items.length?z.items.map(it=>cardHTML(it,'call',!z.tint,S.group==='kat')).join(''):'<div class="colempty" style="padding:4px 2px">prázdné</div>'}</div></div>`).join('')
       :'<div class="colempty">Nic k hovoru.</div>'}</div></div>`;
@@ -808,6 +932,15 @@ document.addEventListener('click',e=>{
   if(el=C('[data-edit]')){const id=el.dataset.edit;S.edit[id]=!S.edit[id];hidePop();return render();}
   if(el=C('[data-grp]')){S.group=el.dataset.grp;return render();}
   if(el=C('[data-dtab]')){S.dtab=el.dataset.dtab;return render();}
+  if(C('[data-navtoggle]')){S.navOpen=!S.navOpen;return render();}
+  if(C('[data-hidedone]')){S.hideDone=!S.hideDone;return render();}
+  if(C('[data-cpedit]')){S.callEdit=true;return render();}
+  if(C('[data-cpcancel]')){S.callEdit=false;return render();}
+  if(C('[data-cpdel]')){S.call=null;S.callEdit=false;return render();}
+  if(C('[data-cpsave]')){
+    S.call={d:document.getElementById('cpDate').value,t:document.getElementById('cpTime').value};
+    S.callEdit=false;return render();
+  }
   if(el=C('[data-tick]')){S.agenda[el.dataset.tick]=1;delete S.wait[el.dataset.tick];delete S.edit[el.dataset.tick];return render();}
   if(el=C('[data-wait]')){S.wait[el.dataset.wait]=1;delete S.edit[el.dataset.wait];return render();}
   if(el=C('[data-back]')){const id=el.dataset.back;delete S.sel[id];delete S.agenda[id];delete S.wait[id];delete S.edit[id];
