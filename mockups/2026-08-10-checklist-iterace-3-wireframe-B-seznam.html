@@ -195,8 +195,6 @@ textarea{font:inherit}
 .card .rel{font-size:10.5px;color:var(--mut);margin:9px 0 0;padding:6px 9px;line-height:1.55;
            background:color-mix(in srgb,var(--accent) 9%,var(--card));border-radius:6px}
 .card .rel b{color:var(--ink);font-weight:600}
-.flag{font-size:10px;font-weight:700;padding:1px 7px;border-radius:5px;background:var(--pot-bg);
-      border:1px solid var(--pot);cursor:help}
 .cnd{font-size:10px;color:var(--faint);border:1px dashed var(--line);border-radius:5px;padding:1px 7px}
 
 .opts{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--card)}
@@ -395,7 +393,7 @@ const AREAS=[
   ['Není dobrý, zasíláme (potvrzení rizik).','pot','Vnější obal je špatný a riziko poškození je vážné. Zásilku přesto pošleme a od zákazníka vyžadujeme potvrzení, že si je toho vědomý a souhlasí.',['stop']],
   ['Není dobrý, přeprava se ruší.','rus','Vnější obal je natolik nevyhovující, že zásilku nepošleme. Nebo případ, kdy se zákazník rozhodne nerealizovat.',[]],
   ['Není dobrý, mění se přeprava.','zme','Zásilka zůstává v původním obalu, ale pošleme ji například jinou variantou (silničně místo letecky) nebo s jiným přepravcem. Obal pak vyhodnotíme znovu a teprve potom u něj označíme některou z rizikových voleb — jen výjimečně je pro nového přepravce v pořádku.',['cena']]]},
- {id:'vnitrni',n:'Vnitřní obal',d:'Posuzujeme výplň a fixaci obsahu uvnitř — jestli se věci při přepravě nepohnou a neroztlučou o sebe.',rel:['Obal'],warn:'Klient u této položky píše jen „Lidské pojmenování viz vnější obal“ — texty jsou odvozené, potřebují jeho potvrzení (otázka 11).',o:[
+ {id:'vnitrni',n:'Vnitřní obal',d:'Posuzujeme výplň a fixaci obsahu uvnitř — jestli se věci při přepravě nepohnou a neroztlučou o sebe.',rel:['Obal'],o:[
   ['Nevíme, jaká je vnitřní výplň','zji','Nemáme jistotu, čím je obsah uvnitř vyplněný a zafixovaný.',[]],
   ['Vnitřní obal nedostačuje','res','Víme, že vnitřní výplň nedostačuje, a jdeme to řešit se zákazníkem.',[]],
   ['Plně vyhovuje a chrání obsah','ok','Výplň a fixace udrží obsah na místě po celou cestu.',[]],
@@ -421,7 +419,7 @@ const AREAS=[
   ['Není stohovatelné, mění se přeprava.','zme','Přehodíme například na jinou variantu přepravy, kde poplatek za nestohovatelnost nebude, nebo je menší riziko, že ho na depu „zakliknou“.',['cena']]]},
 ]},
 {n:'Z pohledu předpisů',items:[
- {id:'drevo',n:'Dřevěné balení a ošetření proti škůdcům (mimo EU)',d:'Posuzujeme, jestli balení neobsahuje neošetřené surové dřevo.',rel:['Obal','Směr'],cond:'mimoEU',note:'Dvě zelené volby s různým zněním — proto picker nemůže být sada pevných tlačítek podle stavů.',o:[
+ {id:'drevo',n:'Dřevěné balení a ošetření proti škůdcům (mimo EU)',d:'Posuzujeme, jestli balení neobsahuje neošetřené surové dřevo.',rel:['Obal','Směr'],cond:'mimoEU',o:[
   ['Nevíme, zjistíme.','zji','Klasika. Nevíme.',[]],
   ['Víme, že balení obsahuje surové neošetřené dřevo, budeme řešit se zákazníkem.','res','Balení je dřevěné nebo obsahuje některé dřevěné části, které nejsou ošetřené. Čeká se na naše řešení se zákazníkem.',[]],
   ['Balení neobsahuje ani kus surového dřeva.','ok','Balení neobsahuje dřevo, nebo ho obsahuje a dřevo je ošetřené.',[]],
@@ -438,8 +436,7 @@ const AREAS=[
   ['Hodnota zhruba odpovídá charakteru obsahu.','ok','Vyhodnotili jsme si, že hodnota zhruba odpovídá obsahu.',[]],
   ['Hodnota neodpovídá charakteru obsahu, zasíláme (oznámení rizik).','inf','Necháváme hodnotu být, neměníme ji, zákazník je upozornění, co to případně může znamenat.',[]],
   ['Hodnota neodpovídá charakteru obsahu, mění se parametry přepravy.','zme','Zjistila se chyba, nesoulad, měníme hodnotu, tím pádem se mění cena pojištění, případně i třeba někdy typ přepravy (například na leteckou, kde má přepravce vyšší odpovědnost).',['cena']]]},
- {id:'pojodp',n:'Pojištění × odpovědnost přepravce (nepojištěno)',d:'U nepojištěné zásilky posuzuješ, jestli zákonná odpovědnost přepravce pokryje hodnotu obsahu.',rel:['Pojištění','Odpovědnost přepravce','Hodnota'],
-  warn:'ROZPOR: schválené principy říkají „podmínky pojištění jen u pojištěných zásilek“, ale tahle položka je určená výslovně pro nepojištěné. K vyjasnění (otázka 9).',o:[
+ {id:'pojodp',n:'Pojištění × odpovědnost přepravce (nepojištěno)',d:'U nepojištěné zásilky posuzuješ, jestli zákonná odpovědnost přepravce pokryje hodnotu obsahu.',rel:['Pojištění','Odpovědnost přepravce','Hodnota'],o:[
   ['Není pojištěno, odpovědnost přepravce nekryje, budeme řešit se zákazníkem.','res','Odpovědnost přepravce za škodu je výrazně menší než hodnota zboží a zákazník nemá pojištěno. Budeme s ním řešit, jak to uděláme.',['cena']],
   ['Není pojištěno, odpovědnost přepravce zhruba kryje hodnotu.','ok','Zákazník nemá pojištěno, ale odpovědnost přepravce kryje zhruba výši hodnoty obsahu zásilky.',[]],
   ['Není pojištěno, odpovědnost přepravce nekryje, zasíláme (oznámení rizik).','inf','Odpovědnost přepravce za škodu je výrazně menší než hodnota zboží a zákazník nemá pojištěno a zároveň zákazník pojistit nechce. Upozorníme ho na rizika.',[]],
@@ -520,8 +517,7 @@ const AREAS=[
   ['Číslo není lokální, mění se data zásilky.','zme','Číslo se mění.',['data']]]},
 ]}]},
 {id:'doba',name:'Doba doručení a vyzvednutí',ctx:[['Avizováno','3–4 pracovní dny'],['Dle tarifu','4–6 dnů'],['Cut-off','14:00 (nyní 12:40)'],['Svoz','po–pá']],groups:[{n:null,items:[
- {id:'dobadoruc',n:'Avizovaná doba doručení je ekvivalentní',d:'Posuzujeme, jestli doba doručení avizovaná zákazníkovi odpovídá realitě u téhle konkrétní zásilky.',rel:['Avizováno','Dle tarifu'],
-  note:'Klientova poznámka: „Změní operátor rovnou den doručení avizovaný zákazníkovi? Měl by asi.“ — k rozhodnutí (otázka 12).',o:[
+ {id:'dobadoruc',n:'Avizovaná doba doručení je ekvivalentní',d:'Posuzujeme, jestli doba doručení avizovaná zákazníkovi odpovídá realitě u téhle konkrétní zásilky.',rel:['Avizováno','Dle tarifu'],o:[
   ['Avizovaná doba doručení neodpovídá nebo velmi často nemusí, budeme řešit se zákazníkem.','res','Avizovaná doba doručení není správná, resp. se často tato konkrétní zásilka může zpozdit. Budeme řešit se zákazníkem.',['cas']],
   ['Avizovaná doba doručení odpovídá.','ok','',[]],
   ['Doba neodpovídá nebo velmi často nemusí, zasíláme (oznámení rizik).','inf','Avizovaná doba doručení není správná, resp. se často tato konkrétní zásilka může zpozdit, zákazníkovi oznámeno, souhlasí s tím. (Pozn.: Změní operátor rovnou den doručení avizovaný zákazníkovi? Měl by asi)',['cas']],
@@ -543,8 +539,7 @@ const AREAS=[
   ['Významně hrozí velký cenový skok při vyšší účtovatelné hmotnosti, zasíláme (potvrzení rizik).','pot','Posíláme, od zákazníka chceme potvrzení o případném doplatku při vyšší účtovatelné hmotnosti.',['cena']],
   ['Hrozí velký cenový skok při vyšší účtovatelné hmotnosti, zásilka se ruší.','rus','',[]],
   ['Hrozí velký cenový skok při vyšší účtovatelné hmotnosti, změna přepravy nebo zabalení.','zme','Například se zásilka přebalí, nebo se pošle jinou variantou, která je trochu dražší, ale nehrozí u ní velký cenový skok.',['cena']]]},
- {id:'priplatek',n:'Blízko velkému příplatku',d:'Posuzujeme, jestli zásilka není těsně pod rozměrovým limitem, jehož překročení znamená velký příplatek.',rel:['Rozměrový limit','Rozměry'],
-  note:'Klient u této a u „Rizika většího objemu“ zvažuje sloučení do obecného „rizika vyšší ceny“. Návrh analýzy: místo sloučení použít značku 💰 (otázka 13).',o:[
+ {id:'priplatek',n:'Blízko velkému příplatku',d:'Posuzujeme, jestli zásilka není těsně pod rozměrovým limitem, jehož překročení znamená velký příplatek.',rel:['Rozměrový limit','Rozměry'],o:[
   ['Hrozí velký příplatek za překročení rozměrů, budeme řešit se zákazníkem.','res','Je to svými parametry blízko velkému příplatku při jejich drobném překročení. Bude se zákazníkem řešit.',['cena']],
   ['Nehrozí velký příplatek za překročení rozměrů.','ok','',[]],
   ['Docela hrozí velký příplatek za překročení rozměrů, zasíláme (oznámení rizik).','inf','',['cena']],
@@ -745,7 +740,7 @@ function itemCard(it){
       <div class="hd">
         <span class="nm">${esc(it.n)}</span>
         ${it.conds.length?`<span class="cnd">jen když: ${it.conds.map(c=>esc(CONDN[c]||c)).join(' + ')}</span>`:''}
-        ${it.warn?`<span class="flag" title="${esc(it.warn)}">⚠ k vyjasnění</span>`:''}</div>
+</div>
       ${it.d?`<p class="dsc">${esc(it.d)}</p>`:''}
       ${optsHTML(it,S.sel[it.id],false)}
       ${bar}</div>`;
@@ -873,11 +868,13 @@ function agCard(it){
 }
 
 function colCall(L,agenda){
-  const waits=L.filter(i=>phase(i.id)==='wait');
-  const open =agenda.filter(i=>phase(i.id)==='call');
+  /* filtr podle stavu z levého sloupce platí i tady — obě strany ukazují totéž */
+  const sf=i=>!S.stFilter||inState(i,S.stFilter);
+  const waits=L.filter(i=>phase(i.id)==='wait').filter(sf);
+  const open =agenda.filter(i=>phase(i.id)==='call').filter(sf);
   /* čekání na zákazníka je bod agendy jako každý jiný — musí se řadit stejně */
   const active=open.concat(waits);
-  const done =L.filter(i=>phase(i.id)==='done'&&S.ticked[i.id]);
+  const done =L.filter(i=>phase(i.id)==='done'&&S.ticked[i.id]).filter(sf);
 
   let zones;
   if(S.group==='stav'){
