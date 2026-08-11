@@ -351,206 +351,206 @@ const TAGS={cena:['💰','Dopad na cenu'],dok:['📄','Potřebujeme doklad'],cas
 /* ═══════════════ DATA (28 položek / 147 voleb) ═══════════════ */
 const AREAS=[
 {id:'obsah',name:'Obsah zásilky',ctx:[['Deklarováno','„drone + accessories“ · 2 položky'],['Nové/použité','neuvedeno'],['Hodnota','45 000 Kč'],['Směr','CZ → CH (mimo EU)']],groups:[{n:null,items:[
- {id:'znam',n:'Známe kompletně obsah',d:'Ptáš se, jestli opravdu víš, co všechno je v zásilce.',rel:['Deklarováno','Nové/použité'],o:[
-  ['Známe kompletní obsah','ok','Jsi si jistý, že víš, co všechno je uvnitř.',[]],
-  ['Nevíme, co všechno je uvnitř','zji','Nemáš úplnou jistotu — musíš se zákazníka doptat.',[]]]},
+ {id:'znam',n:'Známe kompletně obsah',d:'Ptáme se, jestli opravdu víme, co všechno je v zásilce.',rel:['Deklarováno','Nové/použité'],o:[
+  ['Ano, známe kompletní obsah.','ok','Když jsme si jisti, že opravdu víme, co vše je v zásilce.',[]],
+  ['Nevíme, zjistíme.','zji','Nemáme úplnou jistotu, co vše je v zásilce, musíme se zákazníka doptat.',[]]]},
 ]}]},
 {id:'prip',name:'Přípustnost',ctx:[['Deklarováno','„drone + accessories“'],['Baterie','Li-ion 4 000 mAh (UN3481)'],['Směr','CZ → CH (mimo EU)'],['Incoterm','DAP'],['Příjemce','Muster AG (firma)']],groups:[{n:null,items:[
- {id:'podm',n:'Přepravní podmínky',d:'Posuzuješ, jestli obsah neodporuje přepravním podmínkám dopravce.',rel:['Deklarováno','Nové/použité'],o:[
-  ['Nevíme, chybí informace o obsahu','zji','Z toho, co máš, nejde soulad posoudit — neznáš celý obsah nebo potřebuješ upřesnit charakter věcí.',[]],
-  ['Nesoulad s přepravními podmínkami','res','Víš, že obsah podmínkám odporuje, ale řešení zatím neznáš.',[]],
-  ['V souladu s přepravními podmínkami','ok','Máš jistotu, žádný problém.',[]],
-  ['Drobný nesoulad','inf','Nesoulad není nic závažného. Posíláte, ale zákazníka upozorni, že při odhalení hrozí zastavení, zničení nebo vrácení na jeho náklady.',['stop']],
-  ['Větší nesoulad','pot','Nesoulad je závažnější. Posíláte, ale zákazník musí potvrdit, že o riziku ví a souhlasí.',['stop']],
-  ['Zásadní nesoulad','rus','Obsah je ve velkém rozporu — nepošlete to, ani kdyby zákazník chtěl. Nebo od přepravy ustoupí sám.',[]],
-  ['Nesoulad řešitelný jinou přepravou','zme','Po dohodě volíte jiného dopravce nebo variantu; mění se tím i cena.',['cena']]]},
- {id:'dg',n:'Potenciální DG',d:'Posuzuješ, jestli zásilka neobsahuje nebezpečné zboží.',rel:['Baterie','Deklarováno'],o:[
-  ['Nevíme, chybí informace o obsahu','zji','Z toho, co máš, nejde posoudit, jestli je uvnitř nebezpečné zboží — neznáš celý obsah nebo potřebuješ upřesnit charakter věcí.',[]],
-  ['Obsahuje DG','res','Víš o DG, řešení zatím neznáš.',[]],
-  ['DG neobsahuje','ok','Máš jistotu.',[]],
-  ['Obsahuje DG, drobné riziko','inf','Posíláte, zákazníka upozorni na rizika.',['stop']],
-  ['Obsahuje nepřepravitelné DG','rus','Přeprava se ruší.',[]],
-  ['Obsahuje DG, potřeba jiná přeprava','zme','Mění se dopravce nebo varianta.',['cena']]]},
- {id:'dok',n:'Pouze dokumenty',d:'Posuzuješ, jestli jsou v zásilce opravdu jen papíry.',rel:['Deklarováno','Hodnota'],o:[
-  ['Nevíme, jestli jsou uvnitř jen dokumenty','zji','Nejsi schopen posoudit.',[]],
-  ['Obsahuje i zboží, ne jen dokumenty','res','Víš to. Čeká se, jestli zákazník zboží vyndá, nebo jak to vyřešíte.',[]],
-  ['Obsahuje pouze dokumenty','ok','Máš jistotu.',[]],
-  ['Obsahuje zboží — překlápí se na balík','zme','Zjištěno, že to nejsou jen dokumenty; mění se typ přepravy.',['cena']]]},
- {id:'clenicil',n:'Clení v cílové zemi',d:'Neposuzuješ jen, jestli je zboží v cílové zemi zakázané, ale jestli může mít tahle konkrétní zásilka problém: součinnost příjemce, doklady navíc, nutnost externího brokera. Stejné zboží do stejné země může být jednou v pořádku a podruhé ne — typicky podle toho, jestli je příjemce firma, nebo fyzická osoba.',rel:['Směr','Incoterm','Příjemce'],o:[
-  ['Nevíme, chybí informace o obsahu','zji','Nejsi schopen posoudit.',[]],
-  ['Proclení bude problematické','res','Víš o problému, řešení zatím neznáš.',['cas']],
-  ['Proclí se standardně, bez problému','ok','Máš jistotu.',[]],
-  ['Proclení je problematické','inf','Posíláte, zákazníka upozorni na možné komplikace.',['cas']],
-  ['Proclení je hodně problematické','pot','Posíláte, ale zákazník musí komplikace potvrdit.',['cas']],
-  ['Proclení není průchozí','rus','Přeprava se ruší.',[]],
-  ['Proclení vyžaduje jinou přepravu','zme','Některé země mají pro silniční přepravu přísnější celní podmínky než pro leteckou. Např. do Turecka se silničně vždy clí přes externího brokera za ~300 USD na účet příjemce; letecky u drobnějších hodnot broker nutný není.',['cena','cas']]]},
+ {id:'podm',n:'Přepravní podmínky',d:'Posuzujeme, jestli obsah neodporuje přepravním podmínkám dopravce.',rel:['Deklarováno','Nové/použité'],o:[
+  ['Nevíme, zjistíme dle obsahu.','zji','Z informací, které zatím máme nejsme schopni posoudit, zda není v rozporu s přepravními podmínkami. Např. si nejsme jisti tím, co vše je v zásilce, nebo potřebujeme k obsahu bližší upřesnění, jakého jsou věci charakteru.',[]],
+  ['Nesoulad s přepravními podmínkami, budeme řešit se zákazníkem.','res','Víme, že obsah je v rozporu s podmínkami, ale neznáme ještě finální řešení, jak to uděláme. Budeme se na něm domlouvat se zákazníkem.',[]],
+  ['V souladu s přepravními podmínkami.','ok','Obsah je v souladu s podmínkami, máme jistotu, žádný problém.',[]],
+  ['Drobný nesoulad, zasíláme (oznámení rizik)','inf','Obsah není v souladu s podmínkami, ale není to nic závažného, zásilku pošleme, ale jen musíme zákazníka upozornit na rizika, že kdyby náhodou se odhalilo, tak to může znamenat zastavení zásilky, její případné zničení, nebo vrácení zpět na jeho náklady.',['stop']],
+  ['Větší nesoulad, zasíláme (potvrzení rizik)','pot','Obsah není v souladu s podmínkami, je to už závažnějšího charakteru, přesto zásilku pošleme, musíme zákazníka samozřejmě upozornit na ta rizika a kvůli tomu, že je to závažnější, tak od něj vyžadujeme potvrzení, že si je toho vědomý a souhlasí s tím.',['stop']],
+  ['Nesoulad s podmínkami, přeprava se ruší.','rus','Obsah je ve velkém rozporu — nepošleme to, ani kdyby zákazník chtěl. Nebo případ, kdy se zákazník rozhodne nerealizovat.',[]],
+  ['Nesoulad s podmínkami, změna v přepravě.','zme','Obsah je v rozporu s podmínkami, vede to k tomu, že po dohodě se zákazníkem zvolíme např. jiného dopravce, jinou přepravní variantu (návazně se pak třeba mění díky tomu cena přepravy apod.)',['cena']]]},
+ {id:'dg',n:'Potenciální DG',d:'Posuzujeme, jestli zásilka neobsahuje nebezpečné zboží.',rel:['Baterie','Deklarováno'],o:[
+  ['Nevíme, zjistíme dle obsahu.','zji','Z toho, co máme, nejde posoudit, jestli je uvnitř nebezpečné zboží — neznáme celý obsah nebo potřebujeme upřesnit charakter věcí.',[]],
+  ['Obsahuje DG, budeme řešit se zákazníkem.','res','Víme o DG, řešení zatím neznáme.',[]],
+  ['Není určitě DG.','ok','Máme jistotu.',[]],
+  ['Obsahuje DG, dovolíme zaslat (oznámení rizik).','inf','Posíláme, zákazníka upozorníme na rizika.',['stop']],
+  ['Obsahuje DG, přeprava se ruší.','rus','Přeprava se ruší.',[]],
+  ['Obsahuje DG, mění se přeprava.','zme','Mění se dopravce nebo varianta.',['cena']]]},
+ {id:'dok',n:'Pouze dokumenty',d:'Posuzujeme, jestli jsou v zásilce opravdu jen papíry.',rel:['Deklarováno','Hodnota'],o:[
+  ['Nevíme, zjistíme.','zji','Není nám jasné, nejsme schopni posoudit, že zásilka obsahuje opravdu jen dokumenty (papíry).',[]],
+  ['Obsahuje zboží, budeme řešit se zákazníkem.','res','Víme, že neobsahuje jen dokumenty, čeká se na zákazníkovo potvrzení, že vyndá, resp. na naše řešení s ním v té věci.',[]],
+  ['Obsahuje pouze dokumenty.','ok','Máme jistotu, že obsahuje jen dokumenty.',[]],
+  ['Obsahuje zboží, mění se přeprava.','zme','Zjištěno, že neobsahuje jen dokumenty, mění se na „balíky“.',['cena']]]},
+ {id:'clenicil',n:'Clení v cílové zemi',d:'Neposuzujeme jen, jestli je zboží v cílové zemi zakázané, ale jestli může mít tahle konkrétní zásilka problém: součinnost příjemce, doklady navíc, nutnost externího brokera. Stejné zboží do stejné země může být jednou v pořádku a podruhé ne — typicky podle toho, jestli je příjemce firma, nebo fyzická osoba.',rel:['Směr','Incoterm','Příjemce'],o:[
+  ['Nevíme, zjistíme dle obsahu.','zji','Nejsme schopni posoudit.',[]],
+  ['Proclení je problematické, budeme řešit se zákazníkem.','res','Víme o problému, řešení zatím neznáme.',['cas']],
+  ['Proclívá se standardně bez problému.','ok','Máme jistotu.',[]],
+  ['Proclení je problematické, zasíláme (oznámení rizik).','inf','Posíláme, zákazníka upozorníme na možné komplikace.',['cas']],
+  ['Proclení je hodně problematické, zasíláme (potvrzení rizik).','pot','Posíláme, ale zákazník musí komplikace potvrdit.',['cas']],
+  ['Proclení je problematické, přeprava se ruší.','rus','Přeprava se ruší.',[]],
+  ['Proclení je problematické, mění se přeprava.','zme','Některé země mají pro silniční přepravu přísnější celní podmínky než pro leteckou. Např. do Turecka se silničně vždy clí přes externího brokera za ~300 USD na účet příjemce; letecky u drobnějších hodnot broker nutný není.',['cena','cas']]]},
 ]}]},
 {id:'baleni',name:'Balení zásilky',ctx:[['Obal','karton, výplň neuvedena'],['Rozměry','60 × 40 × 30 cm'],['Hmotnost','12 kg'],['Směr','CZ → CH (mimo EU)']],groups:[
 {n:'Z pohledu vhodné ochrany pro přepravu',items:[
- {id:'vnejsi',n:'Vnější obal',d:'Posuzuješ, jestli vnější obal ochrání obsah po celou cestu.',rel:['Obal','Rozměry'],o:[
-  ['Nevíme, jaký je vnější obal','zji','Nemáš jistotu.',[]],
-  ['Vnější obal nedostačuje','res','Víš, že je nedostačující, jdeš to řešit se zákazníkem.',[]],
-  ['Plně vyhovuje a chrání obsah','ok','',[]],
-  ['Vnější obal není ideální','inf','Posíláte, zákazníka upozorni na rizika.',['stop']],
-  ['Vnější obal je špatný','pot','Posíláte, zákazník musí riziko potvrdit.',['stop']],
-  ['Vnější obal je nepřijatelný','rus','Přeprava se ruší.',[]],
-  ['Obal zůstává, mění se přeprava','zme','Zásilka jede v původním obalu, ale jinou variantou nebo s jiným dopravcem. Skoro vždy k tomu ještě vybereš i některou z rizikových voleb — výjimečně může být obal pro nového dopravce v pořádku.',['cena']]]},
- {id:'vnitrni',n:'Vnitřní obal',d:'Posuzuješ výplň a fixaci obsahu uvnitř — jestli se věci při přepravě nepohnou a neroztlučou o sebe.',rel:['Obal'],warn:'Klient u této položky píše jen „Lidské pojmenování viz vnější obal“ — texty jsou odvozené, potřebují jeho potvrzení (otázka 11).',o:[
-  ['Nevíme, jaká je vnitřní výplň','zji','Nemáš jistotu, čím je obsah uvnitř vyplněný a zafixovaný.',[]],
-  ['Vnitřní obal nedostačuje','res','Víš, že výplň obsah neochrání, ale řešení zatím neznáš — jdeš to probrat se zákazníkem.',[]],
+ {id:'vnejsi',n:'Vnější obal',d:'Posuzujeme, jestli vnější obal ochrání obsah po celou cestu.',rel:['Obal','Rozměry'],o:[
+  ['Nevíme, zjistíme.','zji','Nemáme jistotu, nevíme, jaký je.',[]],
+  ['Není vhodné, budeme řešit se zákazníkem.','res','Víme, že je nedostačující a jdeme řešit se zákazníkem.',[]],
+  ['Plně vyhovuje a chrání obsah.','ok','',[]],
+  ['Není ideální, zasíláme (oznámení rizik).','inf','Posíláme, zákazníka upozorníme na rizika.',['stop']],
+  ['Není dobrý, zasíláme (potvrzení rizik).','pot','Posíláme, zákazník musí riziko potvrdit.',['stop']],
+  ['Není dobrý, přeprava se ruší.','rus','Přeprava se ruší.',[]],
+  ['Není dobrý, mění se přeprava.','zme','Tady to znamená, že zásilka zůstává v původním obalu, ale třeba ji pošleme jinou přepravní variantou (silničně místo letecky), nebo s jiným přepravcem. Nestává se úplně často, ale někdy ano. V tom případě pak bychom samozřejmě i tak označili nějakou variantu, že negativní s rizikem skoro vždy. Výjimečně se může stát, že by při změně přepravce bylo pro něj balení v pořádku (vzácně ale ano).',['cena']]]},
+ {id:'vnitrni',n:'Vnitřní obal',d:'Posuzujeme výplň a fixaci obsahu uvnitř — jestli se věci při přepravě nepohnou a neroztlučou o sebe.',rel:['Obal'],warn:'Klient u této položky píše jen „Lidské pojmenování viz vnější obal“ — texty jsou odvozené, potřebují jeho potvrzení (otázka 11).',o:[
+  ['Nevíme, jaká je vnitřní výplň','zji','Nemáme jistotu, čím je obsah uvnitř vyplněný a zafixovaný.',[]],
+  ['Vnitřní obal nedostačuje','res','Víme, že výplň obsah neochrání, ale řešení zatím neznáme — jdeme to probrat se zákazníkem.',[]],
   ['Plně vyhovuje a chrání obsah','ok','Výplň a fixace udrží obsah na místě po celou cestu.',[]],
-  ['Vnitřní obal není ideální','inf','Výplň není dokonalá. Posíláte, ale zákazníka upozorni, že při poškození nemusí pojišťovna plnit.',['stop']],
-  ['Vnitřní obal je špatný','pot','Výplň je vážně nedostatečná. Posíláte, ale zákazník musí potvrdit, že o riziku poškození ví.',['stop']],
+  ['Vnitřní obal není ideální','inf','Výplň není dokonalá. Posíláme, ale zákazníka upozorníme, že při poškození nemusí pojišťovna plnit.',['stop']],
+  ['Vnitřní obal je špatný','pot','Výplň je vážně nedostatečná. Posíláme, ale zákazník musí potvrdit, že o riziku poškození ví.',['stop']],
   ['Vnitřní obal je nepřijatelný','rus','Obsah by cestu v tomhle zabalení nepřežil — přeprava se ruší.',[]],
   ['Obal zůstává, mění se přeprava','zme','Zásilka jede v původním balení, ale variantou nebo dopravcem, kde je manipulace šetrnější; mění se tím cena.',['cena']]]},
 ]},
 {n:'Z pohledu případných poplatků (speciální manipulace)',items:[
- {id:'osklivy',n:'„Ošklivý balík“',d:'Posuzuješ, jestli typ obalu nespadne pod poplatek za speciální manipulaci.',rel:['Obal','Rozměry','Hmotnost'],o:[
-  ['Nevíme, jak je zabaleno','zji','Neznáš přesné zabalení, nejde posoudit.',[]],
-  ['Zabaleno jako „ošklivý balík“','res','Víš to, jdeš to řešit se zákazníkem.',['cena']],
-  ['Zabaleno vhodně, poplatek nehrozí','ok','',[]],
-  ['Podléhá poplatku za „ošklivý balík“','inf','Zákazníka informuješ, zásilku posíláte.',['cena']],
-  ['Poplatek zákazník odmítl','rus','Kvůli poplatku ruší přepravu.',[]],
-  ['Poplatku se vyhneme jinou přepravou','zme','Přehodíte na variantu, kde poplatek nebude nebo je menší riziko, že ho na depu „zakliknou“.',['cena']]]},
- {id:'stoh',n:'Stohovatelnost',d:'Posuzuješ, jestli je zásilka stohovatelná — jinak hrozí poplatek.',rel:['Rozměry','Obal'],o:[
-  ['Nevíme, jestli je stohovatelná','zji','',[]],
-  ['Zásilka není stohovatelná','res','Víš to, jdeš to řešit se zákazníkem.',['cena']],
-  ['Zásilka je stohovatelná','ok','',[]],
-  ['Není stohovatelná, podléhá poplatku','inf','Zákazníka informuješ, posíláte.',['cena']],
-  ['Poplatek zákazník odmítl','rus','',[]],
-  ['Poplatku se vyhneme jinou přepravou','zme','',['cena']]]},
+ {id:'osklivy',n:'„Ošklivý balík“',d:'Posuzujeme, jestli typ obalu nespadne pod poplatek za speciální manipulaci.',rel:['Obal','Rozměry','Hmotnost'],o:[
+  ['Nevíme, zjistíme dle balení.','zji','Nevím, jak je přesně zabaleno, tedy nejsme schopni posoudit, zda typ obalu není takový, aby se na něj nevztahoval poplatek ze speciální manipulaci kvůli balení.',[]],
+  ['Zabaleno specificky, ošklivý balík, budeme řešit se zákazníkem.','res','Víme to, jdeme to řešit se zákazníkem.',['cena']],
+  ['Zabaleno vhodně, není „ošklivý balík“.','ok','Je zabaleno tak, že se na zásilku nebude vztahovat poplatek za ošklivý balík.',[]],
+  ['Zabaleno specificky, ošklivý balík (oznámení rizik).','inf','Je zabaleno tak, že to bude podléhá poplatku za ošklivý balík. Zákazníka informujeme, zásilku posíláme.',['cena']],
+  ['Zabaleno specificky, ošklivý balík, přeprava se ruší.','rus','Zákazník se rozhodl přepravu zrušit kvůli poplatku.',[]],
+  ['Zabaleno specificky, ošklivý balík, mění se přeprava.','zme','Asi jasné, přehodíme na jinou variantu přepravy, kde třeba poplatek nebude, nebo menší riziko, že ho na depu „zakliknou“.',['cena']]]},
+ {id:'stoh',n:'Stohovatelnost',d:'Posuzujeme, jestli je zásilka stohovatelná — jinak hrozí poplatek.',rel:['Rozměry','Obal'],o:[
+  ['Nevíme, zjistíme.','zji','',[]],
+  ['Nestohovatelné, budeme řešit se zákazníkem.','res','Víme to, jdeme to řešit se zákazníkem.',['cena']],
+  ['Je stohovatelné.','ok','',[]],
+  ['Není stohovatelné (oznámení rizik).','inf','Zákazníka informuješ, posíláme.',['cena']],
+  ['Není stohovatelné, zásilka se ruší.','rus','',[]],
+  ['Není stohovatelné, mění se přeprava.','zme','',['cena']]]},
 ]},
 {n:'Z pohledu předpisů',items:[
- {id:'drevo',n:'Dřevěné balení a ošetření proti škůdcům (mimo EU)',d:'Posuzuješ, jestli balení neobsahuje neošetřené surové dřevo.',rel:['Obal','Směr'],cond:'mimoEU',note:'Dvě zelené volby s různým zněním — proto picker nemůže být sada pevných tlačítek podle stavů.',o:[
-  ['Nevíme, jestli je v balení dřevo','zji','',[]],
-  ['Balení obsahuje neošetřené surové dřevo','res','Balení je dřevěné nebo má dřevěné části, které nejsou ošetřené. Čeká se na řešení se zákazníkem.',[]],
-  ['Balení neobsahuje ani kus surového dřeva','ok','',[]],
-  ['Balení obsahuje surové dřevo, vše je ošetřeno','ok','Dřevěné části jsou ošetřené podle ISPM 15 a označené — z pohledu předpisů je zásilka v pořádku.',[]],
-  ['Neošetřené surové dřevo','pot','Posíláte s rizikem, zákazník to musí potvrdit.',['stop']],
-  ['Neošetřené dřevo, zákazník nechce řešit','rus','Přeprava se kvůli tomu ruší.',[]],
-  ['Přebalí se do jiného obalu','zme','Mění se tím parametry i cena.',['cena']]]},
+ {id:'drevo',n:'Dřevěné balení a ošetření proti škůdcům (mimo EU)',d:'Posuzujeme, jestli balení neobsahuje neošetřené surové dřevo.',rel:['Obal','Směr'],cond:'mimoEU',note:'Dvě zelené volby s různým zněním — proto picker nemůže být sada pevných tlačítek podle stavů.',o:[
+  ['Nevíme, zjistíme.','zji','Klasika. Nevíme.',[]],
+  ['Víme, že balení obsahuje surové neošetřené dřevo, budeme řešit se zákazníkem.','res','Balení je dřevěné nebo obsahuje některé dřevěné části, které nejsou ošetřené. Čeká se na naše řešení se zákazníkem.',[]],
+  ['Balení neobsahuje ani kus surového dřeva.','ok','Balení neobsahuje dřevo, nebo ho obsahuje a dřevo je ošetřené.',[]],
+  ['Balení obsahuje surové dřevo, vše je ošetřeno.','ok','Dřevěné části jsou ošetřené podle ISPM 15 a označené — z pohledu předpisů je zásilka v pořádku.',[]],
+  ['Balení obsahuje neošetřené surové dřevo, zasíláme (potvrzení rizik).','pot','Balení obsahuje dřevo, dřevo není ošetřené, posílá se s rizikem a je nutné to mít zákazníkem potvrzené.',['stop']],
+  ['Balení obsahuje neošetřené surové dřevo, zásilka se ruší.','rus','Balení obsahuje dřevo, není ošetřené, zákazník nijak nechce řešit, ruší se díky tomu přeprava.',[]],
+  ['Balení obsahuje neošetřené surové dřevo, mění se přeprava.','zme','Např. se přebaluje do jiného obalu, mění se díky tomu parametry, cena apod..',['cena']]]},
 ]}]},
 {id:'hodnota',name:'Hodnota, odpovědnost, pojištění',ctx:[['Hodnota','45 000 Kč'],['Pojištění','nesjednáno'],['Odpovědnost přepravce','~12 500 Kč (rozdíl 32 500 Kč)'],['Komodita','elektronika, Li-ion'],['Nové/použité','neuvedeno']],groups:[
 {n:null,items:[
- {id:'hodobs',n:'Hodnota odpovídá obsahu',d:'Posuzuješ, jestli deklarovaná hodnota zhruba sedí k tomu, co je uvnitř.',rel:['Hodnota','Komodita'],o:[
-  ['Nevíme, chybí informace o obsahu','zji','Neznáš přesný obsah ani charakter položek.',[]],
-  ['Hodnota neodpovídá charakteru obsahu','res','',[]],
-  ['Hodnota zhruba odpovídá obsahu','ok','',[]],
-  ['Hodnota neodpovídá, necháváme ji být','inf','Hodnotu neměníte, zákazník je upozorněn, co to může znamenat.',[]],
-  ['Hodnota se opravuje','zme','Mění se cena pojištění, případně i typ přepravy (např. na leteckou, kde má přepravce vyšší odpovědnost).',['cena']]]},
+ {id:'hodobs',n:'Hodnota odpovídá obsahu',d:'Posuzujeme, jestli deklarovaná hodnota zhruba sedí k tomu, co je uvnitř.',rel:['Hodnota','Komodita'],o:[
+  ['Nevíme, zjistíme dle obsahu.','zji','Neznáme přesně obsah nebo detaily k charakterům položek, nemůžeme tak posoudit.',[]],
+  ['Hodnota neodpovídá charakteru obsahu, budeme řešit se zákazníkem.','res','Asi jasné.',[]],
+  ['Hodnota zhruba odpovídá charakteru obsahu.','ok','Vyhodnotili jsme si, že hodnota zhruba odpovídá obsahu.',[]],
+  ['Hodnota neodpovídá charakteru obsahu, zasíláme (oznámení rizik).','inf','Necháváme hodnotu být, neměníme ji, zákazník je upozornění, co to případně může znamenat.',[]],
+  ['Hodnota neodpovídá charakteru obsahu, mění se parametry přepravy.','zme','Zjistila se chyba, nesoulad, měníme hodnotu, tím pádem se mění cena pojištění, případně i třeba někdy typ přepravy (např. na leteckou, kde má přepravce vyšší odpovědnost.',['cena']]]},
  {id:'pojodp',n:'Pojištění × odpovědnost přepravce (nepojištěno)',d:'U nepojištěné zásilky posuzuješ, jestli zákonná odpovědnost přepravce pokryje hodnotu obsahu.',rel:['Pojištění','Odpovědnost přepravce','Hodnota'],
   warn:'ROZPOR: schválené principy říkají „podmínky pojištění jen u pojištěných zásilek“, ale tahle položka je určená výslovně pro nepojištěné. K vyjasnění (otázka 9).',o:[
-  ['Odpovědnost přepravce hodnotu nekryje','res','Rozdíl je výrazný a zákazník nemá pojištěno. Domluvíte se, jak dál.',['cena']],
-  ['Odpovědnost přepravce hodnotu zhruba kryje','ok','Nepojištěno, ale odpovědnost stačí.',[]],
-  ['Nekryje, zákazník pojistit nechce','inf','Upozorni ho na rizika a posíláte.',[]],
-  ['Zákazník chce zásilku pojistit','zme','Zásilka se pojišťuje, mění se cena.',['cena']]]},
+  ['Není pojištěno, odpovědnost přepravce nekryje, budeme řešit se zákazníkem.','res','Odpovědnost přepravce za škodu je výrazně menší než hodnota zboží a zákazník nemá pojištěno. Budeme s ním řešit, jak to uděláme.',['cena']],
+  ['Není pojištěno, odpovědnost přepravce zhruba kryje hodnotu.','ok','Zákazník nemá pojištěno, ale odpovědnost přepravce kryje zhruba výši hodnoty obsahu zásilky.',[]],
+  ['Není pojištěno, odpovědnost přepravce nekryje, zasíláme (oznámení rizik).','inf','Odpovědnost přepravce za škodu je výrazně menší než hodnota zboží a zákazník nemá pojištěno a zároveň zákazník pojistit nechce. Upozorníme ho na rizika.',[]],
+  ['Není pojištěno, odpovědnost přepravce nekryje, mění se parametry přepravy.','zme','Odpovědnost přepravce za škodu je výrazně menší než hodnota zboží, zákazník chce pojistit. Zásilka se tedy pojišťuje, mění se díky tomu cena..',['cena']]]},
 ]},
 {n:'Pojištění',items:[
- {id:'gc',n:'Pojistitelné jako general cargo',d:'Posuzuješ, jestli obsah spadá do standardního pojištění general cargo.',rel:['Komodita'],o:[
-  ['Nevíme, chybí informace o obsahu','zji','Neznáš charakter konkrétních věcí.',[]],
-  ['Není pojistitelné jako general cargo','res','Víš to, čeká se na řešení se zákazníkem.',[]],
-  ['Pojistitelné jako general cargo','ok','',[]],
-  ['Nepojistitelné, zákazník ruší','rus','Kvůli tomu nechce poslat.',[]],
-  ['Přechod na speciální pojištění','zme','S přihláškou nebo potvrzením pojišťovny; často má individuální cenu.',['cena']]]},
- {id:'plny',n:'Pojistitelné v plném rozsahu',d:'Posuzuješ, jestli lze zásilku pojistit i na poškození, ne jen na ztrátu. Typicky naráží na použité zboží.',rel:['Komodita','Nové/použité'],o:[
-  ['Nevíme, chybí informace o obsahu a stáří','zji','',[]],
-  ['Není pojistitelné v plném rozsahu','res','Zboží je použité a nespadá do žádné z výjimek. Čeká se na řešení.',[]],
-  ['Pojistitelné v plném rozsahu','ok','',[]],
-  ['Kryje jen ztrátu, ne poškození','inf','Pojištění zůstává, zákazník je informován o specifických podmínkách.',[]],
-  ['Zákazník kvůli tomu ruší přepravu','rus','',[]],
-  ['Zákazník ruší pojištění','zme','Ruší se pojištění, mění se cena.',['cena']]]},
+ {id:'gc',n:'Pojistitelné jako general cargo',d:'Posuzujeme, jestli obsah spadá do standardního pojištění general cargo.',rel:['Komodita'],o:[
+  ['Nevíme, zjistíme dle obsahu.','zji','Neznáme přesně obsah nebo charakter konkrétních věcí a nejsme schopni posoudit.',[]],
+  ['Není pojistitelní jako general cargo, budeme řešit se zákazníkem.','res','Není možné jako general cargo, čekáme, až s ním budeme řešit.',[]],
+  ['Pojistitelné jako general cargo.','ok','Je to ok, pojistitelné jako general cargo.',[]],
+  ['Není pojistitelné jako general cargo, zásilka se ruší.','rus','Není možné pojistit jako general cargo, díky tomu zákazník nechce poslat a přeprava se ruší.',[]],
+  ['Není pojistitelné jako general cargo, mění se parametry přepravy.','zme','Mění se na speciální pojištění, tedy s přihláškou nebo případně potvrzením pojišťovny, často může mít takové pojištění individuální cenu.',['cena']]]},
+ {id:'plny',n:'Pojistitelné v plném rozsahu',d:'Posuzujeme, jestli lze zásilku pojistit i na poškození, ne jen na ztrátu. Typicky naráží na použité zboží.',rel:['Komodita','Nové/použité'],o:[
+  ['Nevíme, zjistíme dle obsahu, stáří apod.','zji','',[]],
+  ['Není pojistitelné v plném rozsahu, budeme řešit se zákazníkem.','res','Není možné v plném rozsahu, tedy v praxi je zboží použité a ani se na něj nevztahuje některá z výjimek pro použité zboží pojistitelné v plném rozsahu. A čeká se ,co s tím, resp. až budeme se zákazníkem řešit.',[]],
+  ['Je pojistitelné v plném rozsahu.','ok','Je pojistitelné v plném rozsahu.',[]],
+  ['Není možné v plném rozsahu, zasíláme, pojišťujeme (oznámení zákazníkovi).','inf','Není pojistitelné v plném rozsahu, pojištění zůstává, zákazník je informován o specifických podmínkách pojištění, tedy zejména že se pojištění vztahuje jen na ztrátu, ne na poškození.',[]],
+  ['Není možné v plném rozsahu, zásilka se ruší.','rus','Není pojistitelné v plném rozsahu, díky tomu chce zákazník celou přepravu zrušit.',[]],
+  ['Není možné v plném rozsahu, mění se parametry přepravy.','zme','Není pojistitelné v plném rozsahu, díky tomu chce zákazník zrušit pojištění. Tedy se ruší pojištění, mění cena...',['cena']]]},
 ]}]},
 {id:'dokum',name:'Dokumentace a clení',cond:'mimoEU',ctx:[['Celní faktura','nahrána, položková'],['Původ','neuveden'],['EORI','CZ68000942 (online neověřeno)'],['Plná moc','nedoložena'],['Směr','CZ → CH (mimo EU)']],groups:[{n:null,items:[
- {id:'faktura',n:'Celní faktura',d:'Posuzuješ, jestli je faktura použitelná pro celní účely.',rel:['Celní faktura'],o:[
-  ['Faktura zatím není nahraná','zji','Zákazník ji nenahrál, nejde posoudit.',['dok']],
-  ['Celní faktura není v pořádku','res','Není vhodná pro celní účely. Čeká se, jestli ji zákazník opraví, nebo nechá s rizikem.',['dok']],
-  ['Celní faktura má všechny náležitosti','ok','',[]],
-  ['Faktura není ideální, zákazník ji chce ponechat','inf','Upozorni ho na možné problémy při clení.',['cas']]]},
+ {id:'faktura',n:'Celní faktura',d:'Posuzujeme, jestli je faktura použitelná pro celní účely.',rel:['Celní faktura'],o:[
+  ['Nevíme, potřebujeme fakturu.','zji','Zákazník ji zatím nenahrál, nemáme ji, nejsme schopni posoudit.',['dok']],
+  ['Celní faktura není ideální, budeme řešit se zákazníkem.','res','Celní faktura není ideální nebo vhodná pro použití pro celní účely a čekáme na řešení se zákazníkem, zda opraví nebo nechá s rizikem.',['dok']],
+  ['Celní faktura v pořádku, má všechny náležitosti.','ok','Celní faktura je vhodná pro použití pro celní účely.',[]],
+  ['Celní faktura není ideální, zasíláme (oznámení rizik).','inf','Celní faktura není ideální nebo vhodná pro použití pro celní účely, zákazník ji přesto chce ponechat, upozorníme ho na možné problémy.',['cas']]]},
  {id:'puvod',n:'Prokázání původu',d:'Nabízí se jen u přeprav do/z zemí, se kterými má EU preferenční dohodu.',rel:['Původ','Celní faktura'],cond:'pref',o:[
-  ['Nevíme, jaký je původ zboží','zji','Na faktuře není věta o původu, EUR1 se neřešil a podle charakteru zboží to nejde posoudit.',['dok']],
-  ['Chybí nebo je špatně uvedený důkaz původu','res','Věta na faktuře je, ale ve špatném znění. Nebo víš, že zboží je lokální a mohlo by mít preferenční sazbu, ale důkaz chybí.',['dok']],
-  ['Věta o původu je v přesném znění (nebo je EUR1)','ok','',[]],
-  ['Důkaz původu chybí, ale zboží není lokální','ok','Zboží nepochází z EU, takže na preferenční sazbu nárok není a chybějící důkaz původu ničemu nevadí.',[]],
-  ['Zboží je lokální, zákazník původ řešit nechce','inf','Upozorni ho a normálně přepravujete — zákazník přijde o preferenční sazbu.',['cena']]]},
- {id:'eori',n:'Platné EORI',d:'Posuzuješ, jestli má osoba vývozce platné EORI.',rel:['EORI'],cond:'clo',o:[
-  ['Neznáme osobu vývozce','zji','Zákazník ji zatím neuvedl a nenahrál celní fakturu.',[]],
-  ['Vývozce nemá platné EORI','res','',['dok']],
-  ['Vývozce má platné EORI','ok','',[]],
-  ['Bez EORI, zásilka se ruší','rus','',[]],
-  ['Mění se osoba vývozce nebo hodnota','zme','Např. se bude clít na fyzickou osobu, nebo se sníží hodnota pod 1 000 EUR, aby nebylo nutné plnohodnotné exportní clení.',['cena']]]},
- {id:'plnamoc',n:'Platná plná moc',d:'Posuzuješ, jestli máme řádně podepsanou plnou moc k zastupování při clení.',rel:['Plná moc'],cond:'clo',o:[
-  ['Plnou moc nemáme nebo je neúplná','res','',['dok']],
-  ['Plnou moc máme, je řádně podepsaná','ok','',[]],
-  ['Bez plné moci, zásilka se ruší','rus','',[]],
-  ['Mění se osoba vývozce','zme','Clít se bude na někoho jiného, kdo plnou moc doložit umí — typicky se to překlopí na fyzickou osobu.',['cena']]]},
+  ['Nevíme, zjistíme.','zji','Na celní faktuře není věta s prokázáním původu, nebo zákazník s námi neřešil certifikát EUR1 a nejsme schopni dle charakteru zboží posoudit jeho původ, potřebujeme tedy zjistit další info.',['dok']],
+  ['Zboží je lokálního původu, chybí nebo není správně uveden důkaz původu (věta na faktuře, EUR 1), budeme řešit se zákazníkem.','res','Na celní faktuře je uvedena věta prokazující původ, ale není ve správném znění. Nebo víme, že zboží je lokálního původu a v cílové zemi by mohlo mít preferenční sazbu a zákazník s námi neřešil EUR1 nebo nemá na celní faktuře větu. A budeme se zákazníkem řešit, zda bude nějak upravovat nebo ne.',['dok']],
+  ['Obsahuje větu o původu v přesném znění (případně je EUR1 cert.)','ok','Zákazník má na faktuře větu o původu ve správném znění, nebo s námi řešil certifikát EUR1, nebo žádný důkaz o původu nemá, ale my víme, že zboží není lokálního původu.',[]],
+  ['Neobsahuje důkaz původ, ale původ není z lokální země.','ok','Zboží nepochází z EU, takže na preferenční sazbu nárok není a chybějící důkaz původu ničemu nevadí.',[]],
+  ['Neobsahuje důkaz původu, je z lokální země, zasíláme (informování zákazníka).','inf','Zákazník nemá prokázání původu pro zboží, které je lokální, ale nechce to řešit. Upozorníme ho a normálně přepravujeme.',['cena']]]},
+ {id:'eori',n:'Platné EORI',d:'Posuzujeme, jestli má osoba vývozce platné EORI.',rel:['EORI'],cond:'clo',o:[
+  ['Neznáme osobu vývozce.','zji','Neznáme zatím osobu vývozce zatím (zákazník neuvedl zatím a nenahrál celní fakturu).',[]],
+  ['Osoba vývozce nemá platné EORI, budeme řešit se zákazníkem.','res','Osoba vývozce nemá platné EORI a budeme řešit se záaknzíkem.',['dok']],
+  ['Vývozce má platné EORI.','ok','Osoba vývozce má platné EORI.',[]],
+  ['Vývozce nemá EORI, zásilka se ruší.','rus','Osoba vývozce nemá platné EORI, zásilka se díky tomu ruší.',[]],
+  ['Vývozce nemá EORI, mění se přepravní údaje.','zme','Osoba vývozce nemá platné EORI, mění se osoba vývozce, např. se bude clít na FO, nebo se mění hodnota (aby bylo do 1.000,- EUR a neclilo se exportně plnohodnotně a nebylo nutné tak EORI).',['cena']]]},
+ {id:'plnamoc',n:'Platná plná moc',d:'Posuzujeme, jestli máme řádně podepsanou plnou moc k zastupování při clení.',rel:['Plná moc'],cond:'clo',o:[
+  ['Plnou moc nemáme, nebo na ní něco chybí, budeme řešit se zákazníkem.','res','Jasné.',['dok']],
+  ['Plnou moc máme a je řádně podepsaná.','ok','Jasné.',[]],
+  ['Plnou moc nemáme, zásilka se ruší.','rus','Jasné.',[]],
+  ['Plnou moc nemáme, mění se přepravní údaje.','zme','Clít se bude na někoho jiného, kdo plnou moc doložit umí — typicky se to překlopí na fyzickou osobu.',['cena']]]},
 ]}]},
 {id:'adresy',name:'Adresy a kontakty',ctx:[['Vyzvednutí','Endevel s.r.o., Lidická 700/19, Brno ✓'],['Doručení','Muster AG, Bahnhofstrasse 12, 8001 Zürich ⚠ neverifikovaná'],['Telefon','+420 777 123 456 (předvolba CZ)']],groups:[{n:null,items:[
- {id:'stat',n:'Správný stát',d:'Posuzuješ, jestli cílový stát odpovídá zbytku adresy.',rel:['Doručení'],o:[
-  ['Stát nesouhlasí','res','',[]],
-  ['Stát souhlasí','ok','',[]],
-  ['Oprava státu zásilku prodraží, zákazník ruší','rus','Např. se zákazník uklikl a zásilka do správného státu by byla o dost dražší.',['cena']],
-  ['Stát se opravuje','zme','Mění se cíl, může se změnit cena přepravy.',['cena']]]},
- {id:'psc',n:'Správné PSČ',d:'Posuzuješ, jestli PSČ odpovídá městu a ulici.',rel:['Doručení'],o:[
-  ['Nejde posoudit, jestli je PSČ správné','zji','Někdy to nejde určit — probereš se zákazníkem.',[]],
-  ['PSČ nesouhlasí','res','',[]],
-  ['PSČ souhlasí','ok','',[]],
-  ['Správnost PSČ je nejistá','inf','Posíláte, zákazníka upozorni na riziko.',['cas']],
-  ['PSČ se opravuje','zme','',['data']]]},
- {id:'ulice',n:'Ulice existuje',d:'Posuzuješ, jestli se ulice v cílovém městě dá dohledat.',rel:['Doručení'],o:[
-  ['Nejde posoudit, jestli ulice existuje','zji','Probereš se zákazníkem.',[]],
-  ['Ulice existuje','ok','',[]],
-  ['Ulici jsme nedohledali','inf','Posíláte, zákazníka upozorni na riziko.',['cas']],
-  ['Ulice se opravuje','zme','',['data']]]},
- {id:'cp',n:'Obsahuje číslo popisné',d:'Posuzuješ, jestli adresa obsahuje číslo popisné.',rel:['Doručení'],o:[
-  ['Nejde posoudit, jestli je číslo popisné potřeba','zji','Někde se číslo popisné nepoužívá — probereš se zákazníkem.',[]],
-  ['Číslo popisné je uvedené','ok','',[]],
-  ['Číslo popisné chybí','inf','Posíláte, zákazníka upozorni.',['cas']],
-  ['Číslo popisné se doplňuje','zme','',['data']]]},
- {id:'byt',n:'Obsahuje číslo bytu',d:'Posuzuješ, jestli u bytového domu nechybí číslo bytu.',rel:['Doručení'],o:[
-  ['Nejde posoudit, jestli je číslo bytu potřeba','zji','',[]],
-  ['Číslo bytu je uvedené','ok','',[]],
-  ['Číslo bytu chybí','inf','Posíláte, zákazníka upozorni.',['cas']],
-  ['Číslo bytu se doplňuje','zme','',['data']]]},
- {id:'tel',n:'Telefonní číslo je lokální',d:'Posuzuješ, jestli je kontakt na příjemce místní číslo — kurýr v cílové zemi na cizí číslo často nedovolá.',rel:['Telefon','Doručení'],o:[
-  ['Nejde posoudit, jestli je číslo místní','zji','',[]],
-  ['Telefonní číslo není lokální','res','',[]],
-  ['Číslo je jistě lokální','ok','',[]],
-  ['Číslo není lokální','inf','Posíláte, zákazníka upozorni na riziko nedoručení.',['cas']],
-  ['Bez lokálního čísla zásilku nepošleme','rus','',[]],
-  ['Číslo se mění','zme','',['data']]]},
+ {id:'stat',n:'Správný stát',d:'Posuzujeme, jestli cílový stát odpovídá zbytku adresy.',rel:['Doručení'],o:[
+  ['Stát nesouhlasí, budeme řešit se zákazníkem.','res','Jasné.',[]],
+  ['Stát souhlasí.','ok','Jasné.',[]],
+  ['Stát nesouhlasí, zásilka se ruší.','rus','Jasné. Třeba se uklikli a zásilka do správného státu by byla o dost dražší, celá přeprav se ruší.',['cena']],
+  ['Stát nesouhlasí, změna parametrů přepravy.','zme','Jasné, mění se stát na správný, může se změnit cena přepravy apod.',['cena']]]},
+ {id:'psc',n:'Správné PSČ',d:'Posuzujeme, jestli PSČ odpovídá městu a ulici.',rel:['Doručení'],o:[
+  ['Nejasné, prodiskutujeme se zákazníkem.','zji','Jasné asi. Někdy nejsme schopni úplně posoudit, zda je správné nebo ne, prodiskutujeme se zákazníkem.',[]],
+  ['PSČ nesouhlasí, budeme řešit se zákazníkem.','res','Jasné.',[]],
+  ['PSČ souhlasí.','ok','Jasné.',[]],
+  ['Správnost PSČ je nejasná, zasíláme (oznámení rizik).','inf','Jasné.',['cas']],
+  ['PSČ není správné, mění se data zásilky.','zme','Jasné.',['data']]]},
+ {id:'ulice',n:'Ulice existuje',d:'Posuzujeme, jestli se ulice v cílovém městě dá dohledat.',rel:['Doručení'],o:[
+  ['Nejasné, prodiskutujeme se zákazníkem.','zji','Probereme to se zákazníkem.',[]],
+  ['Ulice existuje.','ok','Jasné.',[]],
+  ['Ulice nedohledána, zasíláme (oznámení rizik).','inf','Jasné.',['cas']],
+  ['Ulice nedohledána, mění se data zásilky.','zme','Jasné.',['data']]]},
+ {id:'cp',n:'Obsahuje číslo popisné',d:'Posuzujeme, jestli adresa obsahuje číslo popisné.',rel:['Doručení'],o:[
+  ['Nejasné, prodiskutujeme se zákazníkem.','zji','Někde se číslo popisné nepoužívá — probereme to se zákazníkem.',[]],
+  ['Obsahuje číslo popisné.','ok','Jasné.',[]],
+  ['Neobsahuje číslo popisné, zasíláme (oznámení zákazníkovi).','inf','Jasné.',['cas']],
+  ['Neobsahuje číslo popisné, mění se data zásilky.','zme','Jasné, doplňuje se číslo popisné.',['data']]]},
+ {id:'byt',n:'Obsahuje číslo bytu',d:'Posuzujeme, jestli u bytového domu nechybí číslo bytu.',rel:['Doručení'],o:[
+  ['Nejasné, prodiskutujeme se zákazníkem.','zji','',[]],
+  ['Obsahuje číslo bytu.','ok','Jasné.',[]],
+  ['Neobsahuje číslo bytu, zasíláme (oznámení zákazníkovi).','inf','Jasné.',['cas']],
+  ['Neobsahuje číslo bytu, mění se data zásilky.','zme','Jasné, doplňuje se.',['data']]]},
+ {id:'tel',n:'Telefonní číslo je lokální',d:'Posuzujeme, jestli je kontakt na příjemce místní číslo — kurýr v cílové zemi na cizí číslo často nedovolá.',rel:['Telefon','Doručení'],o:[
+  ['Nejasné, prodiskutujeme se zákazníkem.','zji','Jasné. Nejsme schopni posoudit, zda je místní nebo ne.',[]],
+  ['Telefonní číslo není lokální, budeme řešit se zákazníkem.','res','Jasné.',[]],
+  ['Jsme si jisti, že číslo je lokální.','ok','Jasné.',[]],
+  ['Číslo není lokální, zasíláme (oznámení rizik).','inf','Jasné.',['cas']],
+  ['Číslo není lokální, zásilka se ruší.','rus','Jasné.',[]],
+  ['Číslo není lokální, mění se data zásilky.','zme','Jasné, číslo se mění.',['data']]]},
 ]}]},
 {id:'doba',name:'Doba doručení a vyzvednutí',ctx:[['Avizováno','3–4 pracovní dny'],['Dle tarifu','4–6 dnů'],['Cut-off','14:00 (nyní 12:40)'],['Svoz','po–pá']],groups:[{n:null,items:[
- {id:'dobadoruc',n:'Avizovaná doba doručení je ekvivalentní',d:'Posuzuješ, jestli doba doručení avizovaná zákazníkovi odpovídá realitě u téhle konkrétní zásilky.',rel:['Avizováno','Dle tarifu'],
+ {id:'dobadoruc',n:'Avizovaná doba doručení je ekvivalentní',d:'Posuzujeme, jestli doba doručení avizovaná zákazníkovi odpovídá realitě u téhle konkrétní zásilky.',rel:['Avizováno','Dle tarifu'],
   note:'Klientova poznámka: „Změní operátor rovnou den doručení avizovaný zákazníkovi? Měl by asi.“ — k rozhodnutí (otázka 12).',o:[
-  ['Avizovaná doba neodpovídá nebo často nemusí','res','Víš, že se zásilka může zpozdit. Domluvíte se se zákazníkem.',['cas']],
-  ['Avizovaná doba odpovídá','ok','',[]],
-  ['Doba nemusí vyjít, zákazník souhlasí','inf','Zákazník je informován a souhlasí.',['cas']],
-  ['Zákazník kvůli termínu ruší','rus','',[]],
-  ['Přechod na expresní variantu','zme','',['cena','cas']]]},
+  ['Avizovaná doba doručení neodpovídá nebo velmi často nemusí, budeme řešit se zákazníkem.','res','Avizovaná doba doručení není správná, resp. se často tato konkrétní zásilka může zpozdit. Budeme řešit se zákazníkem.',['cas']],
+  ['Avizovaná doba doručení odpovídá.','ok','Jasné.',[]],
+  ['Doba neodpovídá nebo velmi často nemusí, zasíláme (oznámení rizik).','inf','Avizovaná doba doručení není správná, resp. se často tato konkrétní zásilka může zpozdit, zákazníkovi oznámeno, souhlasí s tím. (Pozn.: Změní operátor rovnou den doručení avizovaný zákazníkovi? Měl by asi)',['cas']],
+  ['Doba neodpovídá nebo velmi často nemusí, zásilka se ruší.','rus','Jasné.',[]],
+  ['Doba neodpovídá nebo velmi často nemusí, mění se přeprava.','zme','Jasné, mění se např. na expresní variantu.',['cena','cas']]]},
 ]}]},
 {id:'cenap',name:'Cena přepravy a náklady',ctx:[['Obj. hmotnost','12 kg (poměr 1,0)'],['Cenové pásmo','do 15 kg (+3,0 kg)'],['Rozměrový limit','60 cm / 120 cm'],['Rozměry','60 × 40 × 30 cm']],groups:[{n:null,items:[
- {id:'objem',n:'Riziko většího objemu',d:'Posuzuješ, jestli u zásilky nehrozí velký skok objemu při drobné změně rozměrů — typicky dlouhé a široké, ale velmi tenké kusy.',rel:['Obj. hmotnost','Rozměry'],o:[
-  ['Hrozí velká změna objemu při drobné změně rozměrů','res','Domluvíte se, co s tím.',['cena']],
-  ['Velká změna objemu nehrozí','ok','',[]],
-  ['Hrozí doplatek, zákazník informován','inf','Posíláte, zákazníka notifikuješ o možném doplatku.',['cena']],
-  ['Hrozí doplatek, chceme potvrzení','pot','Posíláte, zákazník musí doplatek předem odsouhlasit.',['cena']],
-  ['Zákazník kvůli riziku ruší','rus','',[]],
-  ['Jiná přeprava nebo přebalení','zme','Např. se zásilka přebalí, nebo se pošle mírně dražší variantou, u které nehrozí velký cenový skok.',['cena']]]},
- {id:'skok',n:'Blízko cenovému skoku',d:'Posuzuješ, jestli zásilka není těsně pod hranicí, za kterou cena výrazně skočí.',rel:['Cenové pásmo','Obj. hmotnost'],o:[
-  ['Hrozí velký cenový skok při vyšší účtovatelné hmotnosti','res','',['cena']],
-  ['Cenový skok nehrozí','ok','',[]],
-  ['Cenový skok docela hrozí','inf','',['cena']],
-  ['Cenový skok významně hrozí','pot','',['cena']],
-  ['Zákazník kvůli riziku ruší','rus','',[]],
-  ['Jiná přeprava nebo přebalení','zme','',['cena']]]},
- {id:'priplatek',n:'Blízko velkému příplatku',d:'Posuzuješ, jestli zásilka není těsně pod rozměrovým limitem, jehož překročení znamená velký příplatek.',rel:['Rozměrový limit','Rozměry'],
+ {id:'objem',n:'Riziko většího objemu',d:'Posuzujeme, jestli u zásilky nehrozí velký skok objemu při drobné změně rozměrů — typicky dlouhé a široké, ale velmi tenké kusy.',rel:['Obj. hmotnost','Rozměry'],o:[
+  ['Hrozí velká změna objemu při drobné změně rozměrů, budeme řešit se zákazníkem.','res','Zásilka je riziková z pohledu potenciálně vyššího objemu při drobné změně rozměrů (dlouhé, široké, ale velmi tenké kusy). A budeme řešit se zákazníkem, co s tím případně.',['cena']],
+  ['Nehrozí velká změna objemu při drobné změně rozměrů.','ok','Zásilka není riziková z pohledu potenciálně vyššího objemu při drobné změně rozměrů (dlouhé, široké, ale velmi tenké kusy).',[]],
+  ['Hrozí velká změna objemu při drobné změně rozměrů, zasíláme (oznámení rizik).','inf','Posíláme, zákazníka notifikujeme o případném doplatku při drobné změně parametrů.',['cena']],
+  ['Hrozí velká změna objemu při drobné změně rozměrů, zasíláme (potvrzení rizik).','pot','Posíláme, od zákazníka chceme potvrzení o případném doplatku při drobné změně parametrů.',['cena']],
+  ['Hrozí velká změna objemu při drobné změně rozměrů, zásilka se ruší.','rus','Jasné.',[]],
+  ['Hrozí velká změna objemu při drobné změně rozměrů, změna přepravy nebo zabalení.','zme','Jasné. Např. přebalí zásilku jinak, pošle se jinou variantou, která je trochu dražší, ale nehrozí velký cenový skok pak apod.',['cena']]]},
+ {id:'skok',n:'Blízko cenovému skoku',d:'Posuzujeme, jestli zásilka není těsně pod hranicí, za kterou cena výrazně skočí.',rel:['Cenové pásmo','Obj. hmotnost'],o:[
+  ['Hrozí velký cenový skok při vyšší účtovatelné hmotnosti, budeme řešit se zákazníkem.','res','Zásilka je blízko většímu cenovému skoku při nevelké změně parametrů. A budeme se zákazníkem řešit.',['cena']],
+  ['Nehrozí velký cenový skok při vyšší účtovatelné hmotnosti.','ok','Zásilka není blízko většímu cenovému skoku při nevelké změně parametrů. Tedy ok z tohoto pohledu.',[]],
+  ['Docela hrozí velký cenový skok při vyšší účtovatelné hmotnosti, zasíláme (oznámení rizik).','inf','',['cena']],
+  ['Významně hrozí velký cenový skok při vyšší účtovatelné hmotnosti, zasíláme (potvrzení rizik).','pot','',['cena']],
+  ['Hrozí velký cenový skok při vyšší účtovatelné hmotnosti, zásilka se ruší.','rus','Jasné.',[]],
+  ['Hrozí velký cenový skok při vyšší účtovatelné hmotnosti, změna přepravy nebo zabalení.','zme','',['cena']]]},
+ {id:'priplatek',n:'Blízko velkému příplatku',d:'Posuzujeme, jestli zásilka není těsně pod rozměrovým limitem, jehož překročení znamená velký příplatek.',rel:['Rozměrový limit','Rozměry'],
   note:'Klient u této a u „Rizika většího objemu“ zvažuje sloučení do obecného „rizika vyšší ceny“. Návrh analýzy: místo sloučení použít značku 💰 (otázka 13).',o:[
-  ['Hrozí velký příplatek za překročení rozměrů','res','',['cena']],
-  ['Velký příplatek nehrozí','ok','',[]],
-  ['Příplatek docela hrozí','inf','',['cena']],
-  ['Příplatek významně hrozí','pot','',['cena']],
-  ['Zákazník kvůli riziku ruší','rus','',[]],
-  ['Jiná přeprava nebo přebalení','zme','',['cena']]]},
+  ['Hrozí velký příplatek za překročení rozměrů, budeme řešit se zákazníkem.','res','Jasné. Je to svými parametry blízko velkému příplatku při jejich drobném překročení. Bude se zákazníkem řešit.',['cena']],
+  ['Nehrozí velký příplatek za překročení rozměrů.','ok','Jasné.',[]],
+  ['Docela hrozí velký příplatek za překročení rozměrů, zasíláme (oznámení rizik).','inf','Jasné.',['cena']],
+  ['Významně hrozí velký příplatek za překročení rozměrů, zasíláme (potvrzení rizik).','pot','Jasné.',['cena']],
+  ['Hrozí velký příplatek za překročení rozměrů, zásilka se ruší.','rus','',[]],
+  ['Hrozí velký příplatek za překročení rozměrů, změna přepravy nebo zabalení.','zme','',['cena']]]},
 ]}]},
 ];
 
@@ -579,7 +579,7 @@ AREAS.forEach(a=>a.groups.forEach(g=>g.items.forEach(it=>{
 /* „Čeká na zákazníka" je volba u každé položky — rozhodnutí padlo, ale čeká se na úkon
    zákazníka. Nikdy to není konečný stav a vždycky to drží položku na agendě hovoru. */
 ITEMS.forEach(it=>it.o.push(['Čeká se na zákazníka','cek',
-  'Domluveno, ale čeká se, až zákazník něco udělá — potvrdí, doloží doklad, opraví údaj. Až to dorazí, vybereš výsledný stav.',[]]));
+  'Domluveno, ale čeká se, až zákazník něco udělá — potvrdí, doloží doklad, opraví údaj. Až to dorazí, vybereme výsledný stav.',[]]));
 RANK.cek=3;
 const BY=Object.fromEntries(ITEMS.map(i=>[i.id,i]));
 const CONDN={mimoEU:'mimo EU',clo:'plnohodnotné clení',pref:'preferenční dohoda',pojisteno:'pojištěno'};
