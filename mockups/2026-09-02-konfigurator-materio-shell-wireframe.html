@@ -1,0 +1,1055 @@
+<meta charset="utf-8">
+<title>Konfigurátor VkŘ v shellu Bytorpu — wireframe všech obrazovek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+<style>
+/* ── Materio tokeny — bytorp-frontend/app/plugins/vuetify/theme.ts ── */
+:root{
+  --primary:#8C57FF; --primary-d:#7E4EE6; --primary-l1:#E4DBF5; --primary-l2:#F2EDFA;
+  --secondary:#8A8D93;
+  --success:#56CA00; --info:#16B1FF; --warning:#FFB400; --error:#FF4C51;
+  --bg:#f4f5fa; --surface:#fff; --surface-2:#fafafc;
+  --on:#2E263D; --on-90:rgba(46,38,61,.9); --on-70:rgba(46,38,61,.7);
+  --on-55:rgba(46,38,61,.55); --on-40:rgba(46,38,61,.4);
+  --border:rgba(46,38,61,.12); --border-strong:rgba(46,38,61,.22);
+  --thead:#F6F7FB;
+  --tint-success:rgba(86,202,0,.12); --tint-warning:rgba(255,180,0,.14);
+  --tint-error:rgba(255,76,81,.12); --tint-info:rgba(22,177,255,.12);
+  --text-success:#3f9400; --text-warning:#a97400; --text-error:#e64449; --text-info:#0f83bd;
+  --shadow:0 2px 6px rgba(46,38,61,.12);
+  --elev3:0 3px 12px rgba(46,38,61,.2);
+  --elev8:0 8px 28px rgba(46,38,61,.28);
+  --chrome-bg:#241f33; --chrome-on:#EFECF8; --chrome-on-55:rgba(239,236,248,.55);
+  --chrome-border:rgba(239,236,248,.16);
+  --r:6px;                 /* Materio border-radius */
+  --nav-w:260px;           /* $layout-vertical-nav-width */
+  --nav-w-mini:80px;       /* $layout-vertical-nav-collapsed-width */
+  --navbar-h:64px;         /* $layout-vertical-nav-navbar-height */
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#28243D; --surface:#312D4B; --surface-2:#3A3552;
+  --on:#E7E3FC; --on-90:rgba(231,227,252,.9); --on-70:rgba(231,227,252,.7);
+  --on-55:rgba(231,227,252,.55); --on-40:rgba(231,227,252,.4);
+  --border:rgba(231,227,252,.12); --border-strong:rgba(231,227,252,.22);
+  --thead:#3D3759; --primary-l1:rgba(140,87,255,.28); --primary-l2:rgba(140,87,255,.14);
+  --tint-success:rgba(86,202,0,.18); --tint-warning:rgba(255,180,0,.18);
+  --tint-error:rgba(255,76,81,.18); --tint-info:rgba(22,177,255,.18);
+  --text-success:#8fe04a; --text-warning:#ffca4d; --text-error:#ff8b8e; --text-info:#6fcdff;
+  --shadow:0 2px 6px rgba(19,17,32,.4); --elev3:0 3px 12px rgba(19,17,32,.55);
+  --elev8:0 8px 28px rgba(19,17,32,.7); --chrome-bg:#1D1A2B;
+}}
+:root[data-theme="dark"]{
+  --bg:#28243D; --surface:#312D4B; --surface-2:#3A3552;
+  --on:#E7E3FC; --on-90:rgba(231,227,252,.9); --on-70:rgba(231,227,252,.7);
+  --on-55:rgba(231,227,252,.55); --on-40:rgba(231,227,252,.4);
+  --border:rgba(231,227,252,.12); --border-strong:rgba(231,227,252,.22);
+  --thead:#3D3759; --primary-l1:rgba(140,87,255,.28); --primary-l2:rgba(140,87,255,.14);
+  --tint-success:rgba(86,202,0,.18); --tint-warning:rgba(255,180,0,.18);
+  --tint-error:rgba(255,76,81,.18); --tint-info:rgba(22,177,255,.18);
+  --text-success:#8fe04a; --text-warning:#ffca4d; --text-error:#ff8b8e; --text-info:#6fcdff;
+  --shadow:0 2px 6px rgba(19,17,32,.4); --elev3:0 3px 12px rgba(19,17,32,.55);
+  --elev8:0 8px 28px rgba(19,17,32,.7); --chrome-bg:#1D1A2B;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--on);
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-size:15px; line-height:22px; -webkit-font-smoothing:antialiased;
+}
+/* Remix Icon = plné tvary, ne obrysy */
+.ico{width:1.375rem;height:1.375rem;flex:none;fill:currentColor;display:block}
+.ico.sm{width:1.125rem;height:1.125rem}
+.ico.xs{width:.9rem;height:.9rem}
+.ico.lg{width:1.75rem;height:1.75rem}
+
+.h4{font-size:24px;line-height:32px;font-weight:500;margin:0}
+.h5{font-size:18px;line-height:28px;font-weight:500;margin:0}
+.h6{font-size:15px;line-height:22px;font-weight:500;margin:0}
+.body2{font-size:13px;line-height:20px}
+.cap{font-size:13px;line-height:18px;color:var(--on-55)}
+.over{font-size:12px;line-height:14px;letter-spacing:.8px;text-transform:uppercase;color:var(--on-55);
+  display:block;margin-bottom:8px}
+.num{font-variant-numeric:tabular-nums}
+
+/* ── lišta wireframu (není součást návrhu) ── */
+.chrome{position:sticky;top:0;z-index:60;background:var(--chrome-bg);color:var(--chrome-on);
+  border-bottom:1px solid var(--chrome-border)}
+.chrome-in{max-width:1680px;margin:0 auto;padding:10px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.chrome-tag{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--chrome-on-55);
+  border:1px solid var(--chrome-border);border-radius:99px;padding:3px 9px}
+.chrome-ttl{font-size:13px;line-height:20px;font-weight:500}
+.chrome select{font:inherit;font-size:13px;line-height:20px;background:rgba(239,236,248,.07);color:var(--chrome-on);
+  border:1px solid var(--chrome-border);border-radius:var(--r);padding:6px 10px;min-width:290px}
+.chrome select optgroup,.chrome select option{color:#1b1826;background:#fff}
+.seg{display:flex;gap:4px;background:rgba(239,236,248,.07);padding:3px;border-radius:var(--r)}
+.seg button{font:inherit;font-size:13px;line-height:20px;font-weight:500;color:var(--chrome-on-55);
+  background:transparent;border:0;cursor:pointer;padding:5px 12px;border-radius:4px}
+.seg button:hover{color:var(--chrome-on)}
+.seg button[aria-pressed="true"]{background:var(--primary);color:#fff}
+.chrome .right{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* ── rám aplikace ── */
+#sheet{max-width:1680px;margin:0 auto;padding:24px 24px 72px}
+.sheet-item{margin-bottom:44px}
+.sheet-label{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-size:12px;line-height:16px;
+  letter-spacing:.8px;text-transform:uppercase;color:var(--on-55)}
+.sheet-label .n{width:22px;height:22px;border-radius:50%;background:var(--primary);color:#fff;
+  display:grid;place-items:center;font-size:12px;font-weight:600;letter-spacing:0;flex:none}
+.sheet-label .sec{margin-left:auto;color:var(--on-40);text-transform:none;letter-spacing:.2px;font-size:12.5px}
+.frame{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;box-shadow:var(--shadow);position:relative}
+
+/* ── vertikální navigace ── */
+.vnav{width:var(--nav-w);flex:none;background:var(--bg);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;transition:width .18s ease}
+body[data-mini="1"] .vnav{width:var(--nav-w-mini)}
+.nav-header{height:var(--navbar-h);flex:none;display:flex;align-items:center;gap:10px;padding:0 16px 0 23px}
+.logo{width:30px;height:30px;flex:none;border-radius:8px;background:var(--primary);color:#fff;display:grid;place-items:center}
+.app-title{font-size:19px;font-weight:600;letter-spacing:.2px;white-space:nowrap}
+.nav-pin{margin-left:auto;color:var(--on-40);display:grid;cursor:pointer;background:none;border:0;padding:0}
+body[data-mini="1"] .app-title,body[data-mini="1"] .nav-pin,
+body[data-mini="1"] .nav-sec span,body[data-mini="1"] .nav-i .lbl,
+body[data-mini="1"] .nav-i .arrow,body[data-mini="1"] .nav-sub{display:none}
+
+.nav-items{padding:4px 0 16px;overflow-y:auto;flex:1}
+.nav-sec{display:flex;align-items:center;gap:8px;margin:14px 16px 6px;padding:0 12px;color:var(--on-55);
+  font-size:12px;line-height:14px;letter-spacing:.8px;text-transform:uppercase;white-space:nowrap}
+.nav-sec::after{content:"";flex:1;height:1px;background:var(--border)}
+.nav-i{display:flex;align-items:center;gap:10px;height:44px;margin:0 16px 6px;padding:0 12px;
+  border-radius:.4rem;color:var(--on-70);cursor:pointer;white-space:nowrap;
+  font-size:15px;line-height:22px;background:none;border:0;width:calc(100% - 32px);text-align:left;font-family:inherit}
+.nav-i:hover{background:rgba(46,38,61,.04);color:var(--on-90)}
+:root[data-theme="dark"] .nav-i:hover{background:rgba(231,227,252,.06)}
+.nav-i .lbl{flex:1;overflow:hidden;text-overflow:ellipsis}
+.nav-i.active{background:var(--primary);color:#fff;box-shadow:var(--elev3)}
+.nav-i.active:hover{background:var(--primary)}
+.nav-i .arrow{transition:transform .15s}
+.nav-i.open .arrow{transform:rotate(180deg)}
+.nav-i.group.open{color:var(--on-90);background:rgba(46,38,61,.06)}
+:root[data-theme="dark"] .nav-i.group.open{background:rgba(231,227,252,.08)}
+.nav-sub .nav-i{height:38px;font-size:14px}
+.nav-sub .nav-i .dot{width:8px;height:8px;border-radius:50%;border:1.5px solid currentColor;
+  margin-left:6px;margin-right:4px;flex:none;opacity:.7}
+.nav-sub .nav-i.active .dot{background:#fff;border-color:#fff;opacity:1}
+.nav-i .count{font-size:12px;line-height:18px;padding:0 7px;border-radius:99px;
+  background:var(--primary-l2);color:var(--primary-d)}
+.nav-i.active .count{background:rgba(255,255,255,.24);color:#fff}
+
+/* ── navbar ── */
+.main{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--bg)}
+.navbar{height:var(--navbar-h);flex:none;display:flex;align-items:center;
+  gap:10px;padding:0 24px;backdrop-filter:blur(6px);background:color-mix(in srgb,var(--bg) 88%,transparent)}
+.navbar .h4{flex:none}
+.nb-back{width:34px;height:34px;border-radius:50%;border:0;background:transparent;color:var(--on-70);
+  cursor:pointer;display:none;place-items:center;margin-left:-8px}
+.nb-back:hover{background:rgba(46,38,61,.06)}
+.frame.back .nb-back{display:grid}
+.nb-chip{font-size:11px;line-height:16px;letter-spacing:.6px;text-transform:uppercase;font-weight:600;
+  padding:2px 8px;border-radius:99px;background:var(--primary-l2);color:var(--primary-d)}
+.nb-right{margin-left:auto;display:flex;align-items:center;gap:6px}
+.iconbtn{width:34px;height:34px;border-radius:50%;border:0;background:transparent;color:var(--on-70);
+  cursor:pointer;display:grid;place-items:center;position:relative}
+.iconbtn:hover{background:rgba(46,38,61,.06);color:var(--on-90)}
+:root[data-theme="dark"] .iconbtn:hover{background:rgba(231,227,252,.08)}
+.iconbtn .dot{position:absolute;top:5px;right:6px;width:8px;height:8px;border-radius:50%;
+  background:var(--error);border:1.5px solid var(--bg)}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--primary-l1);color:var(--primary-d);
+  display:grid;place-items:center;font-size:13px;font-weight:600;cursor:pointer}
+
+/* ── obsah ── */
+.content{flex:1;overflow:visible;padding:0 24px 40px}
+/* obsah se nemačká — pod 1150 px se scrolluje vodorovně, stejně jako v checklistu v4 */
+.boxed{max-width:1440px;min-width:1150px;margin:0 auto}
+.screen{display:block}
+
+/* drobečky — jen na podstránkách, které je dnes mají */
+.crumbs{display:flex;align-items:center;gap:8px;padding:0 0 14px;font-size:13px;color:var(--on-55)}
+.crumbs a{color:var(--on-55);text-decoration:none}
+.crumbs a:hover{color:var(--primary)}
+.crumbs .sep{opacity:.5}
+.crumbs .now{color:var(--on-90)}
+.crumbs .end{margin-left:auto}
+
+/* ── komponenty ── */
+.card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow)}
+.card + .card{margin-top:20px}
+.card-hd{display:flex;align-items:flex-start;gap:12px;padding:20px 24px 0}
+.card-hd .t{flex:1;min-width:0}
+.card-bd{padding:20px 24px}
+.card-bd + .card-bd{border-top:1px solid var(--border)}
+
+.btn{font:inherit;font-size:15px;line-height:22px;font-weight:500;border-radius:var(--r);
+  padding:8px 18px;border:1px solid transparent;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.btn.flat{background:var(--primary);color:#fff;box-shadow:0 2px 4px rgba(140,87,255,.4)}
+.btn.flat:hover{background:var(--primary-d)}
+.btn.tonal{background:var(--primary-l2);color:var(--primary-d)}
+.btn.tonal:hover{background:var(--primary-l1)}
+.btn.outlined{background:transparent;border-color:var(--border-strong);color:var(--on-70)}
+.btn.outlined:hover{border-color:var(--primary);color:var(--primary)}
+.btn.outlined.err{border-color:rgba(255,76,81,.5);color:var(--error)}
+.btn.text{background:transparent;color:var(--primary);padding:6px 10px}
+.btn.text:hover{background:var(--primary-l2)}
+.btn.sm{font-size:13px;line-height:20px;padding:5px 12px}
+.btn.block{width:100%;justify-content:center}
+.btn[disabled],.btn.off{opacity:.45;cursor:default;box-shadow:none}
+
+.field{position:relative;min-height:42px;border:1px solid var(--border-strong);border-radius:var(--r);
+  display:flex;align-items:center;gap:10px;padding:9px 14px;color:var(--on-40);background:var(--surface)}
+.field:hover{border-color:var(--on-55)}
+.field .lbl{position:absolute;top:-8px;left:10px;background:var(--surface);padding:0 5px;
+  font-size:12px;line-height:14px;color:var(--on-55)}
+.field.filled{color:var(--on-90)}
+.field.sel{padding-right:36px;cursor:pointer}
+.field.sel .caret{position:absolute;right:10px;color:var(--on-40);display:grid}
+.field.ta{align-items:flex-start;min-height:76px}
+.field + .field{margin-top:20px}
+.f-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+
+.chip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:99px;
+  font-size:13px;line-height:20px;font-weight:500;white-space:nowrap}
+.chip.ghost{background:transparent;border:1px solid var(--border-strong);color:var(--on-70);font-weight:400}
+.chip.primary{background:var(--primary-l2);color:var(--primary-d)}
+.chip.success{background:var(--tint-success);color:var(--text-success)}
+.chip.warning{background:var(--tint-warning);color:var(--text-warning)}
+.chip.error{background:var(--tint-error);color:var(--text-error)}
+.chip.info{background:var(--tint-info);color:var(--text-info)}
+.chip.sec{background:rgba(138,141,147,.14);color:var(--on-70)}
+
+/* volitelné chipy (dopravce, země, typ služby) */
+.chipset{display:flex;gap:8px;flex-wrap:wrap}
+.chipset button{font:inherit;height:30px;padding:0 13px;border-radius:99px;cursor:pointer;
+  border:1px solid var(--border-strong);background:transparent;color:var(--on-70);
+  font-size:13px;line-height:20px;display:inline-flex;align-items:center;gap:6px}
+.chipset button:hover{border-color:var(--primary);color:var(--primary)}
+.chipset button[aria-pressed="true"]{background:var(--primary);border-color:var(--primary);color:#fff}
+.chipset.tight button{height:26px;padding:0 9px;font-size:12px}
+.chipset .n{font-size:12px;opacity:.8;font-variant-numeric:tabular-nums}
+
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);padding:0 24px}
+.tabs button{font:inherit;font-size:14px;line-height:20px;font-weight:500;color:var(--on-55);
+  background:none;border:0;border-bottom:2px solid transparent;padding:12px 14px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px}
+.tabs button:hover{color:var(--on-90)}
+.tabs button[aria-pressed="true"]{color:var(--primary);border-bottom-color:var(--primary)}
+
+.rows{display:flex;flex-direction:column}
+.row{display:flex;align-items:center;gap:14px;padding:12px 24px;border-top:1px solid var(--border);cursor:pointer}
+.row:hover{background:var(--surface-2)}
+.row.sel{background:var(--primary-l2)}
+.row .ord{display:flex;flex-direction:column;gap:0;color:var(--on-40);flex:none}
+.row .ord button{background:none;border:0;padding:0;cursor:pointer;color:inherit;display:grid;height:13px}
+.row .ord button:hover{color:var(--primary)}
+.row .main-cell{flex:1;min-width:0}
+.row .nm{font-size:15px;line-height:22px;font-weight:500;color:var(--on-90)}
+.row .sub{margin-top:3px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.row .end{display:flex;align-items:center;gap:10px;flex:none;color:var(--on-40)}
+.thead{display:flex;gap:14px;padding:10px 24px;background:var(--thead);
+  font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:var(--on-55)}
+
+/* sloupcové rozvržení editorů */
+.split{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:20px;align-items:start}
+.cols3{display:grid;grid-template-columns:290px minmax(0,1fr) 320px;gap:20px;align-items:start}
+.stack{display:flex;flex-direction:column;gap:20px}
+.side-actions{display:flex;flex-direction:column;gap:10px}
+
+.f{margin-bottom:20px}
+.f:last-child{margin-bottom:0}
+.f-l{font-size:12px;line-height:14px;letter-spacing:.8px;text-transform:uppercase;color:var(--on-55);margin-bottom:8px}
+.f-box{border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;background:var(--surface-2)}
+.f-box .v{font-size:14px;line-height:20px;color:var(--on-90)}
+.f-box .v2{font-size:13px;line-height:18px;color:var(--on-55);margin-top:2px}
+
+/* vnořená skupina podmínek */
+.group{border:1px solid var(--border);border-radius:var(--r);background:var(--surface-2);padding:14px 16px}
+.group + .group{margin-top:14px}
+.group .gl{font-size:12px;line-height:14px;letter-spacing:.8px;text-transform:uppercase;color:var(--on-55);margin-bottom:10px}
+.cond{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.cond .field{background:var(--surface);min-width:0}
+.cond .f1{flex:1 1 150px}
+.cond .f2{flex:0 1 110px}
+.cond .fv{flex:1 1 100%}
+.cond .x{margin-left:auto;color:var(--on-40);background:none;border:0;cursor:pointer;display:grid}
+.cond .x:hover{color:var(--error)}
+
+/* segmentovaný přepínač uvnitř formuláře (spouštěč) */
+.segf{display:inline-flex;gap:8px}
+.segf button{font:inherit;font-size:14px;line-height:20px;font-weight:500;padding:8px 16px;border-radius:var(--r);
+  border:1px solid var(--border-strong);background:transparent;color:var(--on-70);cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px}
+.segf button[aria-pressed="true"]{background:var(--primary);border-color:var(--primary);color:#fff}
+
+/* radio */
+.radio{display:flex;align-items:center;gap:9px;font-size:14px;line-height:20px;color:var(--on-90);
+  margin-bottom:8px;cursor:pointer}
+.radio i{width:18px;height:18px;border-radius:50%;border:2px solid var(--border-strong);flex:none;display:grid;place-items:center}
+.radio.on i{border-color:var(--primary)}
+.radio.on i::after{content:"";width:9px;height:9px;border-radius:50%;background:var(--primary)}
+
+/* switch */
+.switch{display:inline-flex;align-items:center;gap:10px;font-size:14px;color:var(--on-90);cursor:pointer}
+.switch i{width:38px;height:22px;border-radius:99px;background:var(--primary);position:relative;flex:none}
+.switch i::after{content:"";position:absolute;top:3px;right:3px;width:16px;height:16px;border-radius:50%;background:#fff}
+.switch.off i{background:rgba(46,38,61,.22)}
+.switch.off i::after{right:auto;left:3px}
+
+/* stavové proužky a prázdné stavy */
+.note{display:flex;gap:10px;align-items:flex-start;border-radius:var(--r);padding:12px 14px;font-size:13px;line-height:19px}
+.note.ok{background:var(--tint-success);color:var(--text-success)}
+.note.info{background:var(--tint-info);color:var(--text-info)}
+.note.warn{background:var(--tint-warning);color:var(--text-warning)}
+.note b{display:block;color:inherit;font-weight:600}
+.note .sub{color:var(--on-55);margin-top:2px}
+.empty{border:1px dashed var(--border-strong);border-radius:var(--r);padding:34px 24px;text-align:center;color:var(--on-40);font-size:14px}
+.empty .big{display:grid;place-items:center;margin:0 auto 12px;width:56px;height:56px;border-radius:50%;
+  background:var(--primary-l2);color:var(--primary)}
+.empty .t{font-size:16px;line-height:24px;font-weight:500;color:var(--on-90);margin-bottom:6px}
+.empty .s{max-width:420px;margin:0 auto 18px;color:var(--on-55);font-size:14px;line-height:21px}
+
+/* bodová osa úseku */
+.points{display:flex;flex-direction:column}
+.point{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--border)}
+.point:first-child{border-top:0}
+.point .n{width:22px;height:22px;border-radius:50%;background:var(--primary-l2);color:var(--primary-d);
+  display:grid;place-items:center;font-size:12px;font-weight:600;flex:none}
+.point .tx{font-size:13px;line-height:19px;color:var(--on-90)}
+.point .mt{font-size:12px;line-height:18px;color:var(--on-55);margin-top:4px}
+
+/* dialog */
+.overlay{position:absolute;inset:0;background:rgba(46,38,61,.5);display:grid;place-items:center;z-index:40}
+.dialog{width:420px;max-width:calc(100% - 48px);background:var(--surface);border-radius:var(--r);box-shadow:var(--elev8)}
+.dialog .db{padding:22px 24px}
+.dialog .df{display:flex;justify-content:flex-end;gap:10px;padding:0 24px 20px}
+
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="ri-sparkling-line" viewBox="0 0 24 24"><path fill="currentColor" d="M14 4.438A2.437 2.437 0 0 0 16.438 2h1.125A2.437 2.437 0 0 0 20 4.438v1.125A2.437 2.437 0 0 0 17.563 8h-1.125A2.437 2.437 0 0 0 14 5.563zM1 11a6 6 0 0 0 6-6h2a6 6 0 0 0 6 6v2a6 6 0 0 0-6 6H7a6 6 0 0 0-6-6zm3.876 1A8.04 8.04 0 0 1 8 15.124A8.04 8.04 0 0 1 11.124 12A8.04 8.04 0 0 1 8 8.876A8.04 8.04 0 0 1 4.876 12m12.374 2A3.25 3.25 0 0 1 14 17.25v1.5A3.25 3.25 0 0 1 17.25 22h1.5A3.25 3.25 0 0 1 22 18.75v-1.5A3.25 3.25 0 0 1 18.75 14z"/></symbol>
+<symbol id="ri-shopping-bag-3-line" viewBox="0 0 24 24"><path fill="currentColor" d="M6.505 2h11a1 1 0 0 1 .8.4l2.7 3.6v15a1 1 0 0 1-1 1h-16a1 1 0 0 1-1-1V6l2.7-3.6a1 1 0 0 1 .8-.4m12.5 6h-14v12h14zm-.5-2l-1.5-2h-10l-1.5 2zm-9.5 4v2a3 3 0 1 0 6 0v-2h2v2a5 5 0 0 1-10 0v-2z"/></symbol>
+<symbol id="ri-file-list-3-line" viewBox="0 0 24 24"><path fill="currentColor" d="M19 22H5a3 3 0 0 1-3-3V3a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v12h4v4a3 3 0 0 1-3 3m-1-5v2a1 1 0 1 0 2 0v-2zm-2 3V4H4v15a1 1 0 0 0 1 1zM6 7h8v2H6zm0 4h8v2H6zm0 4h5v2H6z"/></symbol>
+<symbol id="ri-user-line" viewBox="0 0 24 24"><path fill="currentColor" d="M4 22a8 8 0 1 1 16 0h-2a6 6 0 0 0-12 0zm8-9c-3.315 0-6-2.685-6-6s2.685-6 6-6s6 2.685 6 6s-2.685 6-6 6m0-2c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4"/></symbol>
+<symbol id="ri-building-line" viewBox="0 0 24 24"><path fill="currentColor" d="M21 19h2v2H1v-2h2V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v15h4v-8h-2V9h3a1 1 0 0 1 1 1zM5 5v14h8V5zm2 6h4v2H7zm0-4h4v2H7z"/></symbol>
+<symbol id="ri-bill-line" viewBox="0 0 24 24"><path fill="currentColor" d="M20 22H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1m-1-2V4H5v16zM8 9h8v2H8zm0 4h8v2H8z"/></symbol>
+<symbol id="ri-map-pin-line" viewBox="0 0 24 24"><path fill="currentColor" d="m12 20.9l4.95-4.95a7 7 0 1 0-9.9 0zm0 2.828l-6.364-6.364a9 9 0 1 1 12.728 0zM12 13a2 2 0 1 0 0-4a2 2 0 0 0 0 4m0 2a4 4 0 1 1 0-8a4 4 0 0 1 0 8"/></symbol>
+<symbol id="ri-calculator-line" viewBox="0 0 24 24"><path fill="currentColor" d="M4 2h16a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1m1 2v16h14V4zm2 2h10v4H7zm0 6h2v2H7zm0 4h2v2H7zm4-4h2v2h-2zm0 4h2v2h-2zm4-4h2v6h-2z"/></symbol>
+<symbol id="ri-list-check-3" viewBox="0 0 24 24"><path fill="currentColor" d="M8 6v3H5V6zM3 4v7h7V4zm10 0h8v2h-8zm0 7h8v2h-8zm0 7h8v2h-8zm-2.293-1.793l-1.414-1.414L6 18.086l-1.793-1.793l-1.414 1.414L6 20.914z"/></symbol>
+<symbol id="ri-menu-line" viewBox="0 0 24 24"><path fill="currentColor" d="M3 4h18v2H3zm0 7h18v2H3zm0 7h18v2H3z"/></symbol>
+<symbol id="ri-circle-line" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"/></symbol>
+<symbol id="ri-record-circle-line" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16m0-5a3 3 0 1 1 0-6a3 3 0 0 1 0 6"/></symbol>
+<symbol id="ri-notification-3-line" viewBox="0 0 24 24"><path fill="currentColor" d="M20 17h2v2H2v-2h2v-7a8 8 0 1 1 16 0zm-2 0v-7a6 6 0 0 0-12 0v7zm-9 4h6v2H9z"/></symbol>
+<symbol id="ri-sun-line" viewBox="0 0 24 24"><path fill="currentColor" d="M12 18a6 6 0 1 1 0-12a6 6 0 0 1 0 12m0-2a4 4 0 1 0 0-8a4 4 0 0 0 0 8M11 1h2v3h-2zm0 19h2v3h-2zM3.515 4.929l1.414-1.414L7.05 5.636L5.636 7.05zM16.95 18.364l1.414-1.414l2.121 2.121l-1.414 1.414zm2.121-14.85l1.414 1.415l-2.121 2.121l-1.414-1.414zM5.636 16.95l1.414 1.414l-2.121 2.121l-1.414-1.414zM23 11v2h-3v-2zM4 11v2H1v-2z"/></symbol>
+<symbol id="ri-moon-clear-line" viewBox="0 0 24 24"><path fill="currentColor" d="M10 6a8 8 0 0 0 11.955 6.956C21.474 18.03 17.2 22 12 22C6.477 22 2 17.523 2 12c0-5.2 3.97-9.474 9.044-9.955A7.96 7.96 0 0 0 10 6m-6 6a8 8 0 0 0 8 8a8 8 0 0 0 6.957-4.045Q18.482 16 18 16C12.477 16 8 11.523 8 6q0-.481.045-.957A8 8 0 0 0 4 12m14.164-9.709L19 2.5v1l-.836.209a2 2 0 0 0-1.455 1.455L16.5 6h-1l-.209-.836a2 2 0 0 0-1.455-1.455L13 3.5v-1l.836-.209A2 2 0 0 0 15.29.836L15.5 0h1l.209.836a2 2 0 0 0 1.455 1.455m5 5L24 7.5v1l-.836.209a2 2 0 0 0-1.455 1.455L21.5 11h-1l-.209-.836a2 2 0 0 0-1.455-1.455L18 8.5v-1l.836-.209a2 2 0 0 0 1.455-1.455L20.5 5h1l.209.836a2 2 0 0 0 1.455 1.455"/></symbol>
+<symbol id="ri-arrow-down-s-line" viewBox="0 0 24 24"><path fill="currentColor" d="m12 13.171l4.95-4.95l1.414 1.415L12 16L5.636 9.636L7.05 8.222z"/></symbol>
+<symbol id="ri-arrow-right-s-line" viewBox="0 0 24 24"><path fill="currentColor" d="m13.172 12l-4.95-4.95l1.414-1.413L16 12l-6.364 6.364l-1.414-1.415z"/></symbol>
+<symbol id="ri-arrow-up-s-line" viewBox="0 0 24 24"><path fill="currentColor" d="m12 10.828l-4.95 4.95l-1.414-1.414L12 8l6.364 6.364l-1.414 1.414z"/></symbol>
+<symbol id="ri-arrow-left-s-line" viewBox="0 0 24 24"><path fill="currentColor" d="m10.828 12l4.95 4.95l-1.414 1.415L8 12l6.364-6.364l1.414 1.414z"/></symbol>
+<symbol id="ri-close-line" viewBox="0 0 24 24"><path fill="currentColor" d="m12 10.587l4.95-4.95l1.414 1.414l-4.95 4.95l4.95 4.95l-1.415 1.414l-4.95-4.95l-4.949 4.95l-1.414-1.415l4.95-4.95l-4.95-4.95L7.05 5.638z"/></symbol>
+<symbol id="ri-add-line" viewBox="0 0 24 24"><path fill="currentColor" d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z"/></symbol>
+<symbol id="ri-search-line" viewBox="0 0 24 24"><path fill="currentColor" d="m18.031 16.617l4.283 4.282l-1.415 1.415l-4.282-4.283A8.96 8.96 0 0 1 11 20c-4.968 0-9-4.032-9-9s4.032-9 9-9s9 4.032 9 9a8.96 8.96 0 0 1-1.969 5.617m-2.006-.742A6.98 6.98 0 0 0 18 11c0-3.867-3.133-7-7-7s-7 3.133-7 7s3.133 7 7 7a6.98 6.98 0 0 0 4.875-1.975z"/></symbol>
+<symbol id="ri-delete-bin-line" viewBox="0 0 24 24"><path fill="currentColor" d="M17 6h5v2h-2v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8H2V6h5V3a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1zm1 2H6v12h12zm-9 3h2v6H9zm4 0h2v6h-2zM9 4v2h6V4z"/></symbol>
+<symbol id="ri-pencil-line" viewBox="0 0 24 24"><path fill="currentColor" d="m15.728 9.576l-1.414-1.414L5 17.476v1.414h1.414zm1.414-1.414l1.414-1.414l-1.414-1.414l-1.414 1.414zm-9.9 12.728H3v-4.243L16.435 3.212a1 1 0 0 1 1.414 0l2.829 2.829a1 1 0 0 1 0 1.414z"/></symbol>
+<symbol id="ri-file-text-line" viewBox="0 0 24 24"><path fill="currentColor" d="M21 8v12.993A1 1 0 0 1 20.007 22H3.993A.993.993 0 0 1 3 21.008V2.992C3 2.455 3.449 2 4.002 2h10.995zm-2 1h-5V4H5v16h14zM8 7h3v2H8zm0 4h8v2H8zm0 4h8v2H8z"/></symbol>
+<symbol id="ri-history-line" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12h2a8 8 0 1 0 1.385-4.5H8v2H2v-6h2V6a9.99 9.99 0 0 1 8-4m1 5v4.585l3.243 3.243l-1.415 1.415L11 12.413V7z"/></symbol>
+<symbol id="ri-price-tag-3-line" viewBox="0 0 24 24"><path fill="currentColor" d="m10.904 2.1l9.9 1.414l1.414 9.9l-9.192 9.192a1 1 0 0 1-1.415 0l-9.9-9.9a1 1 0 0 1 0-1.413zm.707 2.122L3.833 12l8.485 8.485l7.779-7.778l-1.061-7.425zm2.122 6.363a2 2 0 1 1 2.828-2.828a2 2 0 0 1-2.828 2.829"/></symbol>
+<symbol id="ri-time-line" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16m1-8h4v2h-6V7h2z"/></symbol>
+<symbol id="ri-error-warning-line" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16m-1-5h2v2h-2zm0-8h2v6h-2z"/></symbol>
+<symbol id="ri-information-line" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16M11 7h2v2h-2zm0 4h2v6h-2z"/></symbol>
+<symbol id="ri-checkbox-circle-line" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16m-.997-4L6.76 11.757l1.414-1.414l2.829 2.829l5.657-5.657l1.414 1.414z"/></symbol>
+<symbol id="ri-settings-3-line" viewBox="0 0 24 24"><path fill="currentColor" d="M3.34 17a10 10 0 0 1-.979-2.326a3 3 0 0 0 .003-5.347a10 10 0 0 1 2.5-4.337a3 3 0 0 0 4.632-2.674a10 10 0 0 1 5.007.003a3 3 0 0 0 4.632 2.671a10.06 10.06 0 0 1 2.503 4.336a3 3 0 0 0-.002 5.347a10 10 0 0 1-2.501 4.337a3 3 0 0 0-4.632 2.674a10 10 0 0 1-5.007-.002a3 3 0 0 0-4.631-2.672A10 10 0 0 1 3.339 17m5.66.196a5 5 0 0 1 2.25 2.77q.75.07 1.499.002a5 5 0 0 1 2.25-2.772a5 5 0 0 1 3.526-.564q.435-.614.748-1.298A5 5 0 0 1 18 12c0-1.26.47-2.437 1.273-3.334a8 8 0 0 0-.75-1.298A5 5 0 0 1 15 6.804a5 5 0 0 1-2.25-2.77q-.75-.071-1.5-.001A5 5 0 0 1 9 6.804a5 5 0 0 1-3.526.564q-.436.614-.747 1.298A5 5 0 0 1 6 12c0 1.26-.471 2.437-1.273 3.334a8 8 0 0 0 .75 1.298A5 5 0 0 1 9 17.196M12 15a3 3 0 1 1 0-6a3 3 0 0 1 0 6m0-2a1 1 0 1 0 0-2a1 1 0 0 0 0 2"/></symbol>
+<symbol id="ri-road-map-line" viewBox="0 0 24 24"><path fill="currentColor" d="M4 6.143v12.824l5.065-2.17l6 3L20 17.68V4.857l1.303-.558a.5.5 0 0 1 .697.46V19l-7 3l-6-3l-6.303 2.701a.5.5 0 0 1-.697-.46V7zm12.243 5.1L12 15.485l-4.243-4.242a6 6 0 1 1 8.486 0M12 12.657l2.828-2.829a4 4 0 1 0-5.656 0z"/></symbol>
+<symbol id="ri-map-pin-2-line" viewBox="0 0 24 24"><path fill="currentColor" d="m12 23.728l-6.364-6.364a9 9 0 1 1 12.728 0zm4.95-7.778a7 7 0 1 0-9.9 0L12 20.9zM12 13a2 2 0 1 1 0-4a2 2 0 0 1 0 4"/></symbol>
+<symbol id="ri-more-2-line" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3c-.825 0-1.5.675-1.5 1.5S11.175 6 12 6s1.5-.675 1.5-1.5S12.825 3 12 3m0 15c-.825 0-1.5.675-1.5 1.5S11.175 21 12 21s1.5-.675 1.5-1.5S12.825 18 12 18m0-7.5c-.825 0-1.5.675-1.5 1.5s.675 1.5 1.5 1.5s1.5-.675 1.5-1.5s-.675-1.5-1.5-1.5"/></symbol>
+<symbol id="ri-save-line" viewBox="0 0 24 24"><path fill="currentColor" d="M7 19v-6h10v6h2V7.828L16.172 5H5v14zM4 3h13l4 4v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1m5 12v4h6v-4z"/></symbol>
+<symbol id="ri-flask-line" viewBox="0 0 24 24"><path fill="currentColor" d="M16 2v2h-1v3.243a8 8 0 0 0 .736 3.352l4.281 9.276A1.5 1.5 0 0 1 18.655 22H5.344a1.5 1.5 0 0 1-1.362-2.129l4.281-9.276A8 8 0 0 0 9 7.243V4H8V2zm-2.613 8.001h-2.776q-.156.545-.374 1.071l-.158.362L6.124 20h11.75l-3.954-8.566A10 10 0 0 1 13.387 10M11 7.243q0 .38-.028.758h2.057a10 10 0 0 1-.02-.364L13 7.243V4h-2z"/></symbol>
+<symbol id="ri-git-branch-line" viewBox="0 0 24 24"><path fill="currentColor" d="M7.105 15.21A3.001 3.001 0 1 1 5 15.17V8.83a3.001 3.001 0 1 1 2 0V12c.836-.628 1.874-1 3-1h4a3 3 0 0 0 2.895-2.21a3.001 3.001 0 1 1 2.032.064A5 5 0 0 1 14 13h-4a3 3 0 0 0-2.895 2.21M6 17a1 1 0 1 0 0 2a1 1 0 0 0 0-2M6 5a1 1 0 1 0 0 2a1 1 0 0 0 0-2m12 0a1 1 0 1 0 0 2a1 1 0 0 0 0-2"/></symbol>
+<symbol id="ri-filter-3-line" viewBox="0 0 24 24"><path fill="currentColor" d="M10 18h4v-2h-4zM3 6v2h18V6zm3 7h12v-2H6z"/></symbol>
+<symbol id="ri-check-line" viewBox="0 0 24 24"><path fill="currentColor" d="m10 15.17l9.192-9.191l1.414 1.414L10 17.999l-6.364-6.364l1.414-1.414z"/></symbol>
+<symbol id="ri-alarm-warning-line" viewBox="0 0 24 24"><path fill="currentColor" d="M4 20v-6a8 8 0 1 1 16 0v6h1v2H3v-2zm2 0h12v-6a6 6 0 0 0-12 0zm5-18h2v3h-2zm8.778 2.808l1.414 1.414l-2.12 2.121l-1.415-1.414zM2.808 6.222l1.414-1.414l2.121 2.12L4.93 8.344zM7 14a5 5 0 0 1 5-5v2a3 3 0 0 0-3 3z"/></symbol>
+<symbol id="ri-node-tree" viewBox="0 0 24 24"><path fill="currentColor" d="M10 2a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H8v2h5V9a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1v-1H8v6h5v-1a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1v-1H7a1 1 0 0 1-1-1V8H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm9 16h-4v2h4zm0-8h-4v2h4zM9 4H5v2h4z"/></symbol>
+<symbol id="ri-play-circle-line" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16M10.622 8.415l4.879 3.252a.4.4 0 0 1 0 .666l-4.88 3.252a.4.4 0 0 1-.621-.332V8.747a.4.4 0 0 1 .622-.332"/></symbol>
+</defs></svg>
+
+<!-- ══════════ lišta wireframu ══════════ -->
+<div class="chrome">
+  <div class="chrome-in">
+    <span class="chrome-tag">wireframe</span>
+    <span class="chrome-ttl">Konfigurátor VkŘ v shellu Bytorpu</span>
+    <div class="right">
+      <div class="seg" role="group" aria-label="Sidebar">
+        <button id="miniOff" aria-pressed="true">Rozbalený</button>
+        <button id="miniOn" aria-pressed="false">Sbalený</button>
+      </div>
+      <div class="seg" role="group" aria-label="Motiv">
+        <button id="thLight" aria-pressed="true">Světlý</button>
+        <button id="thDark" aria-pressed="false">Tmavý</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ shell — klonuje se ke každé obrazovce ══════════ -->
+<template id="navTpl">
+  <aside class="vnav">
+    <div class="nav-header">
+      <div class="logo"><svg class="ico sm"><use href="#ri-sparkling-line"/></svg></div>
+      <span class="app-title">Bytorp</span>
+      <button class="nav-pin" title="Připnout / odepnout"><svg class="ico sm"><use href="#ri-record-circle-line"/></svg></button>
+    </div>
+
+    <div class="nav-items">
+      <div class="nav-sec"><span>Dashboards</span></div>
+      <button class="nav-i"><svg class="ico"><use href="#ri-sparkling-line"/></svg><span class="lbl">Shipee AI</span></button>
+      <button class="nav-i"><svg class="ico"><use href="#ri-shopping-bag-3-line"/></svg><span class="lbl">Zásilky</span></button>
+      <button class="nav-i"><svg class="ico"><use href="#ri-file-list-3-line"/></svg><span class="lbl">Fakturační centrum</span></button>
+      <button class="nav-i"><svg class="ico"><use href="#ri-user-line"/></svg><span class="lbl">Operátoři</span></button>
+      <button class="nav-i"><svg class="ico"><use href="#ri-building-line"/></svg><span class="lbl">Objednatelé</span></button>
+      <button class="nav-i"><svg class="ico"><use href="#ri-bill-line"/></svg><span class="lbl">Odesílatelé / příjemci</span></button>
+      <button class="nav-i"><svg class="ico"><use href="#ri-map-pin-line"/></svg><span class="lbl">Adresy</span></button>
+      <button class="nav-i"><svg class="ico"><use href="#ri-calculator-line"/></svg><span class="lbl">Kalkulátor</span></button>
+      <button class="nav-i"><svg class="ico"><use href="#ri-list-check-3"/></svg><span class="lbl">Věci k řešení</span><span class="count num">12</span></button>
+
+      <div class="nav-sec"><span>Nastavení</span></div>
+      <button class="nav-i group open grp" >
+        <svg class="ico"><use href="#ri-settings-3-line"/></svg>
+        <span class="lbl">Konfigurátor VkŘ</span>
+        <svg class="ico sm arrow"><use href="#ri-arrow-down-s-line"/></svg>
+      </button>
+      <div class="nav-sub sub">
+        <button class="nav-i" data-sec="pravidla" data-go="p1"><span class="dot"></span><span class="lbl">Pravidla pro tracking</span></button>
+        <button class="nav-i" data-sec="soulad" data-go="s1"><span class="dot"></span><span class="lbl">Soulad s trasou</span></button>
+        <button class="nav-i" data-sec="situace" data-go="t1"><span class="dot"></span><span class="lbl">Situace a závažnosti</span></button>
+      </div>
+    </div>
+  </aside>
+</template>
+
+<template id="barTpl">
+    <header class="navbar">
+      <button class="nb-back" title="Zpět"><svg class="ico"><use href="#ri-arrow-left-s-line"/></svg></button>
+      <h1 class="h4 nav-title"></h1>
+      <span class="nb-chip">prototyp</span>
+      <div class="nb-right">
+        <button class="iconbtn" title="Motiv"><svg class="ico sm"><use href="#ri-sun-line"/></svg></button>
+        <button class="iconbtn" title="Oznámení"><svg class="ico sm"><use href="#ri-notification-3-line"/></svg><span class="dot"></span></button>
+        <div class="avatar">EK</div>
+      </div>
+    </header>
+</template>
+
+<!-- ══════════ obrazovky pod sebou ══════════ -->
+<div id="sheet"></div>
+
+<div id="src" hidden>
+      <!-- ═══ 1 · Seznam pravidel + detail ═══ -->
+      <section class="screen on" id="s-p1">
+        <div class="split">
+          <div class="card">
+            <div class="card-hd">
+              <div class="t">
+                <h2 class="h5">Všechna pravidla</h2>
+                <p class="cap" style="margin:4px 0 0">Kompletní katalog pravidel napříč oblastmi.</p>
+              </div>
+              <button class="btn flat"><svg class="ico sm"><use href="#ri-add-line"/></svg>Nové pravidlo</button>
+            </div>
+            <div class="card-bd">
+              <div class="field" style="margin-bottom:18px">
+                <svg class="ico sm"><use href="#ri-search-line"/></svg><span>Hledat pravidlo, kód…</span>
+              </div>
+              <div class="chipset">
+                <button aria-pressed="true">Všechny <span class="n">7</span></button>
+                <button aria-pressed="false">Nízká <span class="n">1</span></button>
+                <button aria-pressed="false">Vyšší <span class="n">3</span></button>
+                <button aria-pressed="false">Vysoká <span class="n">3</span></button>
+                <button aria-pressed="false">Urgentní <span class="n">0</span></button>
+              </div>
+            </div>
+            <div class="thead"><span style="width:24px"></span><span style="flex:1">Pravidlo</span><span>Akce</span></div>
+            <div class="rows" id="ruleRows"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-hd">
+              <div class="t"><h2 class="h5">Poškození zásilky</h2></div>
+              <button class="iconbtn" title="Zavřít"><svg class="ico sm"><use href="#ri-close-line"/></svg></button>
+            </div>
+            <div class="tabs" style="margin-top:14px">
+              <button aria-pressed="true"><svg class="ico xs"><use href="#ri-file-text-line"/></svg>Detail pravidla</button>
+              <button aria-pressed="false"><svg class="ico xs"><use href="#ri-history-line"/></svg>Historie</button>
+            </div>
+            <div class="card-bd">
+              <div class="f"><div class="f-l">Oblast</div>
+                <span class="chip info"><svg class="ico xs"><use href="#ri-price-tag-3-line"/></svg>Záznamy z trackingu</span></div>
+              <div class="f"><div class="f-l">Spouštěč</div>
+                <div class="f-box"><div class="v">Reaktivní — při každém novém tracking záznamu</div></div></div>
+              <div class="f"><div class="f-l">Akce</div>
+                <div class="f-box"><div class="v">Vytvořit VkŘ</div><div class="v2">Poškození zásilky</div></div></div>
+              <div class="f"><div class="f-l">Priorita</div><span class="chip error">Vysoká</span></div>
+            </div>
+            <div class="card-bd" style="display:flex;flex-direction:column;gap:10px">
+              <button class="btn flat block"><svg class="ico sm"><use href="#ri-pencil-line"/></svg>Upravit pravidlo</button>
+              <button class="btn outlined err block"><svg class="ico sm"><use href="#ri-delete-bin-line"/></svg>Smazat pravidlo</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ 2 · Nové pravidlo — výchozí stav ═══ -->
+      <section class="screen" id="s-p2">
+        <div class="cols3">
+          <div class="stack">
+            <div class="card"><div class="card-bd">
+              <span class="over">Situace</span>
+              <div class="field sel"><span>— vyber situaci —</span><span class="caret"><svg class="ico sm"><use href="#ri-arrow-down-s-line"/></svg></span></div>
+            </div></div>
+            <div class="side-actions">
+              <button class="btn flat block off">Uložit pravidlo</button>
+              <button class="btn outlined block"><svg class="ico sm"><use href="#ri-arrow-left-s-line"/></svg>Zpět na pravidla</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-bd">
+              <span class="over">Nastavení pravidla</span>
+              <div class="field"><span class="lbl">Název pravidla</span><span>Pojmenuj pravidlo…</span></div>
+              <div class="field ta"><span class="lbl">Popis (volitelný)</span><span>Krátký popis pravidla…</span></div>
+            </div>
+            <div class="card-bd">
+              <div class="empty">Vyber situaci a závažnost v levém sloupci.</div>
+            </div>
+          </div>
+
+          <div class="card"><div class="card-bd">
+            <span class="over">Akce</span>
+            <div class="empty">Vyber situaci a závažnost v levém sloupci.</div>
+          </div></div>
+        </div>
+      </section>
+
+      <!-- ═══ 3 · Editor pravidla — podmínky ═══ -->
+      <section class="screen" id="s-p3">
+        <div class="cols3">
+          <div class="stack">
+            <div class="card"><div class="card-bd">
+              <span class="over">Situace</span>
+              <div class="field sel filled"><span>Nedoručeno</span><span class="caret"><svg class="ico sm"><use href="#ri-arrow-down-s-line"/></svg></span></div>
+            </div></div>
+            <div class="card"><div class="card-bd">
+              <span class="over">Závažnost</span>
+              <div class="chipset" style="flex-direction:column;align-items:stretch">
+                <button aria-pressed="true" style="justify-content:flex-start">běžné</button>
+                <button aria-pressed="false" style="justify-content:flex-start">problémové</button>
+                <button aria-pressed="false" style="justify-content:flex-start">kritické</button>
+              </div>
+            </div></div>
+            <div class="side-actions">
+              <button class="btn flat block">Uložit pravidlo</button>
+              <button class="btn outlined block"><svg class="ico sm"><use href="#ri-arrow-left-s-line"/></svg>Zpět na pravidla</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-bd">
+              <span class="over">Nastavení pravidla</span>
+              <div class="field filled"><span class="lbl">Název pravidla</span><span>Nedoručeno na druhý pokus</span></div>
+              <div class="field ta"><span class="lbl">Popis (volitelný)</span><span>Krátký popis pravidla…</span></div>
+            </div>
+
+            <div class="card-bd">
+              <span class="over">Spouštěč</span>
+              <div class="segf">
+                <button aria-pressed="true"><svg class="ico xs"><use href="#ri-flask-line"/></svg>Automaticky</button>
+                <button aria-pressed="false"><svg class="ico xs"><use href="#ri-time-line"/></svg>Časovač</button>
+              </div>
+              <p class="cap" style="margin:10px 0 0">Vyhodnotí se při každém novém tracking záznamu.</p>
+            </div>
+
+            <div class="card-bd">
+              <span class="over">Podmínky</span>
+              <div class="group">
+                <div class="gl">Podmínky pro příchozí záznam</div>
+                <div class="cond">
+                  <div class="field sel filled f1"><span>Stav</span><span class="caret"><svg class="ico sm"><use href="#ri-arrow-down-s-line"/></svg></span></div>
+                  <div class="field sel filled f2"><span>je</span><span class="caret"><svg class="ico sm"><use href="#ri-arrow-down-s-line"/></svg></span></div>
+                  <button class="x" title="Odebrat podmínku"><svg class="ico sm"><use href="#ri-close-line"/></svg></button>
+                </div>
+                <div class="field" style="margin-bottom:12px"><span>hodnota…</span></div>
+                <button class="btn text sm"><svg class="ico xs"><use href="#ri-add-line"/></svg>přidat podmínku</button>
+              </div>
+              <div class="group">
+                <div class="gl">Podmínky pro historické záznamy</div>
+                <button class="btn text sm"><svg class="ico xs"><use href="#ri-add-line"/></svg>přidat podmínku</button>
+              </div>
+              <div class="group">
+                <div class="gl">Co dále platí</div>
+                <button class="btn text sm"><svg class="ico xs"><use href="#ri-add-line"/></svg>Přidat podmínku</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card"><div class="card-bd">
+            <span class="over">Akce</span>
+            <div class="f-box">
+              <span class="chip primary">Informovat e-mailem</span>
+              <div class="v2" style="margin-top:8px">Informuj zákazníka o neúspěšném pokusu a domluv nový termín.</div>
+            </div>
+            <p class="cap" style="margin:12px 0 0">Akce se dědí ze závažnosti situace — mění se v editoru situace.</p>
+          </div></div>
+        </div>
+      </section>
+
+      <!-- ═══ 5 · Seznam tras ═══ -->
+      <section class="screen" id="s-s1">
+        <div class="card">
+          <div class="card-hd">
+            <div class="t">
+              <h2 class="h5">Trasy</h2>
+              <p class="cap" style="margin:4px 0 0">Předepsané trasy a jejich úseky — proti nim se kontroluje soulad zásilky.</p>
+            </div>
+            <button class="btn flat"><svg class="ico sm"><use href="#ri-add-line"/></svg>Nová trasa</button>
+          </div>
+          <div class="tabs" style="margin-top:14px">
+            <button aria-pressed="true"><svg class="ico xs"><use href="#ri-road-map-line"/></svg>Trasy <span class="chip sec" style="height:20px">1</span></button>
+            <button aria-pressed="false"><svg class="ico xs"><use href="#ri-git-branch-line"/></svg>Úseky <span class="chip sec" style="height:20px">2</span></button>
+          </div>
+          <div class="rows">
+            <div class="row" style="border-top:0">
+              <svg class="ico sm" style="color:var(--on-40)"><use href="#ri-arrow-right-s-line"/></svg>
+              <div class="main-cell">
+                <div class="nm">FedEx Air — USA (přes Paříž)</div>
+                <div class="sub"><span class="cap">R-FX-AIR-US · FedEx · 🇺🇸 US</span></div>
+              </div>
+              <div class="end"><span class="chip success">Aktivní</span><span class="cap num">2 úseky</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ 6 · Editor trasy ═══ -->
+      <section class="screen" id="s-s2">
+        <div class="cols3">
+          <div class="stack">
+            <div class="card"><div class="card-bd">
+              <span class="over">Pokrytí trasy</span>
+              <div class="field filled"><span class="lbl">Název trasy</span><span>FedEx Air — USA (přes Paříž)</span></div>
+              <div class="field filled"><span class="lbl">Kód trasy</span><span>R-FX-AIR-US</span></div>
+              <div class="f" style="margin-top:20px">
+                <div class="f-l">Dopravce</div>
+                <div class="chipset tight">
+                  <button aria-pressed="true">FedEx</button><button>UPS</button><button>DHL</button><button>PPL</button><button>GLS</button>
+                </div>
+              </div>
+              <div class="f">
+                <div class="f-l">Typ služby</div>
+                <div class="chipset tight">
+                  <button>Express</button><button aria-pressed="true">Economy</button><button>Pallet</button><button>Freight</button>
+                </div>
+              </div>
+              <div class="f">
+                <div class="f-l">Cílová země</div>
+                <div class="chipset tight">
+                  <button>🇨🇿 CZ</button><button>🇸🇰 SK</button><button>🇩🇪 DE</button><button>🇦🇹 AT</button><button>🇵🇱 PL</button>
+                  <button>🇫🇷 FR</button><button>🇳🇱 NL</button><button>🇮🇹 IT</button><button>🇬🇧 GB</button>
+                  <button aria-pressed="true">🇺🇸 US</button><button>🇨🇦 CA</button><button>🇨🇳 CN</button><button>🇯🇵 JP</button>
+                  <button class="off" style="border-style:dashed">…dalších 25</button>
+                </div>
+              </div>
+              <div class="note info"><svg class="ico sm"><use href="#ri-information-line"/></svg><div>= 1 kombinací pokryto</div></div>
+              <div class="switch" style="margin-top:16px"><i></i>Aktivní</div>
+            </div></div>
+            <div class="side-actions">
+              <button class="btn flat block">Uložit trasu</button>
+              <button class="btn outlined block"><svg class="ico sm"><use href="#ri-arrow-left-s-line"/></svg>Zpět na trasy</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-bd" style="padding-bottom:0"><span class="over" style="margin-bottom:0">Úseky trasy</span></div>
+            <div class="rows" style="margin-top:12px">
+              <div class="row sel">
+                <div class="point" style="padding:0;border:0"><span class="n">1</span></div>
+                <div class="main-cell"><div class="nm">Praha/Brno → Paříž</div><div class="sub"><span class="cap">2 body</span></div></div>
+                <div class="end"><svg class="ico sm"><use href="#ri-arrow-right-s-line"/></svg></div>
+              </div>
+              <div class="row">
+                <div class="point" style="padding:0;border:0"><span class="n">2</span></div>
+                <div class="main-cell"><div class="nm">Paříž → USA</div><div class="sub"><span class="cap">2 body</span></div></div>
+                <div class="end"><svg class="ico sm"><use href="#ri-arrow-right-s-line"/></svg></div>
+              </div>
+            </div>
+            <div class="card-bd">
+              <span class="over">Přidat úsek</span>
+              <div class="f-row">
+                <button class="btn outlined sm"><svg class="ico xs"><use href="#ri-add-line"/></svg>přidat existující úsek</button>
+                <button class="btn tonal sm"><svg class="ico xs"><use href="#ri-add-line"/></svg>vytvořit nový úsek</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-bd" style="padding-bottom:6px"><span class="over" style="margin-bottom:0">Náhled úseku: Praha/Brno → Paříž</span></div>
+            <div class="card-bd" style="border-top:0;padding-top:6px">
+              <div class="points">
+                <div class="point">
+                  <span class="n">1</span>
+                  <div><div class="tx">TRASA-05 — odlet z odesílacího FedEx terminálu. ID místa je nutné upřesnit dle číselníku dopravce (v zadání jen placeholder „ABCD“).</div>
+                  <div class="mt">2 match podmínek</div></div>
+                </div>
+                <div class="point">
+                  <span class="n">2</span>
+                  <div><div class="tx">TRASA-06 — přílet do přestupního hubu Paříž/CDG (ID místa: CDG_HUB). D+1 = +1 pracovní den od vyzvednutí.</div>
+                  <div class="mt">2 match podmínek</div></div>
+                </div>
+              </div>
+              <button class="btn flat block" style="margin-top:18px"><svg class="ico sm"><use href="#ri-pencil-line"/></svg>Upravit úsek</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ 7 · Detail úseku ═══ -->
+      <section class="screen" id="s-s3">
+        <div class="crumbs">
+          <a href="#">Soulad s trasou</a><span class="sep">/</span>
+          <a href="#">trasa</a><span class="sep">/</span>
+          <span class="now">Praha/Brno → Paříž</span>
+          <span class="end"><button class="btn outlined sm off"><svg class="ico xs"><use href="#ri-delete-bin-line"/></svg>Nelze smazat — používá se v 1 trase</button></span>
+        </div>
+
+        <div class="split" style="grid-template-columns:290px minmax(0,1fr)">
+          <div class="stack">
+            <div class="card"><div class="card-bd">
+              <span class="over">Základní info</span>
+              <div class="field filled"><span class="lbl">Název úseku</span><span>Praha/Brno → Paříž</span></div>
+              <div class="field ta filled"><span class="lbl">Popis (volitelný)</span><span>Vyzvednutí v ČR, let do přestupního hubu Paříž/CDG.</span></div>
+              <div class="f" style="margin-top:20px">
+                <div class="f-l">Dopravci</div>
+                <div class="chipset tight"><button aria-pressed="true">FedEx</button><button>UPS</button><button>DHL</button><button>PPL</button><button>GLS</button></div>
+              </div>
+              <div class="f">
+                <div class="f-l">Typ služby</div>
+                <div class="chipset tight"><button>Express</button><button aria-pressed="true">Economy</button><button>Pallet</button><button>Freight</button></div>
+              </div>
+            </div></div>
+
+            <div class="card">
+              <div class="card-bd" style="padding-bottom:8px"><span class="over" style="margin-bottom:0">Body úseku (2)</span></div>
+              <div class="rows">
+                <div class="row sel" style="padding:10px 24px">
+                  <div class="main-cell"><div class="body2">TRASA-05 — odlet z odesíla…</div></div>
+                </div>
+                <div class="row" style="padding:10px 24px">
+                  <div class="main-cell"><div class="body2">TRASA-06 — přílet do přestu…</div></div>
+                </div>
+              </div>
+              <div class="card-bd"><button class="btn text sm"><svg class="ico xs"><use href="#ri-add-line"/></svg>Přidat bod</button></div>
+            </div>
+          </div>
+
+          <div class="stack">
+            <div class="card">
+              <div class="card-hd"><div class="t"><h2 class="h5">Co musí být na záznamu</h2></div></div>
+              <div class="card-bd">
+                <div class="field filled"><span class="lbl">Status (oddělte čárkou)</span><span>Left FedEx origin facility</span></div>
+                <div class="field filled"><span class="lbl">Typ lokace (oddělte čárkou)</span><span>ORIGIN_FEDEX_FACILITY</span></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-hd"><div class="t"><h2 class="h5">Vlastní čas záznamu musí být nejpozději do</h2></div></div>
+              <div class="card-bd">
+                <div class="radio on"><i></i>v konkrétní den a čas</div>
+                <div class="radio"><i></i>s odstupem od události</div>
+
+                <div class="group" style="margin-top:16px">
+                  <div class="gl">Den</div>
+                  <div class="field sel filled"><span>Vyzvednutí zásilky</span><span class="caret"><svg class="ico sm"><use href="#ri-arrow-down-s-line"/></svg></span></div>
+                  <div class="f-row" style="margin-top:12px">
+                    <span class="cap">Posun:</span>
+                    <div class="field filled" style="width:80px"><span>0</span></div>
+                    <span class="cap">dní</span>
+                    <div class="field sel filled" style="width:150px"><span>kalendářní</span><span class="caret"><svg class="ico sm"><use href="#ri-arrow-down-s-line"/></svg></span></div>
+                  </div>
+                </div>
+
+                <div class="group">
+                  <div class="gl">Čas</div>
+                  <div class="f-row">
+                    <div class="field filled" style="width:120px"><svg class="ico sm"><use href="#ri-time-line"/></svg><span>22:00</span></div>
+                    <span class="cap">pásmo</span>
+                    <div class="field sel filled" style="width:200px"><span>Europe/Prague</span><span class="caret"><svg class="ico sm"><use href="#ri-arrow-down-s-line"/></svg></span></div>
+                  </div>
+                </div>
+
+                <div class="note ok" style="margin-top:16px">
+                  <svg class="ico sm"><use href="#ri-check-line"/></svg>
+                  <div><b>nejpozději v den události „Vyzvednutí zásilky“ v 22:00 Europe/Prague</b>
+                  <div class="sub">Dřívější dny se započítávají automaticky.</div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-hd"><div class="t"><h2 class="h5">Konečný limit</h2></div></div>
+              <div class="card-bd">
+                <div class="f-row">
+                  <span class="cap">Konečný limit</span>
+                  <div class="field sel filled" style="width:190px"><span>posun od Termínu</span><span class="caret"><svg class="ico sm"><use href="#ri-arrow-down-s-line"/></svg></span></div>
+                  <div class="field filled" style="width:80px"><span>0</span></div>
+                  <span class="cap">h po Termínu</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ 8 · Seznam situací ═══ -->
+      <section class="screen" id="s-t1">
+        <div class="card">
+          <div class="card-hd">
+            <div class="t">
+              <h2 class="h5">Situace a závažnosti</h2>
+              <p class="cap" style="margin:4px 0 0">Šablony pro věci k řešení — každá situace má stupně závažnosti s výchozím názvem, popisem, prioritou a akcemi.</p>
+            </div>
+            <button class="btn flat"><svg class="ico sm"><use href="#ri-add-line"/></svg>Nová situace</button>
+          </div>
+          <div class="card-bd">
+            <div class="field"><svg class="ico sm"><use href="#ri-search-line"/></svg><span>Hledat situaci, závažnost…</span></div>
+          </div>
+          <div class="rows" id="sitRows"></div>
+        </div>
+      </section>
+
+      <!-- ═══ 9 · Editor situace ═══ -->
+      <section class="screen" id="s-t2">
+        <div style="max-width:900px">
+          <div class="card">
+            <div class="card-bd">
+              <div class="f-row" style="flex-wrap:nowrap">
+                <div class="field filled" style="flex:1"><span class="lbl">Název situace</span><span>Nedoručeno</span></div>
+                <button class="btn outlined err"><svg class="ico sm"><use href="#ri-delete-bin-line"/></svg>Smazat</button>
+              </div>
+              <div class="field ta filled"><span class="lbl">Popis</span><span>Zásilka byla doručována, ale příjemce nebyl zastižen.</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-bd" style="padding-bottom:0"><span class="over" style="margin-bottom:0">Závažnosti (3)</span></div>
+            <div class="card-bd" style="border-top:0" id="sevWrap"></div>
+            <div class="card-bd">
+              <button class="btn text"><svg class="ico sm"><use href="#ri-add-line"/></svg>Přidat závažnost</button>
+            </div>
+          </div>
+
+          <div class="f-row" style="margin-top:20px">
+            <button class="btn flat">Uložit</button>
+            <button class="btn outlined"><svg class="ico sm"><use href="#ri-arrow-left-s-line"/></svg>Zpět na situace</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ 10 · Prázdný stav ═══ -->
+      <section class="screen" id="s-v1">
+        <div class="card">
+          <div class="card-hd">
+            <div class="t"><h2 class="h5">Trasy</h2>
+            <p class="cap" style="margin:4px 0 0">Předepsané trasy a jejich úseky.</p></div>
+            <button class="btn flat"><svg class="ico sm"><use href="#ri-add-line"/></svg>Nová trasa</button>
+          </div>
+          <div class="card-bd">
+            <div class="empty" style="border:0;padding:56px 24px">
+              <div class="big"><svg class="ico lg"><use href="#ri-road-map-line"/></svg></div>
+              <div class="t">Zatím tu není žádná trasa</div>
+              <div class="s">Trasa popisuje, kudy má zásilka jet a kdy má na kterém místě být. Bez trasy se soulad nekontroluje.</div>
+              <button class="btn flat"><svg class="ico sm"><use href="#ri-add-line"/></svg>Vytvořit první trasu</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-bd">
+            <p class="cap" style="margin:0">Stejný vzor platí pro prázdný seznam pravidel, situací i pro filtr bez výsledku — mění se jen ikona, text a název tlačítka.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ 11 · Potvrzovací dialog ═══ -->
+      <section class="screen" id="s-v2">
+        <div class="card">
+          <div class="card-hd">
+            <div class="t"><h2 class="h5">Všechna pravidla</h2>
+            <p class="cap" style="margin:4px 0 0">Kompletní katalog pravidel napříč oblastmi.</p></div>
+            <button class="btn flat"><svg class="ico sm"><use href="#ri-add-line"/></svg>Nové pravidlo</button>
+          </div>
+          <div class="thead"><span style="width:24px"></span><span style="flex:1">Pravidlo</span><span>Akce</span></div>
+          <div class="rows" id="ruleRows2"></div>
+        </div>
+      </section>
+  <div class="overlay" id="dlg">
+    <div class="dialog">
+      <div class="db">
+        <h2 class="h5" style="margin-bottom:8px">Smazat pravidlo?</h2>
+        <p class="cap" style="margin:0">Pravidlo „Poškození zásilky“ se smaže i s historií vyhodnocení. Tuhle akci nejde vzít zpět.</p>
+      </div>
+      <div class="df">
+        <button class="btn outlined">Zrušit</button>
+        <button class="btn flat" style="background:var(--error);box-shadow:0 2px 4px rgba(255,76,81,.4)">
+          <svg class="ico sm"><use href="#ri-delete-bin-line"/></svg>Smazat</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* data pro opakující se seznamy — ať se markup nemusí psát sedmkrát */
+const RULES = [
+  ["Zásilka na první pokus nedoručena","Podmínka","Nízká","success"],
+  ["Nedoručeno na druhý pokus","Podmínka","Vyšší","warning"],
+  ["Nedoručeno na 3. pokus","Podmínka","Vysoká","error"],
+  ["Poškození zásilky","Podmínka","Vysoká","error"],
+  ["Zásilka se vrací odesílateli","Podmínka","Vyšší","warning"],
+  ["Zásilka zastavena — nebezpečné zboží","Podmínka","Vysoká","error"],
+  ["Zásilka dlouho bez pohybu","Časovač","Vyšší","warning"],
+];
+const SITUACE = [
+  ["Nedoručeno","Zásilka byla doručována, ale příjemce nebyl zastižen.","3 závažnosti","3 pravidla"],
+  ["Poškození zásilky","Tracking hlásí zjištěné poškození zásilky.","1 závažnost","1 pravidlo"],
+  ["Problém v přepravě","Zásilka vykazuje známky problému v přepravě.","3 závažnosti","0 pravidel"],
+  ["Problém na trase","Bod na trase nebyl nalezen do svého Konečného limitu.","1 závažnost","0 pravidel"],
+  ["Problém na trase — záznam se objevil","Bod se objevil až po Konečném limitu, jinak splňuje podmínky.","1 závažnost","0 pravidel"],
+  ["Zpožděná zásilka","Bod „Dnešní doručení“ vyhodnotil, že zásilka dnes nedorazí.","1 závažnost","0 pravidel"],
+  ["Dnešní doručení","Bod „Dnešní doručení“ vyhodnotil, že zásilka dnes dorazí.","1 závažnost","0 pravidel"],
+];
+const SEVERITY = [
+  ["běžné","Nízká",["Informovat e-mailem"],"1 pravidlo"],
+  ["problémové","Vyšší",["Informovat e-mailem","Prověřit u dopravce"],"1 pravidlo"],
+  ["kritické","Vysoká",["Zavolat zákazníkovi","Prověřit u dopravce"],"1 pravidlo"],
+];
+const ic = (n, c) => `<svg class="ico ${c || "sm"}"><use href="#ri-${n}"/></svg>`;
+
+function renderRules(el, selected){
+  el.innerHTML = RULES.map(([nm, typ, pri, kind], i) => `
+    <div class="row${i === selected ? " sel" : ""}">
+      <div class="ord"><button title="Posunout nahoru">${ic("arrow-up-s-line","xs")}</button><button title="Posunout dolů">${ic("arrow-down-s-line","xs")}</button></div>
+      <div class="main-cell">
+        <div class="nm">${nm}</div>
+        <div class="sub">
+          <span class="chip info">${ic("price-tag-3-line","xs")}Záznamy z trackingu</span>
+          <span class="chip ${typ === "Časovač" ? "sec" : "ghost"}">${typ === "Časovač" ? ic("time-line","xs") : ""}${typ}</span>
+          <span class="chip ${kind}">${pri}</span>
+        </div>
+      </div>
+      <div class="end">${ic("delete-bin-line")}</div>
+    </div>`).join("");
+}
+renderRules(document.getElementById("ruleRows"), 3);
+renderRules(document.getElementById("ruleRows2"), 3);
+
+document.getElementById("sitRows").innerHTML = SITUACE.map(([nm, popis, zav, prav]) => `
+  <div class="row">
+    ${ic("arrow-right-s-line")}
+    <div class="main-cell"><div class="nm">${nm}</div><div class="sub"><span class="cap">${popis}</span></div></div>
+    <div class="end">
+      <span class="cap num">${zav}</span>
+      <span class="chip ${prav.startsWith("0") ? "sec" : "primary"} num">${prav}</span>
+      ${ic("delete-bin-line")}
+    </div>
+  </div>`).join("");
+
+document.getElementById("sevWrap").innerHTML = SEVERITY.map(([nm, pri, akce, prav]) => `
+  <div class="group" style="background:var(--surface);border-color:var(--border)">
+    <div class="f-row" style="flex-wrap:nowrap;margin-bottom:16px">
+      <div class="field filled" style="flex:1"><span class="lbl">Název závažnosti</span><span>${nm}</span></div>
+      <button class="x" style="background:none;border:0;color:var(--on-40);cursor:pointer">${ic("delete-bin-line")}</button>
+    </div>
+    <div class="f" style="max-width:220px">
+      <div class="f-l">Priorita</div>
+      <div class="field sel filled"><span>${pri}</span><span class="caret">${ic("arrow-down-s-line")}</span></div>
+    </div>
+    <div class="f-l">Přiřazené akce</div>
+    <div class="f-row" style="margin-bottom:12px">
+      ${akce.map(a => `<span class="chip primary">${a}${ic("close-line","xs")}</span>`).join("")}
+    </div>
+    <button class="btn text sm">${ic("add-line","xs")}Přidat akci</button>
+    <div class="f-row" style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+      <span class="cap">${prav}</span>
+      <button class="btn tonal sm" style="margin-left:auto">${ic("add-line","xs")}Pravidlo pro tuto závažnost</button>
+    </div>
+  </div>`).join("");
+
+/* obrazovky se skládají pod sebe — každá dostane vlastní shell (menu + navbar) */
+const ORDER = [
+  ["p1", "Seznam pravidel + detail",   "Pravidla pro tracking",         "pravidla", false],
+  ["p2", "Nové pravidlo — výchozí stav","Nové pravidlo",                "pravidla", true ],
+  ["p3", "Editor pravidla — podmínky", "Nedoručeno na druhý pokus",     "pravidla", true ],
+  ["s1", "Seznam tras",                "Soulad s trasou",               "soulad",   false],
+  ["s2", "Editor trasy",               "FedEx Air — USA (přes Paříž)",  "soulad",   true ],
+  ["s3", "Detail úseku",               "Praha/Brno → Paříž",            "soulad",   true ],
+  ["t1", "Seznam situací",             "Situace a závažnosti",          "situace",  false],
+  ["t2", "Editor situace",             "Nedoručeno",                    "situace",  true ],
+  ["v1", "Prázdný stav",               "Soulad s trasou",               "soulad",   false],
+  ["v2", "Potvrzovací dialog",         "Pravidla pro tracking",         "pravidla", false],
+];
+const SEKCE = { pravidla: "Pravidla pro tracking", soulad: "Soulad s trasou", situace: "Situace a závažnosti" };
+
+const sheet  = document.getElementById("sheet");
+const navTpl = document.getElementById("navTpl");
+const barTpl = document.getElementById("barTpl");
+
+ORDER.forEach(([id, label, title, section, back], i) => {
+  const item = document.createElement("section");
+  item.className = "sheet-item";
+  item.id = "obr-" + id;
+
+  const head = document.createElement("div");
+  head.className = "sheet-label";
+  head.innerHTML = `<span class="n">${i + 1}</span>${label}<span class="sec">${SEKCE[section]}</span>`;
+  item.appendChild(head);
+
+  const frame = document.createElement("div");
+  frame.className = "frame" + (back ? " back" : "");
+  frame.appendChild(navTpl.content.cloneNode(true));
+
+  const main = document.createElement("div");
+  main.className = "main";
+  main.appendChild(barTpl.content.cloneNode(true));
+
+  const content = document.createElement("div");
+  content.className = "content";
+  const boxed = document.createElement("div");
+  boxed.className = "boxed";
+  boxed.appendChild(document.getElementById("s-" + id));
+  content.appendChild(boxed);
+  main.appendChild(content);
+  frame.appendChild(main);
+
+  if (id === "v2") frame.appendChild(document.getElementById("dlg"));
+
+  frame.querySelector(".nav-title").textContent = title;
+  frame.querySelectorAll(".nav-sub .nav-i").forEach(b => b.classList.toggle("active", b.dataset.sec === section));
+
+  /* skupina v menu jde sbalit — v každém rámu zvlášť */
+  const grp = frame.querySelector(".grp"), sub = frame.querySelector(".sub");
+  grp.addEventListener("click", () => {
+    grp.classList.toggle("open");
+    sub.style.display = grp.classList.contains("open") ? "" : "none";
+  });
+  /* klik v menu skočí na první obrazovku dané sekce */
+  frame.querySelectorAll(".nav-sub [data-go]").forEach(b => b.addEventListener("click", () => {
+    document.getElementById("obr-" + b.dataset.go).scrollIntoView({ behavior: "smooth", block: "start" });
+  }));
+
+  item.appendChild(frame);
+  sheet.appendChild(item);
+});
+
+/* přepínače v liště wireframu */
+const pair = (a, b, fn) => {
+  const A = document.getElementById(a), B = document.getElementById(b);
+  A.addEventListener("click", () => { A.setAttribute("aria-pressed","true"); B.setAttribute("aria-pressed","false"); fn(false); });
+  B.addEventListener("click", () => { B.setAttribute("aria-pressed","true"); A.setAttribute("aria-pressed","false"); fn(true); });
+};
+pair("miniOff", "miniOn", on => document.body.dataset.mini = on ? "1" : "0");
+pair("thLight", "thDark", on => document.documentElement.dataset.theme = on ? "dark" : "light");
+document.documentElement.dataset.theme = "light";
+</script>
