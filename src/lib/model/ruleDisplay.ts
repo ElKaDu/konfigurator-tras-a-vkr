@@ -56,3 +56,52 @@ export function resolveRuleActions(rule: Rule): Action[] {
   }
   return rule.actions;
 }
+
+/* ── Čitelný popis podmínek pro detail pravidla ───────────────────────── */
+
+import { TRACKING_FIELDS, isIncomingConditionRow, isHistoricalConditionRow } from "@/lib/model/trackingFields";
+import { findVkrField, findVkrOperator, type VkrCondition } from "@/lib/vkr/vkrConditionCatalog";
+
+const trackingFieldLabel = (id: string) =>
+  TRACKING_FIELDS.find((f) => f.value === id)?.label ?? id;
+
+export interface ConditionGroup {
+  label: string;
+  items: string[];
+}
+
+/**
+ * Podmínky pravidla ve stejném členění, jaké má editor: příchozí záznam,
+ * historické záznamy, co dále platí. Prázdné skupiny se nevracejí.
+ * „Co dále platí" žije v uiState, ne v rule.conditions — proto ten samostatný zdroj.
+ */
+export function describeRuleConditions(rule: Rule): ConditionGroup[] {
+  const groups: ConditionGroup[] = [];
+
+  const incoming = rule.conditions.filter(isIncomingConditionRow).map((c) => {
+    const value = c.value?.trim();
+    return `${trackingFieldLabel(c.fieldId)} ${c.operator}${value ? ` ${value}` : ""}`;
+  });
+  if (incoming.length) groups.push({ label: "Příchozí záznam", items: incoming });
+
+  const historical = rule.conditions.filter(isHistoricalConditionRow).map((c) => {
+    const negated = c.mode === "not_contains";
+    const scope = c.scope === "anywhere" ? "kdekoliv v historii" : "jen předchozí záznam";
+    const value = c.expectedValue?.trim();
+    return `${trackingFieldLabel(c.trackingFieldId)} ${negated ? "není" : "je"}${value ? ` ${value}` : ""} — ${scope}`;
+  });
+  if (historical.length) groups.push({ label: "Historické záznamy", items: historical });
+
+  const vkr = (rule.uiState?.vkrConditions as VkrCondition[] | undefined) ?? [];
+  const extra = vkr.map((c) => {
+    const field = findVkrField(c.fieldId);
+    const operator = findVkrOperator(c.fieldId, c.operator);
+    const value = c.value?.trim();
+    return [field?.label ?? c.fieldId, operator?.label ?? c.operator, value, operator?.valueSuffix]
+      .filter(Boolean)
+      .join(" ");
+  });
+  if (extra.length) groups.push({ label: "Co dále platí", items: extra });
+
+  return groups;
+}

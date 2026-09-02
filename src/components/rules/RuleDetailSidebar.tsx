@@ -1,15 +1,14 @@
 import { X, Pencil, FileText, History as HistoryIcon, Trash2 } from "@/components/ui/icon";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
-import { AreaBadge } from "@/components/common/AreaBadge";
 import { rulesStore } from "@/lib/model/store";
-import { priorityLabel, isPriorityHigh, resolveRuleActions, resolveRulePriority } from "@/lib/model/ruleDisplay";
+import { priorityLabel, isPriorityHigh, resolveRuleActions, resolveRulePriority, describeRuleConditions } from "@/lib/model/ruleDisplay";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Rule } from "@/lib/model/types";
 
 export function RuleDetailSidebar({ rule, onClose }: { rule: Rule; onClose: () => void }) {
   return (
-    <aside className="fixed right-0 top-16 bottom-0 flex w-[460px] flex-col border-l border-border bg-surface shadow-xl">
+    <aside className="sticky top-0 flex max-h-[calc(100vh-8.5rem)] w-[420px] shrink-0 flex-col rounded-md bg-card elevation-2">
       {/* Header */}
       <div className="flex items-start justify-between gap-3 px-5 pt-5 pb-3">
         <div className="min-w-0">
@@ -87,16 +86,38 @@ function RuleSummaryTab({ rule }: { rule: Rule }) {
     request_field_from_operator: "Vyžádat pole od operátora",
   };
 
+  const conditionGroups = describeRuleConditions(rule);
+
   return (
     <div className="space-y-4">
-      <SummarySection label="Oblast">
-        <AreaBadge area={rule.area} />
-      </SummarySection>
-
       <SummarySection label="Spouštěč">
-        <div className="rounded-lg border border-border bg-background px-3 py-2 text-sm">
+        <div className="rounded-md border border-border bg-muted/50 px-3 py-2 text-sm">
           {rule.trigger.label}
         </div>
+      </SummarySection>
+
+      <SummarySection label="Podmínky">
+        {conditionGroups.length === 0 ? (
+          <div className="rounded-md border border-dashed border-input px-3 py-2.5 text-[13px] text-muted-foreground">
+            Bez podmínek — pravidlo se uplatní na každý záznam.
+          </div>
+        ) : (
+          <div className="space-y-2.5">
+            {conditionGroups.map((group) => (
+              <div key={group.label} className="rounded-md border border-border bg-muted/50 px-3 py-2.5">
+                <div className="text-overline mb-1.5">{group.label}</div>
+                <ul className="space-y-1">
+                  {group.items.map((item, i) => (
+                    <li key={i} className="flex gap-2 text-[13px] leading-[19px]">
+                      <span className="mt-[7px] size-1 shrink-0 rounded-full bg-muted-foreground" />
+                      <span className="min-w-0">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
       </SummarySection>
 
       <SummarySection label="Akce">

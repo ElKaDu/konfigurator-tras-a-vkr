@@ -55,8 +55,9 @@ const MENU: NavEntry[] = [
   { kind: "item", label: "Akce", icon: ListUnordered },
   { kind: "item", label: "Zákazníci", icon: Group },
   { kind: "divider" },
-  // Administrace je rozbalená — konfigurátor sedí tady.
   { kind: "group", label: "Administrace", icon: Lock, children: [{ label: "Kategorie", icon: Folder }] },
+  // Konfigurátor je vlastní kategorie na stejné úrovni jako Administrace.
+  { kind: "group", label: "Konfigurátor VkŘ", icon: Settings },
   { kind: "group", label: "Reporty a statistiky", icon: BarChart },
   { kind: "group", label: "Provoz a správa", icon: PanelLeft },
   { kind: "group", label: "Fakturační centrum", icon: FileList },
@@ -107,20 +108,21 @@ function VerticalNav({ current }: { current: SectionKey }) {
           if (entry.kind === "divider") return <div key={i} className="mx-4 my-2.5 h-px bg-border" />;
           if (entry.kind === "item") return <DecorativeItem key={entry.label} {...entry} />;
 
-          const isAdmin = entry.label === "Administrace";
+          const expanded = entry.label === "Administrace" || entry.label === "Konfigurátor VkŘ";
+          const isKonfigurator = entry.label === "Konfigurátor VkŘ";
           return (
             <div key={entry.label}>
               <div
                 className={cn(
                   navItemBase,
                   "cursor-default",
-                  isAdmin ? "bg-foreground/[0.06] text-foreground" : "text-muted-foreground",
+                  expanded ? "bg-foreground/[0.06] text-foreground" : "text-muted-foreground",
                 )}
                 title="Součást Bytorpu — mimo tento prototyp"
               >
                 <entry.icon size={20} className="shrink-0" />
                 <span className="min-w-0 flex-1 truncate">{entry.label}</span>
-                {isAdmin ? (
+                {expanded ? (
                   <ChevronDown size={18} className="shrink-0" />
                 ) : (
                   <ChevronRight size={18} className="shrink-0" />
@@ -138,8 +140,7 @@ function VerticalNav({ current }: { current: SectionKey }) {
                 </div>
               ))}
 
-              {/* Konfigurátor VkŘ visí pod Administrací. */}
-              {isAdmin &&
+              {isKonfigurator &&
                 KONFIGURATOR_ITEMS.map((item) => {
                   const active = item.section === current;
                   return (
