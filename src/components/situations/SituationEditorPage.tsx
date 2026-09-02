@@ -70,72 +70,67 @@ export function SituationEditorPage({ situationId }: { situationId: string }) {
 
   return (
     <AppShell current="situace" title={situation.name || "Situace"} backTo="/situace">
-      <div>
-        <div className="max-w-3xl space-y-5">
+      <div className="grid items-start gap-5 lg:grid-cols-[340px_minmax(0,1fr)]">
+        {/* LEVÝ SLOUPEC — název, popis, akce */}
+        <div className="flex flex-col gap-5">
           <div className="rounded-md bg-card px-6 py-5 elevation-2">
-            <div className="flex items-center gap-3">
-              <input
-                value={draftName}
-                onChange={(e) => setDraftName(e.target.value)}
-                className="h-[42px] w-full rounded-md border border-input bg-card px-3.5 text-sm outline-none transition-colors focus:border-primary flex-1 text-base font-medium"
-              />
-              <button
-                disabled={totalUsage > 0}
-                onClick={() => {
-                  situationsStore.remove(situation.id);
-                  navigate({ to: "/situace" });
-                }}
-                title={totalUsage > 0 ? "Situace se používá na pravidlech" : "Smazat situaci"}
-                className="flex shrink-0 items-center gap-1.5 rounded-md border border-destructive/50 px-4 py-2 text-[15px] text-destructive transition-colors hover:bg-destructive/[0.06] disabled:cursor-not-allowed disabled:opacity-30"
-              >
-                <Trash2 size={18} /> Smazat
-              </button>
-            </div>
+            <div className="text-overline mb-2">Název situace</div>
+            <input
+              value={draftName}
+              onChange={(e) => setDraftName(e.target.value)}
+              className="h-[42px] w-full rounded-md border border-input bg-card px-3.5 text-base font-medium outline-none transition-colors focus:border-primary"
+            />
 
+            <div className="text-overline mb-2 mt-5">Popis</div>
             <textarea
               value={draftDescription}
               onChange={(e) => setDraftDescription(e.target.value)}
               placeholder="Popis situace…"
-              rows={2}
-              className="mt-4 w-full resize-none rounded-md border border-input bg-card px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-primary"
+              rows={4}
+              className="w-full resize-none rounded-md border border-input bg-card px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-primary"
             />
           </div>
 
-          <div className="rounded-md bg-card px-6 py-5 elevation-2">
-            <div className="text-overline mb-3">Závažnosti ({draftSeverities.length})</div>
-            <div className="space-y-3">
-              {draftSeverities.map((sev) => (
-                <SeverityCard
-                  key={sev.id}
-                  severity={sev}
-                  situationId={situation.id}
-                  usageCount={severityUsageCount(sev.id)}
-                  onChange={updateSeverity}
-                  onRemove={() => removeSeverity(sev.id)}
-                />
-              ))}
-            </div>
-            <button
-              onClick={addSeverity}
-              className="mt-3 w-full rounded-md border border-dashed border-input py-2.5 text-sm text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-            >
-              + Přidat závažnost
-            </button>
-          </div>
-
-          <div className="space-y-2.5">
+          <div className="flex flex-col gap-2.5">
             <button
               onClick={handleSave}
               className="w-full rounded-md bg-primary px-4 py-2.5 text-[15px] font-medium text-primary-foreground elevation-1 transition-colors hover:bg-[#7E4EE6]"
             >
               Uložit
             </button>
-            <Link
-              to="/situace"
-              className="block w-full rounded-md border border-input px-4 py-2 text-center text-[15px] text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+            <button
+              disabled={totalUsage > 0}
+              onClick={() => {
+                situationsStore.remove(situation.id);
+                navigate({ to: "/situace" });
+              }}
+              title={totalUsage > 0 ? "Situace se používá na pravidlech" : "Smazat situaci"}
+              className="flex w-full items-center justify-center gap-1.5 rounded-md border border-destructive/50 px-4 py-2 text-[15px] text-destructive transition-colors hover:bg-destructive/[0.06] disabled:cursor-not-allowed disabled:opacity-30"
             >
-              ← Zpět na situace
-            </Link>
+              <Trash2 size={18} /> Smazat situaci
+            </button>
+          </div>
+        </div>
+
+        {/* PRAVÁ ČÁST — každá závažnost ve vlastním boxu, dvě pod sebou, pak nový sloupec */}
+        <div>
+          <div className="text-overline mb-3">Závažnosti ({draftSeverities.length})</div>
+          <div className="grid grid-flow-col grid-rows-2 gap-5 overflow-x-auto pb-2 auto-cols-[minmax(320px,1fr)]">
+            {draftSeverities.map((sev) => (
+              <SeverityCard
+                key={sev.id}
+                severity={sev}
+                usageCount={severityUsageCount(sev.id)}
+                onChange={updateSeverity}
+                onRemove={() => removeSeverity(sev.id)}
+              />
+            ))}
+            <button
+              onClick={addSeverity}
+              className="flex min-h-[120px] items-center justify-center rounded-md border border-dashed border-input text-sm text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+            >
+              + Přidat závažnost
+            </button>
           </div>
         </div>
       </div>

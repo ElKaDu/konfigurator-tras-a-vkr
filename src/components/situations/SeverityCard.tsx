@@ -1,5 +1,4 @@
 import { Trash2 } from "@/components/ui/icon";
-import { Link } from "@tanstack/react-router";
 import { ActionTagPicker } from "./ActionTagPicker";
 import { useActionTags } from "@/lib/model/store";
 import { cn } from "@/lib/utils";
@@ -7,13 +6,11 @@ import type { Priority, Severity } from "@/lib/model/types";
 
 export function SeverityCard({
   severity,
-  situationId,
   usageCount,
   onChange,
   onRemove,
 }: {
   severity: Severity;
-  situationId: string;
   usageCount: number;
   onChange: (next: Severity) => void;
   onRemove: () => void;
@@ -33,7 +30,7 @@ export function SeverityCard({
   }
 
   return (
-    <div className="space-y-3.5 rounded-md border border-border bg-card p-4">
+    <div className="space-y-3.5 rounded-md bg-card p-5 elevation-2">
       <div className="flex items-center gap-2">
         <input
           value={severity.name}
@@ -103,17 +100,8 @@ export function SeverityCard({
         </div>
       </div>
 
-      <div className="flex items-center justify-between border-t border-border pt-3">
-        <span className="text-[13px] text-muted-foreground">
-          {usageCount} {usageCount === 1 ? "pravidlo" : usageCount < 5 ? "pravidla" : "pravidel"}
-        </span>
-        <Link
-          to="/rules/new"
-          search={{ situationId, severityId: severity.id }}
-          className="rounded-md bg-primary-soft px-3.5 py-1.5 text-[13px] font-medium text-accent-foreground transition-colors hover:bg-[#E4DBF5]"
-        >
-          + Pravidlo pro tuto závažnost
-        </Link>
+      <div className="border-t border-border pt-3 text-[13px] text-muted-foreground">
+        {usageCount} {usageCount === 1 ? "pravidlo" : usageCount < 5 ? "pravidla" : "pravidel"}
       </div>
     </div>
   );

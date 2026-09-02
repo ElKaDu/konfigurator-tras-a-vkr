@@ -310,12 +310,7 @@ export function RuleCreatorPage({
             >
               {isEdit ? "Uložit změny" : "Uložit pravidlo"}
             </button>
-            <Link
-              to="/"
-              className="block w-full rounded-md border border-input px-4 py-2 text-center text-[15px] text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-            >
-              ← Zpět na pravidla
-            </Link>
+            
           </div>
         </div>
 

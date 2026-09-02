@@ -81,7 +81,7 @@ export function RulesList() {
     >
       {/* Šířka seznamu je stálá — panel s detailem se otevírá vedle něj, nezužuje ho. */}
       <div className="flex items-start gap-5">
-        <div className="w-full max-w-[920px] shrink-0 rounded-md bg-card elevation-2">
+        <div className="min-w-0 flex-1 rounded-md bg-card elevation-2">
           {/* Hlavička karty */}
           <div className="px-6 pt-5">
             <h2 className="text-h5">{title}</h2>

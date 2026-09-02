@@ -182,7 +182,7 @@ export function AppShell({
   backTo?: LinkProps["to"];
   /** Akce stránky vpravo v navbaru (např. „Nové pravidlo"). */
   actions?: ReactNode;
-  /** "boxed" = scrollující obsah do 1440 px, zarovnaný k menu. "full" = obsah si výšku i scroll řídí sám. */
+  /** "boxed" = scrollující obsah přes celou šířku vedle menu. "full" = obsah si výšku i scroll řídí sám. */
   contentLayout?: "boxed" | "full";
   children: ReactNode;
 }) {
@@ -223,7 +223,7 @@ export function AppShell({
 
         {contentLayout === "boxed" ? (
           <main className="min-h-0 flex-1 overflow-auto">
-            <div className="max-w-[1440px] px-6 pb-10">{children}</div>
+            <div className="px-6 pb-10">{children}</div>
           </main>
         ) : (
           <main className="flex min-h-0 flex-1 flex-col">{children}</main>

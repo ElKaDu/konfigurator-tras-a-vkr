@@ -79,90 +79,96 @@ export function SouladSTrasouUsekPage({
   const { used, count } = isSegmentUsed(segment.id);
 
   return (
-    <AppShell current="soulad" title={segment.name || "Úsek"} backTo="/soulad-s-trasou" contentLayout="full">
-      <div className="flex items-center justify-between px-6 pb-3 text-sm text-muted-foreground">
+    <AppShell current="soulad" title={segment.name || "Úsek"} backTo="/soulad-s-trasou">
+      <div className="mb-4 flex items-center justify-between gap-4 text-[13px] text-muted-foreground">
         <div>
-          <Link to="/soulad-s-trasou" className="hover:text-foreground">Soulad s trasou</Link>
+          <Link to="/soulad-s-trasou" className="hover:text-primary">Soulad s trasou</Link>
           {fromRouteId && (
             <>
-              <span className="mx-1.5">/</span>
-              <Link to="/soulad-s-trasou/trasa/$id" params={{ id: fromRouteId }} className="hover:text-foreground">
+              <span className="mx-1.5 opacity-50">/</span>
+              <Link to="/soulad-s-trasou/trasa/$id" params={{ id: fromRouteId }} className="hover:text-primary">
                 trasa
               </Link>
             </>
           )}
-          <span className="mx-1.5">/</span>
-          <span className="text-foreground font-medium">{segment.name}</span>
+          <span className="mx-1.5 opacity-50">/</span>
+          <span className="font-medium text-foreground">{segment.name}</span>
         </div>
         <button
           disabled={used}
           onClick={deleteSegment}
           title={used ? `Používá se v ${count} ${count === 1 ? "trase" : "trasách"}` : "Smazat úsek"}
           className={cn(
-            "flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs transition-colors",
+            "flex shrink-0 items-center gap-1.5 rounded-md border px-3 py-1.5 text-[13px] transition-colors",
             used
-              ? "border-border text-muted-foreground/40 cursor-not-allowed"
-              : "border-border text-muted-foreground hover:border-red-300 hover:text-red-500",
+              ? "cursor-not-allowed border-input text-muted-foreground/40"
+              : "border-destructive/50 text-destructive hover:bg-destructive/[0.06]",
           )}
         >
-          <Trash2 className="size-3.5" />
+          <Trash2 size={16} />
           {used ? `Nelze smazat — používá se v ${count} ${count === 1 ? "trase" : "trasách"}` : "Smazat úsek"}
         </button>
       </div>
-      <div className="flex flex-1 min-h-0">
-        <div className="w-[300px] shrink-0 border-r border-border overflow-y-auto p-4">
-          <SegmentMetaEditor segment={segment} onUpdate={updateSegment} />
 
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-            Body úseku ({usekVisibleCheckpoints.length})
+      <div className="grid items-start gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
+        <div className="flex flex-col gap-5">
+          <div className="rounded-md bg-card px-6 py-5 elevation-2">
+            <SegmentMetaEditor segment={segment} onUpdate={updateSegment} />
           </div>
-          <div className="relative flex flex-col gap-0.5 mb-2">
-            <div className="absolute left-[15px] top-3.5 bottom-3.5 w-px bg-border" />
-            {usekVisibleCheckpoints.map((cp) => {
-              const isSelected = cp.id === selectedBodId;
-              return (
-                <div
-                  key={cp.id}
-                  className={cn(
-                    "group relative flex items-center gap-2.5 rounded-md pl-2.5 pr-1.5 py-2 text-sm",
-                    isSelected ? "bg-primary-soft text-primary font-medium" : "hover:bg-muted",
-                  )}
-                >
-                  <button
-                    onClick={() => setSelectedBodId(cp.id)}
-                    className="flex flex-1 min-w-0 items-center gap-2.5 text-left"
+
+          <div className="rounded-md bg-card px-6 py-5 elevation-2">
+            <div className="text-overline mb-3">Body úseku ({usekVisibleCheckpoints.length})</div>
+            <div className="relative mb-3 flex flex-col gap-0.5">
+              <div className="absolute bottom-3.5 left-[15px] top-3.5 w-px bg-border" />
+              {usekVisibleCheckpoints.map((cp) => {
+                const isSelected = cp.id === selectedBodId;
+                return (
+                  <div
+                    key={cp.id}
+                    className={cn(
+                      "group relative flex items-center gap-2.5 rounded-md py-2 pl-2.5 pr-1.5 text-sm",
+                      isSelected ? "bg-primary-soft font-medium text-primary" : "hover:bg-muted/60",
+                    )}
                   >
-                    <span
-                      className={cn(
-                        "z-10 size-2.5 shrink-0 rounded-full",
-                        isSelected ? "bg-primary ring-4 ring-primary-soft" : "bg-muted-foreground/40",
-                      )}
-                    />
-                    <span className="flex-1 min-w-0 truncate">{cp.note ?? cp.checkpointTypeId}</span>
-                  </button>
-                  <button
-                    onClick={() => removeCheckpoint(cp.id)}
-                    title="Smazat bod"
-                    className="shrink-0 rounded p-1 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all"
-                  >
-                    <Trash2 className="size-3.5" />
-                  </button>
-                </div>
-              );
-            })}
+                    <button
+                      onClick={() => setSelectedBodId(cp.id)}
+                      className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
+                    >
+                      <span
+                        className={cn(
+                          "z-10 size-2.5 shrink-0 rounded-full",
+                          isSelected ? "bg-primary ring-4 ring-primary-soft" : "bg-muted-foreground/40",
+                        )}
+                      />
+                      <span className="min-w-0 flex-1 truncate">{cp.note ?? cp.checkpointTypeId}</span>
+                    </button>
+                    <button
+                      onClick={() => removeCheckpoint(cp.id)}
+                      title="Smazat bod"
+                      className="shrink-0 rounded p-1 text-muted-foreground opacity-0 transition-all hover:text-destructive group-hover:opacity-100"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+            <button
+              onClick={addCheckpoint}
+              className="w-full rounded-md border border-dashed border-input px-2.5 py-2.5 text-sm text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+            >
+              + Přidat bod
+            </button>
           </div>
-          <button
-            onClick={addCheckpoint}
-            className="w-full rounded-md border border-dashed border-border px-2.5 py-2 text-xs text-primary hover:bg-muted"
-          >
-            + Přidat bod
-          </button>
         </div>
-        <div className="flex-1 min-w-0 overflow-y-auto">
+
+        <div className="min-w-0">
           {selectedBod ? (
             <BodDetailPanel segment={segment} checkpoint={selectedBod} onUpdate={updateCheckpoint} />
           ) : (
-            <div className="p-8 text-sm text-muted-foreground">Vyberte bod vlevo, nebo přidejte nový.</div>
+            <div className="rounded-md bg-card px-6 py-10 text-center text-sm text-muted-foreground elevation-2">
+              Vyberte bod vlevo, nebo přidejte nový.
+            </div>
           )}
         </div>
       </div>

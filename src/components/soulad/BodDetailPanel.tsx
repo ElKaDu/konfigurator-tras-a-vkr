@@ -14,13 +14,13 @@ export function BodDetailPanel({
   onUpdate: (next: Checkpoint) => void;
 }) {
   return (
-    <div className="p-6 flex flex-col gap-6">
-      <div className="rounded-lg border border-border bg-card p-4">
-        <div className="text-sm font-semibold mb-3">Co musí být na záznamu</div>
+    <div className="flex flex-col gap-5">
+      <div className="rounded-md bg-card px-6 py-5 elevation-2">
+        <div className="mb-4 text-h5">Co musí být na záznamu</div>
         <MatchEditor value={checkpoint.match} onChange={(match) => onUpdate({ ...checkpoint, match })} />
       </div>
 
-      <div className="rounded-lg border border-border bg-card p-4">
+      <div className="rounded-md bg-card px-6 py-5 elevation-2">
         <TerminEditor
           segment={segment}
           currentCheckpointId={checkpoint.id}
@@ -29,8 +29,8 @@ export function BodDetailPanel({
         />
       </div>
 
-      <div className="rounded-lg border border-border bg-card p-4">
-        <div className="text-sm font-semibold mb-3">Konečný limit</div>
+      <div className="rounded-md bg-card px-6 py-5 elevation-2">
+        <div className="mb-4 text-h5">Konečný limit</div>
         <TimeLimitEditor
           label="Konečný limit"
           value={checkpoint.konecnyLimit ?? { mode: "offset", offsetHours: 0 }}
