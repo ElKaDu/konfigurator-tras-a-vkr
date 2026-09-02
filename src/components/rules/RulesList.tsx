@@ -57,45 +57,34 @@ export function RulesList() {
     ? rules
     : rules.filter((r) => resolveRulePriority(r) === selection.priority);
 
-  const { title, subtitle } = selection.kind === "priority"
-    ? { title: `Priorita: ${priorityLabel(selection.priority)}`, subtitle: `Pravidla s touto prioritou (odvozenou ze Závažnosti).` }
-    : { title: "Všechna pravidla", subtitle: "Pořadí určuje, v jakém se pravidla vyhodnocují." };
-
   return (
     <AppShell
       current="rules"
       title="Pravidla podle trackingu"
-      actions={
-        <div className="flex items-center gap-2">
-          <Link
-            to="/rules/new"
-            search={{ situationId: undefined, severityId: undefined }}
-            className="flex items-center gap-1.5 rounded-md border border-primary px-4 py-2 text-[15px] font-medium text-primary transition-colors hover:bg-primary/[0.06]"
-          >
-            <Plus size={18} />
-            Nové pravidlo
-          </Link>
-          <DataMenu />
-        </div>
-      }
+      actions={<DataMenu />}
     >
       {/* Šířka seznamu je stálá — panel s detailem se otevírá vedle něj, nezužuje ho. */}
       <div className="flex items-start gap-5">
         <div className="min-w-0 flex-1 rounded-md bg-card elevation-2">
-          {/* Hlavička karty */}
-          <div className="px-6 pt-5">
-            <h2 className="text-h5">{title}</h2>
-            {subtitle && <p className="mt-1 text-[13px] leading-[18px] text-muted-foreground">{subtitle}</p>}
-          </div>
-
-          <div className="px-6 py-5">
-            {/* Hledání — zatím jen vizuál */}
-            <div className="mb-4 flex h-[42px] items-center gap-2.5 rounded-md border border-input px-3.5 text-sm text-muted-foreground">
-              <Search size={18} className="shrink-0" />
-              <span>Hledat pravidlo, kód…</span>
+          {/* Záhlaví jako u přehledů v aplikaci — název s počtem, hledání a akce v jednom řádku. */}
+          <div className="px-6 py-4">
+            <div className="flex flex-wrap items-center gap-4">
+              <h2 className="text-[15px] font-medium leading-[22px]">Přehled pravidel ({allCount})</h2>
+              <div className="flex h-[38px] w-[260px] items-center gap-2.5 rounded-md border border-input px-3 text-sm text-muted-foreground">
+                <Search size={18} className="shrink-0" />
+                <span>Hledat pravidlo, kód…</span>
+              </div>
+              <Link
+                to="/rules/new"
+                search={{ situationId: undefined, severityId: undefined }}
+                className="ml-auto flex items-center gap-1.5 rounded-md border border-primary px-4 py-2 text-[15px] font-medium text-primary transition-colors hover:bg-primary/[0.06]"
+              >
+                <Plus size={18} />
+                Nové pravidlo
+              </Link>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="mt-3.5 flex flex-wrap items-center gap-2">
               <PriorityChip
                 label="Všechny"
                 count={allCount}

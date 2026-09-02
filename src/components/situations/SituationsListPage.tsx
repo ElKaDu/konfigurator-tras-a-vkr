@@ -64,35 +64,28 @@ export function SituationsListPage({ openSituationId }: { openSituationId?: stri
     <AppShell
       current="situace"
       title="Situace a závažnosti"
-      actions={
-        <button
-          onClick={createSituation}
-          className="flex items-center gap-1.5 rounded-md border border-primary px-4 py-2 text-[15px] font-medium text-primary transition-colors hover:bg-primary/[0.06]"
-        >
-          <Plus size={18} /> Nová situace
-        </button>
-      }
     >
       {/* Šířka seznamu je stálá — panel s detailem se otevírá vedle něj. */}
       <div className="flex items-start gap-5">
         <div className="min-w-0 flex-1 rounded-md bg-card elevation-2">
-          <div className="px-6 pt-5">
-            <h2 className="text-h5">Přehled situací</h2>
-            <p className="mt-1 text-[13px] leading-[18px] text-muted-foreground">
-              Šablony pro věci k řešení — každá situace má stupně závažnosti s výchozím názvem, popisem, prioritou a akcemi.
-            </p>
-          </div>
-
-          <div className="px-6 py-5">
-          <div className="flex h-[42px] items-center gap-2.5 rounded-md border border-input px-3.5 text-sm text-muted-foreground">
-            <Search size={18} className="shrink-0" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Hledat situaci, závažnost…"
-              className="flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground"
-            />
-          </div>
+          {/* Záhlaví jako u přehledů v aplikaci — název s počtem, hledání a akce v jednom řádku. */}
+          <div className="flex flex-wrap items-center gap-4 px-6 py-4">
+            <h2 className="text-[15px] font-medium leading-[22px]">Přehled situací ({situations.length})</h2>
+            <div className="flex h-[38px] w-[260px] items-center gap-2.5 rounded-md border border-input px-3 text-sm text-muted-foreground">
+              <Search size={18} className="shrink-0" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Hledat situaci, závažnost…"
+                className="min-w-0 flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground"
+              />
+            </div>
+            <button
+              onClick={createSituation}
+              className="ml-auto flex items-center gap-1.5 rounded-md border border-primary px-4 py-2 text-[15px] font-medium text-primary transition-colors hover:bg-primary/[0.06]"
+            >
+              <Plus size={18} /> Nová situace
+            </button>
           </div>
 
           {/* Hlavička tabulky — stejná jako v Pravidlech podle trackingu */}
