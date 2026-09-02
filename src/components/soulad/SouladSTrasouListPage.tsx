@@ -56,7 +56,7 @@ export function SouladSTrasouListPage() {
             </div>
             <button
               onClick={addRoute}
-              className="flex shrink-0 items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-[15px] font-medium text-primary-foreground elevation-1 transition-colors hover:bg-[#7E4EE6]"
+              className="flex shrink-0 items-center gap-1.5 rounded-md border border-primary px-4 py-2 text-[15px] font-medium text-primary transition-colors hover:bg-primary/[0.06]"
             >
               <Plus size={18} /> Nová trasa
             </button>
@@ -88,7 +88,7 @@ export function SouladSTrasouListPage() {
             </div>
             <button
               onClick={addSegment}
-              className="flex shrink-0 items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-[15px] font-medium text-primary-foreground elevation-1 transition-colors hover:bg-[#7E4EE6]"
+              className="flex shrink-0 items-center gap-1.5 rounded-md border border-primary px-4 py-2 text-[15px] font-medium text-primary transition-colors hover:bg-primary/[0.06]"
             >
               <Plus size={18} /> Nový úsek
             </button>

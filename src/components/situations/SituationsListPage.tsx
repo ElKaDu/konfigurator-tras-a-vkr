@@ -62,7 +62,7 @@ export function SituationsListPage() {
       actions={
         <button
           onClick={createSituation}
-          className="flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-[15px] font-medium text-primary-foreground elevation-1 transition-colors hover:bg-[#7E4EE6]"
+          className="flex items-center gap-1.5 rounded-md border border-primary px-4 py-2 text-[15px] font-medium text-primary transition-colors hover:bg-primary/[0.06]"
         >
           <Plus size={18} /> Nová situace
         </button>

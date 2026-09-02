@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Lock } from "@/components/ui/icon";
+import { Lock, Zap, Clock } from "@/components/ui/icon";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
@@ -136,20 +136,19 @@ export function RuleCreatorPage({
       current="rules"
       title={ruleName || (ruleId ? "Úprava pravidla" : "Nové pravidlo")}
       backTo="/"
-      contentLayout="full"
     >
-      <div className="flex min-h-0 flex-1">
-        {/* LEFT COLUMN — Situace + Závažnost */}
-        <div className="flex w-[260px] shrink-0 flex-col border-r border-border">
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="grid items-start gap-5 py-1 lg:grid-cols-[290px_minmax(0,1fr)_320px]">
+        {/* LEVÝ SLOUPEC — Situace + Závažnost */}
+        <div className="flex flex-col gap-5">
+          <div className="rounded-md bg-card px-6 py-5 elevation-2">
             {/* Situace + Závažnost (tracking_records) */}
             {isTrackingRecords && (
               <div>
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Situace</div>
+                <div className="text-overline mb-2">Situace</div>
                 <select
                   value={selectedSituationId ?? ""}
                   onChange={(e) => handleSelectSituation(e.target.value)}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm mb-3"
+                  className="mb-4 h-[42px] w-full rounded-md border border-input bg-card px-3 text-sm outline-none transition-colors focus:border-primary"
                 >
                   <option value="" disabled>— vyber situaci —</option>
                   {situations.filter((s) => s.area === "tracking_records").map((s) => (
@@ -159,7 +158,7 @@ export function RuleCreatorPage({
 
                 {selectedSituationObj && (
                   <>
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Závažnost</div>
+                    <div className="text-overline mb-2">Závažnost</div>
                     <div className="flex flex-col gap-1.5">
                       {selectedSituationObj.severities.map((sev) => {
                         const isSelected = selectedSeverityId === sev.id;
@@ -186,8 +185,8 @@ export function RuleCreatorPage({
 
           </div>
 
-          {/* Save button */}
-          <div className="border-t border-border p-4 space-y-2">
+          {/* Akce sloupce */}
+          <div className="flex flex-col gap-2.5">
             <button
               disabled={!ruleName}
               onClick={() => {
@@ -247,34 +246,36 @@ export function RuleCreatorPage({
                 }
               }}
               className={cn(
-                "w-full rounded-lg px-4 py-2.5 text-sm font-medium transition-colors",
-                ruleName ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground cursor-not-allowed"
+                "w-full rounded-md px-4 py-2.5 text-[15px] font-medium transition-colors",
+                ruleName
+                  ? "bg-primary text-primary-foreground elevation-1 hover:bg-[#7E4EE6]"
+                  : "cursor-not-allowed bg-muted text-muted-foreground"
               )}
             >
               {isEdit ? "Uložit změny" : "Uložit pravidlo"}
             </button>
             <Link
               to="/"
-              className="block w-full rounded-lg border border-border px-4 py-2 text-center text-sm text-muted-foreground hover:bg-muted transition-colors"
+              className="block w-full rounded-md border border-input px-4 py-2 text-center text-[15px] text-muted-foreground transition-colors hover:border-primary hover:text-primary"
             >
               ← Zpět na pravidla
             </Link>
           </div>
         </div>
 
-        {/* MIDDLE COLUMN — Spouštěč + Podmínky */}
-        <div className="flex flex-1 min-w-0 flex-col border-r border-border">
-          <div className="flex-1 overflow-y-auto p-5 space-y-4">
-            {/* Meta — název, popis — nahoře */}
-            <div className="space-y-3">
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Nastavení pravidla</div>
+        {/* PROSTŘEDNÍ SLOUPEC — Nastavení, Spouštěč, Podmínky */}
+        <div className="min-w-0 rounded-md bg-card elevation-2">
+          <div className="divide-y divide-border">
+            {/* Meta — název, popis */}
+            <div className="space-y-4 px-6 py-5">
+              <div className="text-overline">Nastavení pravidla</div>
               <div>
                 <label className="text-xs text-muted-foreground mb-1 block">Název pravidla</label>
                 <input
                   value={ruleName}
                   onChange={(e) => setRuleName(e.target.value)}
                   placeholder="Pojmenuj pravidlo…"
-                  className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="h-[42px] w-full rounded-md border border-input bg-card px-3.5 text-sm outline-none transition-colors focus:border-primary"
                 />
               </div>
               <div>
@@ -289,10 +290,8 @@ export function RuleCreatorPage({
               </div>
             </div>
 
-            <div className="border-t border-border" />
-
             {!isTrackingRecords && (
-              <div className="rounded-xl border border-dashed border-border p-8 text-center">
+              <div className="m-6 rounded-md border border-dashed border-input p-8 text-center">
                 <div className="text-sm text-muted-foreground">
                   Konfigurace podmínek pro tuto oblast bude přidána později.
                 </div>
@@ -300,36 +299,40 @@ export function RuleCreatorPage({
             )}
 
             {isTrackingRecords && !selectedSeverityId && (
-              <div className="rounded-xl border border-dashed border-border p-8 text-center">
+              <div className="m-6 rounded-md border border-dashed border-input p-8 text-center">
                 <div className="text-sm text-muted-foreground">Vyber situaci a závažnost v levém sloupci.</div>
               </div>
             )}
 
             {isTrackingRecords && selectedSeverityId && (
               <>
-                <div>
-                  <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Spouštěč</div>
-                  <div className="flex gap-1.5 rounded-lg bg-muted/40 p-1 max-w-xs">
+                <div className="px-6 py-5">
+                  <div className="text-overline mb-2">Spouštěč</div>
+                  <div className="inline-flex gap-2">
                     <button
                       onClick={() => setTriggerType("automatic")}
                       className={cn(
-                        "flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
-                        triggerType === "automatic" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                        "flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors",
+                        triggerType === "automatic"
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-input text-muted-foreground hover:border-primary hover:text-primary",
                       )}
                     >
-                      ⚡ Automaticky
+                      <Zap size={16} /> Automaticky
                     </button>
                     <button
                       onClick={() => setTriggerType("timer")}
                       className={cn(
-                        "flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
-                        triggerType === "timer" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                        "flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium transition-colors",
+                        triggerType === "timer"
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-input text-muted-foreground hover:border-primary hover:text-primary",
                       )}
                     >
-                      🕐 Časovač
+                      <Clock size={16} /> Časovač
                     </button>
                   </div>
-                  <p className="mt-1.5 text-[11px] text-muted-foreground">
+                  <p className="mt-2.5 text-[13px] leading-[18px] text-muted-foreground">
                     {triggerType === "automatic"
                       ? "Vyhodnotí se při každém novém tracking záznamu."
                       : "Kontroluje periodicky, jestli od posledního záznamu neuplynula nastavená doba."}
@@ -337,10 +340,8 @@ export function RuleCreatorPage({
                 </div>
 
                 {triggerType === "timer" && (
-                  <div>
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                      Zásilka nemá nový záznam déle než
-                    </div>
+                  <div className="px-6 py-5">
+                    <div className="text-overline mb-2">Zásilka nemá nový záznam déle než</div>
                     <div className="flex items-center gap-2">
                       <input
                         type="number"
@@ -370,14 +371,12 @@ export function RuleCreatorPage({
                   </div>
                 )}
 
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-wider text-foreground mb-3 pb-2 border-b border-border">
-                    Podmínky
-                  </div>
+                <div className="px-6 py-5">
+                  <div className="text-overline mb-3">Podmínky</div>
 
                   {triggerType === "automatic" && (
-                    <div className="mb-4 rounded-xl border border-border bg-muted/10 p-3 space-y-2.5">
-                      <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    <div className="mb-3.5 rounded-md border border-border bg-muted/50 p-4 space-y-2.5">
+                      <div className="text-overline">
                         Podmínky pro příchozí záznam
                       </div>
                       <TrackingIncomingConditionsBuilder
@@ -387,8 +386,8 @@ export function RuleCreatorPage({
                     </div>
                   )}
 
-                  <div className="mb-4 rounded-xl border border-border bg-muted/10 p-3 space-y-2.5">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <div className="mb-3.5 rounded-md border border-border bg-muted/50 p-4 space-y-2.5">
+                    <div className="text-overline">
                       Podmínky pro historické záznamy
                     </div>
                     <TrackingHistoricalConditionsBuilder
@@ -398,8 +397,8 @@ export function RuleCreatorPage({
                     />
                   </div>
 
-                  <div className="rounded-xl border border-border bg-muted/10 p-3 space-y-2.5">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <div className="rounded-md border border-border bg-muted/50 p-4 space-y-2.5">
+                    <div className="text-overline">
                       Co dále platí
                     </div>
                     <VkrConditionsBuilder
@@ -414,19 +413,19 @@ export function RuleCreatorPage({
           </div>
         </div>
 
-        {/* RIGHT COLUMN — Akce (needitovatelné, jen zobrazení ze Závažnosti) */}
-        <div className="flex w-[340px] shrink-0 flex-col">
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Akce</div>
+        {/* PRAVÝ SLOUPEC — Akce (needitovatelné, dědí se ze Závažnosti) */}
+        <div className="rounded-md bg-card px-6 py-5 elevation-2">
+          <div className="space-y-4">
+            <div className="text-overline">Akce</div>
 
             {isTrackingRecords && !selectedSeverityObj && (
-              <div className="rounded-xl border border-dashed border-border p-8 text-center">
+              <div className="rounded-md border border-dashed border-input p-8 text-center">
                 <div className="text-sm text-muted-foreground">Vyber situaci a závažnost v levém sloupci.</div>
               </div>
             )}
 
             {isTrackingRecords && selectedSeverityObj && selectedSeverityObj.actions.length === 0 && (
-              <div className="rounded-xl border border-dashed border-border p-8 text-center">
+              <div className="rounded-md border border-dashed border-input p-8 text-center">
                 <div className="text-sm text-muted-foreground">Tato závažnost nemá žádné výchozí akce.</div>
               </div>
             )}
@@ -452,7 +451,7 @@ export function RuleCreatorPage({
             )}
 
             {!isTrackingRecords && (
-              <div className="rounded-xl border border-dashed border-border p-8 text-center">
+              <div className="rounded-md border border-dashed border-input p-8 text-center">
                 <div className="text-sm text-muted-foreground">Pro tuto oblast se akce nekonfigurují přes wizard.</div>
               </div>
             )}

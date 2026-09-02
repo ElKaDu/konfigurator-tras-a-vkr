@@ -33,32 +33,32 @@ export function SeverityCard({
   }
 
   return (
-    <div className="rounded-xl border border-border bg-background p-4 space-y-3">
+    <div className="space-y-3.5 rounded-md border border-border bg-card p-4">
       <div className="flex items-center gap-2">
         <input
           value={severity.name}
           onChange={(e) => onChange({ ...severity, name: e.target.value })}
-          className="flex-1 rounded-md border border-border bg-background px-2.5 py-1.5 text-sm font-medium"
+          className="h-[42px] w-full rounded-md border border-input bg-card px-3.5 text-sm outline-none transition-colors focus:border-primary flex-1 font-medium"
         />
         <button
           disabled={usageCount > 0}
           onClick={onRemove}
           title={usageCount > 0 ? `Používá se v ${usageCount} pravidlech` : "Smazat závažnost"}
           className={cn(
-            "rounded-md p-1.5 text-muted-foreground transition-colors",
-            usageCount > 0 ? "opacity-30 cursor-not-allowed" : "hover:text-red-500"
+            "grid size-[34px] shrink-0 place-items-center rounded-md text-muted-foreground transition-colors",
+            usageCount > 0 ? "cursor-not-allowed opacity-30" : "hover:bg-destructive/10 hover:text-destructive"
           )}
         >
-          <Trash2 className="size-4" />
+          <Trash2 size={18} />
         </button>
       </div>
 
       <div>
-        <label className="text-xs text-muted-foreground mb-1 block">Priorita</label>
+        <label className="text-overline mb-1.5 block">Priorita</label>
         <select
           value={severity.priority}
           onChange={(e) => onChange({ ...severity, priority: e.target.value as Priority })}
-          className="rounded-md border border-border bg-background px-2.5 py-1.5 text-sm"
+          className="h-[42px] rounded-md border border-input bg-card px-3 text-sm outline-none transition-colors focus:border-primary"
         >
           <option value="low">Nízká</option>
           <option value="medium">Vyšší</option>
@@ -68,17 +68,15 @@ export function SeverityCard({
       </div>
 
       <div>
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-          Přiřazené akce
-        </div>
+        <div className="text-overline mb-2">Přiřazené akce</div>
         <div className="space-y-2">
           {severity.actions.map((a) => (
-            <div key={a.id} className="rounded-lg border border-border bg-muted/20 p-2.5">
+            <div key={a.id} className="rounded-md border border-border bg-muted/50 p-3">
               <div className="flex items-center justify-between mb-1.5">
-                <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary">
+                <span className="inline-flex h-6 items-center rounded-full bg-primary-soft px-2.5 text-[13px] font-medium leading-5 text-accent-foreground">
                   {tagLabel(a.actionTagId)}
                 </span>
-                <button onClick={() => removeAction(a.id)} className="text-muted-foreground hover:text-red-500 text-xs">
+                <button onClick={() => removeAction(a.id)} className="text-[13px] text-muted-foreground transition-colors hover:text-destructive">
                   Odebrat
                 </button>
               </div>
@@ -87,7 +85,7 @@ export function SeverityCard({
                 onChange={(e) => updateAction(a.id, { description: e.target.value })}
                 placeholder="Výchozí text pro operátora…"
                 rows={2}
-                className="w-full rounded border border-border bg-background px-2 py-1.5 text-xs resize-none"
+                className="w-full resize-none rounded-md border border-input bg-card px-3 py-2 text-[13px] outline-none transition-colors focus:border-primary"
               />
             </div>
           ))}
@@ -105,14 +103,14 @@ export function SeverityCard({
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-2 border-t border-border">
-        <span className="text-xs text-muted-foreground">
+      <div className="flex items-center justify-between border-t border-border pt-3">
+        <span className="text-[13px] text-muted-foreground">
           {usageCount} {usageCount === 1 ? "pravidlo" : usageCount < 5 ? "pravidla" : "pravidel"}
         </span>
         <Link
           to="/rules/new"
           search={{ situationId, severityId: severity.id }}
-          className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+          className="rounded-md bg-primary-soft px-3.5 py-1.5 text-[13px] font-medium text-accent-foreground transition-colors hover:bg-[#E4DBF5]"
         >
           + Pravidlo pro tuto závažnost
         </Link>

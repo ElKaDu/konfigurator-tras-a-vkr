@@ -1,8 +1,9 @@
 import { findSeverityById } from "./store";
 import type { Action, Priority, Rule } from "./types";
 
+/** Názvy spouštěčů — stejné, jaké si uživatel vybírá v editoru pravidla. */
 export function triggerLabel(kind: string): string {
-  if (kind === "condition_met") return "Podmínka";
+  if (kind === "condition_met") return "Automaticky";
   if (kind === "schedule") return "Časovač";
   return "Manuálně";
 }

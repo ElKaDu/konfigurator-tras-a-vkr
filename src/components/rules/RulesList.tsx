@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Search, Trash2, ChevronUp, ChevronDown, Plus } from "@/components/ui/icon";
+import { Search, Trash2, ChevronUp, ChevronDown, Plus, Pencil } from "@/components/ui/icon";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { AppShell } from "@/components/AppShell";
 import { DataMenu } from "@/components/common/DataMenu";
-import { AreaBadge } from "@/components/common/AreaBadge";
 import { useRules, rulesStore } from "@/lib/model/store";
 import { triggerLabel, priorityLabel, isPriorityHigh, resolveRulePriority } from "@/lib/model/ruleDisplay";
 import { RuleDetailSidebar } from "./RuleDetailSidebar";
@@ -60,7 +59,7 @@ export function RulesList() {
 
   const { title, subtitle } = selection.kind === "priority"
     ? { title: `Priorita: ${priorityLabel(selection.priority)}`, subtitle: `Pravidla s touto prioritou (odvozenou ze Závažnosti).` }
-    : { title: "Všechna pravidla", subtitle: "Kompletní katalog pravidel napříč oblastmi." };
+    : { title: "Všechna pravidla", subtitle: "Pořadí určuje, v jakém se pravidla vyhodnocují." };
 
   return (
     <AppShell
@@ -71,7 +70,7 @@ export function RulesList() {
           <Link
             to="/rules/new"
             search={{ situationId: undefined, severityId: undefined }}
-            className="flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-[15px] font-medium text-primary-foreground elevation-1 transition-colors hover:bg-[#7E4EE6]"
+            className="flex items-center gap-1.5 rounded-md border border-primary px-4 py-2 text-[15px] font-medium text-primary transition-colors hover:bg-primary/[0.06]"
           >
             <Plus size={18} />
             Nové pravidlo
@@ -145,7 +144,7 @@ export function RulesList() {
                   key={rule.id}
                   onClick={() => setSelectedRule(selectedRule?.id === rule.id ? null : rule)}
                   className={cn(
-                    "group flex cursor-pointer items-center gap-3.5 border-t border-border px-6 py-3 transition-colors",
+                    "group flex cursor-pointer items-center gap-4 border-t border-border px-6 py-4 transition-colors",
                     selectedRule?.id === rule.id ? "bg-primary-soft" : "hover:bg-muted/60",
                   )}
                 >
@@ -174,8 +173,7 @@ export function RulesList() {
 
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-[15px] font-medium leading-[22px]">{rule.name}</div>
-                    <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                      <AreaBadge area={rule.area} />
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                       <span className="inline-flex h-6 items-center rounded-full border border-input px-2.5 text-[13px] leading-5 text-muted-foreground">
                         {triggerLabel(rule.trigger.kind)}
                       </span>
@@ -192,17 +190,29 @@ export function RulesList() {
                     </div>
                   </div>
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      rulesStore.remove(rule.id);
-                      if (selectedRule?.id === rule.id) setSelectedRule(null);
-                    }}
-                    className="shrink-0 rounded p-1 text-muted-foreground opacity-0 transition-all hover:text-destructive group-hover:opacity-100"
-                    title="Smazat pravidlo"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <Link
+                      to="/rules/$ruleId/edit"
+                      params={{ ruleId: rule.id }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex items-center gap-1.5 rounded-md border border-input px-3 py-1.5 text-[13px] leading-5 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                      title="Upravit pravidlo"
+                    >
+                      <Pencil size={16} />
+                      Upravit
+                    </Link>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        rulesStore.remove(rule.id);
+                        if (selectedRule?.id === rule.id) setSelectedRule(null);
+                      }}
+                      className="grid size-[34px] place-items-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                      title="Smazat pravidlo"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
                 </div>
               );
             })

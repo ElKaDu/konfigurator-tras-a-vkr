@@ -72,37 +72,37 @@ export function SituationEditorPage({ situationId }: { situationId: string }) {
     <AppShell current="situace" title={situation.name || "Situace"} backTo="/situace">
       <div>
         <div className="max-w-3xl space-y-5">
-          <div className="flex items-center gap-2">
-            <input
-              value={draftName}
-              onChange={(e) => setDraftName(e.target.value)}
-              className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-lg font-semibold"
+          <div className="rounded-md bg-card px-6 py-5 elevation-2">
+            <div className="flex items-center gap-3">
+              <input
+                value={draftName}
+                onChange={(e) => setDraftName(e.target.value)}
+                className="h-[42px] w-full rounded-md border border-input bg-card px-3.5 text-sm outline-none transition-colors focus:border-primary flex-1 text-base font-medium"
+              />
+              <button
+                disabled={totalUsage > 0}
+                onClick={() => {
+                  situationsStore.remove(situation.id);
+                  navigate({ to: "/situace" });
+                }}
+                title={totalUsage > 0 ? "Situace se používá na pravidlech" : "Smazat situaci"}
+                className="flex shrink-0 items-center gap-1.5 rounded-md border border-destructive/50 px-4 py-2 text-[15px] text-destructive transition-colors hover:bg-destructive/[0.06] disabled:cursor-not-allowed disabled:opacity-30"
+              >
+                <Trash2 size={18} /> Smazat
+              </button>
+            </div>
+
+            <textarea
+              value={draftDescription}
+              onChange={(e) => setDraftDescription(e.target.value)}
+              placeholder="Popis situace…"
+              rows={2}
+              className="mt-4 w-full resize-none rounded-md border border-input bg-card px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-primary"
             />
-            <button
-              disabled={totalUsage > 0}
-              onClick={() => {
-                situationsStore.remove(situation.id);
-                navigate({ to: "/situace" });
-              }}
-              title={totalUsage > 0 ? "Situace se používá na pravidlech" : "Smazat situaci"}
-              className="rounded-md border border-border px-3 py-2 text-sm text-muted-foreground hover:border-red-300 hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1.5"
-            >
-              <Trash2 className="size-4" /> Smazat
-            </button>
           </div>
 
-          <textarea
-            value={draftDescription}
-            onChange={(e) => setDraftDescription(e.target.value)}
-            placeholder="Popis situace…"
-            rows={2}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm resize-none"
-          />
-
-          <div>
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-              Závažnosti ({draftSeverities.length})
-            </div>
+          <div className="rounded-md bg-card px-6 py-5 elevation-2">
+            <div className="text-overline mb-3">Závažnosti ({draftSeverities.length})</div>
             <div className="space-y-3">
               {draftSeverities.map((sev) => (
                 <SeverityCard
@@ -117,22 +117,22 @@ export function SituationEditorPage({ situationId }: { situationId: string }) {
             </div>
             <button
               onClick={addSeverity}
-              className="mt-3 w-full rounded-lg border border-dashed border-border py-2 text-xs text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+              className="mt-3 w-full rounded-md border border-dashed border-input py-2.5 text-sm text-muted-foreground transition-colors hover:border-primary hover:text-primary"
             >
               + Přidat závažnost
             </button>
           </div>
 
-          <div className="border-t border-border pt-4 space-y-2">
+          <div className="space-y-2.5">
             <button
               onClick={handleSave}
-              className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              className="w-full rounded-md bg-primary px-4 py-2.5 text-[15px] font-medium text-primary-foreground elevation-1 transition-colors hover:bg-[#7E4EE6]"
             >
               Uložit
             </button>
             <Link
               to="/situace"
-              className="block w-full rounded-lg border border-border px-4 py-2 text-center text-sm text-muted-foreground hover:bg-muted transition-colors"
+              className="block w-full rounded-md border border-input px-4 py-2 text-center text-[15px] text-muted-foreground transition-colors hover:border-primary hover:text-primary"
             >
               ← Zpět na situace
             </Link>
