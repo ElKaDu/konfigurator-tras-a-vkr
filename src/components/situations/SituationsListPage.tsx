@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Plus, Trash2, ChevronRight, ChevronDown, Search } from "lucide-react";
+import { Plus, Trash2, ChevronRight, ChevronDown, Search } from "@/components/ui/icon";
 import { useNavigate } from "@tanstack/react-router";
-import { AppHeader } from "@/components/AppHeader";
+import { AppShell } from "@/components/AppShell";
 import { AreaBadge } from "@/components/common/AreaBadge";
 import { useSituations, situationsStore, useRules } from "@/lib/model/store";
 import { triggerLabel, priorityLabel, isPriorityHigh, resolveRulePriority } from "@/lib/model/ruleDisplay";
@@ -56,37 +56,42 @@ export function SituationsListPage() {
   const visible = situations.filter(matchesQuery);
 
   return (
-    <div className="flex h-screen w-screen flex-col bg-background text-foreground">
-      <AppHeader current="situace" />
-
-      <div className={cn("flex-1 overflow-y-auto", selectedRule && "mr-[460px]")}>
-        <div className="mx-auto max-w-3xl p-6">
-          <div className="flex items-center justify-between mb-1">
-            <h1 className="text-lg font-semibold">Situace a závažnosti</h1>
-            <button
-              onClick={createSituation}
-              className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
-            >
-              <Plus className="size-3.5" /> Nová situace
-            </button>
+    <AppShell
+      current="situace"
+      title="Situace a závažnosti"
+      actions={
+        <button
+          onClick={createSituation}
+          className="flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-[15px] font-medium text-primary-foreground elevation-1 transition-colors hover:bg-[#7E4EE6]"
+        >
+          <Plus size={18} /> Nová situace
+        </button>
+      }
+    >
+      <div className={cn(selectedRule && "mr-[460px]")}>
+        <div className="rounded-md bg-card elevation-2">
+          <div className="px-6 pt-5">
+            <h2 className="text-h5">Přehled situací</h2>
+            <p className="mt-1 text-[13px] leading-[18px] text-muted-foreground">
+              Šablony pro věci k řešení — každá situace má stupně závažnosti s výchozím názvem, popisem, prioritou a akcemi.
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground mb-4">
-            Šablony pro věci k řešení — každá situace má stupně závažnosti s výchozím názvem, popisem, prioritou a akcemi.
-          </p>
 
-          <div className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground mb-4">
-            <Search size={15} className="shrink-0" />
+          <div className="px-6 py-5">
+          <div className="flex h-[42px] items-center gap-2.5 rounded-md border border-input px-3.5 text-sm text-muted-foreground">
+            <Search size={18} className="shrink-0" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Hledat situaci, závažnost…"
-              className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
+              className="flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground"
             />
           </div>
+          </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col">
             {visible.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-8 text-center">
+              <p className="border-t border-border py-10 text-center text-sm text-muted-foreground">
                 {situations.length === 0 ? "Zatím žádné situace." : "Žádná situace neodpovídá hledání."}
               </p>
             ) : (
@@ -94,21 +99,21 @@ export function SituationsListPage() {
                 const usage = totalUsage(s.id);
                 const isOpen = expanded.has(s.id);
                 return (
-                  <div key={s.id} className="rounded-lg border border-border overflow-hidden">
+                  <div key={s.id} className="border-t border-border">
                     <div
                       onClick={() => navigate({ to: "/situace/$id", params: { id: s.id } })}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40 transition-colors cursor-pointer"
+                      className="flex cursor-pointer items-center gap-3.5 px-6 py-3 transition-colors hover:bg-muted/60"
                     >
                       <button
                         onClick={(e) => { e.stopPropagation(); toggleExpanded(s.id); }}
                         className="shrink-0 text-muted-foreground hover:text-foreground"
                         title={isOpen ? "Skrýt závažnosti a pravidla" : "Zobrazit závažnosti a pravidla"}
                       >
-                        {isOpen ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
+                        {isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
                       </button>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium">{s.name}</div>
-                        {s.description && <div className="text-xs text-muted-foreground mt-0.5">{s.description}</div>}
+                        <div className="text-[15px] font-medium leading-[22px]">{s.name}</div>
+                        {s.description && <div className="mt-0.5 text-[13px] leading-[18px] text-muted-foreground">{s.description}</div>}
                       </div>
                       <span className="shrink-0 text-xs text-muted-foreground">
                         {s.severities.length} {s.severities.length === 1 ? "závažnost" : "závažnosti"}
@@ -195,6 +200,6 @@ export function SituationsListPage() {
           onClose={() => setSelectedRule(null)}
         />
       )}
-    </div>
+    </AppShell>
   );
 }

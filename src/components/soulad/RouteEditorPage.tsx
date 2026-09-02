@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { ChevronRight, ChevronUp, ChevronDown, X } from "lucide-react";
+import { ChevronRight, ChevronUp, ChevronDown, X } from "@/components/ui/icon";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { AppHeader } from "@/components/AppHeader";
+import { AppShell } from "@/components/AppShell";
 import { useRoutes, useSegments, routesStore, segmentsStore } from "@/lib/model/store";
 import { cn } from "@/lib/utils";
 import type { Route, Segment } from "@/lib/model/types";
 import { TRANSPORT_VARIANTS } from "@/lib/routes/types";
-import { COUNTRY_OPTIONS } from "@/lib/routes/countries";
+import { COUNTRY_OPTIONS, countryFlag } from "@/lib/routes/countries";
 import { AddExistingSegmentPicker } from "./AddExistingSegmentPicker";
 
 const CARRIER_OPTIONS = ["FedEx", "UPS", "DHL", "PPL", "GLS"];
@@ -28,10 +28,11 @@ export function RouteEditorPage({ routeId }: { routeId: string }) {
 
   if (!route) {
     return (
-      <div className="flex h-screen w-screen flex-col bg-background text-foreground">
-        <AppHeader current="soulad" />
-        <div className="p-8 text-sm text-muted-foreground">Trasa nenalezena.</div>
-      </div>
+      <AppShell current="soulad" title="Trasa" backTo="/soulad-s-trasou">
+        <div className="rounded-md bg-card px-6 py-10 text-center text-sm text-muted-foreground elevation-2">
+          Trasa nenalezena.
+        </div>
+      </AppShell>
     );
   }
 
@@ -62,9 +63,8 @@ export function RouteEditorPage({ routeId }: { routeId: string }) {
   }
 
   return (
-    <div className="flex h-screen w-screen flex-col bg-background text-foreground">
-      <AppHeader current="soulad" />
-      <div className="flex flex-1 min-h-0">
+    <AppShell current="soulad" title={route.name || "Trasa"} backTo="/soulad-s-trasou" contentLayout="full">
+      <div className="flex min-h-0 flex-1">
         {/* LEFT — Pokrytí trasy */}
         <div className="flex w-[280px] shrink-0 flex-col border-r border-border">
           <div className="flex-1 overflow-y-auto p-4 space-y-5">
@@ -136,12 +136,13 @@ export function RouteEditorPage({ routeId }: { routeId: string }) {
                       title={c.label}
                       onClick={() => update({ destCountries: toggleMulti(route.destCountries, c.value) })}
                       className={cn(
-                        "rounded-full px-2.5 py-0.5 text-xs font-medium border transition-colors",
+                        "inline-flex h-[26px] items-center gap-1.5 rounded-full border px-2.5 text-xs transition-colors",
                         route.destCountries.includes(c.value)
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "border-border hover:bg-muted",
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-input text-muted-foreground hover:border-primary hover:text-primary",
                       )}
                     >
+                      <span aria-hidden="true">{countryFlag(c.value)}</span>
                       {c.value}
                     </button>
                   ))}
@@ -324,6 +325,6 @@ export function RouteEditorPage({ routeId }: { routeId: string }) {
           </div>
         </div>
       </div>
-    </div>
+    </AppShell>
   );
 }

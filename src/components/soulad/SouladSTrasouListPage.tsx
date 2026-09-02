@@ -1,8 +1,8 @@
 // src/components/soulad/SouladSTrasouListPage.tsx
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus } from "@/components/ui/icon";
 import { useNavigate } from "@tanstack/react-router";
-import { AppHeader } from "@/components/AppHeader";
+import { AppShell } from "@/components/AppShell";
 import { DataMenu } from "@/components/common/DataMenu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRoutes, useSegments, routesStore, segmentsStore } from "@/lib/model/store";
@@ -39,27 +39,31 @@ export function SouladSTrasouListPage() {
   }
 
   return (
-    <div className="flex h-screen w-screen flex-col bg-background text-foreground">
-      <AppHeader current="soulad" extras={<DataMenu />} />
-      <Tabs defaultValue="trasy" className="flex flex-1 min-h-0 flex-col">
-        <TabsList className="mx-4 mt-3 grid w-fit grid-cols-2">
-          <TabsTrigger value="trasy" className="text-xs">Trasy</TabsTrigger>
-          <TabsTrigger value="useky" className="text-xs">Úseky</TabsTrigger>
+    <AppShell current="soulad" title="Soulad s trasou" actions={<DataMenu />}>
+      <Tabs defaultValue="trasy" className="rounded-md bg-card elevation-2">
+        <TabsList className="w-full border-b border-border px-6">
+          <TabsTrigger value="trasy">Trasy</TabsTrigger>
+          <TabsTrigger value="useky">Úseky</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="trasy" className="flex flex-1 min-h-0 flex-col mt-0">
-          <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border">
-            <h2 className="text-sm font-semibold">Trasy</h2>
+        <TabsContent value="trasy" className="mt-0">
+          <div className="flex items-center justify-between gap-3 border-b border-border px-6 py-4">
+            <div>
+              <h2 className="text-h5">Trasy</h2>
+              <p className="mt-1 text-[13px] leading-[18px] text-muted-foreground">
+                Předepsané trasy a jejich úseky — proti nim se kontroluje soulad zásilky.
+              </p>
+            </div>
             <button
               onClick={addRoute}
-              className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              className="flex shrink-0 items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-[15px] font-medium text-primary-foreground elevation-1 transition-colors hover:bg-[#7E4EE6]"
             >
-              <Plus className="size-3.5" /> Nová trasa
+              <Plus size={18} /> Nová trasa
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto">
+          <div>
             {routes.length === 0 ? (
-              <div className="p-6 text-center text-sm text-muted-foreground italic">Zatím žádné trasy.</div>
+              <div className="px-6 py-12 text-center text-sm text-muted-foreground">Zatím žádné trasy.</div>
             ) : (
               routes.map((route) => (
                 <RouteRow
@@ -74,25 +78,30 @@ export function SouladSTrasouListPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="useky" className="flex flex-1 min-h-0 flex-col mt-0">
-          <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border">
-            <h2 className="text-sm font-semibold">Úseky</h2>
+        <TabsContent value="useky" className="mt-0">
+          <div className="flex items-center justify-between gap-3 border-b border-border px-6 py-4">
+            <div>
+              <h2 className="text-h5">Úseky</h2>
+              <p className="mt-1 text-[13px] leading-[18px] text-muted-foreground">
+                Znovupoužitelné části trasy — jeden úsek může být v několika trasách.
+              </p>
+            </div>
             <button
               onClick={addSegment}
-              className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              className="flex shrink-0 items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-[15px] font-medium text-primary-foreground elevation-1 transition-colors hover:bg-[#7E4EE6]"
             >
-              <Plus className="size-3.5" /> Nový úsek
+              <Plus size={18} /> Nový úsek
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto">
+          <div>
             {segments.length === 0 ? (
-              <div className="p-6 text-center text-sm text-muted-foreground italic">Zatím žádné úseky.</div>
+              <div className="px-6 py-12 text-center text-sm text-muted-foreground">Zatím žádné úseky.</div>
             ) : (
               segments.map((seg) => <SegmentRow key={seg.id} segment={seg} />)
             )}
           </div>
         </TabsContent>
       </Tabs>
-    </div>
+    </AppShell>
   );
 }

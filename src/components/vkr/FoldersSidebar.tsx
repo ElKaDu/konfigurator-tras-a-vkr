@@ -1,4 +1,4 @@
-import { Folder as FolderIcon, Archive, Plus } from "lucide-react";
+import { Folder as FolderIcon, Archive, Plus } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import { FOLDERS } from "@/lib/vkr/mockData";
 import type { Rule } from "@/lib/vkr/types";

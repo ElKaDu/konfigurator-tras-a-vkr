@@ -1,4 +1,4 @@
-import { Trash2 } from "lucide-react";
+import { Trash2 } from "@/components/ui/icon";
 import { Link } from "@tanstack/react-router";
 import { ActionTagPicker } from "./ActionTagPicker";
 import { useActionTags } from "@/lib/model/store";

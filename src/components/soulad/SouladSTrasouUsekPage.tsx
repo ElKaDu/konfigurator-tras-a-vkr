@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Trash2 } from "lucide-react";
-import { AppHeader } from "@/components/AppHeader";
+import { Trash2 } from "@/components/ui/icon";
+import { AppShell } from "@/components/AppShell";
 import { useSegments, segmentsStore, isSegmentUsed } from "@/lib/model/store";
 import { cn } from "@/lib/utils";
 import type { Checkpoint, Segment } from "@/lib/model/types";
@@ -38,10 +38,11 @@ export function SouladSTrasouUsekPage({
 
   if (!segment) {
     return (
-      <div className="flex h-screen w-screen flex-col bg-background text-foreground">
-        <AppHeader current="soulad" />
-        <div className="p-8 text-sm text-muted-foreground">Úsek nenalezen.</div>
-      </div>
+      <AppShell current="soulad" title="Úsek" backTo="/soulad-s-trasou">
+        <div className="rounded-md bg-card px-6 py-10 text-center text-sm text-muted-foreground elevation-2">
+          Úsek nenalezen.
+        </div>
+      </AppShell>
     );
   }
 
@@ -78,9 +79,8 @@ export function SouladSTrasouUsekPage({
   const { used, count } = isSegmentUsed(segment.id);
 
   return (
-    <div className="flex h-screen w-screen flex-col bg-background text-foreground">
-      <AppHeader current="soulad" />
-      <div className="border-b border-border bg-surface px-6 py-3 text-sm text-muted-foreground flex items-center justify-between">
+    <AppShell current="soulad" title={segment.name || "Úsek"} backTo="/soulad-s-trasou" contentLayout="full">
+      <div className="flex items-center justify-between px-6 pb-3 text-sm text-muted-foreground">
         <div>
           <Link to="/soulad-s-trasou" className="hover:text-foreground">Soulad s trasou</Link>
           {fromRouteId && (
@@ -166,6 +166,6 @@ export function SouladSTrasouUsekPage({
           )}
         </div>
       </div>
-    </div>
+    </AppShell>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, X, Search } from "lucide-react";
+import { Plus, X, Search } from "@/components/ui/icon";
 import {
   VKR_CONDITION_CATALOG,
   findVkrField,

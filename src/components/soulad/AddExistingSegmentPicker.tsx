@@ -1,6 +1,6 @@
 // src/components/soulad/AddExistingSegmentPicker.tsx
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus } from "@/components/ui/icon";
 import { eligibleSegments } from "@/lib/model/routeEligibility";
 import type { Route, Segment } from "@/lib/model/types";
 

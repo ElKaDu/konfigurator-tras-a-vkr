@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Download, MoreHorizontal, Upload } from "lucide-react";
+import { Download, MoreHorizontal, Upload } from "@/components/ui/icon";
 import {
   DropdownMenu,
   DropdownMenuContent,

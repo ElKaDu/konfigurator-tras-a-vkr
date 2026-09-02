@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, ChevronRight, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Trash2 } from "@/components/ui/icon";
 import { Link } from "@tanstack/react-router";
 import { isSegmentUsed, segmentsStore } from "@/lib/model/store";
 import { cn } from "@/lib/utils";

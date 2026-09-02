@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { PlayCircle, AlertTriangle, CircleCheck } from "lucide-react";
-import { AppHeader } from "@/components/AppHeader";
+import { PlayCircle, AlertTriangle, CircleCheck } from "@/components/ui/icon";
+import { AppShell } from "@/components/AppShell";
 import { AreaBadge } from "@/components/common/AreaBadge";
 import { useSampleShipments, useRules } from "@/lib/model/store";
 import { resolveRuleActions } from "@/lib/model/ruleDisplay";
@@ -155,15 +155,11 @@ export function TestPanel() {
   const selectedRule = rules.find((r) => r.id === selectedRuleId);
 
   return (
-    <div className="flex h-screen w-screen flex-col bg-background text-foreground">
-      <AppHeader current="rules" />
-
-      <div className="flex-1 overflow-auto">
-        <div className="mx-auto max-w-3xl w-full p-6 flex flex-col gap-4">
-          {/* Title */}
+    <AppShell current="rules" title="Otestovat pravidlo" backTo="/">
+      <div>
+        <div className="flex max-w-3xl flex-col gap-4">
           <div>
-            <h1 className="text-lg font-semibold">Otestovat pravidlo</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <p className="text-[13px] leading-[18px] text-muted-foreground">
               Vyber vzorovou zásilku a pravidlo — uvidíš, co by se stalo.
               (Vyhodnocení je zatím ukázkové.)
             </p>
@@ -227,6 +223,6 @@ export function TestPanel() {
           )}
         </div>
       </div>
-    </div>
+    </AppShell>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Trash2, X, Clock, Database, Percent, Hash, Link2, Calendar, MapPin } from "lucide-react";
+import { Plus, Trash2, X, Clock, Database, Percent, Hash, Link2, Calendar, MapPin } from "@/components/ui/icon";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { rulesStore } from "@/lib/vkr/store";

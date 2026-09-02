@@ -1,4 +1,4 @@
-import { CircleCheck, AlertTriangle, Plus } from "lucide-react";
+import { CircleCheck, AlertTriangle, Plus } from "@/components/ui/icon";
 import { PlainToken } from "@/components/common/PlainToken";
 import type { Area, ActionType } from "@/lib/model/types";
 

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { X, Mail, FileEdit, AlertCircle, Pencil, ListChecks, Hand, Bell, PlayCircle, History as HistoryIcon, Sparkles } from "lucide-react";
+import { X, Mail, FileEdit, AlertCircle, Pencil, ListChecks, Hand, Bell, PlayCircle, History as HistoryIcon, Sparkles } from "@/components/ui/icon";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Action, ConditionGroup, Condition, Rule } from "@/lib/vkr/types";
 import { isGroup } from "@/lib/vkr/types";
@@ -62,7 +62,7 @@ export function RuleDetailPanel({
       </div>
 
       <Tabs defaultValue="summary" className="flex min-h-0 flex-1 flex-col">
-        <TabsList className="mx-5 grid w-auto grid-cols-3">
+        <TabsList className="mx-5 border-b border-border">
           <TabsTrigger value="summary" className="text-xs"><Sparkles className="mr-1 size-3.5" />Shrnutí</TabsTrigger>
           <TabsTrigger value="test" className="text-xs"><PlayCircle className="mr-1 size-3.5" />Test</TabsTrigger>
           <TabsTrigger value="history" className="text-xs"><HistoryIcon className="mr-1 size-3.5" />Historie</TabsTrigger>

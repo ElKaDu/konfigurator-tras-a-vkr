@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2 } from "@/components/ui/icon";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { AppHeader } from "@/components/AppHeader";
+import { AppShell } from "@/components/AppShell";
 import { SeverityCard } from "./SeverityCard";
 import { useSituations, situationsStore, severityUsageCount } from "@/lib/model/store";
 import type { Severity } from "@/lib/model/types";
@@ -27,10 +27,11 @@ export function SituationEditorPage({ situationId }: { situationId: string }) {
 
   if (!situation) {
     return (
-      <div className="flex h-screen w-screen flex-col bg-background text-foreground">
-        <AppHeader current="situace" />
-        <div className="p-6 text-sm text-muted-foreground">Situace nenalezena. <Link to="/situace" className="text-primary underline">Zpět na seznam</Link></div>
-      </div>
+      <AppShell current="situace" title="Situace" backTo="/situace">
+        <div className="rounded-md bg-card px-6 py-10 text-center text-sm text-muted-foreground elevation-2">
+          Situace nenalezena. <Link to="/situace" className="text-primary underline">Zpět na seznam</Link>
+        </div>
+      </AppShell>
     );
   }
 
@@ -68,11 +69,9 @@ export function SituationEditorPage({ situationId }: { situationId: string }) {
   const totalUsage = activeSituation.severities.reduce((sum, s) => sum + severityUsageCount(s.id), 0);
 
   return (
-    <div className="flex h-screen w-screen flex-col bg-background text-foreground">
-      <AppHeader current="situace" />
-
-      <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-2xl p-6 space-y-5">
+    <AppShell current="situace" title={situation.name || "Situace"} backTo="/situace">
+      <div>
+        <div className="max-w-3xl space-y-5">
           <div className="flex items-center gap-2">
             <input
               value={draftName}
@@ -140,6 +139,6 @@ export function SituationEditorPage({ situationId }: { situationId: string }) {
           </div>
         </div>
       </div>
-    </div>
+    </AppShell>
   );
 }

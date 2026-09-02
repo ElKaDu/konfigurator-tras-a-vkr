@@ -1,4 +1,4 @@
-import { Plus, X } from "lucide-react";
+import { Plus, X } from "@/components/ui/icon";
 import { TRACKING_FIELDS, isIncomingConditionRow, incomingRowKindOf, type IncomingRowKind } from "@/lib/model/trackingFields";
 import type { Condition } from "@/lib/model/types";
 

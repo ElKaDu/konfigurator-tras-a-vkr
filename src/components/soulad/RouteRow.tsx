@@ -1,5 +1,5 @@
 // src/components/soulad/RouteRow.tsx
-import { ChevronDown, ChevronRight, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Plus, Trash2 } from "@/components/ui/icon";
 import { Link } from "@tanstack/react-router";
 import { routesStore, segmentsStore } from "@/lib/model/store";
 import { cn } from "@/lib/utils";

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "@/components/ui/icon";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useActionTags, actionTagsStore, actionTagUsageCount } from "@/lib/model/store";
 import { cn } from "@/lib/utils";

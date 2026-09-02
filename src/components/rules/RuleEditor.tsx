@@ -1,6 +1,6 @@
-import { Clock, Filter, Zap, Pencil } from "lucide-react";
+import { Clock, Filter, Zap } from "@/components/ui/icon";
 import { Link } from "@tanstack/react-router";
-import { AppHeader } from "@/components/AppHeader";
+import { AppShell } from "@/components/AppShell";
 import { SectionCard } from "@/components/common/SectionCard";
 import { PlainToken } from "@/components/common/PlainToken";
 import { AreaBadge } from "@/components/common/AreaBadge";
@@ -11,21 +11,13 @@ import type { Area } from "@/lib/model/types";
 
 export function RuleEditor({ area, name }: { area: Area; name: string }) {
   return (
-    <div className="flex h-screen w-screen flex-col bg-background text-foreground">
-      <AppHeader current="rules" />
-
-      <div className="flex-1 overflow-auto">
-        <div className="mx-auto max-w-3xl w-full p-6">
-          {/* Top row: rule name + area badge + step indicator */}
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <h1 className="text-lg font-semibold truncate">{name}</h1>
-              <Pencil size={14} className="text-muted-foreground shrink-0" />
-            </div>
-            <div className="flex items-center gap-2 shrink-0 ml-4">
-              <AreaBadge area={area} />
-              <span className="text-xs text-muted-foreground">· krok 2 ze 2</span>
-            </div>
+    <AppShell current="rules" title={name} backTo="/">
+      <div>
+        <div className="max-w-3xl">
+          {/* Název pravidla je v navbaru (useHeading), tady zůstává jen oblast a krok. */}
+          <div className="mb-2 flex items-center justify-end gap-2">
+            <AreaBadge area={area} />
+            <span className="text-xs text-muted-foreground">· krok 2 ze 2</span>
           </div>
 
           {/* Meta row: priority + active toggle */}
@@ -88,6 +80,6 @@ export function RuleEditor({ area, name }: { area: Area; name: string }) {
           </div>
         </div>
       </div>
-    </div>
+    </AppShell>
   );
 }

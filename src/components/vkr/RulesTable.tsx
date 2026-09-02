@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, MoreHorizontal, Copy, Pencil, Archive, ArchiveRestore } from "lucide-react";
+import { Search, MoreHorizontal, Copy, Pencil, Archive, ArchiveRestore } from "@/components/ui/icon";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Sparkles, Wand2, Loader2, Check, RefreshCw, ArrowRight, Zap, Filter, Hourglass, Play } from "lucide-react";
+import { Sparkles, Wand2, Loader2, Check, RefreshCw, ArrowRight, Zap, Filter, Hourglass, Play } from "@/components/ui/icon";
 import { useServerFn } from "@tanstack/react-start";
 import { suggestRule, PHASES, type AISuggestion } from "@/lib/vkr/aiSuggest.functions";
 import { FIELDS, TRIGGER_LABELS, ACTION_LABELS, OPERATOR_LABELS } from "@/lib/vkr/fields";

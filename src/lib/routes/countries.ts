@@ -43,3 +43,11 @@ export const COUNTRY_OPTIONS: Array<{ value: string; label: string }> = [
 export function countryLabel(code: string): string {
   return COUNTRY_OPTIONS.find((c) => c.value === code)?.label ?? code;
 }
+
+/**
+ * Vlajka z ISO2 kódu přes regionální indikátory — bez další závislosti.
+ * Reálná aplikace má v závislostech `flag-icons` (CSS sprite); v prototypu
+ * emoji stačí a chová se stejně jako v ostatních prototypech (checklist, průvodce).
+ */
+export const countryFlag = (iso2: string): string =>
+  iso2.replace(/./g, (ch) => String.fromCodePoint(127397 + ch.toUpperCase().charCodeAt(0)));

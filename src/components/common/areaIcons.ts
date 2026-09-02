@@ -5,8 +5,8 @@ import {
   PackageX,
   Scale,
   Circle,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+} from "@/components/ui/icon";
+import type { LucideIcon } from "@/components/ui/icon";
 
 // Map from icon strings in areas.ts to available lucide-react icons in this version.
 // ListSearch → TextSearch, PackageOff → PackageX (closest equivalents available).

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { AREAS } from "@/lib/model/areas";
-import { AppHeader } from "@/components/AppHeader";
+import { AppShell } from "@/components/AppShell";
 import { resolveAreaIcon } from "@/components/common/areaIcons";
 import type { Area } from "@/lib/model/types";
 
@@ -12,14 +12,11 @@ export function AreaPicker({ preselectedArea }: { preselectedArea?: Area }) {
   const navigate = useNavigate();
 
   return (
-    <div className="flex h-screen w-screen flex-col bg-background text-foreground">
-      <AppHeader current="rules" />
-
-      <div className="flex-1 overflow-auto">
-        <div className="mx-auto max-w-3xl p-6">
+    <AppShell current="rules" title="Nové pravidlo" backTo="/">
+      <div>
+        <div className="max-w-3xl">
           {/* Heading row */}
           <div className="flex items-baseline gap-2 mb-1">
-            <h1 className="text-lg font-semibold">Nové pravidlo</h1>
             <span className="text-sm text-muted-foreground">· krok 1 ze 2</span>
           </div>
 
@@ -125,6 +122,6 @@ export function AreaPicker({ preselectedArea }: { preselectedArea?: Area }) {
           </div>
         </div>
       </div>
-    </div>
+    </AppShell>
   );
 }

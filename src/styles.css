@@ -5,8 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  /* Materio pracuje s jedním poloměrem 6px, ne se stupnicí. */
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --color-background: var(--background);
@@ -38,74 +39,117 @@
   --color-surface: var(--surface);
   --color-surface-foreground: var(--surface-foreground);
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Rozměry shellu — @layouts/styles/_variables.scss */
+  --spacing-nav: 260px;
+  --spacing-nav-mini: 80px;
+  --spacing-navbar: 64px;
 }
 
+/*
+  Materio design systém — tokeny jsou 1:1 z reálné aplikace:
+  bytorp-frontend/app/plugins/vuetify/theme.ts
+  Texty používají stupně důrazu 90 / 70 / 55 / 40 %, ne vlastní odstíny šedé.
+*/
 :root {
-  --radius: 0.625rem;
+  --radius: 0.375rem; /* 6px */
 
-  --background: oklch(0.985 0.005 280);
-  --foreground: oklch(0.18 0.03 280);
+  --background: #f4f5fa;
+  --foreground: rgba(46, 38, 61, 0.9);
 
-  --surface: oklch(1 0 0);
-  --surface-foreground: oklch(0.18 0.03 280);
+  --surface: #ffffff;
+  --surface-foreground: rgba(46, 38, 61, 0.9);
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.03 280);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.03 280);
+  --card: #ffffff;
+  --card-foreground: rgba(46, 38, 61, 0.9);
+  --popover: #ffffff;
+  --popover-foreground: rgba(46, 38, 61, 0.9);
 
-  /* Bytorp purple */
-  --primary: oklch(0.56 0.22 295);
-  --primary-foreground: oklch(0.99 0 0);
-  --primary-soft: oklch(0.96 0.04 295);
+  /* primary #8C57FF, darken-1 #7E4EE6, lighten-1 #E4DBF5, lighten-2 #F2EDFA */
+  --primary: #8c57ff;
+  --primary-foreground: #ffffff;
+  --primary-soft: #f2edfa;
 
-  --secondary: oklch(0.97 0.01 280);
-  --secondary-foreground: oklch(0.25 0.03 280);
+  --secondary: #f1f0f4;
+  --secondary-foreground: rgba(46, 38, 61, 0.9);
 
-  --muted: oklch(0.965 0.008 280);
-  --muted-foreground: oklch(0.5 0.02 280);
+  /* table-header-color #F6F7FB */
+  --muted: #f6f7fb;
+  --muted-foreground: rgba(46, 38, 61, 0.55);
 
-  --accent: oklch(0.96 0.03 295);
-  --accent-foreground: oklch(0.35 0.18 295);
+  --accent: #f2edfa;
+  --accent-foreground: #7e4ee6;
 
-  --destructive: oklch(0.6 0.22 25);
-  --destructive-foreground: oklch(0.99 0 0);
+  --destructive: #ff4c51;
+  --destructive-foreground: #ffffff;
 
-  --success: oklch(0.7 0.16 155);
-  --success-foreground: oklch(0.2 0.05 155);
+  /* *-foreground u stavů je čitelná varianta pro text na tintu (bg-success/20 apod.) */
+  --success: #56ca00;
+  --success-foreground: #3f9400;
 
-  --warning: oklch(0.82 0.16 75);
-  --warning-foreground: oklch(0.3 0.08 75);
+  --warning: #ffb400;
+  --warning-foreground: #a97400;
 
-  --info: oklch(0.7 0.14 230);
-  --info-foreground: oklch(0.25 0.08 230);
+  --info: #16b1ff;
+  --info-foreground: #0f83bd;
 
-  --border: oklch(0.92 0.01 280);
-  --input: oklch(0.92 0.01 280);
-  --ring: oklch(0.56 0.22 295);
+  /* border-color #2E263D @ 12 %; vstupy mají silnější obrys */
+  --border: rgba(46, 38, 61, 0.12);
+  --input: rgba(46, 38, 61, 0.22);
+  --ring: #8c57ff;
+
+  /* Materio elevace */
+  --elevation-1: 0 2px 4px rgba(46, 38, 61, 0.12);
+  --elevation-2: 0 2px 6px rgba(46, 38, 61, 0.12);
+  --elevation-3: 0 3px 12px rgba(46, 38, 61, 0.2);
+  --elevation-8: 0 8px 28px rgba(46, 38, 61, 0.28);
 }
 
 .dark {
-  --background: oklch(0.16 0.02 280);
-  --foreground: oklch(0.96 0.005 280);
-  --surface: oklch(0.2 0.02 280);
-  --surface-foreground: oklch(0.96 0.005 280);
-  --card: oklch(0.2 0.02 280);
-  --card-foreground: oklch(0.96 0.005 280);
-  --popover: oklch(0.2 0.02 280);
-  --popover-foreground: oklch(0.96 0.005 280);
-  --primary: oklch(0.7 0.2 295);
-  --primary-foreground: oklch(0.15 0.02 280);
-  --primary-soft: oklch(0.3 0.1 295);
-  --secondary: oklch(0.25 0.02 280);
-  --secondary-foreground: oklch(0.96 0.005 280);
-  --muted: oklch(0.25 0.02 280);
-  --muted-foreground: oklch(0.7 0.02 280);
-  --accent: oklch(0.3 0.08 295);
-  --accent-foreground: oklch(0.96 0.005 280);
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.7 0.2 295);
+  --background: #28243d;
+  --foreground: rgba(231, 227, 252, 0.9);
+
+  --surface: #312d4b;
+  --surface-foreground: rgba(231, 227, 252, 0.9);
+
+  --card: #312d4b;
+  --card-foreground: rgba(231, 227, 252, 0.9);
+  --popover: #312d4b;
+  --popover-foreground: rgba(231, 227, 252, 0.9);
+
+  --primary: #8c57ff;
+  --primary-foreground: #ffffff;
+  --primary-soft: rgba(140, 87, 255, 0.14);
+
+  --secondary: #3a3552;
+  --secondary-foreground: rgba(231, 227, 252, 0.9);
+
+  --muted: #3d3759;
+  --muted-foreground: rgba(231, 227, 252, 0.55);
+
+  --accent: rgba(140, 87, 255, 0.14);
+  --accent-foreground: #c3a3ff;
+
+  --destructive: #ff4c51;
+  --destructive-foreground: #ffffff;
+
+  --success: #56ca00;
+  --success-foreground: #8fe04a;
+
+  --warning: #ffb400;
+  --warning-foreground: #ffca4d;
+
+  --info: #16b1ff;
+  --info-foreground: #6fcdff;
+
+  --border: rgba(231, 227, 252, 0.12);
+  --input: rgba(231, 227, 252, 0.22);
+  --ring: #8c57ff;
+
+  --elevation-1: 0 2px 4px rgba(19, 17, 32, 0.4);
+  --elevation-2: 0 2px 6px rgba(19, 17, 32, 0.4);
+  --elevation-3: 0 3px 12px rgba(19, 17, 32, 0.55);
+  --elevation-8: 0 8px 28px rgba(19, 17, 32, 0.7);
 }
 
 @layer base {
@@ -116,9 +160,29 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    /* Materio body1 */
+    font-size: 15px;
+    line-height: 22px;
     -webkit-font-smoothing: antialiased;
   }
   html, body, #root {
     height: 100%;
+  }
+}
+
+@layer components {
+  /* Karta v Materiu drží tvar stínem, ne rámečkem. */
+  .elevation-1 { box-shadow: var(--elevation-1); }
+  .elevation-2 { box-shadow: var(--elevation-2); }
+  .elevation-3 { box-shadow: var(--elevation-3); }
+  .elevation-8 { box-shadow: var(--elevation-8); }
+
+  /* Typografická stupnice Materia — pro nadpisy stránek a sekcí. */
+  .text-h4 { font-size: 24px; line-height: 32px; font-weight: 500; }
+  .text-h5 { font-size: 18px; line-height: 28px; font-weight: 500; }
+  .text-h6 { font-size: 15px; line-height: 22px; font-weight: 500; }
+  .text-overline {
+    font-size: 12px; line-height: 14px; letter-spacing: 0.8px;
+    text-transform: uppercase; color: var(--color-muted-foreground);
   }
 }

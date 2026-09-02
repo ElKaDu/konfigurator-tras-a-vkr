@@ -1,4 +1,4 @@
-import { X, Pencil, FileText, History as HistoryIcon, Trash2 } from "lucide-react";
+import { X, Pencil, FileText, History as HistoryIcon, Trash2 } from "@/components/ui/icon";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { AreaBadge } from "@/components/common/AreaBadge";
@@ -9,7 +9,7 @@ import type { Rule } from "@/lib/model/types";
 
 export function RuleDetailSidebar({ rule, onClose }: { rule: Rule; onClose: () => void }) {
   return (
-    <aside className="fixed right-0 top-14 bottom-0 flex w-[460px] flex-col border-l border-border bg-surface shadow-xl">
+    <aside className="fixed right-0 top-16 bottom-0 flex w-[460px] flex-col border-l border-border bg-surface shadow-xl">
       {/* Header */}
       <div className="flex items-start justify-between gap-3 px-5 pt-5 pb-3">
         <div className="min-w-0">
@@ -27,7 +27,7 @@ export function RuleDetailSidebar({ rule, onClose }: { rule: Rule; onClose: () =
       </div>
 
       <Tabs defaultValue="summary" className="flex min-h-0 flex-1 flex-col">
-        <TabsList className="mx-5 grid w-auto grid-cols-2">
+        <TabsList className="mx-5 border-b border-border">
           <TabsTrigger value="summary" className="text-xs">
             <FileText className="mr-1 size-3.5" />Detail pravidla
           </TabsTrigger>
