@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { Textarea } from "@/components/ui/textarea";
 import { useRules, rulesStore, useSituations, useActionTags } from "@/lib/model/store";
+import { priorityLabel, isPriorityHigh } from "@/lib/model/ruleDisplay";
 import { cn } from "@/lib/utils";
 import type { Area, Priority, Rule, Situation, Severity, Condition } from "@/lib/model/types";
 import { VkrConditionsBuilder } from "@/components/rules/editors/VkrConditionsBuilder";
@@ -137,7 +138,7 @@ export function RuleCreatorPage({
       title={ruleName || (ruleId ? "Úprava pravidla" : "Nové pravidlo")}
       backTo="/"
     >
-      <div className="grid items-start gap-5 py-1 lg:grid-cols-[290px_minmax(0,1fr)_320px]">
+      <div className="grid items-start gap-5 py-1 lg:grid-cols-[340px_minmax(0,1fr)_320px]">
         {/* LEVÝ SLOUPEC — Situace + Závažnost */}
         <div className="flex flex-col gap-5">
           <div className="rounded-md bg-card px-6 py-5 elevation-2">
@@ -167,13 +168,24 @@ export function RuleCreatorPage({
                             key={sev.id}
                             onClick={() => handleSelectSeverity(sev)}
                             className={cn(
-                              "rounded-lg border px-3 py-2 text-left text-xs font-medium transition-colors",
+                              "flex items-center gap-2 rounded-md border px-3 py-2.5 text-left text-sm font-medium transition-colors",
                               isSelected
-                                ? "border-primary bg-primary-soft/40 text-primary"
-                                : "border-border hover:border-primary/30 hover:bg-muted/30 text-foreground"
+                                ? "border-primary bg-primary-soft text-primary"
+                                : "border-input text-foreground hover:border-primary/40 hover:bg-muted/50",
                             )}
                           >
-                            {sev.name}
+                            <span className="min-w-0 flex-1 truncate">{sev.name}</span>
+                            {/* Priorita pravidla se dědí odsud, tak ať je vidět rovnou u závažnosti. */}
+                            <span
+                              className={cn(
+                                "inline-flex h-6 shrink-0 items-center rounded-full px-2.5 text-[13px] font-medium leading-5",
+                                isPriorityHigh(sev.priority)
+                                  ? "bg-destructive/12 text-destructive"
+                                  : "bg-muted text-muted-foreground",
+                              )}
+                            >
+                              {priorityLabel(sev.priority)}
+                            </span>
                           </button>
                         );
                       })}

@@ -40,7 +40,7 @@ export function TrackingIncomingConditionsBuilder({
               <select
                 value={row.fieldId}
                 onChange={(e) => updateAt(i, { ...row, fieldId: e.target.value })}
-                className="rounded border border-border bg-background px-2 py-1.5 text-xs"
+                className="rounded border border-border bg-background px-2 py-1.5 text-[13px]"
               >
                 {TRACKING_FIELDS.map((f) => (
                   <option key={f.value} value={f.value}>{f.label}</option>
@@ -49,7 +49,7 @@ export function TrackingIncomingConditionsBuilder({
               <select
                 value={kind}
                 onChange={(e) => changeKind(i, e.target.value as IncomingRowKind)}
-                className="rounded border border-border bg-background px-2 py-1.5 text-xs"
+                className="rounded border border-border bg-background px-2 py-1.5 text-[13px]"
               >
                 <option value="is">je</option>
                 <option value="is_not">není</option>
@@ -63,7 +63,7 @@ export function TrackingIncomingConditionsBuilder({
               value={row.value ?? ""}
               onChange={(e) => updateAt(i, { ...row, value: e.target.value })}
               placeholder="hodnota…"
-              className="w-full rounded border border-border bg-background px-2 py-1.5 text-xs"
+              className="w-full rounded border border-border bg-background px-2 py-1.5 text-[13px]"
             />
           </div>
         );
@@ -71,7 +71,7 @@ export function TrackingIncomingConditionsBuilder({
 
       <button
         onClick={addRow}
-        className="flex items-center gap-1 rounded-lg border border-dashed border-border px-3 py-1.5 text-xs text-muted-foreground hover:border-primary hover:text-primary"
+        className="flex items-center gap-1 rounded-lg border border-dashed border-border px-3 py-1.5 text-[13px] text-muted-foreground hover:border-primary hover:text-primary"
       >
         <Plus className="size-3" /> přidat podmínku
       </button>

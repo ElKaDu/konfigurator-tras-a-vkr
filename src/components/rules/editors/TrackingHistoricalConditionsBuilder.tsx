@@ -46,7 +46,7 @@ export function TrackingHistoricalConditionsBuilder({
             <select
               value={row.trackingFieldId}
               onChange={(e) => updateAt(i, { ...row, trackingFieldId: e.target.value })}
-              className="rounded border border-border bg-background px-2 py-1.5 text-xs"
+              className="rounded border border-border bg-background px-2 py-1.5 text-[13px]"
             >
               {TRACKING_FIELDS.map((f) => (
                 <option key={f.value} value={f.value}>{f.label}</option>
@@ -55,7 +55,7 @@ export function TrackingHistoricalConditionsBuilder({
             <select
               value={row.mode ?? "contains"}
               onChange={(e) => updateAt(i, { ...row, mode: e.target.value as "contains" | "not_contains" })}
-              className="rounded border border-border bg-background px-2 py-1.5 text-xs"
+              className="rounded border border-border bg-background px-2 py-1.5 text-[13px]"
             >
               <option value="contains">je</option>
               <option value="not_contains">není</option>
@@ -69,19 +69,22 @@ export function TrackingHistoricalConditionsBuilder({
             value={row.expectedValue ?? ""}
             onChange={(e) => updateAt(i, { ...row, expectedValue: e.target.value })}
             placeholder="hodnota…"
-            className="w-full rounded border border-border bg-background px-2 py-1.5 text-xs"
+            className="w-full rounded border border-border bg-background px-2 py-1.5 text-[13px]"
           />
 
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+            <div className="text-overline mb-1.5">
               Kde hledat
             </div>
-            <div className="inline-flex gap-1 rounded-lg bg-muted/40 p-1">
+            {/* Tvar VBtnToggle z reálné aplikace: orámovaná skupina, 14px, aktivní v primary. */}
+            <div className="inline-flex overflow-hidden rounded-md border border-input">
               <button
                 onClick={() => updateAt(i, { ...row, scope: "recent" })}
                 className={cn(
-                  "rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors",
-                  row.scope === "recent" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                  "h-10 px-4 text-sm font-medium transition-colors",
+                  row.scope === "recent"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-foreground/[0.04] hover:text-foreground",
                 )}
               >
                 {triggerType === "automatic" ? "Jen předchozí záznam" : "Jen aktuální záznam"}
@@ -89,8 +92,10 @@ export function TrackingHistoricalConditionsBuilder({
               <button
                 onClick={() => updateAt(i, { ...row, scope: "anywhere" })}
                 className={cn(
-                  "rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors",
-                  row.scope === "anywhere" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                  "h-10 border-l border-input px-4 text-sm font-medium transition-colors",
+                  row.scope === "anywhere"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-foreground/[0.04] hover:text-foreground",
                 )}
               >
                 kdekoliv v historii
@@ -102,7 +107,7 @@ export function TrackingHistoricalConditionsBuilder({
 
       <button
         onClick={addRow}
-        className="flex items-center gap-1 rounded-lg border border-dashed border-border px-3 py-1.5 text-xs text-muted-foreground hover:border-primary hover:text-primary"
+        className="flex items-center gap-1 rounded-lg border border-dashed border-border px-3 py-1.5 text-[13px] text-muted-foreground hover:border-primary hover:text-primary"
       >
         <Plus className="size-3" /> přidat podmínku
       </button>

@@ -86,7 +86,7 @@ function ConditionRow({
 
   if (!field) {
     return (
-      <div className="rounded-lg border border-destructive/40 bg-background p-2 text-xs text-destructive flex items-center justify-between">
+      <div className="rounded-lg border border-destructive/40 bg-background p-2 text-[13px] text-destructive flex items-center justify-between">
         <span>Neznámé pole: {condition.fieldId}</span>
         <button onClick={onRemove}>
           <X className="size-3.5" />
@@ -98,7 +98,7 @@ function ConditionRow({
   return (
     <div className="rounded-lg border border-border bg-background p-2.5">
       <div className="flex items-center gap-1.5 flex-wrap">
-        <span className="text-xs font-medium text-foreground">{field.label}</span>
+        <span className="text-[13px] font-medium text-foreground">{field.label}</span>
         {field.customValueEditor !== "tracking_time" && (
         <select
           value={condition.operator}
@@ -107,7 +107,7 @@ function ConditionRow({
             const defaultValue = newOp?.valueOptions?.[0]?.value ?? "";
             onUpdate({ operator: e.target.value, value: defaultValue });
           }}
-          className="rounded border border-border bg-background px-1.5 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary/40"
+          className="rounded border border-border bg-background px-1.5 py-0.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary/40"
         >
           {field.operators.map((op) => (
             <option key={op.id} value={op.id}>
@@ -129,7 +129,7 @@ function ConditionRow({
           <select
             value={condition.value ?? ""}
             onChange={(e) => onUpdate({ value: e.target.value })}
-            className="rounded border border-border bg-background px-1.5 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary/40"
+            className="rounded border border-border bg-background px-1.5 py-0.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary/40"
           >
             {operator.valueOptions.map((v) => (
               <option key={v.value} value={v.value}>
@@ -147,10 +147,10 @@ function ConditionRow({
               value={condition.value ?? ""}
               placeholder={operator.valuePlaceholder}
               onChange={(e) => onUpdate({ value: e.target.value })}
-              className="flex-1 min-w-[120px] rounded border border-border bg-background px-1.5 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary/40"
+              className="flex-1 min-w-[120px] rounded border border-border bg-background px-1.5 py-0.5 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary/40"
             />
             {operator.valueSuffix && (
-              <span className="text-[11px] text-muted-foreground">
+              <span className="text-[13px] text-muted-foreground">
                 {operator.valueSuffix}
               </span>
             )}
@@ -196,7 +196,7 @@ function AddConditionButton({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button className="flex items-center gap-1.5 rounded-lg border border-dashed border-border bg-background px-3 py-1.5 text-xs text-muted-foreground hover:border-primary hover:text-primary transition-colors">
+        <button className="flex items-center gap-1.5 rounded-lg border border-dashed border-border bg-background px-3 py-1.5 text-[13px] text-muted-foreground hover:border-primary hover:text-primary transition-colors">
           <Plus className="size-3.5" /> Přidat podmínku
         </button>
       </PopoverTrigger>
@@ -212,18 +212,18 @@ function AddConditionButton({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Hledat podmínku…"
-            className="flex-1 bg-transparent text-xs focus:outline-none"
+            className="flex-1 bg-transparent text-[13px] focus:outline-none"
           />
         </div>
         <div className="max-h-64 overflow-y-auto p-1">
           {Object.keys(grouped).length === 0 && (
-            <div className="px-2 py-3 text-center text-xs text-muted-foreground">
+            <div className="px-2 py-3 text-center text-[13px] text-muted-foreground">
               Nic nenalezeno
             </div>
           )}
           {Object.entries(grouped).map(([category, fields]) => (
             <div key={category} className="mb-1.5 last:mb-0">
-              <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <div className="px-2 py-1 text-overline">
                 {category}
               </div>
               {fields.map((f) => {
@@ -241,7 +241,7 @@ function AddConditionButton({
                       isUsed && "opacity-60",
                     )}
                   >
-                    <div className="text-xs font-medium flex items-center gap-1.5">
+                    <div className="text-[13px] font-medium flex items-center gap-1.5">
                       {f.label}
                       {isUsed && (
                         <span className="text-[9px] uppercase tracking-wider text-muted-foreground">
@@ -250,7 +250,7 @@ function AddConditionButton({
                       )}
                     </div>
                     {f.description && (
-                      <div className="text-[10px] text-muted-foreground leading-snug">
+                      <div className="text-[12px] text-muted-foreground leading-snug">
                         {f.description}
                       </div>
                     )}
