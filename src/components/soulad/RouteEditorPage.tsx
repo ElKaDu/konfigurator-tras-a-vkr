@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import type { Route, Segment } from "@/lib/model/types";
 import { TRANSPORT_VARIANTS } from "@/lib/routes/types";
 import { COUNTRY_OPTIONS, countryFlag } from "@/lib/routes/countries";
+import { DeleteEntityButton } from "@/components/common/DeleteEntityButton";
 import { AddExistingSegmentPicker } from "./AddExistingSegmentPicker";
 
 const CARRIER_OPTIONS = ["FedEx", "UPS", "DHL", "PPL", "GLS"];
@@ -194,15 +195,24 @@ export function RouteEditorPage({ routeId }: { routeId: string }) {
             </div>
           </div>
 
-          <button
-            onClick={() => {
-              toast.success("Trasa uložena");
-              navigate({ to: "/soulad-s-trasou" });
-            }}
-            className="w-full rounded-md bg-primary px-4 py-2.5 text-[15px] font-medium text-primary-foreground elevation-1 transition-colors hover:bg-[#7E4EE6]"
-          >
-            Uložit trasu
-          </button>
+          <div className="flex flex-col gap-2.5">
+            <button
+              onClick={() => {
+                toast.success("Trasa uložena");
+                navigate({ to: "/soulad-s-trasou" });
+              }}
+              className="w-full rounded-md bg-primary px-4 py-2.5 text-[15px] font-medium text-primary-foreground elevation-1 transition-colors hover:bg-[#7E4EE6]"
+            >
+              Uložit trasu
+            </button>
+            <DeleteEntityButton
+              label="Smazat trasu"
+              onDelete={() => {
+                routesStore.remove(route.id);
+                navigate({ to: "/soulad-s-trasou" });
+              }}
+            />
+          </div>
         </div>
 
         {/* ÚSEKY TRASY */}

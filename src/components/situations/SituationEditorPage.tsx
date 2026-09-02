@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Trash2 } from "@/components/ui/icon";
+import { DeleteEntityButton } from "@/components/common/DeleteEntityButton";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
@@ -105,17 +105,15 @@ export function SituationEditorPage({ situationId }: { situationId: string }) {
             >
               Uložit
             </button>
-            <button
+            <DeleteEntityButton
+              label="Smazat situaci"
               disabled={totalUsage > 0}
-              onClick={() => {
+              disabledReason={`Používá se na ${totalUsage} pravidlech`}
+              onDelete={() => {
                 situationsStore.remove(situation.id);
-                navigate({ to: "/situace", search: { open: situationId } });
+                navigate({ to: "/situace", search: { open: undefined } });
               }}
-              title={totalUsage > 0 ? "Situace se používá na pravidlech" : "Smazat situaci"}
-              className="flex w-full items-center justify-center gap-1.5 rounded-md border border-destructive/50 px-4 py-2 text-[15px] text-destructive transition-colors hover:bg-destructive/[0.06] disabled:cursor-not-allowed disabled:opacity-30"
-            >
-              <Trash2 size={18} /> Smazat situaci
-            </button>
+            />
           </div>
         </div>
 

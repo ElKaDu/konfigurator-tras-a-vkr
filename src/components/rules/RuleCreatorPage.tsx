@@ -8,6 +8,7 @@ import { useRules, rulesStore, useSituations, useActionTags } from "@/lib/model/
 import { priorityLabel, isPriorityHigh } from "@/lib/model/ruleDisplay";
 import { cn } from "@/lib/utils";
 import type { Area, Priority, Rule, Situation, Severity, Condition } from "@/lib/model/types";
+import { DeleteEntityButton } from "@/components/common/DeleteEntityButton";
 import { VkrConditionsBuilder } from "@/components/rules/editors/VkrConditionsBuilder";
 import type { VkrCondition } from "@/lib/vkr/vkrConditionCatalog";
 import { TrackingIncomingConditionsBuilder } from "@/components/rules/editors/TrackingIncomingConditionsBuilder";
@@ -316,6 +317,18 @@ export function RuleCreatorPage({
             >
               {isEdit ? "Uložit změny" : "Uložit pravidlo"}
             </button>
+            <DeleteEntityButton
+              label="Smazat pravidlo"
+              disabled={!isEdit}
+              disabledReason="Pravidlo ještě není uložené"
+              onDelete={() => {
+                if (!existingRule) return;
+                rulesStore.remove(existingRule.id);
+                toast.success("Pravidlo smazáno");
+                if (returnToSituationId) navigate({ to: "/situace", search: { open: returnToSituationId } });
+                else navigate({ to: "/" });
+              }}
+            />
             
           </div>
         </div>

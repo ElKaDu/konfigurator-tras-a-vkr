@@ -1,5 +1,6 @@
 import type { CheckpointCorrectness, Segment } from "@/lib/model/types";
 import { useCheckpointTypes, useRoutes, useSegments } from "@/lib/model/store";
+import { SelectToken } from "@/components/common/SentenceToken";
 
 type AnchorValue = Pick<CheckpointCorrectness, "anchorKind" | "anchorLabel" | "anchorCheckpointTypeId">;
 
@@ -47,27 +48,32 @@ export function AnchorPicker({
         ? `system:${value.anchorLabel}`
         : "unsupported";
 
+  const label = value.anchorLabel || "vyber událost";
+
   return (
-    <select
-      aria-label="kotva"
+    <SelectToken
+      ariaLabel="událost, od které se termín počítá"
       value={selectValue}
-      onChange={(e) => {
-        const raw = e.target.value;
+      label={label}
+      onChange={(raw) => {
         if (raw.startsWith("system:")) {
           onChange({ anchorKind: "system_event", anchorLabel: raw.slice("system:".length) });
         } else {
           const checkpointTypeId = raw.slice("checkpoint:".length);
-          onChange({ anchorKind: "checkpoint", anchorLabel: ctMap.get(checkpointTypeId) ?? checkpointTypeId, anchorCheckpointTypeId: checkpointTypeId });
+          onChange({
+            anchorKind: "checkpoint",
+            anchorLabel: ctMap.get(checkpointTypeId) ?? checkpointTypeId,
+            anchorCheckpointTypeId: checkpointTypeId,
+          });
         }
       }}
-      className="rounded border border-border bg-background px-2 py-1 text-xs"
     >
       {selectValue === "unsupported" && (
         <option value="unsupported" disabled hidden>
           {value.anchorLabel || "nepodporovaná kotva"}
         </option>
       )}
-      <optgroup label="Systémové kotvy">
+      <optgroup label="Události zásilky">
         {SYSTEM_ANCHORS.map((a) => (
           <option key={a.label} value={`system:${a.label}`}>{a.label}</option>
         ))}
@@ -83,8 +89,7 @@ export function AnchorPicker({
       </optgroup>
       {/* Pozn.: hodnota kotvy je klíčovaná jen checkpointTypeId, ne konkrétním úsekem — pokud
           se stejný typ bodu objeví ve dvou sourozeneckých úsecích, výběr mezi nimi se ve
-          <select> nerozliší (obě možnosti mají stejnou value). Známé omezení, neřeší se v
-          tomto tasku — viz code review Task 1, docs/superpowers/plans/2026-07-20-usek-detail-v2.md. */}
+          <select> nerozliší (obě možnosti mají stejnou value). Známé omezení. */}
       {siblingSegments.map((sib) => (
         <optgroup key={sib.id} label={`Body úseku: ${sib.name}`}>
           {sib.checkpoints.map((cp) => (
@@ -94,6 +99,6 @@ export function AnchorPicker({
           ))}
         </optgroup>
       ))}
-    </select>
+    </SelectToken>
   );
 }

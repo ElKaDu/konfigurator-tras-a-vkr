@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Trash2 } from "@/components/ui/icon";
+import { DeleteEntityButton } from "@/components/common/DeleteEntityButton";
 import { AppShell } from "@/components/AppShell";
 import { useSegments, segmentsStore, isSegmentUsed } from "@/lib/model/store";
 import { cn } from "@/lib/utils";
@@ -80,7 +81,7 @@ export function SouladSTrasouUsekPage({
 
   return (
     <AppShell current="soulad" title={segment.name || "Úsek"} backTo="/soulad-s-trasou">
-      <div className="mb-4 flex items-center justify-between gap-4 text-[13px] text-muted-foreground">
+      <div className="mb-4 text-[13px] text-muted-foreground">
         <div>
           <Link to="/soulad-s-trasou" className="hover:text-primary">Pravidla podle trasy</Link>
           {fromRouteId && (
@@ -94,20 +95,7 @@ export function SouladSTrasouUsekPage({
           <span className="mx-1.5 opacity-50">/</span>
           <span className="font-medium text-foreground">{segment.name}</span>
         </div>
-        <button
-          disabled={used}
-          onClick={deleteSegment}
-          title={used ? `Používá se v ${count} ${count === 1 ? "trase" : "trasách"}` : "Smazat úsek"}
-          className={cn(
-            "flex shrink-0 items-center gap-1.5 rounded-md border px-3 py-1.5 text-[13px] transition-colors",
-            used
-              ? "cursor-not-allowed border-input text-muted-foreground/40"
-              : "border-destructive/50 text-destructive hover:bg-destructive/[0.06]",
-          )}
-        >
-          <Trash2 size={16} />
-          {used ? `Nelze smazat — používá se v ${count} ${count === 1 ? "trase" : "trasách"}` : "Smazat úsek"}
-        </button>
+
       </div>
 
       <div className="grid items-start gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
@@ -160,6 +148,13 @@ export function SouladSTrasouUsekPage({
               + Přidat bod
             </button>
           </div>
+
+          <DeleteEntityButton
+            label="Smazat úsek"
+            disabled={used}
+            disabledReason={`Používá se v ${count} ${count === 1 ? "trase" : "trasách"}`}
+            onDelete={deleteSegment}
+          />
         </div>
 
         <div className="min-w-0">
