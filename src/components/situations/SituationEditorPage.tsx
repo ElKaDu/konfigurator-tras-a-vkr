@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Trash2 } from "@/components/ui/icon";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -16,14 +16,21 @@ export function SituationEditorPage({ situationId }: { situationId: string }) {
   const [draftDescription, setDraftDescription] = useState(situation?.description ?? "");
   const [draftSeverities, setDraftSeverities] = useState<Severity[]>(situation?.severities ?? []);
 
+  /*
+   * Situace, kterou uživatel sám založil, žije jen v localStorage a store se
+   * hydratuje až po prvním renderu. Závislost jen na situationId proto draft
+   * nikdy nenaplnila — formulář zůstal prázdný a uložení by data přepsalo.
+   * Načteme tedy jakmile situace dorazí, ale jen jednou pro dané id, aby se
+   * rozpracované úpravy nepřepisovaly při každé změně store.
+   */
+  const loadedForId = useRef<string | null>(null);
   useEffect(() => {
-    if (!situation) return;
+    if (!situation || loadedForId.current === situation.id) return;
+    loadedForId.current = situation.id;
     setDraftName(situation.name);
     setDraftDescription(situation.description ?? "");
-    setDraftSeverities(situation.severities);
-    // Resetuje draft jen při přepnutí na jinou Situaci, ne při každé změně store (aby se nepřepsaly rozpracované úpravy).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [situationId]);
+    setDraftSeverities(situation.severities ?? []);
+  }, [situation]);
 
   if (!situation) {
     return (
@@ -66,7 +73,7 @@ export function SituationEditorPage({ situationId }: { situationId: string }) {
     navigate({ to: "/situace" });
   }
 
-  const totalUsage = activeSituation.severities.reduce((sum, s) => sum + severityUsageCount(s.id), 0);
+  const totalUsage = (activeSituation.severities ?? []).reduce((sum, s) => sum + severityUsageCount(s.id), 0);
 
   return (
     <AppShell current="situace" title={situation.name || "Situace"} backTo="/situace">

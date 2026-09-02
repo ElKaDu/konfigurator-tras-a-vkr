@@ -49,7 +49,7 @@ export function SituationsListPage() {
     const q = query.trim().toLocaleLowerCase("cs-CZ");
     if (!q) return true;
     if (situation.name.toLocaleLowerCase("cs-CZ").includes(q)) return true;
-    return situation.severities.some((s) => s.name.toLocaleLowerCase("cs-CZ").includes(q));
+    return (situation.severities ?? []).some((s) => s.name.toLocaleLowerCase("cs-CZ").includes(q));
   }
 
   const visible = situations.filter(matchesQuery);
@@ -128,7 +128,7 @@ export function SituationsListPage() {
 
                       <div className="flex shrink-0 items-center gap-1.5">
                         <span className="inline-flex h-6 items-center rounded-full bg-muted px-2.5 text-[13px] leading-5 text-muted-foreground">
-                          {s.severities.length} {s.severities.length === 1 ? "závažnost" : s.severities.length < 5 ? "závažnosti" : "závažností"}
+                          {(s.severities ?? []).length} {(s.severities ?? []).length === 1 ? "závažnost" : (s.severities ?? []).length < 5 ? "závažnosti" : "závažností"}
                         </span>
                         <span
                           className={cn(
@@ -170,10 +170,10 @@ export function SituationsListPage() {
 
                     {isOpen && (
                       <div className="space-y-3 border-t border-border bg-muted/50 px-6 py-4">
-                        {s.severities.length === 0 ? (
+                        {(s.severities ?? []).length === 0 ? (
                           <p className="text-[13px] text-muted-foreground">Zatím žádné závažnosti.</p>
                         ) : (
-                          s.severities.map((sev) => {
+                          (s.severities ?? []).map((sev) => {
                             const sevRules = rulesForSeverity(sev.id);
                             return (
                               <div key={sev.id} className="border-l-2 border-border pl-3">

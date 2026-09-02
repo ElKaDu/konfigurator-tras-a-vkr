@@ -16,17 +16,19 @@ export function SeverityCard({
   onRemove: () => void;
 }) {
   const actionTags = useActionTags();
+  // Data v localStorage mohou být z dřívější podoby modelu — bez actions by render spadl.
+  const actions = severity.actions ?? [];
   const tagLabel = (id: string) => actionTags.find((t) => t.id === id)?.label ?? id;
 
   function updateAction(actionId: string, patch: Partial<Severity["actions"][number]>) {
     onChange({
       ...severity,
-      actions: severity.actions.map((a) => (a.id === actionId ? { ...a, ...patch } : a)),
+      actions: actions.map((a) => (a.id === actionId ? { ...a, ...patch } : a)),
     });
   }
 
   function removeAction(actionId: string) {
-    onChange({ ...severity, actions: severity.actions.filter((a) => a.id !== actionId) });
+    onChange({ ...severity, actions: actions.filter((a) => a.id !== actionId) });
   }
 
   return (
@@ -67,7 +69,7 @@ export function SeverityCard({
       <div>
         <div className="text-overline mb-2">Přiřazené akce</div>
         <div className="space-y-2">
-          {severity.actions.map((a) => (
+          {actions.map((a) => (
             <div key={a.id} className="rounded-md border border-border bg-muted/50 p-3">
               <div className="flex items-center justify-between mb-1.5">
                 <span className="inline-flex h-6 items-center rounded-full bg-primary-soft px-2.5 text-[13px] font-medium leading-5 text-accent-foreground">
@@ -89,11 +91,11 @@ export function SeverityCard({
         </div>
         <div className="mt-2">
           <ActionTagPicker
-            excludeIds={severity.actions.map((a) => a.actionTagId)}
+            excludeIds={actions.map((a) => a.actionTagId)}
             onPick={(tag) =>
               onChange({
                 ...severity,
-                actions: [...severity.actions, { id: "sa_" + Date.now(), actionTagId: tag.id, description: "" }],
+                actions: [...actions, { id: "sa_" + Date.now(), actionTagId: tag.id, description: "" }],
               })
             }
           />

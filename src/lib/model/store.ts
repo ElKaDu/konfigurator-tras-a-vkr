@@ -167,11 +167,16 @@ export function severityUsageCount(severityId: string): number {
   return _rules.getState().filter((r) => r.severityId === severityId).length;
 }
 
+/*
+ * Data v localStorage přežívají změny modelu i ruční zásahy, takže tvar není
+ * zaručený. Jedna položka bez `severities` nebo `actions` dřív shodila celý
+ * render (chyba vybublala až do error boundary a stránka se nenačetla).
+ */
 /** Kolik Závažností (napříč všemi Situacemi) aktuálně používá danou Akci z katalogu — guard pro mazání akce. */
 export function actionTagUsageCount(actionTagId: string): number {
   return _situations.getState().reduce(
-    (sum, situation) => sum + situation.severities.filter(
-      (sev) => sev.actions.some((a) => a.actionTagId === actionTagId)
+    (sum, situation) => sum + (situation.severities ?? []).filter(
+      (sev) => (sev.actions ?? []).some((a) => a.actionTagId === actionTagId)
     ).length,
     0
   );
@@ -180,7 +185,7 @@ export function actionTagUsageCount(actionTagId: string): number {
 /** Najde Závažnost podle id napříč všemi Situacemi. */
 export function findSeverityById(severityId: string): Severity | undefined {
   for (const situation of _situations.getState()) {
-    const severity = situation.severities.find((s) => s.id === severityId);
+    const severity = (situation.severities ?? []).find((s) => s.id === severityId);
     if (severity) return severity;
   }
   return undefined;

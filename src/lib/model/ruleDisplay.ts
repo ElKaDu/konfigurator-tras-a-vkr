@@ -45,7 +45,7 @@ export function resolveRuleActions(rule: Rule): Action[] {
   if (rule.severityId) {
     const severity = findSeverityById(rule.severityId);
     if (severity) {
-      return severity.actions.map((a) => ({
+      return (severity.actions ?? []).map((a) => ({
         id: a.id,
         type: "create_vkr",
         title: rule.name,
