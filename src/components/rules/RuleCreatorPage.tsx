@@ -138,8 +138,8 @@ export function RuleCreatorPage({
       title={ruleName || (ruleId ? "Úprava pravidla" : "Nové pravidlo")}
       backTo="/"
     >
-      <div className="grid items-start gap-5 py-1 lg:grid-cols-[340px_minmax(0,1fr)_320px]">
-        {/* LEVÝ SLOUPEC — Situace + Závažnost */}
+      <div className="grid items-start gap-5 py-1 lg:grid-cols-[340px_minmax(0,1fr)]">
+        {/* LEVÝ SLOUPEC — Situace, Závažnost, Akce */}
         <div className="flex flex-col gap-5">
           <div className="rounded-md bg-card px-6 py-5 elevation-2">
             {/* Situace + Závažnost (tracking_records) */}
@@ -197,7 +197,51 @@ export function RuleCreatorPage({
 
           </div>
 
-          {/* Akce sloupce */}
+          {/* Akce se dědí ze Závažnosti, proto sedí hned pod ní. */}
+          <div className="rounded-md bg-card px-6 py-5 elevation-2">
+            <div className="space-y-4">
+            <div className="text-overline">Akce</div>
+
+            {isTrackingRecords && !selectedSeverityObj && (
+              <div className="rounded-md border border-dashed border-input p-8 text-center">
+                <div className="text-sm text-muted-foreground">Vyber situaci a závažnost v levém sloupci.</div>
+              </div>
+            )}
+
+            {isTrackingRecords && selectedSeverityObj && selectedSeverityObj.actions.length === 0 && (
+              <div className="rounded-md border border-dashed border-input p-8 text-center">
+                <div className="text-sm text-muted-foreground">Tato závažnost nemá žádné výchozí akce.</div>
+              </div>
+            )}
+
+            {isTrackingRecords && selectedSeverityObj && selectedSeverityObj.actions.length > 0 && (
+              <div className="space-y-2">
+                {selectedSeverityObj.actions.map((a) => {
+                  const tag = actionTags.find((t) => t.id === a.actionTagId);
+                  return (
+                    <div key={a.id} className="rounded-md border border-border bg-muted/50 p-3">
+                      <span className="inline-flex h-6 items-center rounded-full bg-primary-soft px-2.5 text-[13px] font-medium leading-5 text-accent-foreground">
+                        {tag?.label ?? a.actionTagId}
+                      </span>
+                      {a.description && (
+                        <p className="mt-2 text-[13px] leading-[19px] text-muted-foreground">
+                          {a.description}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {!isTrackingRecords && (
+              <div className="rounded-md border border-dashed border-input p-8 text-center">
+                <div className="text-sm text-muted-foreground">Pro tuto oblast se akce nekonfigurují přes wizard.</div>
+              </div>
+            )}
+            </div>
+          </div>
+
           <div className="flex flex-col gap-2.5">
             <button
               disabled={!ruleName}
@@ -425,50 +469,6 @@ export function RuleCreatorPage({
           </div>
         </div>
 
-        {/* PRAVÝ SLOUPEC — Akce (needitovatelné, dědí se ze Závažnosti) */}
-        <div className="rounded-md bg-card px-6 py-5 elevation-2">
-          <div className="space-y-4">
-            <div className="text-overline">Akce</div>
-
-            {isTrackingRecords && !selectedSeverityObj && (
-              <div className="rounded-md border border-dashed border-input p-8 text-center">
-                <div className="text-sm text-muted-foreground">Vyber situaci a závažnost v levém sloupci.</div>
-              </div>
-            )}
-
-            {isTrackingRecords && selectedSeverityObj && selectedSeverityObj.actions.length === 0 && (
-              <div className="rounded-md border border-dashed border-input p-8 text-center">
-                <div className="text-sm text-muted-foreground">Tato závažnost nemá žádné výchozí akce.</div>
-              </div>
-            )}
-
-            {isTrackingRecords && selectedSeverityObj && selectedSeverityObj.actions.length > 0 && (
-              <div className="space-y-2">
-                {selectedSeverityObj.actions.map((a) => {
-                  const tag = actionTags.find((t) => t.id === a.actionTagId);
-                  return (
-                    <div key={a.id} className="rounded-lg border border-border bg-muted/20 p-2.5">
-                      <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary">
-                        {tag?.label ?? a.actionTagId}
-                      </span>
-                      {a.description && (
-                        <p className="mt-1.5 rounded-md bg-muted/30 px-2 py-1.5 text-xs text-muted-foreground">
-                          {a.description}
-                        </p>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {!isTrackingRecords && (
-              <div className="rounded-md border border-dashed border-input p-8 text-center">
-                <div className="text-sm text-muted-foreground">Pro tuto oblast se akce nekonfigurují přes wizard.</div>
-              </div>
-            )}
-          </div>
-        </div>
       </div>
     </AppShell>
   );
