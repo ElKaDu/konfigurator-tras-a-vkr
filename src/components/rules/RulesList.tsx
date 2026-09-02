@@ -195,6 +195,7 @@ export function RulesList() {
                     <Link
                       to="/rules/$ruleId/edit"
                       params={{ ruleId: rule.id }}
+                      search={{ fromSituation: undefined }}
                       onClick={(e) => e.stopPropagation()}
                       className="flex items-center gap-1.5 rounded-md border border-input px-3 py-1.5 text-[13px] leading-5 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
                       title="Upravit pravidlo"

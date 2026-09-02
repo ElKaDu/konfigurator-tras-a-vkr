@@ -34,9 +34,9 @@ export function SituationEditorPage({ situationId }: { situationId: string }) {
 
   if (!situation) {
     return (
-      <AppShell current="situace" title="Situace" backTo="/situace">
+      <AppShell current="situace" title="Situace" backTo="/situace" backSearch={{ open: situationId }}>
         <div className="rounded-md bg-card px-6 py-10 text-center text-sm text-muted-foreground elevation-2">
-          Situace nenalezena. <Link to="/situace" className="text-primary underline">Zpět na seznam</Link>
+          Situace nenalezena. <Link to="/situace" search={{ open: undefined }} className="text-primary underline">Zpět na seznam</Link>
         </div>
       </AppShell>
     );
@@ -70,13 +70,13 @@ export function SituationEditorPage({ situationId }: { situationId: string }) {
       severities: draftSeverities,
     });
     toast.success("Situace uložena");
-    navigate({ to: "/situace" });
+    navigate({ to: "/situace", search: { open: situationId } });
   }
 
   const totalUsage = (activeSituation.severities ?? []).reduce((sum, s) => sum + severityUsageCount(s.id), 0);
 
   return (
-    <AppShell current="situace" title={situation.name || "Situace"} backTo="/situace">
+    <AppShell current="situace" title={situation.name || "Situace"} backTo="/situace" backSearch={{ open: situationId }}>
       <div className="grid items-start gap-5 lg:grid-cols-[340px_minmax(0,1fr)]">
         {/* LEVÝ SLOUPEC — název, popis, akce */}
         <div className="flex flex-col gap-5">
@@ -109,7 +109,7 @@ export function SituationEditorPage({ situationId }: { situationId: string }) {
               disabled={totalUsage > 0}
               onClick={() => {
                 situationsStore.remove(situation.id);
-                navigate({ to: "/situace" });
+                navigate({ to: "/situace", search: { open: situationId } });
               }}
               title={totalUsage > 0 ? "Situace se používá na pravidlech" : "Smazat situaci"}
               className="flex w-full items-center justify-center gap-1.5 rounded-md border border-destructive/50 px-4 py-2 text-[15px] text-destructive transition-colors hover:bg-destructive/[0.06] disabled:cursor-not-allowed disabled:opacity-30"

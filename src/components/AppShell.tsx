@@ -171,6 +171,7 @@ export function AppShell({
   current,
   title,
   backTo,
+  backSearch,
   actions,
   contentLayout = "boxed",
   children,
@@ -180,6 +181,8 @@ export function AppShell({
   title: string;
   /** Podstránky mají v navbaru šipku zpět (heading.navigateBack v BTLayout.vue). */
   backTo?: LinkProps["to"];
+  /** Parametry pro cíl šipky zpět — např. která situace se má rozbalit. */
+  backSearch?: Record<string, unknown>;
   /** Akce stránky vpravo v navbaru (např. „Nové pravidlo"). */
   actions?: ReactNode;
   /** "boxed" = scrollující obsah přes celou šířku vedle menu. "full" = obsah si výšku i scroll řídí sám. */
@@ -195,6 +198,7 @@ export function AppShell({
           {backTo && (
             <Link
               to={backTo}
+              search={backSearch as never}
               aria-label="Zpět"
               className="-ml-2 grid size-[34px] place-items-center rounded-full text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground"
             >

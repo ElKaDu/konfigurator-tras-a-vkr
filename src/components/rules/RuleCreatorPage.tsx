@@ -64,10 +64,13 @@ export function RuleCreatorPage({
   ruleId,
   initialSituationId,
   initialSeverityId,
+  returnToSituationId,
 }: {
   ruleId?: string;
   initialSituationId?: string;
   initialSeverityId?: string;
+  /** Uživatel přišel ze seznamu situací — po uložení i po zpět ho tam vrátíme s rozbalenou situací. */
+  returnToSituationId?: string;
 } = {}) {
   const rules = useRules();
   const navigate = useNavigate();
@@ -136,7 +139,8 @@ export function RuleCreatorPage({
     <AppShell
       current="rules"
       title={ruleName || (ruleId ? "Úprava pravidla" : "Nové pravidlo")}
-      backTo="/"
+      backTo={returnToSituationId ? "/situace" : "/"}
+      backSearch={returnToSituationId ? { open: returnToSituationId } : undefined}
     >
       <div className="grid items-start gap-5 py-1 lg:grid-cols-[340px_minmax(0,1fr)]">
         {/* LEVÝ SLOUPEC — Situace, Závažnost, Akce */}
@@ -294,8 +298,10 @@ export function RuleCreatorPage({
                 });
                 toast.success(isEdit ? "Pravidlo upraveno" : "Pravidlo uloženo");
 
-                // Vstup přes "+ Pravidlo pro tuto závažnost" — po uložení zpět na detail Situace, ze které uživatel přišel.
-                if (!isEdit && isTrackingRecords && initialSituationId) {
+                // Vrátíme uživatele tam, odkud přišel.
+                if (returnToSituationId) {
+                  navigate({ to: "/situace", search: { open: returnToSituationId } });
+                } else if (!isEdit && isTrackingRecords && initialSituationId) {
                   navigate({ to: "/situace/$id", params: { id: initialSituationId } });
                 } else {
                   navigate({ to: "/" });

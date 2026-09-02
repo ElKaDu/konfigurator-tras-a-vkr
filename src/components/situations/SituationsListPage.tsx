@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Trash2, ChevronRight, ChevronDown, Search, Pencil } from "@/components/ui/icon";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
@@ -8,13 +8,19 @@ import { RuleDetailSidebar } from "@/components/rules/RuleDetailSidebar";
 import { cn } from "@/lib/utils";
 import type { Rule, Situation } from "@/lib/model/types";
 
-export function SituationsListPage() {
+export function SituationsListPage({ openSituationId }: { openSituationId?: string } = {}) {
   const situations = useSituations();
   const rules = useRules();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [selectedRule, setSelectedRule] = useState<Rule | null>(null);
+  const [selectedRuleFrom, setSelectedRuleFrom] = useState<string | undefined>(undefined);
+
+  // Návrat z editoru pravidla — rozbal situaci, ze které uživatel odešel.
+  useEffect(() => {
+    if (openSituationId) setExpanded((cur) => new Set(cur).add(openSituationId));
+  }, [openSituationId]);
 
   function createSituation() {
     const id = "sit_" + Date.now();
@@ -196,7 +202,7 @@ export function SituationsListPage() {
                                 {sevRules.map((rule) => (
                                   <div
                                     key={rule.id}
-                                    onClick={() => setSelectedRule(rule)}
+                                    onClick={() => { setSelectedRule(rule); setSelectedRuleFrom(s.id); }}
                                     className="mt-1.5 flex cursor-pointer items-center gap-3 rounded-md border border-border bg-card px-3.5 py-2.5 transition-colors hover:bg-muted/60"
                                   >
                                     <div className="flex-1 min-w-0">
@@ -233,7 +239,7 @@ export function SituationsListPage() {
         </div>
 
         {selectedRule && (
-          <RuleDetailSidebar rule={selectedRule} onClose={() => setSelectedRule(null)} />
+          <RuleDetailSidebar rule={selectedRule} onClose={() => setSelectedRule(null)} fromSituationId={selectedRuleFrom} />
         )}
       </div>
     </AppShell>

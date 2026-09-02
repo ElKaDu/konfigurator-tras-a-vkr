@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronRight, ChevronUp, ChevronDown, X, Info } from "@/components/ui/icon";
+import { ChevronRight, ChevronUp, ChevronDown, X, Info, Plus, Pencil } from "@/components/ui/icon";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
@@ -65,7 +65,7 @@ export function RouteEditorPage({ routeId }: { routeId: string }) {
   return (
     <AppShell current="soulad" title={route.name || "Trasa"} backTo="/soulad-s-trasou">
       {/* Náhled úseku nese nejvíc textu, proto je nejširší. */}
-      <div className="grid items-start gap-5 xl:grid-cols-[340px_320px_minmax(0,1fr)]">
+      <div className="grid items-start gap-5 xl:grid-cols-[340px_minmax(0,1fr)_minmax(0,1.4fr)]">
         {/* POKRYTÍ TRASY */}
         <div className="flex flex-col gap-5">
           <div className="rounded-md bg-card px-6 py-5 elevation-2">
@@ -281,9 +281,9 @@ export function RouteEditorPage({ routeId }: { routeId: string }) {
             <AddExistingSegmentPicker route={route} segments={segments} onAdd={addExistingSegment} />
             <button
               onClick={createAndOpenNewSegment}
-              className="flex items-center gap-1.5 rounded-md bg-primary-soft px-3.5 py-2 text-[13px] font-medium text-accent-foreground transition-colors hover:bg-[#E4DBF5]"
+              className="flex items-center gap-1.5 rounded-md border border-primary px-4 py-2 text-[13px] font-medium text-primary transition-colors hover:bg-primary/[0.06]"
             >
-              + vytvořit nový úsek
+              <Plus size={16} /> Vytvořit nový úsek
             </button>
           </div>
         </div>
@@ -299,7 +299,7 @@ export function RouteEditorPage({ routeId }: { routeId: string }) {
             </div>
           )}
           {selectedSegment && (
-            <div className="space-y-2.5">
+            <div className="flex flex-col gap-2.5">
               {(() => {
                 const visibleCheckpoints = selectedSegment.checkpoints.filter((cp) => cp.kind !== "dnesni_doruceni");
                 if (visibleCheckpoints.length === 0) {
@@ -326,9 +326,9 @@ export function RouteEditorPage({ routeId }: { routeId: string }) {
                 to="/soulad-s-trasou/usek/$id"
                 params={{ id: selectedSegment.id }}
                 search={{ from: routeId }}
-                className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-md bg-primary px-4 py-2.5 text-[15px] font-medium text-primary-foreground elevation-1 transition-colors hover:bg-[#7E4EE6]"
+                className="mt-2 inline-flex items-center gap-1.5 self-start rounded-md border border-primary px-4 py-2 text-[15px] font-medium text-primary transition-colors hover:bg-primary/[0.06]"
               >
-                Upravit úsek
+                <Pencil size={18} /> Upravit úsek
               </Link>
             </div>
           )}

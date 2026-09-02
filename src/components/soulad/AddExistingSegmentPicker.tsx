@@ -20,9 +20,9 @@ export function AddExistingSegmentPicker({
     <div>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 rounded-md border border-dashed border-border px-3 py-1.5 text-xs text-primary hover:bg-primary-soft/20 transition-colors"
+        className="flex items-center gap-1.5 rounded-md border border-primary px-4 py-2 text-[13px] font-medium text-primary transition-colors hover:bg-primary/[0.06]"
       >
-        <Plus className="size-3.5" /> přidat existující úsek
+        <Plus size={16} /> Přidat existující úsek
       </button>
       {open && (
         <div className="mt-1.5 rounded-md border border-border bg-muted/20 p-1.5 space-y-0.5 max-w-sm">

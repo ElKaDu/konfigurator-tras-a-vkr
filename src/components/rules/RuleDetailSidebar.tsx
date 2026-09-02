@@ -6,7 +6,16 @@ import { priorityLabel, isPriorityHigh, resolveRuleActions, resolveRulePriority,
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Rule } from "@/lib/model/types";
 
-export function RuleDetailSidebar({ rule, onClose }: { rule: Rule; onClose: () => void }) {
+export function RuleDetailSidebar({
+  rule,
+  onClose,
+  fromSituationId,
+}: {
+  rule: Rule;
+  onClose: () => void;
+  /** Otevřeno ze seznamu situací — úprava pravidla se pak vrací sem. */
+  fromSituationId?: string;
+}) {
   return (
     <aside className="sticky top-0 flex max-h-[calc(100vh-8.5rem)] w-[420px] shrink-0 flex-col rounded-md bg-card elevation-2">
       {/* Header */}
@@ -51,6 +60,7 @@ export function RuleDetailSidebar({ rule, onClose }: { rule: Rule; onClose: () =
         <Link
           to="/rules/$ruleId/edit"
           params={{ ruleId: rule.id }}
+          search={{ fromSituation: fromSituationId }}
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
         >
           <Pencil className="size-4" /> Upravit pravidlo
