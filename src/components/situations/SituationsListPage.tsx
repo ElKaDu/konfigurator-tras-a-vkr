@@ -69,7 +69,7 @@ export function SituationsListPage() {
     >
       {/* Šířka seznamu je stálá — panel s detailem se otevírá vedle něj. */}
       <div className="flex items-start gap-5">
-        <div className="w-full max-w-[920px] shrink-0 rounded-md bg-card elevation-2">
+        <div className="w-full max-w-[1160px] shrink-0 rounded-md bg-card elevation-2">
           <div className="px-6 pt-5">
             <h2 className="text-h5">Přehled situací</h2>
             <p className="mt-1 text-[13px] leading-[18px] text-muted-foreground">
