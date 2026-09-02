@@ -91,7 +91,7 @@ export function SituationsListPage() {
 
           {/* Hlavička tabulky — stejná jako v Nastavení pravidel */}
           <div className="flex gap-4 bg-muted px-6 py-2.5 text-[12px] uppercase tracking-[0.6px] text-muted-foreground">
-            <span className="w-[18px]" />
+            <span className="w-9" />
             <span className="flex-1">Situace</span>
             <span>Akce</span>
           </div>
@@ -113,7 +113,7 @@ export function SituationsListPage() {
                     >
                       <button
                         onClick={(e) => { e.stopPropagation(); toggleExpanded(s.id); }}
-                        className="grid w-[18px] shrink-0 place-items-center text-muted-foreground transition-colors hover:text-primary"
+                        className="-my-2 grid size-9 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-primary"
                         title={isOpen ? "Skrýt závažnosti a pravidla" : "Zobrazit závažnosti a pravidla"}
                       >
                         {isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
