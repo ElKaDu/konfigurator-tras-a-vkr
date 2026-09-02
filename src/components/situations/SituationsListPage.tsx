@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { Plus, Trash2, ChevronRight, ChevronDown, Search } from "@/components/ui/icon";
-import { useNavigate } from "@tanstack/react-router";
+import { Plus, Trash2, ChevronRight, ChevronDown, Search, Pencil } from "@/components/ui/icon";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
-import { AreaBadge } from "@/components/common/AreaBadge";
 import { useSituations, situationsStore, useRules } from "@/lib/model/store";
 import { triggerLabel, priorityLabel, isPriorityHigh, resolveRulePriority } from "@/lib/model/ruleDisplay";
 import { RuleDetailSidebar } from "@/components/rules/RuleDetailSidebar";
@@ -90,6 +89,13 @@ export function SituationsListPage() {
           </div>
           </div>
 
+          {/* Hlavička tabulky — stejná jako v Nastavení pravidel */}
+          <div className="flex gap-4 bg-muted px-6 py-2.5 text-[12px] uppercase tracking-[0.6px] text-muted-foreground">
+            <span className="w-[18px]" />
+            <span className="flex-1">Situace</span>
+            <span>Akce</span>
+          </div>
+
           <div className="flex flex-col">
             {visible.length === 0 ? (
               <p className="border-t border-border py-10 text-center text-sm text-muted-foreground">
@@ -103,56 +109,87 @@ export function SituationsListPage() {
                   <div key={s.id} className="border-t border-border">
                     <div
                       onClick={() => navigate({ to: "/situace/$id", params: { id: s.id } })}
-                      className="flex cursor-pointer items-center gap-3.5 px-6 py-3 transition-colors hover:bg-muted/60"
+                      className="flex cursor-pointer items-center gap-4 px-6 py-4 transition-colors hover:bg-muted/60"
                     >
                       <button
                         onClick={(e) => { e.stopPropagation(); toggleExpanded(s.id); }}
-                        className="shrink-0 text-muted-foreground hover:text-foreground"
+                        className="grid w-[18px] shrink-0 place-items-center text-muted-foreground transition-colors hover:text-primary"
                         title={isOpen ? "Skrýt závažnosti a pravidla" : "Zobrazit závažnosti a pravidla"}
                       >
                         {isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
                       </button>
-                      <div className="flex-1 min-w-0">
+
+                      <div className="min-w-0 flex-1">
                         <div className="text-[15px] font-medium leading-[22px]">{s.name}</div>
-                        {s.description && <div className="mt-0.5 text-[13px] leading-[18px] text-muted-foreground">{s.description}</div>}
-                      </div>
-                      <span className="shrink-0 text-xs text-muted-foreground">
-                        {s.severities.length} {s.severities.length === 1 ? "závažnost" : "závažnosti"}
-                      </span>
-                      <span className="shrink-0 text-xs text-muted-foreground">
-                        {usage} {usage === 1 ? "pravidlo" : usage < 5 ? "pravidla" : "pravidel"}
-                      </span>
-                      <button
-                        disabled={usage > 0}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          situationsStore.remove(s.id);
-                        }}
-                        title={usage > 0 ? `Používá se v ${usage} pravidlech` : "Smazat situaci"}
-                        className={cn(
-                          "shrink-0 rounded p-1.5 text-muted-foreground transition-colors",
-                          usage > 0 ? "opacity-30 cursor-not-allowed" : "hover:text-red-500"
+                        {s.description && (
+                          <div className="mt-1 text-[13px] leading-[18px] text-muted-foreground">{s.description}</div>
                         )}
-                      >
-                        <Trash2 className="size-3.5" />
-                      </button>
+                      </div>
+
+                      <div className="flex shrink-0 items-center gap-1.5">
+                        <span className="inline-flex h-6 items-center rounded-full bg-muted px-2.5 text-[13px] leading-5 text-muted-foreground">
+                          {s.severities.length} {s.severities.length === 1 ? "závažnost" : s.severities.length < 5 ? "závažnosti" : "závažností"}
+                        </span>
+                        <span
+                          className={cn(
+                            "inline-flex h-6 items-center rounded-full px-2.5 text-[13px] font-medium leading-5",
+                            usage > 0 ? "bg-primary-soft text-accent-foreground" : "bg-muted text-muted-foreground",
+                          )}
+                        >
+                          {usage} {usage === 1 ? "pravidlo" : usage < 5 ? "pravidla" : "pravidel"}
+                        </span>
+                      </div>
+
+                      <div className="flex shrink-0 items-center gap-1">
+                        <Link
+                          to="/situace/$id"
+                          params={{ id: s.id }}
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center gap-1.5 rounded-md border border-input px-3 py-1.5 text-[13px] leading-5 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                          title="Upravit situaci"
+                        >
+                          <Pencil size={16} />
+                          Upravit
+                        </Link>
+                        <button
+                          disabled={usage > 0}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            situationsStore.remove(s.id);
+                          }}
+                          title={usage > 0 ? `Používá se v ${usage} pravidlech` : "Smazat situaci"}
+                          className={cn(
+                            "grid size-[34px] place-items-center rounded-md text-muted-foreground transition-colors",
+                            usage > 0 ? "cursor-not-allowed opacity-30" : "hover:bg-destructive/10 hover:text-destructive",
+                          )}
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </div>
 
                     {isOpen && (
-                      <div className="border-t border-border bg-muted/10 px-4 py-3 space-y-3">
+                      <div className="space-y-3 border-t border-border bg-muted/50 px-6 py-4">
                         {s.severities.length === 0 ? (
-                          <p className="text-xs text-muted-foreground italic">Zatím žádné závažnosti.</p>
+                          <p className="text-[13px] text-muted-foreground">Zatím žádné závažnosti.</p>
                         ) : (
                           s.severities.map((sev) => {
                             const sevRules = rulesForSeverity(sev.id);
                             return (
                               <div key={sev.id} className="border-l-2 border-border pl-3">
                                 <div className="flex items-center gap-2 py-1">
-                                  <span className="text-xs font-medium">{sev.name}</span>
-                                  <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                                  <span className="text-sm font-medium">{sev.name}</span>
+                                  <span
+                                    className={cn(
+                                      "inline-flex h-6 items-center rounded-full px-2.5 text-[13px] font-medium leading-5",
+                                      isPriorityHigh(sev.priority)
+                                        ? "bg-destructive/12 text-destructive"
+                                        : "bg-muted text-muted-foreground",
+                                    )}
+                                  >
                                     {priorityLabel(sev.priority)}
                                   </span>
-                                  <span className="ml-auto text-[11px] text-muted-foreground">
+                                  <span className="ml-auto text-[13px] text-muted-foreground">
                                     {sevRules.length} {sevRules.length === 1 ? "pravidlo" : sevRules.length < 5 ? "pravidla" : "pravidel"}
                                   </span>
                                 </div>
@@ -160,19 +197,20 @@ export function SituationsListPage() {
                                   <div
                                     key={rule.id}
                                     onClick={() => setSelectedRule(rule)}
-                                    className="mt-1 flex items-center gap-3 rounded-lg border border-border bg-background px-3 py-2 hover:bg-muted/40 transition-colors cursor-pointer"
+                                    className="mt-1.5 flex cursor-pointer items-center gap-3 rounded-md border border-border bg-card px-3.5 py-2.5 transition-colors hover:bg-muted/60"
                                   >
                                     <div className="flex-1 min-w-0">
-                                      <div className="text-xs font-medium truncate">{rule.name}</div>
-                                      <div className="flex gap-1.5 mt-1">
-                                        <AreaBadge area={rule.area} />
-                                        <span className="rounded-full border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                                      <div className="truncate text-sm font-medium">{rule.name}</div>
+                                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                                        <span className="inline-flex h-6 items-center rounded-full border border-input px-2.5 text-[13px] leading-5 text-muted-foreground">
                                           {triggerLabel(rule.trigger.kind)}
                                         </span>
                                         <span
                                           className={cn(
-                                            "rounded-full border border-border px-1.5 py-0.5 text-[10px] font-semibold",
-                                            isPriorityHigh(resolveRulePriority(rule)) ? "text-destructive border-destructive/30" : "text-muted-foreground"
+                                            "inline-flex h-6 items-center rounded-full px-2.5 text-[13px] font-medium leading-5",
+                                            isPriorityHigh(resolveRulePriority(rule))
+                                              ? "bg-destructive/12 text-destructive"
+                                              : "bg-muted text-muted-foreground",
                                           )}
                                         >
                                           {priorityLabel(resolveRulePriority(rule))}
