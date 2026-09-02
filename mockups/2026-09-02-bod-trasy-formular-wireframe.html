@@ -7,33 +7,30 @@
 :root{
   --primary:#8C57FF; --primary-d:#7E4EE6; --primary-l1:#E4DBF5; --primary-l2:#F2EDFA;
   --success:#56CA00; --info:#16B1FF; --warning:#FFB400; --error:#FF4C51;
-  --bg:#f4f5fa; --surface:#fff; --surface-2:#fafafc;
+  --bg:#f4f5fa; --surface:#fff;
   --on:#2E263D; --on-90:rgba(46,38,61,.9); --on-70:rgba(46,38,61,.7);
   --on-55:rgba(46,38,61,.55); --on-40:rgba(46,38,61,.4);
   --border:rgba(46,38,61,.12); --border-strong:rgba(46,38,61,.22);
   --muted:#F6F7FB;
-  --tint-info:rgba(22,177,255,.12); --text-info:#0f83bd;
   --shadow:0 2px 6px rgba(46,38,61,.12);
   --chrome-bg:#241f33; --chrome-on:#EFECF8; --chrome-on-55:rgba(239,236,248,.55);
   --chrome-border:rgba(239,236,248,.16);
   --r:6px;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#28243D; --surface:#312D4B; --surface-2:#3A3552;
+  --bg:#28243D; --surface:#312D4B;
   --on:#E7E3FC; --on-90:rgba(231,227,252,.9); --on-70:rgba(231,227,252,.7);
   --on-55:rgba(231,227,252,.55); --on-40:rgba(231,227,252,.4);
   --border:rgba(231,227,252,.12); --border-strong:rgba(231,227,252,.22);
   --muted:#3D3759; --primary-l1:rgba(140,87,255,.28); --primary-l2:rgba(140,87,255,.14);
-  --tint-info:rgba(22,177,255,.18); --text-info:#6fcdff;
   --shadow:0 2px 6px rgba(19,17,32,.4); --chrome-bg:#1D1A2B;
 }}
 :root[data-theme="dark"]{
-  --bg:#28243D; --surface:#312D4B; --surface-2:#3A3552;
+  --bg:#28243D; --surface:#312D4B;
   --on:#E7E3FC; --on-90:rgba(231,227,252,.9); --on-70:rgba(231,227,252,.7);
   --on-55:rgba(231,227,252,.55); --on-40:rgba(231,227,252,.4);
   --border:rgba(231,227,252,.12); --border-strong:rgba(231,227,252,.22);
   --muted:#3D3759; --primary-l1:rgba(140,87,255,.28); --primary-l2:rgba(140,87,255,.14);
-  --tint-info:rgba(22,177,255,.18); --text-info:#6fcdff;
   --shadow:0 2px 6px rgba(19,17,32,.4); --chrome-bg:#1D1A2B;
 }
 *{box-sizing:border-box}
@@ -45,7 +42,7 @@ body{margin:0;background:var(--bg);color:var(--on-90);
 
 .chrome{position:sticky;top:0;z-index:40;background:var(--chrome-bg);color:var(--chrome-on);
   border-bottom:1px solid var(--chrome-border)}
-.chrome-in{max-width:1320px;margin:0 auto;padding:10px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.chrome-in{max-width:1100px;margin:0 auto;padding:10px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 .chrome-tag{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--chrome-on-55);
   border:1px solid var(--chrome-border);border-radius:99px;padding:3px 9px}
 .chrome-ttl{font-size:13px;line-height:20px;font-weight:500}
@@ -54,83 +51,57 @@ body{margin:0;background:var(--bg);color:var(--on-90);
   background:transparent;border:0;cursor:pointer;padding:5px 12px;border-radius:4px}
 .seg button[aria-pressed="true"]{background:var(--primary);color:#fff}
 
-.page{max-width:1320px;margin:0 auto;padding:28px 24px 72px}
-.lead{max-width:760px;margin:0 0 26px;font-size:14px;line-height:21px;color:var(--on-55)}
-.cols{display:grid;gap:28px;grid-template-columns:repeat(auto-fit,minmax(430px,1fr))}
-.col > h2{display:flex;align-items:center;gap:9px;margin:0 0 4px;font-size:13px;line-height:18px;
-  letter-spacing:.6px;text-transform:uppercase;color:var(--on-55)}
-.col > h2 b{color:var(--on-90);font-size:16px;line-height:24px;letter-spacing:0;text-transform:none;font-weight:600}
-.col > p{margin:0 0 16px;font-size:13px;line-height:19px;color:var(--on-55)}
-.pick{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:2px 10px;font-size:12px;
-  font-weight:600;letter-spacing:.4px;text-transform:uppercase}
-.pick.yes{background:rgba(86,202,0,.14);color:#3f9400}
-.pick.no{background:var(--muted);color:var(--on-55)}
+.page{max-width:1100px;margin:0 auto;padding:28px 24px 80px}
+.frame{max-width:760px}
 
-.card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:16px}
-.card h3{margin:0;padding:18px 24px 0;font-size:18px;line-height:28px;font-weight:500}
-.card .bd{padding:16px 24px 20px}
-.over{display:block;font-size:12px;line-height:14px;letter-spacing:.8px;text-transform:uppercase;
-  color:var(--on-55);margin-bottom:8px}
+/* dvě části bodu — oddělené nadpisem a odsazením */
+.part{margin-bottom:34px}
+.part-hd{display:flex;align-items:baseline;gap:10px;margin:0 0 4px}
+.part-hd .n{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;flex:none;
+  background:var(--primary);color:#fff;font-size:12px;font-weight:600;transform:translateY(3px)}
+.part-hd h2{margin:0;font-size:17px;line-height:26px;font-weight:600}
+.part-sub{margin:0 0 14px 32px;font-size:13px;line-height:19px;color:var(--on-55)}
+.part-body{margin-left:32px}
 
-/* pole se šířkou podle obsahu, ne přes celý sloupec */
-.f{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:14px}
+.card:last-child{margin-bottom:0}
+.card h3{margin:0;padding:16px 22px 0;font-size:15px;line-height:22px;font-weight:500;color:var(--on-70)}
+.card .bd{padding:14px 22px 18px}
+
+.f{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
 .f:last-child{margin-bottom:0}
-.f > label{width:104px;flex:none;font-size:13px;line-height:18px;color:var(--on-55)}
-.inp{height:38px;border:1px solid var(--border-strong);border-radius:var(--r);background:var(--surface);
-  display:inline-flex;align-items:center;gap:8px;padding:0 12px;font-size:14px;color:var(--on-90)}
-.inp.ph{color:var(--on-40)}
-.inp.sel{padding-right:30px;position:relative;cursor:pointer}
-.inp.sel::after{content:"";position:absolute;right:11px;width:8px;height:8px;border-right:1.5px solid var(--on-40);
-  border-bottom:1.5px solid var(--on-40);transform:translateY(-2px) rotate(45deg)}
-.w-num{width:72px}.w-time{width:104px}.w-ev{width:250px}.w-tz{width:168px}.w-unit{width:140px}.w-mode{width:172px}
-.grow{flex:1;min-width:0}
-
-/* hodnoty jako chipy místo textu odděleného čárkou */
+.f > label{width:96px;flex:none;font-size:13px;line-height:38px;color:var(--on-55)}
 .chipfield{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-height:38px;flex:1;
   border:1px solid var(--border-strong);border-radius:var(--r);padding:5px 10px;background:var(--surface)}
 .chip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:99px;
   background:var(--primary-l2);color:var(--primary-d);font-size:13px;font-weight:500;white-space:nowrap}
-.chip .x{opacity:.6}
+.chip .x{opacity:.55}
 .chipfield .ph{font-size:14px;color:var(--on-40)}
 
-/* věta s vloženými ovladači */
 .sentence{font-size:15px;line-height:2.3;color:var(--on-90)}
 .tok{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 11px;border-radius:var(--r);
   background:var(--primary-l2);color:var(--primary-d);font-weight:500;cursor:pointer;white-space:nowrap;
   margin:0 2px;font-size:14px}
 .tok::after{content:"";width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;
   transform:translateY(-2px) rotate(45deg);opacity:.7}
-.tok.num{background:var(--surface);color:var(--on-90);border:1px solid var(--border-strong);font-variant-numeric:tabular-nums}
+.tok.num{background:var(--surface);color:var(--on-90);border:1px solid var(--border-strong);
+  font-variant-numeric:tabular-nums}
 .tok.num::after{display:none}
 
-.readback{display:flex;align-items:center;gap:8px;margin-top:14px;padding:9px 12px;border-radius:var(--r);
-  background:var(--muted);font-size:13px;line-height:19px;color:var(--on-70)}
-.readback b{color:var(--on-90);font-weight:600}
-
-.note{display:flex;gap:9px;align-items:flex-start;margin-top:14px;padding:10px 12px;border-radius:var(--r);
-  background:var(--tint-info);color:var(--text-info);font-size:13px;line-height:19px}
-
-/* srovnání textů */
-.copy{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:18px 24px 20px;margin-top:8px}
-.copy h3{margin:0 0 12px;padding:0;font-size:16px;line-height:24px;font-weight:600}
-.copy table{width:100%;border-collapse:collapse;font-size:13.5px}
-.copy td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:top}
-.copy td:first-child{color:var(--on-40);width:50%;text-decoration:line-through}
-.copy td:last-child{color:var(--on-90);font-weight:500}
-.copy tr:last-child td{border-bottom:0}
+.alt{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);
+  font-size:13px;line-height:19px;color:var(--on-55)}
+.alt .sentence{font-size:14px;line-height:2.1;color:var(--on-70)}
+.alt-lbl{display:block;margin-bottom:2px;font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:var(--on-40)}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-<symbol id="i-time" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16m1-8h4v2h-6V7h2z"/></symbol>
-<symbol id="i-check" viewBox="0 0 24 24"><path fill="currentColor" d="M9.998 15.171L19.192 5.977l1.414 1.414L9.998 18L3.634 11.636L5.048 10.22z"/></symbol>
-<symbol id="i-info" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16M11 7h2v2h-2zm0 4h2v6h-2z"/></symbol>
 <symbol id="i-close" viewBox="0 0 24 24"><path fill="currentColor" d="m12 10.586l4.95-4.95l1.414 1.414l-4.95 4.95l4.95 4.95l-1.414 1.414l-4.95-4.95l-4.95 4.95l-1.414-1.414l4.95-4.95l-4.95-4.95L7.05 5.636z"/></symbol>
 </defs></svg>
 
 <div class="chrome">
   <div class="chrome-in">
     <span class="chrome-tag">wireframe</span>
-    <span class="chrome-ttl">Bod trasy — dvě varianty formuláře</span>
+    <span class="chrome-ttl">Bod trasy — formulář</span>
     <div class="seg" role="group" aria-label="Motiv">
       <button id="thLight" aria-pressed="true">Světlý</button>
       <button id="thDark" aria-pressed="false">Tmavý</button>
@@ -138,19 +109,14 @@ body{margin:0;background:var(--bg);color:var(--on-90);
   </div>
 </div>
 
-<div class="page">
-  <p class="lead">
-    Stejný obsah dvakrát. Vlevo věta, kterou si člověk přečte odshora dolů. Vpravo klasická pole.
-    Obě varianty mají pole široká podle obsahu, jedno písmo a texty bez vysvětlivek.
-  </p>
+<div class="page"><div class="frame">
 
-  <div class="cols">
+  <!-- ═══ 1 ═══ -->
+  <div class="part">
+    <div class="part-hd"><span class="n">1</span><h2>Co musí záznam splnit</h2></div>
+    <p class="part-sub">Podle čeho bod poznáme v trackingu a do kdy měl nastat.</p>
 
-    <!-- ═══════════ A — věta ═══════════ -->
-    <div class="col">
-      <h2><b>A · Věta</b> <span class="pick yes">doporučuji</span></h2>
-      <p>Podmínka se čte jako oznamovací věta, fialové části se rozklikávají. Stejný vzor už je v editoru pravidla.</p>
-
+    <div class="part-body">
       <div class="card">
         <h3>Rozpoznání</h3>
         <div class="bd">
@@ -176,120 +142,44 @@ body{margin:0;background:var(--bg);color:var(--on-90);
             Nejpozději <span class="tok">v den</span> události <span class="tok">Vyzvednutí zásilky</span>
             v <span class="tok num">12:00</span> <span class="tok">místního času</span>.
           </div>
-          <div class="readback">
-            <svg class="ico xs"><use href="#i-check"/></svg>
-            <span>Posun <b>0 dní</b> — <span style="color:var(--on-55)">upravit</span></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Termín <span style="font-size:13px;color:var(--on-40)">— druhý tvar téže věty</span></h3>
-        <div class="bd">
-          <div class="sentence">
-            Nejpozději <span class="tok">za</span> <span class="tok num">6</span> <span class="tok">hodin</span>
-            od události <span class="tok">Vyzvednutí zásilky</span>.
-          </div>
-          <div class="note">
-            <svg class="ico xs" style="margin-top:2px"><use href="#i-info"/></svg>
-            <span>První token přepíná mezi „v den" a „za" — režim je součástí věty, ne přepínač nad ní.</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Konečný limit</h3>
-        <div class="bd">
-          <div class="sentence">
-            <span class="tok num">6</span> <span class="tok">hodin</span> po termínu.
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══════════ B — pole ═══════════ -->
-    <div class="col">
-      <h2><b>B · Pole</b> <span class="pick no">záložní</span></h2>
-      <p>Blíž tomu, co je v aplikaci u ostatních formulářů. Pole mají šířku podle obsahu, popisky jsou jednoslovné.</p>
-
-      <div class="card">
-        <h3>Rozpoznání</h3>
-        <div class="bd">
-          <div class="f">
-            <label>Status</label>
-            <div class="chipfield">
-              <span class="chip">Picked up <svg class="ico xs x"><use href="#i-close"/></svg></span>
-              <span class="chip">Departed FedEx location <svg class="ico xs x"><use href="#i-close"/></svg></span>
-              <span class="ph">+ přidat</span>
+          <div class="alt">
+            <span class="alt-lbl">Druhý tvar téže věty</span>
+            <div class="sentence">
+              Nejpozději <span class="tok">za</span> <span class="tok num">6</span> <span class="tok">hodin</span>
+              od události <span class="tok">Vyzvednutí zásilky</span>.
             </div>
           </div>
-          <div class="f">
-            <label>Typ lokace</label>
-            <div class="chipfield"><span class="ph">+ přidat</span></div>
-          </div>
         </div>
-      </div>
-
-      <div class="card">
-        <h3>Termín</h3>
-        <div class="bd">
-          <div class="f">
-            <label>Počítat od</label>
-            <span class="inp sel w-ev">Vyzvednutí zásilky</span>
-          </div>
-          <div class="f">
-            <label>Typ</label>
-            <span class="inp sel w-mode">Den a čas</span>
-          </div>
-          <div class="f">
-            <label>Posun</label>
-            <span class="inp w-num">0</span>
-            <span class="inp sel w-unit">kalendářních dní</span>
-          </div>
-          <div class="f">
-            <label>Čas</label>
-            <span class="inp w-time"><svg class="ico xs"><use href="#i-time"/></svg>12:00</span>
-            <span class="inp sel w-tz">místní čas</span>
-          </div>
-          <div class="readback">
-            <svg class="ico xs"><use href="#i-check"/></svg>
-            <span>Nejpozději <b>v den vyzvednutí ve 12:00</b></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Konečný limit</h3>
-        <div class="bd">
-          <div class="f">
-            <label>Typ</label>
-            <span class="inp sel w-mode">Posun od termínu</span>
-          </div>
-          <div class="f">
-            <label>Posun</label>
-            <span class="inp w-num">6</span>
-            <span style="font-size:13px;color:var(--on-55)">hodin</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="copy">
-        <h3>Texty</h3>
-        <table>
-          <tr><td>Co musí být na záznamu</td><td>Rozpoznání</td></tr>
-          <tr><td>Status (oddělte čárkou)</td><td>Status</td></tr>
-          <tr><td>Typ lokace (oddělte čárkou)</td><td>Typ lokace</td></tr>
-          <tr><td>Vlastní čas záznamu musí být nejpozději do</td><td>Termín</td></tr>
-          <tr><td>v konkrétní den a čas</td><td>Den a čas</td></tr>
-          <tr><td>s odstupem od události</td><td>Uplynulá doba</td></tr>
-          <tr><td>DEN / ČAS / pásmo</td><td>Počítat od · Posun · Čas</td></tr>
-          <tr><td>nejpozději v den události „Vyzvednutí zásilky" ve 12:00 místního času. Dřívější dny se započítávají automaticky.</td><td>Nejpozději v den vyzvednutí ve 12:00</td></tr>
-          <tr><td>posun od Termínu · h po Termínu</td><td>Posun od termínu · hodin</td></tr>
-        </table>
       </div>
     </div>
   </div>
-</div>
+
+  <!-- ═══ 2 ═══ -->
+  <div class="part">
+    <div class="part-hd"><span class="n">2</span><h2>Jak dlouho na něj čekat</h2></div>
+    <p class="part-sub">Tracking chodí se zpožděním. Tohle je okamžik, kdy přestaneme čekat.</p>
+
+    <div class="part-body">
+      <div class="card">
+        <h3>Konečný limit</h3>
+        <div class="bd">
+          <div class="sentence">
+            Čekat <span class="tok num">6</span> <span class="tok">hodin</span> po termínu,
+            pak založit věc k řešení.
+          </div>
+          <div class="alt">
+            <span class="alt-lbl">Druhý tvar téže věty</span>
+            <div class="sentence">
+              Čekat <span class="tok">do</span> <span class="tok num">09:00</span>,
+              pak založit věc k řešení.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div></div>
 
 <script>
 const A = document.getElementById("thLight"), B = document.getElementById("thDark");
