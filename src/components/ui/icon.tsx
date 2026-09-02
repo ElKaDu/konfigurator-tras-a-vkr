@@ -160,6 +160,21 @@ export const RecordCircle = make("<path fill=\"currentColor\" d=\"M12 22C6.477 2
 /** ri-menu-line */
 export const Menu = make("<path fill=\"currentColor\" d=\"M3 4h18v2H3zm0 7h18v2H3zm0 7h18v2H3z\"/>");
 
+/** ri-home-4-line */
+export const Home = make("<path fill=\"currentColor\" d=\"M19 21H5a1 1 0 0 1-1-1v-9H1l10.327-9.388a1 1 0 0 1 1.346 0L23 11h-3v9a1 1 0 0 1-1 1m-6-2h5V9.157l-6-5.454l-6 5.454V19h5v-6h2z\"/>");
+/** ri-inbox-line */
+export const Inbox = make("<path fill=\"currentColor\" d=\"M21 3a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM7.416 14H4v5h16v-5h-3.416a5.001 5.001 0 0 1-9.168 0M20 5H4v7h5a3 3 0 1 0 6 0h5z\"/>");
+/** ri-list-unordered */
+export const ListUnordered = make("<path fill=\"currentColor\" d=\"M8 4h13v2H8zM4.5 6.5a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3m0 7a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3m0 6.9a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3M8 11h13v2H8zm0 7h13v2H8z\"/>");
+/** ri-group-line */
+export const Group = make("<path fill=\"currentColor\" d=\"M2 22a8 8 0 1 1 16 0h-2a6 6 0 0 0-12 0zm8-9c-3.315 0-6-2.685-6-6s2.685-6 6-6s6 2.685 6 6s-2.685 6-6 6m0-2c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4m8.284 3.703A8 8 0 0 1 23 22h-2a6 6 0 0 0-3.537-5.473zm-.688-11.29A5.5 5.5 0 0 1 21 8.5a5.5 5.5 0 0 1-5 5.478v-2.013a3.5 3.5 0 0 0 1.041-6.609z\"/>");
+/** ri-bar-chart-box-line */
+export const BarChart = make("<path fill=\"currentColor\" d=\"M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1m1 2v14h16V5zm3 8h2v4H7zm4-6h2v10h-2zm4 3h2v7h-2z\"/>");
+/** ri-book-2-line */
+export const Book = make("<path fill=\"currentColor\" d=\"M21 18H6a1 1 0 1 0 0 2h15v2H6a3 3 0 0 1-3-3V4a2 2 0 0 1 2-2h16zM5 16.05q.243-.05.5-.05H19V4H5zM16 9H8V7h8z\"/>");
+/** ri-pushpin-line */
+export const Pushpin = make("<path fill=\"currentColor\" d=\"m13.827 1.69l8.486 8.485l-1.415 1.414l-.707-.707l-4.242 4.243l-.707 3.536l-1.415 1.414l-4.242-4.243l-4.95 4.95l-1.414-1.414l4.95-4.95l-4.243-4.243l1.414-1.414l3.536-.707l4.242-4.243l-.707-.707zm.707 3.536l-4.67 4.67l-2.822.565l6.5 6.5l.564-2.822l4.671-4.67z\"/>");
+
 /* Aliasy pro volací místa, která importovala lucide pod jiným jménem. */
 export const ChevronDownIcon = ChevronDown;
 export const ChevronLeftIcon = ChevronLeft;

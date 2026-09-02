@@ -64,7 +64,7 @@ export function RulesList() {
   return (
     <AppShell
       current="rules"
-      title="Pravidla pro tracking"
+      title="Nastavení pravidel"
       actions={
         <div className="flex items-center gap-2">
           <Link
