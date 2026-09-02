@@ -125,7 +125,6 @@ export function TerminEditor({
               <option key={t.value} value={t.value}>{t.label}</option>
             ))}
           </SelectToken>
-          .
         </>
       ) : (
         <>
@@ -161,7 +160,6 @@ export function TerminEditor({
             value={anchor}
             onChange={(next) => onChange({ ...value, ...next })}
           />
-          .
         </>
       )}
     </Sentence>

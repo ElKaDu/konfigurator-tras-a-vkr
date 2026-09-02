@@ -59,7 +59,7 @@ export function TimeLimitEditor({
           />
         </>
       )}
-        , pak založit věc k řešení.
+        a pak založit věc k řešení
       </Sentence>
     </div>
   );

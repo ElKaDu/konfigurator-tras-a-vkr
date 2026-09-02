@@ -25,7 +25,7 @@ export function SelectToken({
   ariaLabel: string;
 }) {
   return (
-    <span className="relative mx-0.5 inline-flex h-8 items-center gap-1.5 rounded-md bg-primary-soft px-2.5 align-middle text-[14px] font-medium text-accent-foreground">
+    <span className="relative inline-flex h-9 items-center gap-1.5 rounded-md bg-primary-soft px-3 text-[14px] font-medium text-accent-foreground">
       {label}
       <ChevronDown size={14} className="opacity-70" />
       <select
@@ -64,7 +64,7 @@ export function InputToken({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       className={cn(
-        "mx-0.5 h-8 rounded-md border border-input bg-card px-2.5 align-middle text-[14px] tabular-nums text-foreground outline-none transition-colors focus:border-primary",
+        "h-9 rounded-md border border-input bg-card px-3 text-[14px] tabular-nums text-foreground outline-none transition-colors focus:border-primary",
         type === "time" ? "w-[104px]" : "w-[68px]",
         className,
       )}
@@ -72,7 +72,14 @@ export function InputToken({
   );
 }
 
-/** Obal věty — dává řádkům dost místa, aby pilulky nesplývaly. */
+/**
+ * Obal věty. Flex místo řádkového toku — každé slovo i ovladač je vlastní položka,
+ * takže mezery jsou všude stejné a nic neposkakuje po účaří.
+ */
 export function Sentence({ children }: { children: ReactNode }) {
-  return <div className="text-[15px] leading-[2.3] text-foreground">{children}</div>;
+  return (
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-2.5 text-[15px] leading-[22px] text-foreground">
+      {children}
+    </div>
+  );
 }
