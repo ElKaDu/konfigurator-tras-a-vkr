@@ -39,7 +39,7 @@ export function SouladSTrasouListPage() {
   }
 
   return (
-    <AppShell current="soulad" title="Soulad s trasou" actions={<DataMenu />}>
+    <AppShell current="soulad" title="Pravidla podle trasy" actions={<DataMenu />}>
       <Tabs defaultValue="trasy" className="rounded-md bg-card elevation-2">
         <TabsList className="px-6 pt-4">
           <TabsTrigger value="trasy">Trasy</TabsTrigger>

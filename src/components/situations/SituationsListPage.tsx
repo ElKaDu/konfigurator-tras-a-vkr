@@ -95,7 +95,7 @@ export function SituationsListPage({ openSituationId }: { openSituationId?: stri
           </div>
           </div>
 
-          {/* Hlavička tabulky — stejná jako v Nastavení pravidel */}
+          {/* Hlavička tabulky — stejná jako v Pravidlech podle trackingu */}
           <div className="flex gap-4 bg-muted px-6 py-2.5 text-[12px] uppercase tracking-[0.6px] text-muted-foreground">
             <span className="w-9" />
             <span className="flex-1">Situace</span>

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { RouteEditorPage } from "@/components/soulad/RouteEditorPage";
 
 export const Route = createFileRoute("/soulad-s-trasou_/trasa/$id")({
-  head: () => ({ meta: [{ title: "Úprava trasy — Soulad s trasou — Bytorp" }] }),
+  head: () => ({ meta: [{ title: "Úprava trasy — Pravidla podle trasy — Bytorp" }] }),
   component: TrasaEditorRoute,
 });
 

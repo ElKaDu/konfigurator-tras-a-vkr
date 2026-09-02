@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SouladSTrasouUsekPage } from "@/components/soulad/SouladSTrasouUsekPage";
 
 export const Route = createFileRoute("/soulad-s-trasou_/usek/$id")({
-  head: () => ({ meta: [{ title: "Úsek — Soulad s trasou — Bytorp" }] }),
+  head: () => ({ meta: [{ title: "Úsek — Pravidla podle trasy — Bytorp" }] }),
   validateSearch: (search: Record<string, unknown>): { from?: string } => ({
     from: search.from as string | undefined,
   }),

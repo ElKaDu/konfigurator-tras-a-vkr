@@ -67,8 +67,8 @@ const MENU: NavEntry[] = [
 ];
 
 const KONFIGURATOR_ITEMS: { label: string; icon: LucideIcon; to: LinkProps["to"]; section: SectionKey }[] = [
-  { label: "Nastavení pravidel", icon: Settings, to: "/", section: "rules" },
-  { label: "Soulad s trasou", icon: Route, to: "/soulad-s-trasou", section: "soulad" },
+  { label: "Pravidla podle trackingu", icon: Settings, to: "/", section: "rules" },
+  { label: "Pravidla podle trasy", icon: Route, to: "/soulad-s-trasou", section: "soulad" },
   { label: "Situace a závažnosti", icon: AlertTriangle, to: "/situace", section: "situace" },
 ];
 
@@ -78,7 +78,7 @@ const navItemBase =
 
 /** Vnořená položka pod rozbalenou skupinou. */
 const navChildBase =
-  "mx-3 mb-1 flex h-10 w-[calc(100%-1.5rem)] items-center gap-2.5 rounded-full pl-9 pr-4 text-left text-[14px] leading-[20px] transition-colors";
+  "mx-3 mb-1 flex h-10 w-[calc(100%-1.5rem)] items-center gap-2 rounded-full pl-7 pr-3 text-left text-[14px] leading-[20px] transition-colors";
 
 function DecorativeItem({ label, icon: Icon, muted }: { label: string; icon: LucideIcon; muted?: boolean }) {
   return (

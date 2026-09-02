@@ -82,7 +82,7 @@ export function SouladSTrasouUsekPage({
     <AppShell current="soulad" title={segment.name || "Úsek"} backTo="/soulad-s-trasou">
       <div className="mb-4 flex items-center justify-between gap-4 text-[13px] text-muted-foreground">
         <div>
-          <Link to="/soulad-s-trasou" className="hover:text-primary">Soulad s trasou</Link>
+          <Link to="/soulad-s-trasou" className="hover:text-primary">Pravidla podle trasy</Link>
           {fromRouteId && (
             <>
               <span className="mx-1.5 opacity-50">/</span>

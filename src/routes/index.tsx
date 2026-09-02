@@ -4,7 +4,7 @@ import { RulesList } from "@/components/rules/RulesList";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Nastavení pravidel — Bytorp" },
+      { title: "Pravidla podle trackingu — Bytorp" },
       { name: "description", content: "Konfigurátor pravidel — automatizovaně vytváří Věci k řešení (VkŘ) pro operátory." },
     ],
   }),
