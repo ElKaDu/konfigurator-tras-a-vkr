@@ -140,7 +140,7 @@ export const actionTagsStore = {
 // Situace store
 // ---------------------------------------------------------------------------
 
-const _situations = makeStore<Situation>(SITUATIONS, "model_situations_v1");
+const _situations = makeStore<Situation>(SITUATIONS, "model_situations_v2");
 
 export function useSituations(): Situation[] {
   return _situations.useItems();
