@@ -12,8 +12,8 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      // Materio VTabs — podtržení, ne pilulka na šedém podkladu.
-      "inline-flex items-center justify-start gap-1 text-muted-foreground",
+      // Materio v-tabs-pill: mezera 0.25rem, žádná spodní linka.
+      "inline-flex items-center justify-start gap-1",
       className,
     )}
     {...props}
@@ -28,7 +28,8 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "inline-flex cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap border-b-2 border-transparent px-3.5 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-primary",
+      // v-tabs-pill: poloměr 6 px, vodorovné odsazení 1.375rem, aktivní vyplněný primary.
+      "inline-flex cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-[1.375rem] py-2 text-sm font-medium text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 hover:text-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:elevation-1 data-[state=active]:hover:text-primary-foreground",
       className,
     )}
     {...props}

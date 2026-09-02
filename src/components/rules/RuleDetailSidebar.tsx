@@ -26,7 +26,7 @@ export function RuleDetailSidebar({ rule, onClose }: { rule: Rule; onClose: () =
       </div>
 
       <Tabs defaultValue="summary" className="flex min-h-0 flex-1 flex-col">
-        <TabsList className="mx-5 border-b border-border">
+        <TabsList className="mx-5">
           <TabsTrigger value="summary" className="text-xs">
             <FileText className="mr-1 size-3.5" />Detail pravidla
           </TabsTrigger>
